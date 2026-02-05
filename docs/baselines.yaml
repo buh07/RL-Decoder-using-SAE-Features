@@ -1,0 +1,29 @@
+frozen_model: gpt2
+recorded_at: TBD
+metrics:
+  next_token_accuracy: null
+  cot_bleu: null
+  throughput_tokens_per_sec: null
+  memory_gb: null
+layers:
+  - id: 4
+    accuracy: null
+    kl_nats: null
+  - id: 6
+    accuracy: null
+    kl_nats: null
+  - id: 8
+    accuracy: null
+    kl_nats: null
+  - id: 10
+    accuracy: null
+    kl_nats: null
+  - id: 12
+    accuracy: null
+    kl_nats: null
+tasks:
+  gsm8k_accuracy: null
+  boolq_accuracy: null
+  squad_f1: null
+notes:
+  - Populate after running `scripts/phase1_gpt2_smoketest.py` and follow-up eval jobs.
