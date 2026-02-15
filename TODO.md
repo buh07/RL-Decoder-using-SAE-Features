@@ -1,65 +1,69 @@
-# TODO — RL-Decoder with SAE Features
+# TODO
 
-## Meta Notes
-- [ ] Record that multiple pretrained LLM checkpoints already live in `/scratch2/f004ndc/LLM Second-Order Effects/models` (pythia-1.4b, gemma-2b, gpt2, gpt2-medium, Meta-Llama-3-8B, phi-2). Decide which will anchor Phase 1 prototyping vs. later scaling. _(context: see `docs/data_manifest.yaml` for current corpus targets.)_
+## 0. Repo + Planning Hygiene
+- [ ] Reconfirm project scope: reproducing phased SAE interpretability experiment (overview.tex, Feb 2026) and define falsifiable stop criteria per phase before writing code.
+- [ ] Decide which artifacts stay tracked in git after this cleanup (e.g., keep `overview.tex`, `TODO.md`, `LICENSE`, `.gitignore`) and document rationale in first commit.
+- [ ] Stand up lightweight project README describing intent, dependencies, and pointers to overview + this TODO so future collaborators ramp quickly.
+- [ ] Create issue tracker outline (GitHub Projects or plaintext) keyed to the sections below with owners + target dates.
 
-## Phase 1 Kickoff Model — gpt2
-- [x] Lock the initial target to `gpt2` (117M params, 12 layers, d_model=768, 12 heads, vocab=50,257) located at `/scratch2/f004ndc/LLM Second-Order Effects/models/models--gpt2`. Use this checkpoint + tokenizer for all Phase 1 baselines.
-- [x] Extract gpt2 architectural constants into a shared config (`configs/models/gpt2_phase1.yaml`) so SAE/decoder scripts automatically set layer choices (focus on layer 6 for hidden-state taps, adjust if logit lens suggests better signal).
-- [ ] Verify tokenizer files (`tokenizer.json`, `merges.txt`, `vocab.json`) exist in the model directory and sync hashes into README for reproducibility. (Need to copy from HF cache blobs → local path; `find` as of 01:22 UTC still shows only config/model files. Remote fetches remain blocked: no system `transformers`/`huggingface_hub`, pip install fails because PyPI is unreachable/offline.) _Progress_: added `scripts/sync_tokenizer_assets.py` + `docs/tokenizer_hashes.md`; waiting on actual files to copy & hash.
-- [x] Generate a quick sanity script (`scripts/phase1_gpt2_smoketest.py`) that runs the frozen model on a mini batch (1k tokens) and logs throughput + hidden-state shapes to confirm env/tooling.
+## 1. Environment + Infrastructure
+- [x] Specify supported runtimes (Python >=3.10, CUDA version) and GPU budget (50-100 RTX-equivalent hours) in docs. *(SETUP.md captures Python 3.12.3 + CUDA 12.8.93; still plan to add GPU-hour budgeting details later if needed.)*
+- [x] Author `setup_env.sh` replacement that installs minimal deps (PyTorch>=2.0, transformers>=4.37, trl>=0.8, accelerate>=0.25, datasets) and pins tokenizer artifacts locally.
+- [x] Define WANDB (or alt) tracking defaults, secrets handling, and naming convention before any training runs. *(Secrets live in `.env`, values intentionally left blank until you paste your real API key.)*
+- [x] Decide how tokenizer assets are synchronized (new script or Makefile target) and document expected location relative to repo. *(Tokenizers now vendored under `vendor/gpt2_tokenizer` and copied into `assets/tokenizers/gpt2` by the setup script.)*
 
-## Phase 1 Resources Snapshot
-- [x] GPU availability on January 25, 2026 @ 00:51:51: eight NVIDIA RTX 6000 Ada (48 GB each). GPU3 currently saturated (~16.5 GB, 100% util); GPUs 0/4/5 idle; GPUs 1/2/6/7 partially used. Plan SAE/RL workloads around free GPUs or coordinate with existing jobs. (`nvidia-smi` unavailable in sandbox—rely on operator-provided snapshot.)
+## 2. Data & Tokenization Pipeline
+- [x] Enumerate reasoning datasets to ingest (GSM8K, CoT-Collection, OpenR1-Math-220k, Reasoning Traces, REVEAL, TRIP, WIQA) with licensing + citation notes. *(See `datasets/DATASETS.md` + generated manifest.)*
+- [x] Design sharded preprocessing plan: streaming from HuggingFace datasets, tokenization via pinned tokenizer, shards of ~2M tokens for fp16 training. *(Documented in `datasets/DATASETS.md#Sharded Tokenization Plan` + implemented in `datasets/tokenize_datasets.py`.)*
+- [x] Decide which columns/fields correspond to reasoning traces vs answers; encode filtering + normalization rules (e.g., ensure strings, drop malformed entries). *(Handled by `datasets/download_datasets.py` normalization step.)*
+- [x] Document how temporal alignment between CoT steps and tokens will be stored for later alignment heuristics. *(See `datasets/DATASETS.md#Temporal Alignment Plan` and upcoming alignment JSONL schema.)*
+- [x] Plan data QC hooks (spot-check seqs, coverage stats, invariance tests from overview risks section). *(Outlined in `datasets/DATASETS.md#Data QC & Validation` with tooling roadmap.)*
 
-## Phase 1 — Setup & Preparation
-- [x] Validate compute availability (≥2×A100 40GB for SAE + RL, spare GPU for labeling); document any constraints or queueing requirements. (Finalized GPU snapshot + noted sandbox `nvidia-smi` limitation.)
-- [x] Create isolated conda/venv with PyTorch 2.0+, HuggingFace Transformers, TRL, wandb, SAE libs; script environment bootstrap. (`scripts/setup_env.sh` provisions env `rl_decoder_phase1` w/ CUDA 12.1 wheels + core deps; run on host with conda.)
-- [x] Stand up data ingestion pipeline (tokenizer parity with chosen base LLM, sharded dataloader, fast disk cache) and verify throughput on target hardware. (Implementation of `src/data/dataloader.py` + `scripts/preprocess_dataset.py` complete; throughput validation blocked until tokenizer assets + datasets can be pulled.)
-- [ ] Gather/curate training corpora: 100M-token supervised split, 10B-token RL buffer, 100k-token clean eval, 50k-token OOD eval; log provenance + licenses. _See `docs/data_manifest.yaml` for target shard mix + licensing checklist._
-- [ ] Run baseline measurements on frozen model (next-token accuracy, CoT quality, throughput, memory) and layer-wise logit lens stats for layers {4,8,12,16,20,24,28,32}; store in `docs/baselines.yaml`.
-- [ ] Enable experiment tracking (wandb project + config templates) and checkpoint storage layout (checkpoints/, results/, logs/). _Scaffolds ready: `configs/tracking/wandb_template.yaml`, `scripts/init_wandb_project.py`, and `docs/tracking.md`. Need to export WANDB_API_KEY + generate first run config._
+## 3. Model Capture Hooks
+- [ ] Choose initial base models (e.g., GPT-2 small, 1B distilled) with layer-probe defaults (mid-layers like 6 for GPT-2) and record ckpt hashes.
+- [ ] Implement activation capture stack constrained to post-MLP residual streams + MLP hidden states; ensure streaming to disk is fp16 + layer-filtered to fit single GPU memory.
+- [ ] Validate hooking latency + throughput on sample batches before SAE training.
 
-## Phase 2 — Sparse Autoencoder (SAE) Training
-- [ ] Implement SAE module exactly as spec (4096→40,960 expansion, sparsity controls, dead-neuron resampling hooks) with config-driven hyperparams.
-- [ ] Build efficient residual-stream extractor that caches layer-8 activations while respecting VRAM via gradient checkpointing + fp16 storage.
-- [ ] Train SAE for planned 50k steps with scheduled sparsity coeffs; monitor reconstruction loss, sparsity, dead-neuron %; add alerting if drift.
-- [ ] Periodically checkpoint (every 5k steps) and benchmark reconstruction MSE + explained variance; keep best artifact tagged.
-- [ ] After training, run QA suite: reconstruction MSE <0.01, KL vs. hidden states <0.5 nats, average L0 between 50-100, dead feature ratio <5%.
-- [ ] (Optional) Repeat SAE on alternative layers (10,12,14,16) and compare interpretability metrics to finalize layer choice for downstream stages.
+## 4. SAE Architecture & Training
+- [ ] Formalize SAE architecture hyperparams: expansion factor 4-8x width, ReLU latents, decoder sharing vs independent per layer.
+- [ ] Implement total loss: reconstruction + L1 sparsity + decorrelation penalty + optional probe-guided loss + temporal smoothness term.
+- [ ] Build configurable training loop supporting streaming batches, logging recon error, activation coverage, feature activations.
+- [ ] Add automatic probes for hypothesis/constraint tasks with leakage diagnostics (flag when probe vs linear baseline gap >5%).
+- [ ] Provide evaluation notebooks/scripts to visualize feature purity, cluster coherence, and activation sparsity histograms.
 
-## Phase 3 — Supervised Decoder Pre-training
-- [ ] Implement baseline linear decoder over SAE features plus optional lightweight transformer path toggled via config.
-- [ ] Integrate supervised training loop that ingests frozen model logits, trains for 3 epochs, tracks CE loss, KL divergence, and accuracy.
-- [ ] Add eval script to compute KL vs frozen model, next-token accuracy on validation + OOD splits after each epoch; gate checkpoints on KL <1.5 nats.
-- [ ] Save `decoder_supervised_init.pt`, push metrics to wandb, and archive training config for reproducibility.
+## 5. Phased Research Program
+### Phase 1 — Ground-Truth Systems
+- [ ] Recreate simple environments (BFS/DFS traversals, stack machines) with exact latent states.
+- [ ] Train SAEs on those states to verify reconstruction + monosemanticity; document failure cases as stop criteria.
+- [ ] Build causal tests: directly edit SAE latents and ensure decoded state changes behave as predicted.
 
-## Phase 4 — RL-Based Decoder Fine-tuning
-- [ ] Implement multi-objective reward module (faithfulness, monosemanticity, task accuracy) with phase-aware weight schedules + KL penalty.
-- [ ] Wire decoder into PPO trainer (batched rollout generation using SAE features); ensure frozen base model stays eval-only.
-- [ ] Run staged PPO schedule (Phase1=faithfulness 2k steps, Phase2=balanced 6k, Phase3=accuracy 2k) while logging KL, task metrics, sparsity stats.
-- [ ] Perform random-policy baseline test to detect reward hacking; halt training if random performs near trained model.
-- [ ] Freeze final RL decoder checkpoint once KL <0.5 nats and task accuracy drop <3% relative to frozen baseline.
+### Phase 2 — Synthetic Transformers
+- [ ] Implement tiny transformers solving grid or logic tasks where full attention patterns are known.
+- [ ] Hook activations, train SAEs with decorrelation + probes, and perform causal perturbations on internal features.
+- [ ] Compare recovered features against known synthetic circuitry; stop if alignment falls below target purity/correlation thresholds.
 
-## Phase 5 — Feature Interpretation & Labeling
-- [ ] Build activation patching + feature importance tooling to rank influential SAE features per task/domain.
-- [ ] Select top-K (e.g., 1000) features for labeling and auto-generate prompts for LLM-assisted labeling pipeline; stage batches for human review.
-- [ ] Implement active-learning loop: capture low-confidence labels, route for manual annotation, maintain `feature_labels.json` with confidence scores.
-- [ ] Run semantic clustering / duplicate detection to merge redundant features and flag low-quality ones for retraining.
+### Phase 3 — Controlled Chain-of-Thought LMs
+- [ ] Collect datasets with labeled reasoning steps; map steps to token spans using regex/similarity heuristics + manual spot checks.
+- [ ] Train SAEs on selected layers, integrate probe guidance tied to labeled steps, and evaluate leakage metrics.
+- [ ] Align learned features with reasoning steps using multi-aligner consensus; establish confidence scoring + EM refinement loop.
 
-## Phase 6 — Human-Interpretable Output Generation
-- [ ] Implement Method A (feature ranking text) producing deterministic explanations directly from activation magnitudes.
-- [ ] Build dataset for Method B (explanation decoder) by pairing active feature sets with templated natural-language rationales; target ≥5k samples.
-- [ ] Train explanation decoder, add faithfulness regularizer (activation patching feedback), and evaluate narrative quality vs. human judgments.
-- [ ] Assemble dashboard pipeline that outputs prediction, feature trace, and explanation; integrate uncertainty estimates + sanity checks.
+### Phase 4 — Frontier LLMs
+- [ ] Select target LLM checkpoints (1B–7B) and reasoning benchmarks (math, logic, Sudoku) for final evaluation.
+- [ ] Run capture, SAE training, and validation using same falsification gates; log hardware utilization vs budget.
+- [ ] Execute causal circuit tests (feature ablations, activation patching) to confirm stable reasoning primitives.
 
-## Validation & Testing
-- [ ] Author unit/integration tests for SAE reconstruction, decoder faithfulness, feature sparsity, reward calculator, and dashboard rendering.
-- [ ] Run task-suite evaluation (GSM8K, BoolQ, SQuAD, OOD set) comparing frozen vs RL decoder; log metrics + degradation deltas.
-- [ ] Execute interpretability benchmarks (label coverage, top-k importance mass, explanation faithfulness) and document results.
+## 6. Validation & Attribution Protocols
+- [ ] Codify purity metrics (top-k coherence, silhouette) and automate reporting per feature.
+- [ ] Implement causal attribution sweeps: add epsilon along decoder atoms, run inference, measure task deltas plus calibration curves.
+- [ ] Establish baselines (null SAE, random features) to contextualize causal scores.
+- [ ] Build replication harness: hold-out datasets, independent reruns, external audits.
 
-## Documentation & Ops
-- [ ] Keep project logbook (daily decisions, anomalies, mitigation steps) in `docs/logbook.md`.
-- [ ] Document hyperparameters, training schedules, and hardware utilization in `docs/experiments/` per run.
-- [ ] Prepare publication-quality figures (architecture diagram, training curves, interpretability visuals) once metrics stabilize.
-- [ ] Draft reproducibility checklist + release notes for code/artifact sharing.
+## 7. Risk Management
+- [ ] Define domain coverage tests to detect brittleness/invariance failures noted in overview.
+- [ ] Create leakage detection suite (compare SAE features against probes, run ablations) to guard against identifiability illusions.
+- [ ] Track assumptions + open questions per phase; decide go/no-go checkpoints before promoting to next phase.
+
+## 8. Resource & Timeline Tracking
+- [ ] Translate 50–100 RTX-hour budget into concrete run schedules; monitor GPU vs wall-clock targets.
+- [ ] Maintain log of dataset sizes, activation storage requirements (<100 GB target), and cleaning steps.
+- [ ] Outline two-week single-GPU execution plan with daily milestones and validation deliverables.

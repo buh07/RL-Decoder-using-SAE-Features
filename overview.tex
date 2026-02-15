@@ -1,0 +1,159 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{natbib}
+
+\title{Mechanistic Interpretability of Reasoning in LLMs via Sparse Autoencoders: A Phased, Resource-Efficient, Falsifiable Framework}
+\author{Benjamin Huh}
+\date{February 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document outlines a comprehensive, phased framework to evaluate sparse autoencoders (SAEs) for extracting human-interpretable, causally verifiable reasoning features from large language model (LLM) activations. Building on SAE successes~\citep{AnthropicMappingMind} and limitations~\citep{SAE-Identifiability,SAE-Random,SAE-Empirical}, we progress from ground-truth systems to LLMs, with strict falsification criteria. Key innovations include decorrelation losses, probe-guided training with leakage diagnostics, staged alignment, and causal attribution protocols. Resource optimizations enable execution on single high-end GPUs (e.g., RTX 6000). Full details cover theory, architecture, datasets, workflow, validation, risks, and scaling.
+\end{abstract}
+
+\section{Introduction and Motivation}
+LLMs excel on reasoning benchmarks, yet internal multi-step processes (e.g., hypothesis formation, constraint propagation) remain opaque. Chain-of-thought (CoT) is unreliable~\citep{Shu2025SurveySAE}. SAEs address this by learning sparse, monosemantic latents via dictionary learning~\citep{AnthropicMappingMind,ScalingMonosemanticityBlog}.
+
+\textbf{Research Question:} Can SAEs recover stable, causal reasoning primitives across phases, or do they reflect artifacts?
+
+Phased to falsify: Failures (e.g., no causal alignment) halt progression~\citep{SAE-Identifiability,SAE-Random}.
+
+\section{Theory and Background}
+\subsection{Sparse Autoencoders}
+SAE: Encoder $f$, decoder $g$ s.t. $X \approx g(f(X))$, $L = \|X - \hat{X}\|_2^2 + \lambda \|h\|_1 + R(h)$, $h = f(X)$~\citep{Shu2025SurveySAE}. Overcomplete bases yield monosemanticity, outperforming neurons~\citep{AnthropicMappingMind,SAE-Monosemantic}.
+
+Limitations: Non-identifiable without sparsity~\citep{SAE-Identifiability}; random nets interpretable~\citep{SAE-Random}; domain-sensitive~\citep{SAE-Domain,SAE-Empirical}.
+
+\subsection{Monosemanticity}
+Features activate consistently for one concept; polysemy fragments axes~\citep{Zhu2025AbsTopK}.
+
+\section{Experimental Formulation}
+\subsection{Activations and Hooks}
+Post-MLP residual + MLP hidden (nonlinear updates). Expand to mid-late layers if needed. Token-level from reasoning datasets.
+
+Efficiency: On-the-fly streaming, fp16, 1-2 layers, small models (1B-7B).
+
+\subsection{SAE Architecture}
+Overcomplete latent ($k=4$-$8 \times d$), ReLU. Decoder reconstructs $X$.
+
+\subsection{Loss Function}
+\[
+L_\text{total} = \|X - \hat{X}\|_2^2 + \lambda \|h\|_1 + \beta \sum_{i<j} w_i^\top w_j + \gamma L_\text{probe} + \delta L_\text{temporal}.
+\]
+Decorrelation: Penalizes redundancy (novel directions, shared subspaces OK). Temporal optional: $\|h_t - h_{t+1}\|_2^2$. Probes: Hypothesis/constraint tasks; ablation if gap $>$5\%.
+
+\section{Datasets and Tasks}
+Structured reasoning: Multi-step math, logic, Sudoku. Corpora: GSM8K, CoT-Collection, OpenR1-Math-220k, Reasoning Traces, REVEAL, TRIP, WIQA. Subsample for efficiency.
+
+\section{Phased Framework}
+\begin{enumerate}
+\item \textbf{Ground-Truth (Phase 1)}: BFS/DFS, stacks; align SAE to states~\citep{SAE-Monosemantic}.
+\item \textbf{Synthetic Transformers (Phase 2)}: Grid/logic; causal perturbations.
+\item \textbf{Controlled CoT (Phase 3)}: Labeled steps; probes.
+\item \textbf{LLMs (Phase 4)}: Benchmarks; circuit tests~\citep{ScalingMonosemanticityBlog}.
+\end{enumerate}
+
+\section{Experimental Workflow}
+\begin{enumerate}
+\item Capture (stream, monitor).
+\item Train Phase 1: Recon + sparsity.
+\item Phase 2: +Decorr/probes.
+\item Align: Multi-heuristic (regex, similarity), confidence-weighted; EM refine.
+\item Inspect: LM descriptions, clustering.
+\item Validate: Purity, causal ($h \leftarrow h + \epsilon e_i$).
+\item Iterate.
+\end{enumerate}
+
+\section{Interpretability Protocols}
+\subsection{Alignment}
+Step-to-token: Rules/edit-distance; multi-aligner consensus; spot-checks.
+
+\subsection{Causal Attribution}
+Baselines (recon, nulls), linearity, hook sweeps, calibration. Stats sig. required~\citep{ScalingMonosemanticityBlog}.
+
+\subsection{Validation}
+Immediate: Purity (silhouette), clusters. Post: Ablations, replication, holdouts, audits.
+
+\section{Evaluation Metrics}
+- Purity: Top-k coherence.
+- Causal: Task/probe shifts.
+- Probe acc.
+- Cross-layer.
+
+\section{Risks and Mitigations}
+- Coverage: Phased scaling~\citep{SAE-Empirical}.
+- Brittleness: Invariance tests~\citep{Li2025InterpretabilityIllusions}.
+- Leakage: Ablations~\citep{SAE-Identifiability}.
+
+\section{Resources (Optimized)}
+50-100 RTX-equivalent hours, $<$100 GB; 1-2 weeks single GPU.
+
+\section{Conclusion}
+This framework advances SAE interpretability for reasoning, with falsifiable phases and efficiencies.
+
+\bibliographystyle{plainnat}
+\begin{thebibliography}{9}
+
+\bibitem[Anthropic Mapping the Mind(2023)]{AnthropicMappingMind}
+Anthropic.
+\newblock Towards Monosemanticity: Decomposing Language Models With Dictionary Learning.
+\newblock \url{https://transformer-circuits.pub/2023/monosemantic-features}, 2023.
+
+\bibitem[Anon(2025a)]{SAE-Identifiability}
+Anon.
+\newblock Identifiable Sparse Autoencoders: Theory \& Methods.
+\newblock arXiv:2506.15963, 2025.
+\url{https://arxiv.org/abs/2506.15963}.
+
+\bibitem[Anon(2025b)]{SAE-Random}
+Anon.
+\newblock Sparse Autoencoders Can Interpret Randomly Initialized Transformers.
+\newblock arXiv:2501.17727, 2025.
+\url{https://arxiv.org/abs/2501.17727}.
+
+\bibitem[Anon(2025c)]{SAE-Domain}
+Anon.
+\newblock Resurrecting the Salmon: Rethinking Mechanistic Interpretability with Domain-Specific Sparse Autoencoders.
+\newblock arXiv:2508.09363, 2025.
+
+\bibitem[Anon(2024)]{SAE-Empirical}
+Anon.
+\newblock Evaluating Sparse Autoencoders for LLM Interpretability.
+\newblock arXiv:2405.08366, 2024.
+\url{https://arxiv.org/abs/2405.08366}.
+
+\bibitem[Anon(2025d)]{SAE-Monosemantic}
+Anon.
+\newblock Sparse Autoencoders Learn Monosemantic Features in Vision-Language Models.
+\newblock arXiv:2504.02821, 2025.
+\url{https://arxiv.org/abs/2504.02821}.
+
+\bibitem[Anthropic(2024)]{ScalingMonosemanticityBlog}
+Anthropic.
+\newblock Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet.
+\newblock \url{https://transformer-circuits.pub/2024/scaling-monosemanticity/}, 2024.
+
+\bibitem[Shu et~al.(2025)]{Shu2025SurveySAE}
+Shu~et~al.
+\newblock Sparse Autoencoders Survey in Mechanistic Interpretability.
+\newblock 2025.
+
+\bibitem[Li(2025)]{Li2025InterpretabilityIllusions}
+Li.
+\newblock Interpretability Illusions.
+\newblock 2025.
+
+\bibitem[Zhu(2025)]{Zhu2025AbsTopK}
+Zhu~et~al.
+\newblock AbsTopK and SAE Limitations.
+\newblock 2025.
+
+\end{thebibliography}
+
+\end{document}
