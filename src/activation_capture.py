@@ -66,6 +66,9 @@ class ActivationCapture:
         """Return a hook function for a given layer and activation type."""
         
         def hook_fn(module: nn.Module, input: tuple, output: Tensor) -> None:
+            if isinstance(output, tuple):
+                output = output[0]
+
             if not self.config.enable_gradient:
                 output = output.detach()
             else:
@@ -187,8 +190,15 @@ class ActivationCapture:
         self.remove_hooks()
         
         # Write global manifest
+        model_config = asdict(self.config)
+        for key, value in list(model_config.items()):
+            if isinstance(value, Path):
+                model_config[key] = str(value)
+            elif isinstance(value, torch.dtype):
+                model_config[key] = str(value)
+
         manifest = {
-            "model_config": asdict(self.config),
+            "model_config": model_config,
             "layer_indices": self.config.layer_indices,
             "total_shards": self.shard_count,
             "total_tokens_captured": self.token_count,

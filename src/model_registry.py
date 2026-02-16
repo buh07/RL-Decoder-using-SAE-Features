@@ -36,12 +36,28 @@ class ModelSpec:
     """Architecture notes, licensing, and relevant details."""
 
 
+def _resolve_hf_snapshot_dir(base_path: Path) -> Path:
+    """Return snapshot dir if present, else fall back to base path."""
+    snapshots_dir = base_path / "snapshots"
+    if not snapshots_dir.is_dir():
+        return base_path
+
+    snapshot_ids = [p for p in snapshots_dir.iterdir() if p.is_dir()]
+    if not snapshot_ids:
+        return base_path
+
+    # Use lexicographically latest snapshot for determinism.
+    return sorted(snapshot_ids)[-1]
+
+
 # Available models with local paths relative to LLM Second-Order Effects/models
 MODELS: dict[str, ModelSpec] = {
     "gpt2": ModelSpec(
         name="GPT-2 Small",
         model_id="gpt2",
-        hf_local_path=Path("/scratch2/f004ndc/LLM Second-Order Effects/models/models--gpt2"),
+        hf_local_path=_resolve_hf_snapshot_dir(
+            Path("/scratch2/f004ndc/LLM Second-Order Effects/models/models--gpt2")
+        ),
         num_layers=12,
         hidden_dim=768,
         mlp_dim=3072,

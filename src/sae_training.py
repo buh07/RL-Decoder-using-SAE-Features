@@ -54,14 +54,19 @@ class ActivationShardDataset(IterableDataset):
         self.max_shards = max_shards
         self.shuffle = shuffle
         
-        # Find all .pt files
-        self.shards = sorted(self.shard_dir.glob("shard_*.pt"))
+        # Find all .pt shard files (supports multiple naming patterns)
+        self.shards = sorted(self.shard_dir.glob("*shard_*.pt"))
+        
+        # Filter to residual streams if both residual and MLP shards exist
+        residual_shards = [s for s in self.shards if "residual" in s.name]
+        if residual_shards:
+            self.shards = residual_shards
         
         if max_shards:
             self.shards = self.shards[:max_shards]
         
         if not self.shards:
-            raise FileNotFoundError(f"No shard_*.pt files found in {shard_dir}")
+            raise FileNotFoundError(f"No *shard_*.pt files found in {shard_dir}")
         
         print(f"[Dataset] Found {len(self.shards)} shards in {shard_dir}")
     

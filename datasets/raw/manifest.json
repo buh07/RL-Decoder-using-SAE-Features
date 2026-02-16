@@ -1,0 +1,16 @@
+{
+  "gsm8k": {
+    "name": "gsm8k",
+    "hf_path": "openai/gsm8k",
+    "subset": "main",
+    "splits": [
+      "train",
+      "test"
+    ],
+    "question_column": "question",
+    "answer_column": "answer",
+    "cot_column": null,
+    "extra_columns": [],
+    "notes": "Grade-school math word problems released under Apache-2.0."
+  }
+}

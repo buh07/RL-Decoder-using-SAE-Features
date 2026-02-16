@@ -57,7 +57,12 @@ def validate_capture(
     model.eval()
     
     # Create dummy input
-    tokenizer = AutoTokenizer.from_pretrained(str(spec.hf_local_path))
+    tokenizer_path = spec.hf_local_path
+    fallback_tokenizer = Path("assets/tokenizers/gpt2")
+    if not (tokenizer_path / "tokenizer.json").exists() and fallback_tokenizer.exists():
+        tokenizer_path = fallback_tokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained(str(tokenizer_path))
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     
