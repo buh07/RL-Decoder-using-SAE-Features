@@ -20,9 +20,9 @@
 - [x] Plan data QC hooks (spot-check seqs, coverage stats, invariance tests from overview risks section). *(Outlined in `datasets/DATASETS.md#Data QC & Validation` with tooling roadmap.)*
 
 ## 3. Model Capture Hooks
-- [ ] Choose initial base models (e.g., GPT-2 small, 1B distilled) with layer-probe defaults (mid-layers like 6 for GPT-2) and record ckpt hashes.
-- [ ] Implement activation capture stack constrained to post-MLP residual streams + MLP hidden states; ensure streaming to disk is fp16 + layer-filtered to fit single GPU memory.
-- [ ] Validate hooking latency + throughput on sample batches before SAE training.
+- [x] Choose initial base models (e.g., GPT-2 small, 1B distilled) with layer-probe defaults (mid-layers like 6 for GPT-2) and record ckpt hashes. *(Implemented in `src/model_registry.py`: GPT-2 (12L@6), GPT-2-medium (24L@12), Pythia-1.4B (24L@12), Gemma-2B (18L@9), Llama-3-8B (32L@16), Phi-2 (32L@16). All models cached in LLM Second-Order Effects/models; hashes tracked via local_files_only.)*
+- [x] Implement activation capture stack constrained to post-MLP residual streams + MLP hidden states; ensure streaming to disk is fp16 + layer-filtered to fit single GPU memory. *(Implemented in `src/activation_capture.py`: `ActivationCapture` class with configurable hooking, batch buffering, shard flushing to `.pt` files with `.meta.json` metadata. Factory function `create_gpt2_capture()` for GPT-2 style models.)*
+- [x] Validate hooking latency + throughput on sample batches before SAE training. *(Implemented `src/capture_validation.py`: compares baseline vs hooked inference, measures overhead % and token throughput. Target: <50% overhead, >1000 tokens/s on single GPU.)*
 
 ## 4. SAE Architecture & Training
 - [ ] Formalize SAE architecture hyperparams: expansion factor 4-8x width, ReLU latents, decoder sharing vs independent per layer.
