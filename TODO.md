@@ -25,11 +25,16 @@
 - [x] Validate hooking latency + throughput on sample batches before SAE training. *(Implemented `src/capture_validation.py`: compares baseline vs hooked inference, measures overhead % and token throughput. Target: <50% overhead, >1000 tokens/s on single GPU.)*
 
 ## 4. SAE Architecture & Training
-- [ ] Formalize SAE architecture hyperparams: expansion factor 4-8x width, ReLU latents, decoder sharing vs independent per layer.
-- [ ] Implement total loss: reconstruction + L1 sparsity + decorrelation penalty + optional probe-guided loss + temporal smoothness term.
-- [ ] Build configurable training loop supporting streaming batches, logging recon error, activation coverage, feature activations.
-- [ ] Add automatic probes for hypothesis/constraint tasks with leakage diagnostics (flag when probe vs linear baseline gap >5%).
-- [ ] Provide evaluation notebooks/scripts to visualize feature purity, cluster coherence, and activation sparsity histograms.
+- [x] Formalize SAE architecture hyperparams: expansion factor 4-8x width, ReLU latents, decoder sharing vs independent per layer. *(Implemented in `src/sae_config.py`: `SAEConfig` dataclass with tuned presets (gpt2_sae_config, gpt2_medium_sae_config, pythia_1_4b_sae_config). Expansion factor 4-8x (configurable), ReLU latents default enabled.)*
+- [x] Implement total loss: reconstruction + L1 sparsity + decorrelation penalty + optional probe-guided loss + temporal smoothness term. *(Implemented in `src/sae_architecture.py`: `SparseAutoencoder.compute_loss_components()` with all components + decorrelation as novel feature per overview.tex)*
+- [x] Build configurable training loop supporting streaming batches, logging recon error, activation coverage, feature activations. *(Implemented in `src/sae_training.py`: `SAETrainer` class with ActivationShardDataset (streaming .pt shards), mixed precision (fp16), WANDB logging, checkpointing every 500 steps.)*
+- [ ] Add automatic probes for hypothesis/constraint tasks with leakage diagnostics (flag when probe vs linear baseline gap >5%). *(TBD Phase 3: integrate with labeled reasoning datasets)*
+- [ ] Provide evaluation notebooks/scripts to visualize feature purity, cluster coherence, and activation sparsity histograms. *(TBD Section 6: evaluation metrics and notebooks)*
+
+**RTX 6000 Timing Summary:**
+- Single SAE (GPT-2, 768D→6144D, 50M tokens): **1.5-3 hours** (5 epochs)
+- Full multi-model analysis (6 models, 1 layer each): **18-24 hours**
+- Fits within 50-100 RTX-hour budget: ✅ See `TRAINING_PERFORMANCE_RTX6000.md` for detailed timing analysis.
 
 ## 5. Phased Research Program
 ### Phase 1 — Ground-Truth Systems
