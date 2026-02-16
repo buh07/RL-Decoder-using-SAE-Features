@@ -1,0 +1,62 @@
+# RL-Decoder with SAE Features - Requirements
+
+Core dependencies (installed by `./setup_env.sh`):
+
+## Python Package Requirements
+torch>=2.0                   # Deep learning framework
+transformers>=4.37           # HuggingFace model loading
+trl>=0.8                     # Training utilities (if using TRL)
+accelerate>=0.25             # Multi-GPU/mixed precision support
+datasets                     # HuggingFace Datasets library
+
+## Optional Packages (recommended for later sections)
+wandb                        # Experiment tracking (Section 4+)
+numpy                        # Numerical computing
+scipy                        # Scientific computing
+scikit-learn                 # ML utilities for validation (Section 6+)
+pyarrow                      # Data serialization support
+pandas                       # Data manipulation
+
+## Development Tools (for notebooks & analysis)
+jupyter                      # Jupyter notebooks
+matplotlib                   # Plotting
+seaborn                      # Statistical visualization
+
+## System Requirements
+Python >=3.10                # Language version
+CUDA >=12.0 (recommended)    # GPU acceleration (tested on 12.8.93)
+GPU with >=12 GB VRAM        # For model loading + activation capture
+
+## Runtime Environment
+- Use Python 3.12.3 for reproducibility (tested version)
+- GPU: Single RTX-class GPU (e.g., RTX 6000, A40, A100)
+- Storage: ~100 GB for datasets, shards, and checkpoints
+- Timeline: 50-100 RTX-equivalent GPU hours
+
+## Installation
+
+```bash
+# Clone repository
+cd RL-Decoder\ with\ SAE\ Features
+
+# Run setup script (installs venv + core deps)
+./setup_env.sh
+
+# Activate
+source .venv/bin/activate
+
+# Install optional packages (as needed)
+pip install wandb jupyter matplotlib seaborn
+```
+
+## Verification
+
+After setup, verify installation:
+
+```bash
+python -c "import torch; print(f'PyTorch {torch.__version__}')"
+python -c "import transformers; print(f'Transformers {transformers.__version__}')"
+python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+```
+
+See SETUP.md for detailed troubleshooting.

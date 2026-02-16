@@ -1,0 +1,21 @@
+# This directory holds tokenized dataset shards (PyTorch .pt files).
+#
+# Populate by running:
+#   python datasets/tokenize_datasets.py --dataset gsm8k cot_collection [...]
+#
+# Creates shards like:
+#   gpt2/gsm8k/train/shard_00000.pt
+#   gpt2/gsm8k/train/shard_00001.pt
+#   gpt2/cot_collection/train/shard_00000.pt
+#   etc.
+#
+# Each shard:
+# - Contains fixed-length sequences (default: 2048 tokens)
+# - Saved as torch.int32 (2 bytes per token)
+# - Paired with .meta.json metadata files
+# - ~2M tokens per shard (~1024 sequences)
+#
+# After tokenization, manifests are written:
+#   gpt2/manifest.json  (global index of all shards)
+#
+# See datasets/DATASETS.md for details.
