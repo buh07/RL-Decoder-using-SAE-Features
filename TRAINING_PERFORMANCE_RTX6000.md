@@ -50,6 +50,25 @@
 - Overhead: 2.2% (acceptable; target <50%)
 - Throughput: ~1,050 tokens/sec with hooks
 
+### Expanded SAE Sweep (10x to 20x)
+
+**Dataset:** GPT-2 Layer 6 activations from `/tmp/gpt2_acts` (4,008 sequences, 512 seq_len)  
+**Run:** 3 epochs per configuration; same loss and optimizer settings as baseline
+
+| Expansion | GPU | Input→Latent | Batch Size | Learning Rate | Steps | Time | Avg Time/Step | Final Loss |
+|-----------|-----|--------------|------------|---------------|-------|------|---------------|------------|
+| **10x** | 0 | 768D→7680D | 32 | 8e-5 | 378 | 15.7s | 41.4ms | 1.8868 |
+| **12x** | 1 | 768D→9216D | 24 | 6e-5 | 501 | 19.9s | 39.7ms | 1.1591 |
+| **14x** | 2 | 768D→10752D | 20 | 5e-5 | 603 | 23.3s | 38.6ms | 0.8444 |
+| **16x** | 3 | 768D→12288D | 16 | 4e-5 | 753 | 29.8s | 39.6ms | 0.6205 |
+| **18x** | 4 | 768D→13824D | 16 | 3e-5 | 753 | 33.4s | 44.3ms | 0.7685 |
+| **20x** | 5 | 768D→15360D | 16 | 2e-5 | 753 | 39.6s | 52.6ms | 1.6518 |
+
+**Key Findings:**
+- Accuracy (final loss) improves from 10x to 16x, then degrades at 18x and 20x.
+- 16x is the best accuracy in this sweep, but 8x remains the speed/accuracy baseline for GPT-2.
+- Larger expansions are increasingly slow per step beyond 16x.
+
 ## Detailed Timing Analysis
 
 ### Model Complexity Tiers
