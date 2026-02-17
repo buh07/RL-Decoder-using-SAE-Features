@@ -1,3 +1,18 @@
 .venv/
 .env
 assets/tokenizers/
+
+# Large artifacts
+checkpoints/
+phase3_results/
+sae_logs/
+sae_results/
+datasets/raw/
+datasets/tokenized/
+
+# Training outputs
+**/*.pt
+**/*.pth
+**/*.ckpt
+**/*.log
+**/*.jsonl

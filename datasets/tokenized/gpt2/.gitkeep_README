@@ -1,9 +1,0 @@
-# This directory holds GPT-2 tokenizer shards.
-#
-# See ../DATASETS.md for tokenization details.
-#
-# After running tokenization, this will contain:
-#   shard_*.pt files with token sequences
-#   shard_*.meta.json with metadata
-#   manifest.json with global index
-#
