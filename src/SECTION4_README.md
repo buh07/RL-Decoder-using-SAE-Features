@@ -173,7 +173,7 @@ python src/sae_training.py \
 python src/sae_training.py \
   --shard-dir /tmp/test_activations \
   --model gpt2 \
-  --resume-from checkpoints/sae/sae_768d_step0500.pt \
+  --resume-from checkpoints/gpt2-small/sae/sae_768d_step0500.pt \
   --max-steps 500
 ```
 
@@ -372,7 +372,7 @@ wandb login  # If first time
 
 Checkpoints saved as:
 ```
-checkpoints/sae/
+checkpoints/gpt2-small/sae/
 ├── sae_768d_step0500.pt
 ├── sae_768d_step1000.pt
 ├── sae_768d_final.pt
@@ -395,7 +395,7 @@ Resume via:
 ```bash
 python src/sae_training.py \
   --shard-dir ... \
-  --resume-from checkpoints/sae/sae_768d_step0500.pt
+  --resume-from checkpoints/gpt2-small/sae/sae_768d_step0500.pt
 ```
 
 ## Evaluation & Metrics (Section 6, TBD)

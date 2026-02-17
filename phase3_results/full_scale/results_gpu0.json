@@ -1,0 +1,68 @@
+{
+  "4": {
+    "expansion": 4,
+    "checkpoint": "sae_768d_4x_final.pt",
+    "gpu_id": 0,
+    "runtime_seconds": 180.740661,
+    "examples": 500,
+    "probes": {
+      "4": {
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "latent_dim": 3072
+      }
+    },
+    "causal": {
+      "4": {
+        "num_features": 100,
+        "top_feature_importance": -0.54461669921875,
+        "results_saved": "phase3_results/full_scale/4x/causal_results_4x.json",
+        "summary_saved": "phase3_results/full_scale/4x/causal_summary_4x.json"
+      }
+    }
+  },
+  "6": {
+    "expansion": 6,
+    "checkpoint": "sae_768d_6x_final.pt",
+    "gpu_id": 0,
+    "runtime_seconds": 204.003878,
+    "examples": 500,
+    "probes": {
+      "6": {
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "latent_dim": 4608
+      }
+    },
+    "causal": {
+      "6": {
+        "num_features": 100,
+        "top_feature_importance": -0.0579833984375,
+        "results_saved": "phase3_results/full_scale/6x/causal_results_6x.json",
+        "summary_saved": "phase3_results/full_scale/6x/causal_summary_6x.json"
+      }
+    }
+  },
+  "8": {
+    "expansion": 8,
+    "checkpoint": "sae_768d_8x_final.pt",
+    "gpu_id": 0,
+    "runtime_seconds": 229.36445,
+    "examples": 500,
+    "probes": {
+      "8": {
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "latent_dim": 6144
+      }
+    },
+    "causal": {
+      "8": {
+        "num_features": 100,
+        "top_feature_importance": -0.0518798828125,
+        "results_saved": "phase3_results/full_scale/8x/causal_results_8x.json",
+        "summary_saved": "phase3_results/full_scale/8x/causal_summary_8x.json"
+      }
+    }
+  }
+}

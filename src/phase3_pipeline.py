@@ -22,6 +22,7 @@ from phase3_alignment import GSM8KAligner, ReasoningExample
 from phase3_causal import CausalAblationEvaluator, FeatureImportanceAnalyzer
 from phase3_config import Phase3Config
 from phase3_probes import ProbeDataset, ProbeTrainer
+from phase3_task_evaluation import GSM8KTaskEvaluator, CausalTaskEvaluator
 from sae_architecture import SparseAutoencoder
 from sae_config import SAEConfig
 from sae_training import ActivationShardDataset
@@ -56,7 +57,7 @@ class Phase3Pipeline:
             # Infer from model registry
             model_info = get_model(self.config.model_name)
             self.tokenizer = AutoTokenizer.from_pretrained(
-                model_info.hf_id, local_files_only=True
+                str(model_info.hf_local_path), local_files_only=True
             )
 
         # Load model (for future task evaluation)
@@ -113,29 +114,70 @@ class Phase3Pipeline:
 
     def load_sae_activations(
         self, examples: list[ReasoningExample]
-    ) -> dict[str, torch.Tensor]:
+    ) -> dict[int, dict[str, torch.Tensor]]:
         """
-        Load SAE latents for each example from sharded activation files.
-        Returns dict mapping example_id -> latents [seq_len, latent_dim]
+        Load activations for each example from sharded activation files.
+        Returns dict mapping expansion -> dict(example_id -> latents [seq_len, latent_dim])
         """
-        print("\n[Phase3] Step 2: Load SAE latents for aligned examples...")
+        print("\n[Phase3] Step 2: Load activations for aligned examples...")
 
-        sae_latents = {}
+        sae_latents_all_expansions = {}
 
-        # This is a simplified version—in practice, you'd need to:
-        # 1. Map examples to their corresponding activation shards
-        # 2. Load those shards and extract the relevant token ranges
-        # For now, we log what would need to happen:
+        for expansion, sae in self.saes.items():
+            print(f"\n  Extracting latents for {expansion}x SAE ({sae.config.latent_dim}D)...")
 
-        print(f"  Found {len(examples)} aligned examples")
-        print(f"  Would load latents from {self.config.train_activation_dir}")
-        print("  [TODO: Implement activation shard->example mapping]")
+            try:
+                from pathlib import Path
+                shard_dir = Path(self.config.train_activation_dir)
+                shards = sorted(shard_dir.glob("*shard_*.pt"))
+                
+                # Filter to residual streams if both residual and MLP shards exist
+                residual_shards = [s for s in shards if "residual" in s.name]
+                if residual_shards:
+                    shards = residual_shards
+                
+                print(f"    Loading from {len(shards)} shards...")
+                
+                latents_dict = {}
+                example_idx = 0
+                
+                with torch.no_grad():
+                    for shard_path in shards:
+                        payload = torch.load(shard_path, map_location="cpu")
+                        acts = payload["activations"]  # [num_sequences, seq_len, hidden_dim]
+                        
+                        # Process each sequence in the shard
+                        for seq_idx in range(acts.shape[0]):
+                            if example_idx >= len(examples):
+                                break
+                            
+                            # Get this sequence's activations
+                            seq_acts = acts[seq_idx]  # [seq_len, hidden_dim]
+                            seq_acts = seq_acts.unsqueeze(0).to(self.config.device).float()  # [1, seq_len, hidden_dim]
+                            
+                            # Extract SAE latents
+                            latents = sae.encoder(seq_acts)  # [1, seq_len, latent_dim]
+                            
+                            example_id = examples[example_idx].example_id
+                            latents_dict[example_id] = latents.squeeze(0).cpu()  # [seq_len, latent_dim]
+                            
+                            example_idx += 1
+                        
+                        if example_idx >= len(examples):
+                            break
+                
+                sae_latents_all_expansions[expansion] = latents_dict
+                print(f"    ✓ Extracted latents for {len(latents_dict)} examples")
 
-        # Placeholder: mock latents for demonstration
-        for ex in examples[:10]:  # Mock first 10
-            sae_latents[ex.example_id] = torch.randn(len(ex.tokens), 768, device="cpu")
+            except Exception as e:
+                print(f"    ✗ Error loading activations: {e}")
+                import traceback
+                traceback.print_exc()
+                continue
 
-        return sae_latents
+        print(f"\n  Total: {len(sae_latents_all_expansions)} SAE expansion(s) loaded")
+
+        return sae_latents_all_expansions
 
     def train_step_probes(self, examples: list[ReasoningExample]) -> dict:
         """Train probes to predict step types from SAE latents."""
@@ -153,17 +195,28 @@ class Phase3Pipeline:
 
         print(f"  Step types: {step_types}")
 
-        # Load SAE latents
-        sae_latents_dict = self.load_sae_activations(examples)
+        # Load SAE latents for all expansions
+        sae_latents_by_expansion = self.load_sae_activations(examples)
 
         # For each SAE expansion level, train a probe
         for expansion, sae in self.saes.items():
             print(f"\n  Training probe for {expansion}x SAE...")
 
+            if expansion not in sae_latents_by_expansion:
+                print(f"    Skipping {expansion}x: no latent data")
+                continue
+
+            sae_latents_dict = sae_latents_by_expansion[expansion]
             latent_dim = sae.config.latent_dim
 
             # Create dataset
-            dataset = ProbeDataset(examples, sae_latents_dict, {st: i for i, st in enumerate(step_types)})
+            try:
+                dataset = ProbeDataset(
+                    examples, sae_latents_dict, {st: i for i, st in enumerate(step_types)}
+                )
+            except Exception as e:
+                print(f"    Error creating dataset: {e}")
+                continue
 
             if len(dataset) == 0:
                 print(f"    Skipping {expansion}x: no training data")
@@ -216,36 +269,99 @@ class Phase3Pipeline:
 
         return probe_results
 
-    def evaluate_causal_importance(self) -> dict:
+    def evaluate_causal_importance(self, examples: list[ReasoningExample]) -> dict:
         """Run causal ablation to measure feature importance."""
         print("\n[Phase3] Step 4: Evaluate causal feature importance...")
 
         causal_results = {}
 
+        # Load test activations and latents
+        print(f"  Loading test activations from {self.config.test_activation_dir}...")
+
         for expansion, sae in self.saes.items():
-            print(f"\n  Evaluating {expansion}x SAE...")
+            print(f"\n  Evaluating {expansion}x SAE ({sae.config.latent_dim}D latent)...")
 
-            # Load test activations (simplified)
-            print(f"  Would load from {self.config.test_activation_dir}")
-            print("  [TODO: Implement activation loading for test set]")
+            try:
+                # Load test activations
+                test_dataset = ActivationShardDataset(
+                    self.config.test_activation_dir, batch_size=self.config.causal_batch_size, shuffle=False
+                )
+                test_loader = DataLoader(
+                    test_dataset, batch_size=None, num_workers=self.config.num_workers
+                )
 
-            # Mock evaluation
-            evaluator = CausalAblationEvaluator(
-                sae,
-                model=None,
-                device=self.config.device,
-                ablation_method=self.config.ablation_method,
-                num_samplings=self.config.num_perturbations_per_feature,
-            )
+                # Extract latents from test batch
+                test_activations_list = []
+                test_latents_list = []
 
-            # In real pipeline, would evaluate top features
-            print(f"    Loaded {expansion}x SAE with {sae.config.latent_dim}D latent space")
+                print(f"    Loading test batches...")
+                batch_count = 0
+                for batch in test_loader:
+                    if batch_count >= 5:  # Limit to first 5 batches for quick validation
+                        break
 
-            causal_results[expansion] = {
-                "status": "not-yet-implemented",
-                "latent_dim": sae.config.latent_dim,
-            }
+                    batch = batch.to(self.config.device).float()
+                    with torch.no_grad():
+                        latents = sae.encoder(batch)
 
+                    test_activations_list.append(batch.cpu())
+                    test_latents_list.append(latents.cpu())
+                    batch_count += 1
+
+                if not test_activations_list:
+                    print(f"    No test data loaded")
+                    continue
+
+                # Concatenate batches
+                test_activations = torch.cat(test_activations_list, dim=0)
+                test_latents = torch.cat(test_latents_list, dim=0)
+
+                print(f"    Loaded test activations: {test_activations.shape}")
+                print(f"    Test latents: {test_latents.shape}")
+
+                # Run causal ablation on top features
+                evaluator = CausalAblationEvaluator(
+                    sae=sae,
+                    model=None,
+                    device=self.config.device,
+                    ablation_method=self.config.ablation_method,
+                    num_samplings=self.config.num_perturbations_per_feature,
+                )
+
+                # Evaluate top-k features
+                top_k = min(self.config.compute_feature_importance_top_k, test_latents.shape[-1])
+                feature_ids = range(top_k)
+
+                print(f"    Evaluating {top_k} features...")
+                results = evaluator.evaluate_feature_importance(
+                    activations=test_activations.to(self.config.device),
+                    latents=test_latents.to(self.config.device),
+                    feature_ids=list(feature_ids),
+                    task_fn=None,
+                    verbose=self.config.verbose,
+                )
+
+                # Save and analyze
+                results_path = self.output_dir / f"causal_results_{expansion}x.json"
+                evaluator.save_results(results, results_path)
+
+                summary_path = self.output_dir / f"causal_summary_{expansion}x.json"
+                FeatureImportanceAnalyzer.save_summary(results, summary_path)
+
+                causal_results[expansion] = {
+                    "num_features": len(results),
+                    "top_feature_importance": results[0].loss_diff if results else None,
+                    "results_saved": str(results_path),
+                    "summary_saved": str(summary_path),
+                }
+
+            except Exception as e:
+                print(f"    Error evaluating causal importance: {e}")
+                import traceback
+                traceback.print_exc()
+                causal_results[expansion] = {"status": "error", "error": str(e)}
+
+        # Save master summary
         summary_path = self.output_dir / "causal_results.json"
         with open(summary_path, "w") as f:
             json.dump(causal_results, f, indent=2)
@@ -265,7 +381,7 @@ class Phase3Pipeline:
         probe_results = self.train_step_probes(examples)
 
         # Step 3: Causal evaluation
-        causal_results = self.evaluate_causal_importance()
+        causal_results = self.evaluate_causal_importance(examples)
 
         # Summary
         print("\n" + "=" * 80)

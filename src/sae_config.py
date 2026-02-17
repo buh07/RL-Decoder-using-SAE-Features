@@ -107,7 +107,7 @@ class SAEConfig:
     wandb_entity: Optional[str] = None
     """W&B entity/team name."""
     
-    checkpoint_dir: Path = field(default_factory=lambda: Path("checkpoints/sae"))
+    checkpoint_dir: Path = field(default_factory=lambda: Path("checkpoints/gpt2-small/sae"))
     """Directory to save checkpoints."""
     
     save_config_to_wandb: bool = True

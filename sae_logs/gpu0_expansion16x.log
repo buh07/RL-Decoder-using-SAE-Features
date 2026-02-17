@@ -1,0 +1,36 @@
+/scratch2/f004ndc/RL-Decoder with SAE Features/src/sae_training.py:158: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = GradScaler() if self.use_amp else None
+/scratch2/f004ndc/RL-Decoder with SAE Features/src/sae_training.py:196: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(dtype=self.dtype):
+/scratch2/f004ndc/RL-Decoder with SAE Features/src/sae_training.py:223: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  self.scheduler.step()
+[Dataset] Found 1 shards in /tmp/gpt2_gsm8k_acts/gsm8k/train
+[training] Starting SAE training
+  Config: 768D → 12288D
+  Device: cuda:0, AMP: True
+  Max epochs: 10, Max steps: None
+
+[epoch 0] avg_loss=264.1542, time=3.6s (18 steps)
+[epoch 1] avg_loss=185.5341, time=3.2s (18 steps)
+[epoch 2] avg_loss=160.3304, time=3.2s (18 steps)
+[epoch 3] avg_loss=129.4456, time=3.3s (18 steps)
+[epoch 4] avg_loss=98.8514, time=3.2s (18 steps)
+[05] step=000100 | loss=72.0354 (recon=72.0340, l1=1.2656, decorr=0.0013) | sparsity=49.43% | lr=1.00e-05 | 113.5ms
+[epoch 5] avg_loss=73.0580, time=3.2s (18 steps)
+[epoch 6] avg_loss=53.9577, time=3.2s (18 steps)
+[epoch 7] avg_loss=40.7973, time=3.3s (18 steps)
+[epoch 8] avg_loss=31.7205, time=3.2s (18 steps)
+[epoch 9] avg_loss=25.1383, time=3.2s (18 steps)
+
+[training] Complete!
+  Total steps: 180
+  Total time: 32.7s
+  Avg time/step: 181.8ms
+[checkpoint] saved to /scratch2/f004ndc/RL-Decoder with SAE Features/checkpoints/sae/sae_768d_final.pt
+
+[done] Training summary:
+  total_steps: 180
+  total_time_seconds: 32.72298479638994
+  avg_time_per_step_ms: 181.7943599799441
+  final_loss: 22.96048927307129
+  model_saved: /scratch2/f004ndc/RL-Decoder with SAE Features/checkpoints/sae

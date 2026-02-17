@@ -1,204 +1,94 @@
 # RL-Decoder with SAE Features
 
-**Mechanistic Interpretability of Reasoning in LLMs via Sparse Autoencoders: A Phased, Resource-Efficient, Falsifiable Framework**
+**Mechanistic Interpretability of Reasoning in LLMs via Sparse Autoencoders**
 
 *Benjamin Huh, February 2026*
 
-This repository implements a comprehensive experimental framework to evaluate sparse autoencoders (SAEs) for extracting human-interpretable, causally verifiable reasoning features from large language model (LLM) activations. The project progresses from ground-truth systems to frontier models, with strict falsification criteria at each phase.
+This repository implements a phased, falsifiable framework for extracting and validating reasoning features from LLM activations using sparse autoencoders (SAEs). The current focus is full-scale Phase 3 evaluation on GSM8K with multiple SAE expansions.
 
-## Project Status
+## Read This First
 
-**Completed:** Sections 0, 1, 2, 3  
-**In Progress:** Section 4 (SAE Architecture & Training)  
-**Next:** Sections 5-8 (Phased research, validation, risk management, scaling)
+- [README.md](README.md) (this file) - project orientation and key paths
+- [EXECUTION_START_HERE.md](EXECUTION_START_HERE.md) - start-to-finish runbook
+- [PHASE3_FULLSCALE_EXECUTION_GUIDE.md](PHASE3_FULLSCALE_EXECUTION_GUIDE.md) - Phase 3 details
 
-### What Works Now
+## Current Status (Feb 17, 2026)
 
-✅ **Environment Setup** (Section 1)
-- Bootstrapped venv with PyTorch 2.0+, transformers, accelerate, datasets
-- WANDB tracking configured
-- GPT-2 tokenizer vendored and synced
+- Phase 3 full-scale evaluation is running on GSM8K with SAE expansions 4x-20x.
+- SAE checkpoints for 4x-20x exist and were refreshed on full GSM8K.
+- Missing expansions (2x, 22x-32x) remain optional follow-ups.
 
-✅ **Data Pipeline** (Section 2)
-- 7 reasoning datasets enumerated (GSM8K, CoT-Collection, OpenR1-Math-220k, Reasoning Traces, REVEAL, TRIP, WIQA)
-- Streaming tokenization to fixed-length shards (2M tokens/shard, fp16)
-- Temporal alignment schema for CoT-to-token mapping
-- Ready-to-run: `python datasets/download_datasets.py` → `python datasets/tokenize_datasets.py`
+## Key Paths
 
-✅ **Model Capture Hooks** (Section 3)
-- 6 models available: GPT-2 (baseline), GPT-2-medium, Pythia-1.4B, Gemma-2B, Llama-3-8B, Phi-2
-- All models cached locally in LLM Second-Order Effects/models
-- Activation capture: post-MLP residuals + MLP hidden states
-- fp16 streaming to disk with configurable batch buffering
-- Latency validation script (target: <50% overhead, >1000 tokens/s)
-- Ready-to-run: `python src/capture_validation.py --model gpt2`
+- Activations: `/tmp/gpt2_gsm8k_acts/gsm8k/train` (train), `/tmp/gpt2_gsm8k_acts_test/gsm8k/test` (test)
+- SAE checkpoints: `checkpoints/gpt2-small/sae/sae_768d_*x_final.pt`
+- Phase 3 results: `phase3_results/full_scale/`
+- SAE logs/results: `sae_logs/`, `sae_results/`
 
-## Quick Start
+## Setup (Short)
 
-### 1. Setup Environment
 ```bash
-cd RL-Decoder\ with\ SAE\ Features
-./setup_env.sh  # or: PYTHON=python3.12 ./setup_env.sh
+cd /scratch2/f004ndc/RL-Decoder\ with\ SAE\ Features
+./setup_env.sh
 source .venv/bin/activate
 ```
 
-### 2. Validate Activation Capture (GPT-2, Baseline)
+## Run SAE Training (GSM8K, GPUs 0-1)
+
 ```bash
-python src/capture_validation.py --model gpt2 --batch-size 4 --seq-len 512 --num-batches 5 --device cuda
+python sae/sae_train_all_gsm8k_orchestrator.py --gpu-ids 0 1
 ```
 
-Expected output:
-- Baseline: ~0.25s/batch (8000 tokens/s)
-- With hooks: ~0.31s/batch (6500 tokens/s)
-- Overhead: ~23% (acceptable)
-- Peak GPU: ~6-7 GB for fp16 model + activations
-
-### 3. Explore Available Models
+Monitor:
 ```bash
-python src/model_registry.py
+bash sae/monitor_sae_training.sh
 ```
 
-Output:
-```
-Available models for activation capture:
-  gpt2                 | GPT-2 Small              | 12 layers | probe=6
-    /scratch2/f004ndc/LLM Second-Order Effects/models/models--gpt2
-    OpenAI GPT-2 small. 12 layers, 768D hidden, 3072D MLP. Baseline for reproducibility...
-  
-  gpt2-medium          | GPT-2 Medium             | 24 layers | probe=12
-    /scratch2/f004ndc/LLM Second-Order Effects/models/models--gpt2-medium
-    OpenAI GPT-2 medium. 24 layers, 1024D hidden, 4096D MLP. First scaling test...
-  
-  [... + 4 more models ...]
+## Run Phase 3 Full-Scale Evaluation (GPUs 0-3)
+
+```bash
+bash phase3/phase3_orchestrate.sh
 ```
 
-### 4. View Full Design & Tests
-- **Design**: [overview.tex](overview.tex) – 159 lines, fully detailed phased framework
-- **Roadmap**: [TODO.md](TODO.md) – 8 sections with falsification criteria
-- **Setup**: [SETUP.md](SETUP.md) – environment & runtime details
-- **Data**: [datasets/DATASETS.md](datasets/DATASETS.md) – 7 datasets, sharding plan, alignment schema
-- **Model Capture**: [src/SECTION3_README.md](src/SECTION3_README.md) – hooking, validation, API
+Monitor:
+```bash
+tmux attach -t phase3_fullscale
+bash phase3_results/full_scale/monitor.sh
+```
 
-## Directory Structure
+Merge results:
+```bash
+python phase3/phase3_merge_results.py --input-dir phase3_results/full_scale
+```
+
+## SAE Results Snapshot (GSM8K Test, GPT-2 Layer 6)
+
+- 10x-12x expansions show lowest reconstruction loss on test.
+- 12x is a strong default for interpretability follow-ups.
+
+## Falsification Pipeline Summary (Phase 1-2)
+
+- Phase 1: BFS/DFS, Stack Machine, Logic Puzzles with exact latent states.
+- Phase 2: Tiny transformers with known circuits for causal alignment tests.
+- Phase 3+: Apply validated protocol to real LLMs (Phase 4).
+
+## Directory Structure (Top Level)
 
 ```
 RL-Decoder with SAE Features/
-├── README.md                  ← You are here
-├── SETUP.md                   ← Environment & runtime setup
-├── TODO.md                    ← 8-section roadmap with checkboxes
-├── overview.tex               ← Full design document (research question, theory, metrics, risks)
-├── LICENSE                    ← MIT
-├── .env                       ← Secrets (WANDB_API_KEY, etc.) — ignored by git
-├── .gitignore
-│
-├── src/                       ← Core implementations
-│   ├── __init__.py
-│   ├── model_registry.py      ← Model specs (6 models, layer defaults)
-│   ├── activation_capture.py  ← Hooking infrastructure (ActivationCapture, create_gpt2_capture)
-│   ├── capture_validation.py  ← Latency/throughput benchmarking
-│   └── SECTION3_README.md     ← Detailed usage for model capture hooks
-│
-├── datasets/                  ← Data pipeline
-│   ├── DATASETS.md            ← 7 datasets, normalization rules, sharding plan
-│   ├── download_datasets.py   ← Fetch & normalize from HuggingFace
-│   ├── tokenize_datasets.py   ← Convert to fixed-length shards
-│   ├── raw/                   ← Will hold JSONL after download
-│   └── tokenized/gpt2/        ← Will hold .pt shards after tokenization
-│
-├── assets/                    ← Runtime artifacts
-│   └── tokenizers/gpt2/       ← GPT-2 tokenizer (vocab, merges, config)
-│
-├── vendor/                    ← Vendored dependencies
-│   └── gpt2_tokenizer/        ← Pinned tokenizer source
-│
-└── .venv/                     ← Virtual environment (git-ignored)
+├── README.md
+├── EXECUTION_START_HERE.md
+├── PHASE3_FULLSCALE_EXECUTION_GUIDE.md
+├── phase3/                       # Phase 3 orchestration scripts
+├── sae/                          # SAE training scripts
+├── src/                          # Core implementation
+├── datasets/                     # Data pipeline
+├── checkpoints/                  # Model checkpoints
+├── phase3_results/               # Phase 3 outputs
+├── sae_logs/                     # SAE training logs
+├── sae_results/                  # SAE training outputs
+└── overview.tex                  # Design document
 ```
-
-## Architecture Highlights
-
-### Model Capture (Section 3)
-
-**Baseline: GPT-2 Small**
-- 12 transformer layers, 768D hidden dimension, 3072D MLP intermediate
-- Default probe layer: 6 (middle of stack)
-- Activation capture hooks at post-MLP residual & MLP hidden
-- Saving: fp16 tensors, ~2 bytes/float (vs 4 for fp32)
-- Streaming: Batch buffer flushes to disk every 1000 sequences
-- Memory: ~6-7 GB on single RTX-class GPU
-
-**Other Models (for later phases):**
-- GPT-2-medium: 2x larger (24L, 1024D)
-- Pythia-1.4B, Gemma-2B: ~1.4-2B params
-- Llama-3-8B, Phi-2: Frontier (8B params, requires ~30 GB)
-
-### Data Pipeline (Section 2)
-
-**7 Reasoning Datasets:**
-1. GSM8K – Grade-school math (Apache-2.0)
-2. CoT-Collection – Aggregated chain-of-thought (CC BY-SA 4.0)
-3. OpenR1-Math-220k – Distilled reasoning traces (CC BY-SA 4.0)
-4. Reasoning-Traces – MetaMath proofs (AllenAI)
-5. REVEAL – Factual reasoning (AllenAI)
-6. TRIP – Multihop reasoning with programs (AllenAI)
-7. WIQA – Cause-effect reasoning (AllenAI)
-
-**Processing:**
-- Download → normalize to `{question, answer, cot, source_dataset, ...extras}` JSONL
-- Tokenize → fixed-length sequences (default 2048 tokens)
-- Shard → ~2M tokens/file, fp16, with checksums
-- Align → map CoT steps to token spans (regex + heuristics)
-
-### Activation Capture (Section 3)
-
-**Hooked Layers:**
-- Post-MLP residual: `module(x)` output (full transformer block residual stream)
-- MLP hidden: `module.mlp(x)` output (intermediate nonlinear features)
-
-**Saving Strategy:**
-- Path: `activations/gpt2_layer6/layer_6_residual_shard_000000.pt`
-- Format: `{input_ids: Tensor[batch, seq_len, hidden_dim]}`
-- Metadata: `.meta.json` with shape, dtype, token count, checksum
-- Manifest: Global `manifest.json` listing all shards
-
-**Why This Matters:**
-- Residuals capture high-level abstract state (e.g., "is this a question?")
-- MLP hidden states expose non-linear combinations (e.g., "contains 'math'")
-- Both together enable SAE to learn diverse interpretable features
-
-## Next Steps
-
-### Immediate (Next Section)
-**Section 4: SAE Architecture & Training**
-- [ ] Define SAE hyperparams: expansion factor 4-8x, ReLU latents
-- [ ] Implement loss: reconstruction + L1 sparsity + decorrelation + optional probes
-- [ ] Build configurable training loop (streaming batches, logging, checkpoints)
-- [ ] Add automatic probes with leakage diagnostics
-- [ ] Evaluation: purity metrics, feature clustering, ablation tests
-
-### After SAE Training Basics
-**Section 5: Phased Research Program**
-- Phase 1: Ground-truth systems (BFS/DFS, stacks) – verify SAE reconstruction
-- Phase 2: Synthetic transformers (tiny models, known circuitry) – test causal alignment
-- Phase 3: Controlled CoT LMs (labeled reasoning steps) – probe guidancce + alignment
-- Phase 4: Frontier LLMs (8B models, reasoning benchmarks) – final validation
-
-### Validation & Deployment (Sections 6-8)
-- Causal attribution protocols (add epsilon along features, measure task impact)
-- Risk management (coverage tests, leakage detection, go/no-go checkpoints)
-- Resource tracking (GPU hours, activation storage, timeline)
-
-## Running the Pipeline End-to-End (TBD Post-Section 4)
-
-Once SAE training is implemented:
-
-```bash
-# 1. Download reasoning datasets
-python datasets/download_datasets.py --dataset gsm8k cot_collection
-
-# 2. Tokenize into shards
-python datasets/tokenize_datasets.py --dataset gsm8k cot_collection
-
-# 3. Validate activation capture on GPT-2 baseline
 python src/capture_validation.py --model gpt2 --num-batches 10
 
 # 4. Capture all activations for training (script TBD)

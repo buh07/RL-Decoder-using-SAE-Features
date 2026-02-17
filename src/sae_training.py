@@ -446,7 +446,7 @@ def main() -> None:
     parser.add_argument(
         "--checkpoint-dir",
         type=Path,
-        default=Path("checkpoints/sae"),
+        default=Path("checkpoints/gpt2-small/sae"),
         help="Directory to save checkpoints",
     )
     

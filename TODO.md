@@ -37,25 +37,43 @@
 - Fits within 50-100 RTX-hour budget: ✅ See `TRAINING_PERFORMANCE_RTX6000.md` for detailed timing analysis.
 
 ## 5. Phased Research Program
-### Phase 1 — Ground-Truth Systems
+
+### Phase 1 — Ground-Truth Systems [🔴 NOT STARTED - INFRASTRUCTURE READY]
+**Status**: Skeleton implemented in `phase1_ground_truth.py`, ready to execute on GPUs 4-7 after Phase 3.
 - [ ] Recreate simple environments (BFS/DFS traversals, stack machines) with exact latent states.
 - [ ] Train SAEs on those states to verify reconstruction + monosemanticity; document failure cases as stop criteria.
 - [ ] Build causal tests: directly edit SAE latents and ensure decoded state changes behave as predicted.
+- **Timeline**: 5-7 days (parallel to Phase 3 full-scale)
+- **Success criteria**: Reconstruction fidelity >95%, causal tests pass for all latent perturbations
 
-### Phase 2 — Synthetic Transformers
+### Phase 2 — Synthetic Transformers [🔴 NOT STARTED - PLACEHOLDER]
 - [ ] Implement tiny transformers solving grid or logic tasks where full attention patterns are known.
 - [ ] Hook activations, train SAEs with decorrelation + probes, and perform causal perturbations on internal features.
 - [ ] Compare recovered features against known synthetic circuitry; stop if alignment falls below target purity/correlation thresholds.
+- **Timeline**: 7-10 days after Phase 1
+- **Success criteria**: Feature alignment purity ≥80%, causal effects match prediction
 
-### Phase 3 — Controlled Chain-of-Thought LMs
-- [ ] Collect datasets with labeled reasoning steps; map steps to token spans using regex/similarity heuristics + manual spot checks.
-- [ ] Train SAEs on selected layers, integrate probe guidance tied to labeled steps, and evaluate leakage metrics.
-- [ ] Align learned features with reasoning steps using multi-aligner consensus; establish confidence scoring + EM refinement loop.
+### Phase 3 — Controlled Chain-of-Thought LMs [🟡 SCALED FULL-DATASET IN PROGRESS]
+**Status**: FULL DATASET EVALUATION NOW RUNNING
+- [x] Collect datasets with labeled reasoning steps (GSM8K ~7,473 examples)
+- [x] Train SAEs on selected layers, integrate probe guidance tied to labeled steps
+- [⏳] **ONGOING**: Evaluate ALL 16 SAE expansions (2x-32x) across entire dataset
+  - 4x-20x: Already trained, evaluating on GPUs 0-3
+  - 2x, 22x-32x: Training on GPUs 4-7 (parallel)
+  - Expected completion: ~20 hours
+- [ ] Aggregate results and identify optimal SAE size
+- [ ] Use results to inform Phase 4 architecture choices
 
-### Phase 4 — Frontier LLMs
+**Resources**: 
+- GPUs 0-3: Phase 3 full-scale evaluation
+- GPUs 4-7: Missing SAE training
+- **Key files**: `PHASE3_FULLSCALE_EXECUTION_GUIDE.md`, `phase3/phase3_orchestrate.sh`
+
+### Phase 4 — Frontier LLMs [🔴 WAITING FOR PHASE 3 RESULTS]
 - [ ] Select target LLM checkpoints (1B–7B) and reasoning benchmarks (math, logic, Sudoku) for final evaluation.
 - [ ] Run capture, SAE training, and validation using same falsification gates; log hardware utilization vs budget.
 - [ ] Execute causal circuit tests (feature ablations, activation patching) to confirm stable reasoning primitives.
+- **Depends on**: Phase 3 optimal SAE size + Phase 1 validation results
 
 ## 6. Validation & Attribution Protocols
 - [ ] Codify purity metrics (top-k coherence, silhouette) and automate reporting per feature.
