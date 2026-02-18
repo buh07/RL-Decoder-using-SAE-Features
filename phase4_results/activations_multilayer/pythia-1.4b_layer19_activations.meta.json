@@ -1,0 +1,10 @@
+{
+  "model_name": "pythia-1.4b",
+  "layer_idx": 19,
+  "num_samples": 50,
+  "activation_shape": [
+    1040,
+    2048
+  ],
+  "activation_dtype": "torch.float32"
+}

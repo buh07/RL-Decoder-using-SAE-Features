@@ -1,0 +1,10 @@
+{
+  "model_name": "gemma-2b",
+  "layer_idx": 15,
+  "num_samples": 50,
+  "activation_shape": [
+    1245,
+    2048
+  ],
+  "activation_dtype": "torch.float32"
+}

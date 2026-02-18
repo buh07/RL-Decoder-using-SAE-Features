@@ -1,0 +1,82 @@
+{
+  "config": {
+    "expansion_factor": 8,
+    "epochs": 10,
+    "batch_size": 64,
+    "top_k": 50
+  },
+  "pairs": {
+    "gemma-2b_math__to__gpt2-medium_gsm8k": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_2048_vs_1024"
+    },
+    "gemma-2b_math__to__phi-2_logic": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_2048_vs_2560"
+    },
+    "gemma-2b_math__to__pythia-1.4b_gsm8k": {
+      "status": "ok",
+      "source_dim": 2048,
+      "target_dim": 2048,
+      "source_recon_loss": 0.4474551334122943,
+      "target_recon_loss_with_source_sae": 0.44536774927545386,
+      "transfer_recon_ratio": 0.9953349644817535,
+      "top_k": 50,
+      "top_k_variance_ratio": 1.0924364729837484,
+      "top_k_spearman": 0.2263144999742508,
+      "decoder_similarity": {
+        "mean_max_cosine": 0.08827086538076401,
+        "pct_above_0_7": 0.0,
+        "pct_above_0_5": 0.0
+      }
+    },
+    "gpt2-medium_gsm8k__to__gemma-2b_math": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_1024_vs_2048"
+    },
+    "gpt2-medium_gsm8k__to__phi-2_logic": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_1024_vs_2560"
+    },
+    "gpt2-medium_gsm8k__to__pythia-1.4b_gsm8k": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_1024_vs_2048"
+    },
+    "phi-2_logic__to__gemma-2b_math": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_2560_vs_2048"
+    },
+    "phi-2_logic__to__gpt2-medium_gsm8k": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_2560_vs_1024"
+    },
+    "phi-2_logic__to__pythia-1.4b_gsm8k": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_2560_vs_2048"
+    },
+    "pythia-1.4b_gsm8k__to__gemma-2b_math": {
+      "status": "ok",
+      "source_dim": 2048,
+      "target_dim": 2048,
+      "source_recon_loss": 0.38402088089367314,
+      "target_recon_loss_with_source_sae": 0.38420002779383566,
+      "transfer_recon_ratio": 1.0004664769662548,
+      "top_k": 50,
+      "top_k_variance_ratio": 1.0960634563064897,
+      "top_k_spearman": 0.3556782007217407,
+      "decoder_similarity": {
+        "mean_max_cosine": 0.08708201348781586,
+        "pct_above_0_7": 0.0,
+        "pct_above_0_5": 0.0
+      }
+    },
+    "pythia-1.4b_gsm8k__to__gpt2-medium_gsm8k": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_2048_vs_1024"
+    },
+    "pythia-1.4b_gsm8k__to__phi-2_logic": {
+      "status": "skipped",
+      "reason": "dimension_mismatch_2048_vs_2560"
+    }
+  }
+}
