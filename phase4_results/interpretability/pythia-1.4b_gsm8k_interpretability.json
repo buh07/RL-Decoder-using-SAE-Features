@@ -1,0 +1,117 @@
+{
+  "model": "pythia-1.4b",
+  "benchmark": "gsm8k",
+  "timestamp": "2026-02-17T21:33:52.446256",
+  "summary": {
+    "n_features": 2048,
+    "mean_sparsity": 0.31733469726562497,
+    "mean_entropy": NaN
+  },
+  "features": {},
+  "top_sparse_features": [
+    {
+      "idx": 407,
+      "sparsity": 0.32166
+    },
+    {
+      "idx": 567,
+      "sparsity": 0.32128
+    },
+    {
+      "idx": 1352,
+      "sparsity": 0.32118
+    },
+    {
+      "idx": 270,
+      "sparsity": 0.32114
+    },
+    {
+      "idx": 50,
+      "sparsity": 0.3211
+    },
+    {
+      "idx": 135,
+      "sparsity": 0.32106
+    },
+    {
+      "idx": 1036,
+      "sparsity": 0.32106
+    },
+    {
+      "idx": 1687,
+      "sparsity": 0.32106
+    },
+    {
+      "idx": 335,
+      "sparsity": 0.321
+    },
+    {
+      "idx": 460,
+      "sparsity": 0.321
+    }
+  ],
+  "top_causally_important": [
+    {
+      "idx": 750,
+      "importance": 0.16425557416706854
+    },
+    {
+      "idx": 48,
+      "importance": 0.15947697935858757
+    },
+    {
+      "idx": 660,
+      "importance": 0.1447861669415641
+    },
+    {
+      "idx": 1551,
+      "importance": 0.11261709925131255
+    },
+    {
+      "idx": 1991,
+      "importance": 0.09105207318014345
+    },
+    {
+      "idx": 316,
+      "importance": 0.08193299481046225
+    },
+    {
+      "idx": 1850,
+      "importance": 0.06220177586205856
+    },
+    {
+      "idx": 2007,
+      "importance": 0.05676713551975473
+    },
+    {
+      "idx": 1576,
+      "importance": 0.055715280342474804
+    },
+    {
+      "idx": 2006,
+      "importance": 0.0539080351250606
+    }
+  ],
+  "feature_descriptions": {
+    "407": "Dim 407: High-variance activations (mean=0.000, std=1.000, sparsity=32.2%). Appears in ~5 tokens.",
+    "567": "Dim 567: High-variance activations (mean=-0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "1352": "Dim 1352: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "270": "Dim 270: High-variance activations (mean=-0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "50": "Dim 50: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "135": "Dim 135: High-variance activations (mean=-0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "1036": "Dim 1036: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "1687": "Dim 1687: High-variance activations (mean=-0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "335": "Dim 335: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "460": "Dim 460: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "24": "Dim 24: High-variance activations (mean=-0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "48": "Dim 48: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "2004": "Dim 2004: High-variance activations (mean=-0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "1850": "Dim 1850: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "750": "Dim 750: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "1156": "Dim 1156: High-variance activations (mean=-0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "316": "Dim 316: High-variance activations (mean=-0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "1267": "Dim 1267: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "2007": "Dim 2007: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens.",
+    "1324": "Dim 1324: High-variance activations (mean=0.000, std=1.000, sparsity=32.1%). Appears in ~5 tokens."
+  }
+}

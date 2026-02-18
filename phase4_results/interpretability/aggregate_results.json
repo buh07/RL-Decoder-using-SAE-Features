@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-02-17T21:34:11.759378",
+  "models_analyzed": 4,
+  "model_summaries": {
+    "gemma-2b": {
+      "n_features": 2048,
+      "mean_sparsity": 0.31728251953125,
+      "mean_entropy": NaN
+    },
+    "gpt2-medium": {
+      "n_features": 1024,
+      "mean_sparsity": 0.317228984375,
+      "mean_entropy": NaN
+    },
+    "phi-2": {
+      "n_features": 2560,
+      "mean_sparsity": 0.31741248046875,
+      "mean_entropy": NaN
+    },
+    "pythia-1.4b": {
+      "n_features": 2048,
+      "mean_sparsity": 0.31733469726562497,
+      "mean_entropy": NaN
+    }
+  },
+  "cross_model_insights": {
+    "mean_sparsity": 0.31731467041015626,
+    "std_sparsity": 6.771938078813557e-05,
+    "mean_entropy": NaN,
+    "std_entropy": NaN
+  }
+}

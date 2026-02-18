@@ -1,0 +1,30 @@
+{
+  "gemma-2b_math": {
+    "model": "gemma-2b",
+    "benchmark": "math",
+    "input_dim": 2048,
+    "latent_dim": 16384,
+    "expansion": 8
+  },
+  "gpt2-medium_gsm8k": {
+    "model": "gpt2-medium",
+    "benchmark": "gsm8k",
+    "input_dim": 1024,
+    "latent_dim": 8192,
+    "expansion": 8
+  },
+  "phi-2_logic": {
+    "model": "phi-2",
+    "benchmark": "logic",
+    "input_dim": 2560,
+    "latent_dim": 20480,
+    "expansion": 8
+  },
+  "pythia-1.4b_gsm8k": {
+    "model": "pythia-1.4b",
+    "benchmark": "gsm8k",
+    "input_dim": 2048,
+    "latent_dim": 16384,
+    "expansion": 8
+  }
+}
