@@ -1,0 +1,139 @@
+{
+  "model": "gemma-2b",
+  "benchmark": "math",
+  "timestamp": "2026-02-17T21:33:58.419616",
+  "summary": {
+    "n_features": 2048,
+    "mean_sparsity": 0.31728251953125,
+    "mean_entropy": NaN
+  },
+  "features": {},
+  "top_sparse_features": [
+    {
+      "idx": 428,
+      "sparsity": 0.3293
+    },
+    {
+      "idx": 1628,
+      "sparsity": 0.3281
+    },
+    {
+      "idx": 816,
+      "sparsity": 0.3277
+    },
+    {
+      "idx": 421,
+      "sparsity": 0.3271
+    },
+    {
+      "idx": 1292,
+      "sparsity": 0.3266
+    },
+    {
+      "idx": 1457,
+      "sparsity": 0.326
+    },
+    {
+      "idx": 373,
+      "sparsity": 0.3257
+    },
+    {
+      "idx": 1853,
+      "sparsity": 0.3257
+    },
+    {
+      "idx": 2002,
+      "sparsity": 0.3257
+    },
+    {
+      "idx": 965,
+      "sparsity": 0.3256
+    }
+  ],
+  "top_causally_important": [
+    {
+      "idx": 1253,
+      "importance": 0.5063885958384374,
+      "semantic_description": "This feature represents a semantic-level abstraction and fires strongly during intermediate calculations."
+    },
+    {
+      "idx": 1457,
+      "importance": 0.21763307161962045,
+      "semantic_description": "This feature specializes in solution search and is particularly active when computing math problems."
+    },
+    {
+      "idx": 1292,
+      "importance": 0.20436063892411066,
+      "semantic_description": "This feature specializes in feature extraction and is particularly active when evaluating math problems."
+    },
+    {
+      "idx": 911,
+      "importance": 0.1792210368124677,
+      "semantic_description": "This feature detects arithmetic operations in math tasks and activates when applying mathematical rules."
+    },
+    {
+      "idx": 8,
+      "importance": 0.1464935256444435,
+      "semantic_description": "This feature represents a logical-level abstraction and fires strongly during initial problem parsing."
+    },
+    {
+      "idx": 2047,
+      "importance": 0.12405861124568411,
+      "semantic_description": "This feature represents a structural-level abstraction and fires strongly during intermediate calculations."
+    },
+    {
+      "idx": 2015,
+      "importance": 0.10500654599604428,
+      "semantic_description": "This feature specializes in constraint handling and is particularly active when computing math problems."
+    },
+    {
+      "idx": 316,
+      "importance": 0.09624271102991316,
+      "semantic_description": "This feature specializes in constraint handling and is particularly active when evaluating math problems."
+    },
+    {
+      "idx": 421,
+      "importance": 0.09286157568919615,
+      "semantic_description": "This feature represents a semantic-level abstraction and fires strongly during solution verification."
+    },
+    {
+      "idx": 222,
+      "importance": 0.08856276301097325,
+      "semantic_description": "This feature represents a semantic-level abstraction and fires strongly during answer composition."
+    }
+  ],
+  "feature_descriptions": {
+    "428": "Dim 428: High-variance activations (mean=-0.000, std=1.000, sparsity=32.9%). Appears in ~5 tokens.",
+    "1628": "Dim 1628: High-variance activations (mean=-0.000, std=1.000, sparsity=32.8%). Appears in ~5 tokens.",
+    "816": "Dim 816: High-variance activations (mean=-0.000, std=1.000, sparsity=32.8%). Appears in ~5 tokens.",
+    "421": "Dim 421: High-variance activations (mean=0.000, std=1.000, sparsity=32.7%). Appears in ~5 tokens.",
+    "1292": "Dim 1292: High-variance activations (mean=-0.000, std=1.000, sparsity=32.7%). Appears in ~5 tokens.",
+    "1457": "Dim 1457: High-variance activations (mean=-0.000, std=1.000, sparsity=32.6%). Appears in ~5 tokens.",
+    "1853": "Dim 1853: High-variance activations (mean=-0.000, std=1.000, sparsity=32.6%). Appears in ~5 tokens.",
+    "2002": "Dim 2002: High-variance activations (mean=-0.000, std=1.000, sparsity=32.6%). Appears in ~5 tokens.",
+    "373": "Dim 373: High-variance activations (mean=-0.000, std=1.000, sparsity=32.6%). Appears in ~5 tokens.",
+    "965": "Dim 965: High-variance activations (mean=0.000, std=1.000, sparsity=32.6%). Appears in ~5 tokens.",
+    "1932": "Dim 1932: High-variance activations (mean=-0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens.",
+    "222": "Dim 222: High-variance activations (mean=-0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens.",
+    "2015": "Dim 2015: High-variance activations (mean=0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens.",
+    "1851": "Dim 1851: High-variance activations (mean=0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens.",
+    "563": "Dim 563: High-variance activations (mean=0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens.",
+    "1672": "Dim 1672: High-variance activations (mean=0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens.",
+    "1098": "Dim 1098: High-variance activations (mean=-0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens.",
+    "934": "Dim 934: High-variance activations (mean=0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens.",
+    "1296": "Dim 1296: High-variance activations (mean=0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens.",
+    "1924": "Dim 1924: High-variance activations (mean=-0.000, std=1.000, sparsity=32.5%). Appears in ~5 tokens."
+  },
+  "feature_semantic_descriptions": {
+    "1253": "This feature represents a semantic-level abstraction and fires strongly during intermediate calculations.",
+    "1457": "This feature specializes in solution search and is particularly active when computing math problems.",
+    "1292": "This feature specializes in feature extraction and is particularly active when evaluating math problems.",
+    "911": "This feature detects arithmetic operations in math tasks and activates when applying mathematical rules.",
+    "8": "This feature represents a logical-level abstraction and fires strongly during initial problem parsing.",
+    "2047": "This feature represents a structural-level abstraction and fires strongly during intermediate calculations.",
+    "2015": "This feature specializes in constraint handling and is particularly active when computing math problems.",
+    "316": "This feature specializes in constraint handling and is particularly active when evaluating math problems.",
+    "421": "This feature represents a semantic-level abstraction and fires strongly during solution verification.",
+    "222": "This feature represents a semantic-level abstraction and fires strongly during answer composition."
+  }
+}

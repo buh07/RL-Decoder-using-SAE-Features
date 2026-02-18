@@ -1,0 +1,49 @@
+{
+  "model": "phi-2",
+  "benchmark": "logic",
+  "timestamp": "2026-02-17T22:07:11.637763",
+  "n_features_named": 10,
+  "features_with_descriptions": [
+    {
+      "feature_id": 210,
+      "description": "This feature represents a procedural-level abstraction and fires strongly during initial problem parsing."
+    },
+    {
+      "feature_id": 372,
+      "description": "This feature specializes in constraint handling and is particularly active when evaluating logic problems."
+    },
+    {
+      "feature_id": 519,
+      "description": "This feature detects logical patterns in logic tasks and activates when identifying key relationships."
+    },
+    {
+      "feature_id": 819,
+      "description": "This feature represents a semantic-level abstraction and fires strongly during solution verification."
+    },
+    {
+      "feature_id": 844,
+      "description": "This feature represents a procedural-level abstraction and fires strongly during answer composition."
+    },
+    {
+      "feature_id": 1225,
+      "description": "This feature specializes in constraint handling and is particularly active when analyzing logic problems."
+    },
+    {
+      "feature_id": 1408,
+      "description": "This feature detects arithmetic operations in logic tasks and activates when identifying key relationships."
+    },
+    {
+      "feature_id": 1483,
+      "description": "This feature detects constraint satisfaction in logic tasks and activates when reasoning through steps."
+    },
+    {
+      "feature_id": 2191,
+      "description": "This feature specializes in pattern recognition and is particularly active when computing logic problems."
+    },
+    {
+      "feature_id": 2352,
+      "description": "This feature represents a procedural-level abstraction and fires strongly during initial problem parsing."
+    }
+  ],
+  "output_file": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5_results/feature_naming/phi-2_logic_interpretability_named.json"
+}

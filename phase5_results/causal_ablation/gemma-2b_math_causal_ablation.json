@@ -1,0 +1,61 @@
+{
+  "model": "gemma-2b",
+  "benchmark": "math",
+  "timestamp": "2026-02-17T22:00:15.481787",
+  "n_features_tested": 10,
+  "baseline_quality": 0.9999490151531063,
+  "correlation_with_variance": -0.1769327670589054,
+  "top_causally_important_features": [
+    {
+      "feature_id": 911,
+      "measured_importance": 0.3636036589891019,
+      "estimated_importance": 0.1792210368124677
+    },
+    {
+      "feature_id": 1292,
+      "measured_importance": 0.35510686559982724,
+      "estimated_importance": 0.20436063892411066
+    },
+    {
+      "feature_id": 2047,
+      "measured_importance": 0.2787842750207685,
+      "estimated_importance": 0.12405861124568411
+    },
+    {
+      "feature_id": 316,
+      "measured_importance": 0.24037012594236215,
+      "estimated_importance": 0.09624271102991316
+    },
+    {
+      "feature_id": 2015,
+      "measured_importance": 0.2202946796314273,
+      "estimated_importance": 0.10500654599604428
+    },
+    {
+      "feature_id": 222,
+      "measured_importance": 0.17676487233638796,
+      "estimated_importance": 0.08856276301097325
+    },
+    {
+      "feature_id": 1457,
+      "measured_importance": 0.1167287884808333,
+      "estimated_importance": 0.21763307161962045
+    },
+    {
+      "feature_id": 1253,
+      "measured_importance": 0.08447790393542666,
+      "estimated_importance": 0.5063885958384374
+    },
+    {
+      "feature_id": 8,
+      "measured_importance": 0.0716037684039836,
+      "estimated_importance": 0.1464935256444435
+    },
+    {
+      "feature_id": 421,
+      "measured_importance": 0.012596953115799841,
+      "estimated_importance": 0.09286157568919615
+    }
+  ],
+  "validation_status": "\u274c FAILED"
+}

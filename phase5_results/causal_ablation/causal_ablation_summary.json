@@ -1,0 +1,257 @@
+{
+  "timestamp": "2026-02-17T22:00:21.291776",
+  "models_tested": 4,
+  "results": {
+    "gemma-2b": {
+      "model": "gemma-2b",
+      "benchmark": "math",
+      "timestamp": "2026-02-17T22:00:15.481787",
+      "n_features_tested": 10,
+      "baseline_quality": 0.9999490151531063,
+      "correlation_with_variance": -0.1769327670589054,
+      "top_causally_important_features": [
+        {
+          "feature_id": 911,
+          "measured_importance": 0.3636036589891019,
+          "estimated_importance": 0.1792210368124677
+        },
+        {
+          "feature_id": 1292,
+          "measured_importance": 0.35510686559982724,
+          "estimated_importance": 0.20436063892411066
+        },
+        {
+          "feature_id": 2047,
+          "measured_importance": 0.2787842750207685,
+          "estimated_importance": 0.12405861124568411
+        },
+        {
+          "feature_id": 316,
+          "measured_importance": 0.24037012594236215,
+          "estimated_importance": 0.09624271102991316
+        },
+        {
+          "feature_id": 2015,
+          "measured_importance": 0.2202946796314273,
+          "estimated_importance": 0.10500654599604428
+        },
+        {
+          "feature_id": 222,
+          "measured_importance": 0.17676487233638796,
+          "estimated_importance": 0.08856276301097325
+        },
+        {
+          "feature_id": 1457,
+          "measured_importance": 0.1167287884808333,
+          "estimated_importance": 0.21763307161962045
+        },
+        {
+          "feature_id": 1253,
+          "measured_importance": 0.08447790393542666,
+          "estimated_importance": 0.5063885958384374
+        },
+        {
+          "feature_id": 8,
+          "measured_importance": 0.0716037684039836,
+          "estimated_importance": 0.1464935256444435
+        },
+        {
+          "feature_id": 421,
+          "measured_importance": 0.012596953115799841,
+          "estimated_importance": 0.09286157568919615
+        }
+      ],
+      "validation_status": "\u274c FAILED"
+    },
+    "gpt2-medium": {
+      "model": "gpt2-medium",
+      "benchmark": "gsm8k",
+      "timestamp": "2026-02-17T22:00:20.257105",
+      "n_features_tested": 10,
+      "baseline_quality": 0.9999890057370067,
+      "correlation_with_variance": 0.1606699876963736,
+      "top_causally_important_features": [
+        {
+          "feature_id": 291,
+          "measured_importance": 0.29476676991245515,
+          "estimated_importance": 0.1558556044355279
+        },
+        {
+          "feature_id": 754,
+          "measured_importance": 0.19694715280347835,
+          "estimated_importance": 0.0877220074788008
+        },
+        {
+          "feature_id": 170,
+          "measured_importance": 0.12761058438369885,
+          "estimated_importance": 0.0767148135072224
+        },
+        {
+          "feature_id": 278,
+          "measured_importance": 0.09369937777001831,
+          "estimated_importance": 0.07909071447224228
+        },
+        {
+          "feature_id": 211,
+          "measured_importance": 0.022342772823315076,
+          "estimated_importance": 0.08203638134584885
+        },
+        {
+          "feature_id": 951,
+          "measured_importance": 0.01617356385397478,
+          "estimated_importance": 0.10205119799506117
+        },
+        {
+          "feature_id": 260,
+          "measured_importance": 0.012908786397905558,
+          "estimated_importance": 0.09065012784831143
+        },
+        {
+          "feature_id": 626,
+          "measured_importance": 0.005567192075969924,
+          "estimated_importance": 0.17443560134810573
+        },
+        {
+          "feature_id": 179,
+          "measured_importance": 0.004631956934740411,
+          "estimated_importance": 0.12342506030589485
+        },
+        {
+          "feature_id": 839,
+          "measured_importance": 0.0035319485795855666,
+          "estimated_importance": 0.07956257014289907
+        }
+      ],
+      "validation_status": "\u274c FAILED"
+    },
+    "phi-2": {
+      "model": "phi-2",
+      "benchmark": "logic",
+      "timestamp": "2026-02-17T22:00:07.166672",
+      "n_features_tested": 10,
+      "baseline_quality": 0.9999740053666756,
+      "correlation_with_variance": 0.7535345817174296,
+      "top_causally_important_features": [
+        {
+          "feature_id": 519,
+          "measured_importance": 0.46429585607096757,
+          "estimated_importance": 0.13515978077964733
+        },
+        {
+          "feature_id": 844,
+          "measured_importance": 0.3774806953986335,
+          "estimated_importance": 0.1293242722194411
+        },
+        {
+          "feature_id": 2352,
+          "measured_importance": 0.17227525852539563,
+          "estimated_importance": 0.07793661640011706
+        },
+        {
+          "feature_id": 372,
+          "measured_importance": 0.17084455348038705,
+          "estimated_importance": 0.08305070735712164
+        },
+        {
+          "feature_id": 1408,
+          "measured_importance": 0.1457017541936165,
+          "estimated_importance": 0.0771951035367903
+        },
+        {
+          "feature_id": 2191,
+          "measured_importance": 0.12389466380709285,
+          "estimated_importance": 0.08064452907439744
+        },
+        {
+          "feature_id": 1225,
+          "measured_importance": 0.10229368954453841,
+          "estimated_importance": 0.10955044684470495
+        },
+        {
+          "feature_id": 1483,
+          "measured_importance": 0.04130843033683,
+          "estimated_importance": 0.07766558744681658
+        },
+        {
+          "feature_id": 819,
+          "measured_importance": 0.012289224039479765,
+          "estimated_importance": 0.09295586746460333
+        },
+        {
+          "feature_id": 210,
+          "measured_importance": 0.01167463561222953,
+          "estimated_importance": 0.09118033909548334
+        }
+      ],
+      "validation_status": "\u2705 PASSED"
+    },
+    "pythia-1.4b": {
+      "model": "pythia-1.4b",
+      "benchmark": "gsm8k",
+      "timestamp": "2026-02-17T22:00:12.165525",
+      "n_features_tested": 10,
+      "baseline_quality": 0.9999890073668212,
+      "correlation_with_variance": 0.6013584098139308,
+      "top_causally_important_features": [
+        {
+          "feature_id": 660,
+          "measured_importance": 0.29841399873881813,
+          "estimated_importance": 0.1447861669415641
+        },
+        {
+          "feature_id": 750,
+          "measured_importance": 0.2928256423575133,
+          "estimated_importance": 0.16425557416706854
+        },
+        {
+          "feature_id": 1551,
+          "measured_importance": 0.19669121973097847,
+          "estimated_importance": 0.11261709925131255
+        },
+        {
+          "feature_id": 1991,
+          "measured_importance": 0.14258789209681516,
+          "estimated_importance": 0.09105207318014345
+        },
+        {
+          "feature_id": 316,
+          "measured_importance": 0.13769291689725666,
+          "estimated_importance": 0.08193299481046225
+        },
+        {
+          "feature_id": 1576,
+          "measured_importance": 0.07392385767575853,
+          "estimated_importance": 0.055715280342474804
+        },
+        {
+          "feature_id": 2007,
+          "measured_importance": 0.05808619387198009,
+          "estimated_importance": 0.05676713551975473
+        },
+        {
+          "feature_id": 2006,
+          "measured_importance": 0.03697188675786168,
+          "estimated_importance": 0.0539080351250606
+        },
+        {
+          "feature_id": 1850,
+          "measured_importance": 0.014749675362137721,
+          "estimated_importance": 0.06220177586205856
+        },
+        {
+          "feature_id": 48,
+          "measured_importance": 0.011106111370710303,
+          "estimated_importance": 0.15947697935858757
+        }
+      ],
+      "validation_status": "\u26a0\ufe0f  INVESTIGATE"
+    }
+  },
+  "cross_model_summary": {
+    "avg_correlation": 0.3346575530422072,
+    "min_correlation": -0.1769327670589054,
+    "max_correlation": 0.7535345817174296,
+    "all_models_pass": false,
+    "overall_status": "\u26a0\ufe0f  PARTIAL - Some models need investigation"
+  }
+}

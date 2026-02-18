@@ -1,0 +1,61 @@
+{
+  "model": "pythia-1.4b",
+  "benchmark": "gsm8k",
+  "timestamp": "2026-02-17T22:00:12.165525",
+  "n_features_tested": 10,
+  "baseline_quality": 0.9999890073668212,
+  "correlation_with_variance": 0.6013584098139308,
+  "top_causally_important_features": [
+    {
+      "feature_id": 660,
+      "measured_importance": 0.29841399873881813,
+      "estimated_importance": 0.1447861669415641
+    },
+    {
+      "feature_id": 750,
+      "measured_importance": 0.2928256423575133,
+      "estimated_importance": 0.16425557416706854
+    },
+    {
+      "feature_id": 1551,
+      "measured_importance": 0.19669121973097847,
+      "estimated_importance": 0.11261709925131255
+    },
+    {
+      "feature_id": 1991,
+      "measured_importance": 0.14258789209681516,
+      "estimated_importance": 0.09105207318014345
+    },
+    {
+      "feature_id": 316,
+      "measured_importance": 0.13769291689725666,
+      "estimated_importance": 0.08193299481046225
+    },
+    {
+      "feature_id": 1576,
+      "measured_importance": 0.07392385767575853,
+      "estimated_importance": 0.055715280342474804
+    },
+    {
+      "feature_id": 2007,
+      "measured_importance": 0.05808619387198009,
+      "estimated_importance": 0.05676713551975473
+    },
+    {
+      "feature_id": 2006,
+      "measured_importance": 0.03697188675786168,
+      "estimated_importance": 0.0539080351250606
+    },
+    {
+      "feature_id": 1850,
+      "measured_importance": 0.014749675362137721,
+      "estimated_importance": 0.06220177586205856
+    },
+    {
+      "feature_id": 48,
+      "measured_importance": 0.011106111370710303,
+      "estimated_importance": 0.15947697935858757
+    }
+  ],
+  "validation_status": "\u26a0\ufe0f  INVESTIGATE"
+}

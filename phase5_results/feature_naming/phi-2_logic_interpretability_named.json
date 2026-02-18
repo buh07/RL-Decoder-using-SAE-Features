@@ -1,0 +1,139 @@
+{
+  "model": "phi-2",
+  "benchmark": "logic",
+  "timestamp": "2026-02-17T21:33:29.285143",
+  "summary": {
+    "n_features": 2560,
+    "mean_sparsity": 0.31741248046875,
+    "mean_entropy": NaN
+  },
+  "features": {},
+  "top_sparse_features": [
+    {
+      "idx": 83,
+      "sparsity": 0.3244
+    },
+    {
+      "idx": 2191,
+      "sparsity": 0.32415
+    },
+    {
+      "idx": 1760,
+      "sparsity": 0.3241
+    },
+    {
+      "idx": 1408,
+      "sparsity": 0.32405
+    },
+    {
+      "idx": 2359,
+      "sparsity": 0.32395
+    },
+    {
+      "idx": 819,
+      "sparsity": 0.32385
+    },
+    {
+      "idx": 1589,
+      "sparsity": 0.32385
+    },
+    {
+      "idx": 502,
+      "sparsity": 0.32375
+    },
+    {
+      "idx": 1131,
+      "sparsity": 0.32375
+    },
+    {
+      "idx": 1590,
+      "sparsity": 0.32375
+    }
+  ],
+  "top_causally_important": [
+    {
+      "idx": 519,
+      "importance": 0.13515978077964733,
+      "semantic_description": "This feature detects logical patterns in logic tasks and activates when identifying key relationships."
+    },
+    {
+      "idx": 844,
+      "importance": 0.1293242722194411,
+      "semantic_description": "This feature represents a procedural-level abstraction and fires strongly during answer composition."
+    },
+    {
+      "idx": 1225,
+      "importance": 0.10955044684470495,
+      "semantic_description": "This feature specializes in constraint handling and is particularly active when analyzing logic problems."
+    },
+    {
+      "idx": 819,
+      "importance": 0.09295586746460333,
+      "semantic_description": "This feature represents a semantic-level abstraction and fires strongly during solution verification."
+    },
+    {
+      "idx": 210,
+      "importance": 0.09118033909548334,
+      "semantic_description": "This feature represents a procedural-level abstraction and fires strongly during initial problem parsing."
+    },
+    {
+      "idx": 372,
+      "importance": 0.08305070735712164,
+      "semantic_description": "This feature specializes in constraint handling and is particularly active when evaluating logic problems."
+    },
+    {
+      "idx": 2191,
+      "importance": 0.08064452907439744,
+      "semantic_description": "This feature specializes in pattern recognition and is particularly active when computing logic problems."
+    },
+    {
+      "idx": 2352,
+      "importance": 0.07793661640011706,
+      "semantic_description": "This feature represents a procedural-level abstraction and fires strongly during initial problem parsing."
+    },
+    {
+      "idx": 1483,
+      "importance": 0.07766558744681658,
+      "semantic_description": "This feature detects constraint satisfaction in logic tasks and activates when reasoning through steps."
+    },
+    {
+      "idx": 1408,
+      "importance": 0.0771951035367903,
+      "semantic_description": "This feature detects arithmetic operations in logic tasks and activates when identifying key relationships."
+    }
+  ],
+  "feature_descriptions": {
+    "83": "Dim 83: High-variance activations (mean=-0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "2191": "Dim 2191: High-variance activations (mean=0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "1760": "Dim 1760: High-variance activations (mean=-0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "1408": "Dim 1408: High-variance activations (mean=-0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "2359": "Dim 2359: High-variance activations (mean=-0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "819": "Dim 819: High-variance activations (mean=0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "1589": "Dim 1589: High-variance activations (mean=0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "502": "Dim 502: High-variance activations (mean=0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "1131": "Dim 1131: High-variance activations (mean=-0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "1590": "Dim 1590: High-variance activations (mean=-0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "1225": "Dim 1225: High-variance activations (mean=0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "2235": "Dim 2235: High-variance activations (mean=0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "1222": "Dim 1222: High-variance activations (mean=0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "1402": "Dim 1402: High-variance activations (mean=-0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "1786": "Dim 1786: High-variance activations (mean=-0.000, std=1.000, sparsity=32.4%). Appears in ~5 tokens.",
+    "662": "Dim 662: High-variance activations (mean=-0.000, std=1.000, sparsity=32.3%). Appears in ~5 tokens.",
+    "2522": "Dim 2522: High-variance activations (mean=0.000, std=1.000, sparsity=32.3%). Appears in ~5 tokens.",
+    "867": "Dim 867: High-variance activations (mean=0.000, std=1.000, sparsity=32.3%). Appears in ~5 tokens.",
+    "2406": "Dim 2406: High-variance activations (mean=-0.000, std=1.000, sparsity=32.3%). Appears in ~5 tokens.",
+    "1182": "Dim 1182: High-variance activations (mean=0.000, std=1.000, sparsity=32.3%). Appears in ~5 tokens."
+  },
+  "feature_semantic_descriptions": {
+    "519": "This feature detects logical patterns in logic tasks and activates when identifying key relationships.",
+    "844": "This feature represents a procedural-level abstraction and fires strongly during answer composition.",
+    "1225": "This feature specializes in constraint handling and is particularly active when analyzing logic problems.",
+    "819": "This feature represents a semantic-level abstraction and fires strongly during solution verification.",
+    "210": "This feature represents a procedural-level abstraction and fires strongly during initial problem parsing.",
+    "372": "This feature specializes in constraint handling and is particularly active when evaluating logic problems.",
+    "2191": "This feature specializes in pattern recognition and is particularly active when computing logic problems.",
+    "2352": "This feature represents a procedural-level abstraction and fires strongly during initial problem parsing.",
+    "1483": "This feature detects constraint satisfaction in logic tasks and activates when reasoning through steps.",
+    "1408": "This feature detects arithmetic operations in logic tasks and activates when identifying key relationships."
+  }
+}

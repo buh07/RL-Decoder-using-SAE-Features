@@ -1,0 +1,61 @@
+{
+  "model": "phi-2",
+  "benchmark": "logic",
+  "timestamp": "2026-02-17T22:00:07.166672",
+  "n_features_tested": 10,
+  "baseline_quality": 0.9999740053666756,
+  "correlation_with_variance": 0.7535345817174296,
+  "top_causally_important_features": [
+    {
+      "feature_id": 519,
+      "measured_importance": 0.46429585607096757,
+      "estimated_importance": 0.13515978077964733
+    },
+    {
+      "feature_id": 844,
+      "measured_importance": 0.3774806953986335,
+      "estimated_importance": 0.1293242722194411
+    },
+    {
+      "feature_id": 2352,
+      "measured_importance": 0.17227525852539563,
+      "estimated_importance": 0.07793661640011706
+    },
+    {
+      "feature_id": 372,
+      "measured_importance": 0.17084455348038705,
+      "estimated_importance": 0.08305070735712164
+    },
+    {
+      "feature_id": 1408,
+      "measured_importance": 0.1457017541936165,
+      "estimated_importance": 0.0771951035367903
+    },
+    {
+      "feature_id": 2191,
+      "measured_importance": 0.12389466380709285,
+      "estimated_importance": 0.08064452907439744
+    },
+    {
+      "feature_id": 1225,
+      "measured_importance": 0.10229368954453841,
+      "estimated_importance": 0.10955044684470495
+    },
+    {
+      "feature_id": 1483,
+      "measured_importance": 0.04130843033683,
+      "estimated_importance": 0.07766558744681658
+    },
+    {
+      "feature_id": 819,
+      "measured_importance": 0.012289224039479765,
+      "estimated_importance": 0.09295586746460333
+    },
+    {
+      "feature_id": 210,
+      "measured_importance": 0.01167463561222953,
+      "estimated_importance": 0.09118033909548334
+    }
+  ],
+  "validation_status": "\u2705 PASSED"
+}

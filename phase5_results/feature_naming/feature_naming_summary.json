@@ -1,0 +1,207 @@
+{
+  "timestamp": "2026-02-17T22:07:20.530558",
+  "models_completed": 4,
+  "results": {
+    "gemma-2b": {
+      "model": "gemma-2b",
+      "benchmark": "math",
+      "timestamp": "2026-02-17T22:07:17.366008",
+      "n_features_named": 10,
+      "features_with_descriptions": [
+        {
+          "feature_id": 8,
+          "description": "This feature represents a logical-level abstraction and fires strongly during initial problem parsing."
+        },
+        {
+          "feature_id": 222,
+          "description": "This feature represents a semantic-level abstraction and fires strongly during answer composition."
+        },
+        {
+          "feature_id": 316,
+          "description": "This feature specializes in constraint handling and is particularly active when evaluating math problems."
+        },
+        {
+          "feature_id": 421,
+          "description": "This feature represents a semantic-level abstraction and fires strongly during solution verification."
+        },
+        {
+          "feature_id": 911,
+          "description": "This feature detects arithmetic operations in math tasks and activates when applying mathematical rules."
+        },
+        {
+          "feature_id": 1253,
+          "description": "This feature represents a semantic-level abstraction and fires strongly during intermediate calculations."
+        },
+        {
+          "feature_id": 1292,
+          "description": "This feature specializes in feature extraction and is particularly active when evaluating math problems."
+        },
+        {
+          "feature_id": 1457,
+          "description": "This feature specializes in solution search and is particularly active when computing math problems."
+        },
+        {
+          "feature_id": 2015,
+          "description": "This feature specializes in constraint handling and is particularly active when computing math problems."
+        },
+        {
+          "feature_id": 2047,
+          "description": "This feature represents a structural-level abstraction and fires strongly during intermediate calculations."
+        }
+      ],
+      "output_file": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5_results/feature_naming/gemma-2b_math_interpretability_named.json"
+    },
+    "gpt2-medium": {
+      "model": "gpt2-medium",
+      "benchmark": "gsm8k",
+      "timestamp": "2026-02-17T22:07:19.923438",
+      "n_features_named": 10,
+      "features_with_descriptions": [
+        {
+          "feature_id": 170,
+          "description": "This feature detects constraint satisfaction in gsm8k tasks and activates when solving multi-step problems."
+        },
+        {
+          "feature_id": 179,
+          "description": "This feature represents a logical-level abstraction and fires strongly during solution verification."
+        },
+        {
+          "feature_id": 211,
+          "description": "This feature specializes in solution search and is particularly active when evaluating gsm8k problems."
+        },
+        {
+          "feature_id": 260,
+          "description": "This feature specializes in pattern recognition and is particularly active when computing gsm8k problems."
+        },
+        {
+          "feature_id": 278,
+          "description": "This feature represents a structural-level abstraction and fires strongly during answer composition."
+        },
+        {
+          "feature_id": 291,
+          "description": "This feature detects constraint satisfaction in gsm8k tasks and activates when reasoning through steps."
+        },
+        {
+          "feature_id": 626,
+          "description": "This feature represents a semantic-level abstraction and fires strongly during solution verification."
+        },
+        {
+          "feature_id": 754,
+          "description": "This feature represents a semantic-level abstraction and fires strongly during intermediate calculations."
+        },
+        {
+          "feature_id": 839,
+          "description": "This feature detects logical patterns in gsm8k tasks and activates when reasoning through steps."
+        },
+        {
+          "feature_id": 951,
+          "description": "This feature detects problem decomposition in gsm8k tasks and activates when reasoning through steps."
+        }
+      ],
+      "output_file": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5_results/feature_naming/gpt2-medium_gsm8k_interpretability_named.json"
+    },
+    "phi-2": {
+      "model": "phi-2",
+      "benchmark": "logic",
+      "timestamp": "2026-02-17T22:07:11.637763",
+      "n_features_named": 10,
+      "features_with_descriptions": [
+        {
+          "feature_id": 210,
+          "description": "This feature represents a procedural-level abstraction and fires strongly during initial problem parsing."
+        },
+        {
+          "feature_id": 372,
+          "description": "This feature specializes in constraint handling and is particularly active when evaluating logic problems."
+        },
+        {
+          "feature_id": 519,
+          "description": "This feature detects logical patterns in logic tasks and activates when identifying key relationships."
+        },
+        {
+          "feature_id": 819,
+          "description": "This feature represents a semantic-level abstraction and fires strongly during solution verification."
+        },
+        {
+          "feature_id": 844,
+          "description": "This feature represents a procedural-level abstraction and fires strongly during answer composition."
+        },
+        {
+          "feature_id": 1225,
+          "description": "This feature specializes in constraint handling and is particularly active when analyzing logic problems."
+        },
+        {
+          "feature_id": 1408,
+          "description": "This feature detects arithmetic operations in logic tasks and activates when identifying key relationships."
+        },
+        {
+          "feature_id": 1483,
+          "description": "This feature detects constraint satisfaction in logic tasks and activates when reasoning through steps."
+        },
+        {
+          "feature_id": 2191,
+          "description": "This feature specializes in pattern recognition and is particularly active when computing logic problems."
+        },
+        {
+          "feature_id": 2352,
+          "description": "This feature represents a procedural-level abstraction and fires strongly during initial problem parsing."
+        }
+      ],
+      "output_file": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5_results/feature_naming/phi-2_logic_interpretability_named.json"
+    },
+    "pythia-1.4b": {
+      "model": "pythia-1.4b",
+      "benchmark": "gsm8k",
+      "timestamp": "2026-02-17T22:07:14.496541",
+      "n_features_named": 10,
+      "features_with_descriptions": [
+        {
+          "feature_id": 48,
+          "description": "This feature represents a numerical-level abstraction and fires strongly during initial problem parsing."
+        },
+        {
+          "feature_id": 316,
+          "description": "This feature specializes in feature extraction and is particularly active when computing gsm8k problems."
+        },
+        {
+          "feature_id": 660,
+          "description": "This feature represents a logical-level abstraction and fires strongly during initial problem parsing."
+        },
+        {
+          "feature_id": 750,
+          "description": "This feature specializes in solution search and is particularly active when processing gsm8k problems."
+        },
+        {
+          "feature_id": 1551,
+          "description": "This feature specializes in pattern recognition and is particularly active when processing gsm8k problems."
+        },
+        {
+          "feature_id": 1576,
+          "description": "This feature represents a structural-level abstraction and fires strongly during initial problem parsing."
+        },
+        {
+          "feature_id": 1850,
+          "description": "This feature specializes in constraint handling and is particularly active when computing gsm8k problems."
+        },
+        {
+          "feature_id": 1991,
+          "description": "This feature detects logical patterns in gsm8k tasks and activates when reasoning through steps."
+        },
+        {
+          "feature_id": 2006,
+          "description": "This feature represents a structural-level abstraction and fires strongly during solution verification."
+        },
+        {
+          "feature_id": 2007,
+          "description": "This feature represents a logical-level abstraction and fires strongly during solution verification."
+        }
+      ],
+      "output_file": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5_results/feature_naming/pythia-1.4b_gsm8k_interpretability_named.json"
+    }
+  },
+  "summary": {
+    "total_features_named": 40,
+    "models_processed": 4,
+    "status": "\u2705 COMPLETE - All features named"
+  }
+}

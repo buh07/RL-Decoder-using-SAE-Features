@@ -1,0 +1,61 @@
+{
+  "model": "gpt2-medium",
+  "benchmark": "gsm8k",
+  "timestamp": "2026-02-17T22:00:20.257105",
+  "n_features_tested": 10,
+  "baseline_quality": 0.9999890057370067,
+  "correlation_with_variance": 0.1606699876963736,
+  "top_causally_important_features": [
+    {
+      "feature_id": 291,
+      "measured_importance": 0.29476676991245515,
+      "estimated_importance": 0.1558556044355279
+    },
+    {
+      "feature_id": 754,
+      "measured_importance": 0.19694715280347835,
+      "estimated_importance": 0.0877220074788008
+    },
+    {
+      "feature_id": 170,
+      "measured_importance": 0.12761058438369885,
+      "estimated_importance": 0.0767148135072224
+    },
+    {
+      "feature_id": 278,
+      "measured_importance": 0.09369937777001831,
+      "estimated_importance": 0.07909071447224228
+    },
+    {
+      "feature_id": 211,
+      "measured_importance": 0.022342772823315076,
+      "estimated_importance": 0.08203638134584885
+    },
+    {
+      "feature_id": 951,
+      "measured_importance": 0.01617356385397478,
+      "estimated_importance": 0.10205119799506117
+    },
+    {
+      "feature_id": 260,
+      "measured_importance": 0.012908786397905558,
+      "estimated_importance": 0.09065012784831143
+    },
+    {
+      "feature_id": 626,
+      "measured_importance": 0.005567192075969924,
+      "estimated_importance": 0.17443560134810573
+    },
+    {
+      "feature_id": 179,
+      "measured_importance": 0.004631956934740411,
+      "estimated_importance": 0.12342506030589485
+    },
+    {
+      "feature_id": 839,
+      "measured_importance": 0.0035319485795855666,
+      "estimated_importance": 0.07956257014289907
+    }
+  ],
+  "validation_status": "\u274c FAILED"
+}

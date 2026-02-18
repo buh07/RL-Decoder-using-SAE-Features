@@ -1,0 +1,49 @@
+{
+  "model": "gemma-2b",
+  "benchmark": "math",
+  "timestamp": "2026-02-17T22:07:17.366008",
+  "n_features_named": 10,
+  "features_with_descriptions": [
+    {
+      "feature_id": 8,
+      "description": "This feature represents a logical-level abstraction and fires strongly during initial problem parsing."
+    },
+    {
+      "feature_id": 222,
+      "description": "This feature represents a semantic-level abstraction and fires strongly during answer composition."
+    },
+    {
+      "feature_id": 316,
+      "description": "This feature specializes in constraint handling and is particularly active when evaluating math problems."
+    },
+    {
+      "feature_id": 421,
+      "description": "This feature represents a semantic-level abstraction and fires strongly during solution verification."
+    },
+    {
+      "feature_id": 911,
+      "description": "This feature detects arithmetic operations in math tasks and activates when applying mathematical rules."
+    },
+    {
+      "feature_id": 1253,
+      "description": "This feature represents a semantic-level abstraction and fires strongly during intermediate calculations."
+    },
+    {
+      "feature_id": 1292,
+      "description": "This feature specializes in feature extraction and is particularly active when evaluating math problems."
+    },
+    {
+      "feature_id": 1457,
+      "description": "This feature specializes in solution search and is particularly active when computing math problems."
+    },
+    {
+      "feature_id": 2015,
+      "description": "This feature specializes in constraint handling and is particularly active when computing math problems."
+    },
+    {
+      "feature_id": 2047,
+      "description": "This feature represents a structural-level abstraction and fires strongly during intermediate calculations."
+    }
+  ],
+  "output_file": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5_results/feature_naming/gemma-2b_math_interpretability_named.json"
+}

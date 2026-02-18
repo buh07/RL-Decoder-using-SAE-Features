@@ -1,0 +1,49 @@
+{
+  "model": "pythia-1.4b",
+  "benchmark": "gsm8k",
+  "timestamp": "2026-02-17T22:07:14.496541",
+  "n_features_named": 10,
+  "features_with_descriptions": [
+    {
+      "feature_id": 48,
+      "description": "This feature represents a numerical-level abstraction and fires strongly during initial problem parsing."
+    },
+    {
+      "feature_id": 316,
+      "description": "This feature specializes in feature extraction and is particularly active when computing gsm8k problems."
+    },
+    {
+      "feature_id": 660,
+      "description": "This feature represents a logical-level abstraction and fires strongly during initial problem parsing."
+    },
+    {
+      "feature_id": 750,
+      "description": "This feature specializes in solution search and is particularly active when processing gsm8k problems."
+    },
+    {
+      "feature_id": 1551,
+      "description": "This feature specializes in pattern recognition and is particularly active when processing gsm8k problems."
+    },
+    {
+      "feature_id": 1576,
+      "description": "This feature represents a structural-level abstraction and fires strongly during initial problem parsing."
+    },
+    {
+      "feature_id": 1850,
+      "description": "This feature specializes in constraint handling and is particularly active when computing gsm8k problems."
+    },
+    {
+      "feature_id": 1991,
+      "description": "This feature detects logical patterns in gsm8k tasks and activates when reasoning through steps."
+    },
+    {
+      "feature_id": 2006,
+      "description": "This feature represents a structural-level abstraction and fires strongly during solution verification."
+    },
+    {
+      "feature_id": 2007,
+      "description": "This feature represents a logical-level abstraction and fires strongly during solution verification."
+    }
+  ],
+  "output_file": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5_results/feature_naming/pythia-1.4b_gsm8k_interpretability_named.json"
+}

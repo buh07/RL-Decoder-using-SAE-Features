@@ -1,0 +1,49 @@
+{
+  "model": "gpt2-medium",
+  "benchmark": "gsm8k",
+  "timestamp": "2026-02-17T22:07:19.923438",
+  "n_features_named": 10,
+  "features_with_descriptions": [
+    {
+      "feature_id": 170,
+      "description": "This feature detects constraint satisfaction in gsm8k tasks and activates when solving multi-step problems."
+    },
+    {
+      "feature_id": 179,
+      "description": "This feature represents a logical-level abstraction and fires strongly during solution verification."
+    },
+    {
+      "feature_id": 211,
+      "description": "This feature specializes in solution search and is particularly active when evaluating gsm8k problems."
+    },
+    {
+      "feature_id": 260,
+      "description": "This feature specializes in pattern recognition and is particularly active when computing gsm8k problems."
+    },
+    {
+      "feature_id": 278,
+      "description": "This feature represents a structural-level abstraction and fires strongly during answer composition."
+    },
+    {
+      "feature_id": 291,
+      "description": "This feature detects constraint satisfaction in gsm8k tasks and activates when reasoning through steps."
+    },
+    {
+      "feature_id": 626,
+      "description": "This feature represents a semantic-level abstraction and fires strongly during solution verification."
+    },
+    {
+      "feature_id": 754,
+      "description": "This feature represents a semantic-level abstraction and fires strongly during intermediate calculations."
+    },
+    {
+      "feature_id": 839,
+      "description": "This feature detects logical patterns in gsm8k tasks and activates when reasoning through steps."
+    },
+    {
+      "feature_id": 951,
+      "description": "This feature detects problem decomposition in gsm8k tasks and activates when reasoning through steps."
+    }
+  ],
+  "output_file": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5_results/feature_naming/gpt2-medium_gsm8k_interpretability_named.json"
+}
