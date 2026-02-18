@@ -4,26 +4,43 @@
 
 *Benjamin Huh, February 2026*
 
-This repository implements a phased, falsifiable framework for extracting and validating reasoning features from LLM activations using sparse autoencoders (SAEs). The current focus is full-scale Phase 3 evaluation on GSM8K with multiple SAE expansions.
+This repository implements a phased framework for extracting, validating, and analyzing reasoning features from LLM activations using sparse autoencoders (SAEs). We've completed comprehensive multi-layer analysis revealing fundamental differences in how language models structure reasoning internally.
 
-## Read This First
+## 📋 Quick Navigation
 
-- [README.md](README.md) (this file) - project orientation and key paths
-- [EXECUTION_START_HERE.md](EXECUTION_START_HERE.md) - start-to-finish runbook
-- [PHASE3_FULLSCALE_EXECUTION_GUIDE.md](PHASE3_FULLSCALE_EXECUTION_GUIDE.md) - Phase 3 details
+- **[PROJECT_STATUS.md](PROJECT_STATUS.md)** - Current status, key results, and next steps
+- **[TODO.md](TODO.md)** - Active task list
+- **[Documentation](docs/)** - Complete technical documentation
+- **[Phase 5.4 Analysis](docs/PHASE5_TASK4_ANALYSIS_REPORT.md)** - Latest reasoning flow analysis
 
-## Current Status (Feb 17, 2026)
+## 🎯 Current Status (Feb 18, 2026)
 
-- Phase 3 full-scale evaluation is running on GSM8K with SAE expansions 4x-20x.
-- SAE checkpoints for 4x-20x exist and were refreshed on full GSM8K.
-- Missing expansions (2x, 22x-32x) remain optional follow-ups.
+**Phase 5.4: Multi-Layer Reasoning Flow Analysis - COMPLETE ✅**
 
-## Key Paths
+- ✅ Trained 98 SAEs across all layers of 4 models
+- ✅ Computed 2,500 layer-to-layer transfer metrics
+- ✅ Generated 13 visualizations of reasoning patterns
+- ✅ Discovered fundamental architectural differences:
+  - **GPT2-medium:** Universal features (high reuse, compositional reasoning)
+  - **Phi-2 & Pythia:** Specialized features (hierarchical transformations)
 
-- Activations: `/tmp/gpt2_gsm8k_acts/gsm8k/train` (train), `/tmp/gpt2_gsm8k_acts_test/gsm8k/test` (test)
-- SAE checkpoints: `checkpoints/gpt2-small/sae/sae_768d_*x_final.pt`
-- Phase 3 results: `phase3_results/full_scale/`
-- SAE logs/results: `sae_logs/`, `sae_results/`
+**Next:** Interactive reasoning tracker to visualize feature activation in real-time
+
+## 📁 Project Structure
+
+```
+├── README.md              # This file - project overview
+├── PROJECT_STATUS.md      # Detailed status & results
+├── TODO.md                # Active tasks
+├── docs/                  # All documentation
+│   ├── PHASE5_TASK4_ANALYSIS_REPORT.md
+│   └── archived_reports/
+├── phase5/                # Latest implementation
+│   └── phase5_task4_*.py  # Multi-layer analysis pipeline
+├── phase5_results/        # Analysis outputs & visualizations
+├── sae_logs/              # Training & execution logs
+└── src/                   # Core SAE implementation
+```
 
 ## Setup (Short)
 

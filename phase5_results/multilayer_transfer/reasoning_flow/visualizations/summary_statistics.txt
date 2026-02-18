@@ -1,0 +1,39 @@
+======================================================================
+REASONING FLOW ANALYSIS - SUMMARY STATISTICS
+======================================================================
+
+GEMMA-2B:
+  Number of layers: 18
+  Mean transfer quality: 0.3362
+  Max cross-layer transfer: 0.5719
+  Min cross-layer transfer: 0.1897
+  Most universal layer: 10 (score: 0.3752)
+  Strong bi-directional pairs: 0
+
+GPT2-MEDIUM:
+  Number of layers: 24
+  Mean transfer quality: 0.4276
+  Max cross-layer transfer: 0.9541
+  Min cross-layer transfer: 0.0031
+  Most universal layer: 11 (score: 0.7058)
+  Strong bi-directional pairs: 43
+    Layers [19, 20]: 0.943
+    Layers [20, 21]: 0.941
+    Layers [21, 22]: 0.939
+
+PHI-2:
+  Number of layers: 32
+  Mean transfer quality: 0.0392
+  Max cross-layer transfer: 0.1407
+  Min cross-layer transfer: 0.0031
+  Most universal layer: 31 (score: 0.0439)
+  Strong bi-directional pairs: 0
+
+PYTHIA-1.4B:
+  Number of layers: 24
+  Mean transfer quality: 0.0461
+  Max cross-layer transfer: 0.0249
+  Min cross-layer transfer: 0.0016
+  Most universal layer: 3 (score: 0.0505)
+  Strong bi-directional pairs: 0
+

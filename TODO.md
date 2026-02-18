@@ -1,10 +1,16 @@
-# TODO
+# Active Tasks & Project TODO
 
-## 0. Repo + Planning Hygiene
-- [ ] Reconfirm project scope: reproducing phased SAE interpretability experiment (overview.tex, Feb 2026) and define falsifiable stop criteria per phase before writing code.
-- [ ] Decide which artifacts stay tracked in git after this cleanup (e.g., keep `overview.tex`, `TODO.md`, `LICENSE`, `.gitignore`) and document rationale in first commit.
-- [ ] Stand up lightweight project README describing intent, dependencies, and pointers to overview + this TODO so future collaborators ramp quickly.
-- [ ] Create issue tracker outline (GitHub Projects or plaintext) keyed to the sections below with owners + target dates.
+**Last Updated:** February 18, 2026
+
+For comprehensive status, see [PROJECT_STATUS.md](PROJECT_STATUS.md) and [docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md).
+
+## Current Priority: Phase 6 - Interactive Reasoning Tracking
+
+### High Priority
+- [ ] Build interactive reasoning tracker for real-time feature visualization
+- [ ] Create cross-model reasoning comparison tool
+- [ ] Implement causal intervention framework using transfer matrix insights
+- [ ] Generate feature evolution trajectories from input to output
 
 ## 1. Environment + Infrastructure
 - [x] Specify supported runtimes (Python >=3.10, CUDA version) and GPU budget (50-100 RTX-equivalent hours) in docs. *(SETUP.md captures Python 3.12.3 + CUDA 12.8.93; still plan to add GPU-hour budgeting details later if needed.)*

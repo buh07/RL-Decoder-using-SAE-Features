@@ -255,12 +255,20 @@ def main():
     for act_file in activation_files:
         # Parse name: model_layer{idx}_activations.pt
         name_parts = act_file.stem.split("_")
-        if "layer" not in name_parts:
+        
+        # Find the part that starts with "layer"
+        layer_part = None
+        for i, part in enumerate(name_parts):
+            if part.startswith("layer"):
+                layer_part = part
+                layer_idx = int(part[5:])  # Extract number after "layer"
+                model_name = "_".join(name_parts[:i])
+                break
+        
+        if layer_part is None:
             logger.warning(f"Cannot parse {act_file.name}")
             continue
-
-        layer_idx = int(name_parts[name_parts.index("layer") + 1])
-        model_name = "_".join(name_parts[: name_parts.index("layer")])
+        
         key = f"{model_name}_layer{layer_idx}"
 
         acts = _load_activations(act_file)
@@ -274,12 +282,20 @@ def main():
     for sae_file in sae_files:
         # Parse name: model_layer{idx}_sae.pt
         name_parts = sae_file.stem.split("_")
-        if "layer" not in name_parts:
+        
+        # Find the part that starts with "layer"
+        layer_part = None
+        for i, part in enumerate(name_parts):
+            if part.startswith("layer"):
+                layer_part = part
+                layer_idx = int(part[5:])  # Extract number after "layer"
+                model_name = "_".join(name_parts[:i])
+                break
+        
+        if layer_part is None:
             logger.warning(f"Cannot parse {sae_file.name}")
             continue
-
-        layer_idx = int(name_parts[name_parts.index("layer") + 1])
-        model_name = "_".join(name_parts[: name_parts.index("layer")])
+        
         key = f"{model_name}_layer{layer_idx}"
 
         sae = _load_sae(sae_file, args.device)
