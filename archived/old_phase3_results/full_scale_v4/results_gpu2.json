@@ -1,0 +1,87 @@
+{
+  "16": {
+    "expansion": 16,
+    "runtime_seconds": 4855.707837,
+    "examples": 7473,
+    "probes": {
+      "16": {
+        "accuracy": 0.9090351924342245,
+        "f1": 0.9209041615979545,
+        "latent_dim": 12288,
+        "majority_class_baseline": 0.9180595717499666,
+        "improvement_over_baseline": -0.00902437931574207,
+        "per_class_accuracy": {
+          "comparison": 0.0,
+          "equation": 0.9067809694064113,
+          "other": 0.9108035855365707,
+          "reasoning": 0.0
+        },
+        "class_weights_applied": true
+      }
+    },
+    "causal": {
+      "16": {
+        "num_features": 100,
+        "top_feature_importance": 0.0,
+        "results_saved": "phase3_results/full_scale_v4/16x/causal_results_16x.json",
+        "summary_saved": "phase3_results/full_scale_v4/16x/causal_summary_16x.json"
+      }
+    }
+  },
+  "18": {
+    "expansion": 18,
+    "runtime_seconds": 3749.477933,
+    "examples": 7473,
+    "probes": {
+      "18": {
+        "accuracy": 0.9124785768564057,
+        "f1": 0.9233221774088379,
+        "latent_dim": 13824,
+        "majority_class_baseline": 0.9180595717499666,
+        "improvement_over_baseline": -0.005580994893560898,
+        "per_class_accuracy": {
+          "comparison": 0.0,
+          "equation": 0.8944096342347775,
+          "other": 0.9156591525923058,
+          "reasoning": 0.0
+        },
+        "class_weights_applied": true
+      }
+    },
+    "causal": {
+      "18": {
+        "status": "error",
+        "error": "CUDA out of memory. Tried to allocate 8.44 GiB. GPU 0 has a total capacity of 47.38 GiB of which 4.62 GiB is free. Process 3247804 has 16.19 GiB memory in use. Including non-PyTorch memory, this process has 26.55 GiB memory in use. Of the allocated memory 19.13 GiB is allocated by PyTorch, and 6.93 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)"
+      }
+    }
+  },
+  "20": {
+    "expansion": 20,
+    "runtime_seconds": 3537.687516,
+    "examples": 7473,
+    "probes": {
+      "20": {
+        "accuracy": 0.8877175719108693,
+        "f1": 0.9056821268115283,
+        "latent_dim": 15360,
+        "majority_class_baseline": 0.9180595717499666,
+        "improvement_over_baseline": -0.030341999839097245,
+        "per_class_accuracy": {
+          "comparison": 0.0,
+          "equation": 0.9436456608789972,
+          "other": 0.8842987260430496,
+          "reasoning": 0.0
+        },
+        "class_weights_applied": true
+      }
+    },
+    "causal": {
+      "20": {
+        "num_features": 100,
+        "top_feature_importance": -0.008136749267578125,
+        "results_saved": "phase3_results/full_scale_v4/20x/causal_results_20x.json",
+        "summary_saved": "phase3_results/full_scale_v4/20x/causal_summary_20x.json"
+      }
+    }
+  }
+}

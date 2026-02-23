@@ -1,0 +1,63 @@
+{
+  "statistics": {
+    "num_features": 100,
+    "mean_loss_diff": 0.0385760498046875,
+    "median_loss_diff": 0.0010013580322265625,
+    "std_loss_diff": 0.08422702410702472,
+    "max_loss_diff": 0.48224639892578125,
+    "mean_relative_importance": 0.002223847609052934,
+    "median_relative_importance": 5.772668992931459e-05
+  },
+  "top_10_by_loss_diff": [
+    {
+      "feature_id": 68,
+      "loss_diff": 0.48224639892578125,
+      "relative_importance": 0.027800734047558444
+    },
+    {
+      "feature_id": 92,
+      "loss_diff": 0.45302391052246094,
+      "relative_importance": 0.026116104302021246
+    },
+    {
+      "feature_id": 11,
+      "loss_diff": 0.2789745330810547,
+      "relative_importance": 0.016082435903107314
+    },
+    {
+      "feature_id": 4,
+      "loss_diff": 0.26299285888671875,
+      "relative_importance": 0.015161117931835453
+    },
+    {
+      "feature_id": 31,
+      "loss_diff": 0.22605514526367188,
+      "relative_importance": 0.01303171778484287
+    },
+    {
+      "feature_id": 5,
+      "loss_diff": 0.20241165161132812,
+      "relative_importance": 0.011668708168911853
+    },
+    {
+      "feature_id": 33,
+      "loss_diff": 0.1835918426513672,
+      "relative_importance": 0.010583776265040335
+    },
+    {
+      "feature_id": 51,
+      "loss_diff": 0.16059112548828125,
+      "relative_importance": 0.009257821686263944
+    },
+    {
+      "feature_id": 84,
+      "loss_diff": 0.12595367431640625,
+      "relative_importance": 0.007261027992708987
+    },
+    {
+      "feature_id": 42,
+      "loss_diff": 0.12356758117675781,
+      "relative_importance": 0.00712347353727742
+    }
+  ]
+}

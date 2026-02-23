@@ -1,0 +1,1002 @@
+[
+  {
+    "feature_id": 0,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632607460021973,
+    "loss_diff": 9.5367431640625e-07,
+    "relative_importance": 6.100545775325143e-08,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 1,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.6671724319458,
+    "loss_diff": 0.03456592559814453,
+    "relative_importance": 0.002211142816266598,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 2,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.992103576660156,
+    "loss_diff": 0.3594970703125,
+    "relative_importance": 0.02299661735466566,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 3,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632720947265625,
+    "loss_diff": 0.00011444091796875,
+    "relative_importance": 7.320654930390171e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 4,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.667702674865723,
+    "loss_diff": 0.035096168518066406,
+    "relative_importance": 0.002245061850777406,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 5,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.797944068908691,
+    "loss_diff": 0.16533756256103516,
+    "relative_importance": 0.010576455205223448,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 6,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.633015632629395,
+    "loss_diff": 0.00040912628173828125,
+    "relative_importance": 2.6171341376144862e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 7,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632721900939941,
+    "loss_diff": 0.00011539459228515625,
+    "relative_importance": 7.381660388143423e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 8,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.747507095336914,
+    "loss_diff": 0.11490058898925781,
+    "relative_importance": 0.0073500595610272385,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 9,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.635529518127441,
+    "loss_diff": 0.0029230117797851562,
+    "relative_importance": 0.00018698172801371563,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 10,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.888504981994629,
+    "loss_diff": 0.25589847564697266,
+    "relative_importance": 0.016369533473472204,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 11,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632576942443848,
+    "loss_diff": -2.956390380859375e-05,
+    "relative_importance": -1.8911691903507943e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 12,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.74009895324707,
+    "loss_diff": 0.10749244689941406,
+    "relative_importance": 0.006876169165199982,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 13,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63259220123291,
+    "loss_diff": -1.430511474609375e-05,
+    "relative_importance": -9.150818662987714e-07,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 14,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.6326322555542,
+    "loss_diff": 2.574920654296875e-05,
+    "relative_importance": 1.6471473593377885e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 15,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.634969711303711,
+    "loss_diff": 0.0023632049560546875,
+    "relative_importance": 0.00015117152431255704,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 16,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632793426513672,
+    "loss_diff": 0.000186920166015625,
+    "relative_importance": 1.195706971963728e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 17,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.640573501586914,
+    "loss_diff": 0.007966995239257812,
+    "relative_importance": 0.0005096395940706624,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 18,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632647514343262,
+    "loss_diff": 4.100799560546875e-05,
+    "relative_importance": 2.6232346833898116e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 19,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632657051086426,
+    "loss_diff": 5.054473876953125e-05,
+    "relative_importance": 3.2332892609223257e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 20,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 16.131797790527344,
+    "loss_diff": 0.4991912841796875,
+    "relative_importance": 0.031932696806361925,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 21,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.788141250610352,
+    "loss_diff": 0.1555347442626953,
+    "relative_importance": 0.009949380104977775,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 22,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63271713256836,
+    "loss_diff": 0.000110626220703125,
+    "relative_importance": 7.076633099377166e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 23,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.664244651794434,
+    "loss_diff": 0.031638145446777344,
+    "relative_importance": 0.0020238560609641162,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 24,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.886369705200195,
+    "loss_diff": 0.25376319885253906,
+    "relative_importance": 0.016232942253562675,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 25,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632874488830566,
+    "loss_diff": 0.00026798248291015625,
+    "relative_importance": 1.7142533628663653e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 26,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.650979042053223,
+    "loss_diff": 0.018372535705566406,
+    "relative_importance": 0.0011752701436163887,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 27,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.6350736618042,
+    "loss_diff": 0.0024671554565429688,
+    "relative_importance": 0.00015782111920766145,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 28,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63631534576416,
+    "loss_diff": 0.0037088394165039062,
+    "relative_importance": 0.0002372502252023948,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 29,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.652470588684082,
+    "loss_diff": 0.01986408233642578,
+    "relative_importance": 0.0012706826795424741,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 30,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632980346679688,
+    "loss_diff": 0.00037384033203125,
+    "relative_importance": 2.391413943927456e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 31,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632513046264648,
+    "loss_diff": -9.34600830078125e-05,
+    "relative_importance": -5.97853485981864e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 32,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.813824653625488,
+    "loss_diff": 0.18121814727783203,
+    "relative_importance": 0.01159231808773059,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 33,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.802017211914062,
+    "loss_diff": 0.16941070556640625,
+    "relative_importance": 0.010837009515287583,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 34,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63475227355957,
+    "loss_diff": 0.0021457672119140625,
+    "relative_importance": 0.00013726227994481573,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 35,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63280963897705,
+    "loss_diff": 0.00020313262939453125,
+    "relative_importance": 1.2994162501442554e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 36,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632580757141113,
+    "loss_diff": -2.574920654296875e-05,
+    "relative_importance": -1.6471473593377885e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 37,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632646560668945,
+    "loss_diff": 4.00543212890625e-05,
+    "relative_importance": 2.56222922563656e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 38,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632651329040527,
+    "loss_diff": 4.482269287109375e-05,
+    "relative_importance": 2.867256514402817e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 39,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.645956993103027,
+    "loss_diff": 0.013350486755371094,
+    "relative_importance": 0.0008540154030877668,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 40,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632612228393555,
+    "loss_diff": 5.7220458984375e-06,
+    "relative_importance": 3.6603274651950856e-07,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 41,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63269329071045,
+    "loss_diff": 8.678436279296875e-05,
+    "relative_importance": 5.55149665554588e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 42,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63273811340332,
+    "loss_diff": 0.0001316070556640625,
+    "relative_importance": 8.418753169948697e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 43,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63276481628418,
+    "loss_diff": 0.0001583099365234375,
+    "relative_importance": 1.0126905987039738e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 44,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632505416870117,
+    "loss_diff": -0.0001010894775390625,
+    "relative_importance": -6.4665785218446515e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 45,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632671356201172,
+    "loss_diff": 6.4849853515625e-05,
+    "relative_importance": 4.1483711272210976e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 46,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.796712875366211,
+    "loss_diff": 0.1641063690185547,
+    "relative_importance": 0.010497697159264,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 47,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632658958435059,
+    "loss_diff": 5.245208740234375e-05,
+    "relative_importance": 3.3553001764288287e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 48,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 16.474050521850586,
+    "loss_diff": 0.8414440155029297,
+    "relative_importance": 0.05382621347393329,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 49,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.921241760253906,
+    "loss_diff": 0.28863525390625,
+    "relative_importance": 0.018463667821768066,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 50,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.721733093261719,
+    "loss_diff": 0.0891265869140625,
+    "relative_importance": 0.005701326059787865,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 51,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.642862319946289,
+    "loss_diff": 0.010255813598632812,
+    "relative_importance": 0.0006560526926784659,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 52,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632882118225098,
+    "loss_diff": 0.00027561187744140625,
+    "relative_importance": 1.7630577290689663e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 53,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.82567024230957,
+    "loss_diff": 0.19306373596191406,
+    "relative_importance": 0.012350066878483727,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 54,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.633672714233398,
+    "loss_diff": 0.0010662078857421875,
+    "relative_importance": 6.82041017681351e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 55,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.645795822143555,
+    "loss_diff": 0.013189315795898438,
+    "relative_importance": 0.0008437054807274673,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 56,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.635313034057617,
+    "loss_diff": 0.0027065277099609375,
+    "relative_importance": 0.00017313348910372755,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 57,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 16.298927307128906,
+    "loss_diff": 0.66632080078125,
+    "relative_importance": 0.042623781266703735,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 58,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.71997356414795,
+    "loss_diff": 0.08736705780029297,
+    "relative_importance": 0.005588770990233117,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 59,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632638931274414,
+    "loss_diff": 3.24249267578125e-05,
+    "relative_importance": 2.0741855636105488e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 60,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.735417366027832,
+    "loss_diff": 0.10281085968017578,
+    "relative_importance": 0.00657669337308927,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 61,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63265609741211,
+    "loss_diff": 4.9591064453125e-05,
+    "relative_importance": 3.1722838031690745e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 62,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63260269165039,
+    "loss_diff": -3.814697265625e-06,
+    "relative_importance": -2.440218310130057e-07,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 63,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632607460021973,
+    "loss_diff": 9.5367431640625e-07,
+    "relative_importance": 6.100545775325143e-08,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 64,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.633411407470703,
+    "loss_diff": 0.000804901123046875,
+    "relative_importance": 5.148860634374421e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 65,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632589340209961,
+    "loss_diff": -1.71661376953125e-05,
+    "relative_importance": -1.0980982395585257e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 66,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63264274597168,
+    "loss_diff": 3.62396240234375e-05,
+    "relative_importance": 2.3182073946235543e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 67,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632607460021973,
+    "loss_diff": 9.5367431640625e-07,
+    "relative_importance": 6.100545775325143e-08,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 68,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.689530372619629,
+    "loss_diff": 0.056923866271972656,
+    "relative_importance": 0.0036413547678338246,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 69,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.637229919433594,
+    "loss_diff": 0.0046234130859375,
+    "relative_importance": 0.0002957544591877629,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 70,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.633659362792969,
+    "loss_diff": 0.0010528564453125,
+    "relative_importance": 6.735002535958957e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 71,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632635116577148,
+    "loss_diff": 2.86102294921875e-05,
+    "relative_importance": 1.8301637325975428e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 72,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632615089416504,
+    "loss_diff": 8.58306884765625e-06,
+    "relative_importance": 5.490491197792628e-07,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 73,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632599830627441,
+    "loss_diff": -6.67572021484375e-06,
+    "relative_importance": -4.2703820427276e-07,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 74,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63259220123291,
+    "loss_diff": -1.430511474609375e-05,
+    "relative_importance": -9.150818662987714e-07,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 75,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.679767608642578,
+    "loss_diff": 0.047161102294921875,
+    "relative_importance": 0.0030168418968137896,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 76,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.6326322555542,
+    "loss_diff": 2.574920654296875e-05,
+    "relative_importance": 1.6471473593377885e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 77,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632984161376953,
+    "loss_diff": 0.000377655029296875,
+    "relative_importance": 2.4158161270287565e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 78,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 16.00844955444336,
+    "loss_diff": 0.3758430480957031,
+    "relative_importance": 0.024042250900556388,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 79,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.667526245117188,
+    "loss_diff": 0.03491973876953125,
+    "relative_importance": 0.0022337758410930545,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 80,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.7279691696167,
+    "loss_diff": 0.09536266326904297,
+    "relative_importance": 0.006100240748036377,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 81,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.63260555267334,
+    "loss_diff": -9.5367431640625e-07,
+    "relative_importance": -6.100545775325143e-08,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 82,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632660865783691,
+    "loss_diff": 5.435943603515625e-05,
+    "relative_importance": 3.4773110919353313e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 83,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632844924926758,
+    "loss_diff": 0.0002384185791015625,
+    "relative_importance": 1.5251364438312858e-05,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 84,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632719993591309,
+    "loss_diff": 0.00011348724365234375,
+    "relative_importance": 7.25964947263692e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 85,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.914643287658691,
+    "loss_diff": 0.28203678131103516,
+    "relative_importance": 0.018041571059573318,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 86,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632634162902832,
+    "loss_diff": 2.765655517578125e-05,
+    "relative_importance": 1.7691582748442915e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 87,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632753372192383,
+    "loss_diff": 0.0001468658447265625,
+    "relative_importance": 9.39484049400072e-06,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 88,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.653764724731445,
+    "loss_diff": 0.021158218383789062,
+    "relative_importance": 0.0013534670857136362,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 89,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.773601531982422,
+    "loss_diff": 0.14099502563476562,
+    "relative_importance": 0.009019290896071704,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 90,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.638715744018555,
+    "loss_diff": 0.0061092376708984375,
+    "relative_importance": 0.00039080096236732863,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 91,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.636481285095215,
+    "loss_diff": 0.0038747787475585938,
+    "relative_importance": 0.00024786517485146057,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 92,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.690420150756836,
+    "loss_diff": 0.05781364440917969,
+    "relative_importance": 0.0036982728599176083,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 93,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.705615997314453,
+    "loss_diff": 0.07300949096679688,
+    "relative_importance": 0.0046703338237579165,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 94,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.637231826782227,
+    "loss_diff": 0.0046253204345703125,
+    "relative_importance": 0.00029587647010326945,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 95,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.637283325195312,
+    "loss_diff": 0.00467681884765625,
+    "relative_importance": 0.000299170764821945,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 96,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.647087097167969,
+    "loss_diff": 0.0144805908203125,
+    "relative_importance": 0.0009263068705253697,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 97,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.716010093688965,
+    "loss_diff": 0.0834035873413086,
+    "relative_importance": 0.005335232307810604,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 98,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.632601737976074,
+    "loss_diff": -4.76837158203125e-06,
+    "relative_importance": -3.0502728876625717e-07,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  },
+  {
+    "feature_id": 99,
+    "baseline_loss": 15.632606506347656,
+    "ablated_loss": 15.752228736877441,
+    "loss_diff": 0.11962223052978516,
+    "relative_importance": 0.007652097582363586,
+    "task_accuracy_baseline": null,
+    "task_accuracy_ablated": null,
+    "task_accuracy_drop": null
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "10": {
+    "expansion": 10,
+    "runtime_seconds": 2533.172263,
+    "examples": 7473,
+    "probes": {
+      "10": {
+        "accuracy": 0.8727751130207629,
+        "f1": 0.8949752404178763,
+        "latent_dim": 7680,
+        "majority_class_baseline": 0.9180595717499666,
+        "improvement_over_baseline": -0.045284458729203614,
+        "per_class_accuracy": {
+          "comparison": 0.0,
+          "equation": 0.9671143558641323,
+          "other": 0.8660633831988829,
+          "reasoning": 0.0
+        },
+        "class_weights_applied": true
+      }
+    },
+    "causal": {
+      "10": {
+        "num_features": 100,
+        "top_feature_importance": 0.047161102294921875,
+        "results_saved": "phase3_results/full_scale_v4/10x/causal_results_10x.json",
+        "summary_saved": "phase3_results/full_scale_v4/10x/causal_summary_10x.json"
+      }
+    }
+  }
+}

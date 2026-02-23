@@ -1,0 +1,435 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/scratch2/f004ndc/RL-Decoder with SAE Features/src/phase3_probes.py:182: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  total_loss += float(loss)
+[phase3_rerun] --no-wait: skipping manifest check
+  Deleted stale alignment cache: phase3_results/full_scale_v4/16x/gsm8k_aligned_train.jsonl
+
+[21:57:55] Starting 16x SAE pipeline...
+[Phase3] Setting up tokenizer and model...
+  Model: gpt2
+  Tokenizer: GPT2Tokenizer
+[Phase3] Loading SAE checkpoints...
+  Loading sae_768d_16x_final.pt...
+  Loaded 1 SAE(s)
+[Phase3Pipeline] Ready. Output: phase3_results/full_scale_v4/16x
+================================================================================
+PHASE 3: CONTROLLED CHAIN-OF-THOUGHT ANALYSIS
+================================================================================
+
+[Phase3] Step 1: Extract and align reasoning steps...
+[GSM8KAligner] Loading GSM8K train split...
+  Processed 100/7473
+  Processed 200/7473
+  Processed 300/7473
+  Processed 400/7473
+  Processed 500/7473
+  Processed 600/7473
+  Processed 700/7473
+  Processed 800/7473
+  Processed 900/7473
+  Processed 1000/7473
+  Processed 1100/7473
+  Processed 1200/7473
+  Processed 1300/7473
+  Processed 1400/7473
+  Processed 1500/7473
+  Processed 1600/7473
+  Processed 1700/7473
+  Processed 1800/7473
+  Processed 1900/7473
+  Processed 2000/7473
+  Processed 2100/7473
+  Processed 2200/7473
+  Processed 2300/7473
+  Processed 2400/7473
+  Processed 2500/7473
+  Processed 2600/7473
+  Processed 2700/7473
+  Processed 2800/7473
+  Processed 2900/7473
+  Processed 3000/7473
+  Processed 3100/7473
+  Processed 3200/7473
+  Processed 3300/7473
+  Processed 3400/7473
+  Processed 3500/7473
+  Processed 3600/7473
+  Processed 3700/7473
+  Processed 3800/7473
+  Processed 3900/7473
+  Processed 4000/7473
+  Processed 4100/7473
+  Processed 4200/7473
+  Processed 4300/7473
+  Processed 4400/7473
+  Processed 4500/7473
+  Processed 4600/7473
+  Processed 4700/7473
+  Processed 4800/7473
+  Processed 4900/7473
+  Processed 5000/7473
+  Processed 5100/7473
+  Processed 5200/7473
+  Processed 5300/7473
+  Processed 5400/7473
+  Processed 5500/7473
+  Processed 5600/7473
+  Processed 5700/7473
+  Processed 5800/7473
+  Processed 5900/7473
+  Processed 6000/7473
+  Processed 6100/7473
+  Processed 6200/7473
+  Processed 6300/7473
+  Processed 6400/7473
+  Processed 6500/7473
+  Processed 6600/7473
+  Processed 6700/7473
+  Processed 6800/7473
+  Processed 6900/7473
+  Processed 7000/7473
+  Processed 7100/7473
+  Processed 7200/7473
+  Processed 7300/7473
+  Processed 7400/7473
+[GSM8KAligner] Processed 7473 examples
+[GSM8KAligner] Saved 7473 aligned examples to phase3_results/full_scale_v4/16x/gsm8k_aligned_train.jsonl
+
+[Phase3] Step 3: Train step type prediction probes...
+  Step types: ['comparison', 'equation', 'other', 'reasoning']
+
+[Phase3] Step 2: Load activations for aligned examples...
+
+  Extracting latents for 16x SAE (12288D)...
+    Loading from 1 shards...
+    ✓ Extracted latents for 7452 examples
+
+  Total: 1 SAE expansion(s) loaded
+
+  Training probe for 16x SAE...
+    Class weights: {'comparison': '384.69', 'equation': '3.11', 'other': '0.27', 'reasoning': '270.52'}
+    Majority-class baseline: 0.918
+Epoch 2/10: train_loss=1.3106 val_acc=0.9043 val_f1=0.9175
+Epoch 4/10: train_loss=1.3104 val_acc=0.9077 val_f1=0.9200
+Epoch 6/10: train_loss=1.3123 val_acc=0.9071 val_f1=0.9195
+Epoch 8/10: train_loss=1.3129 val_acc=0.9029 val_f1=0.9166
+Epoch 10/10: train_loss=1.3134 val_acc=0.9090 val_f1=0.9209
+[ProbeTrainer] Saved to phase3_results/full_scale_v4/16x/probe_16x.pt
+
+  Probe results saved to phase3_results/full_scale_v4/16x/probe_results.json
+
+[Phase3] Step 4: Evaluate causal feature importance...
+  Loading test activations from /scratch2/f004ndc/gpt2_gsm8k_acts_full/gsm8k/test...
+
+  Evaluating 16x SAE (12288D latent)...
+[Dataset] Found 1 shards in /scratch2/f004ndc/gpt2_gsm8k_acts_full/gsm8k/test
+    Loading test batches...
+    Loaded test activations: torch.Size([163840, 768])
+    Test latents: torch.Size([163840, 12288])
+    Evaluating 100 features...
+  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [00:00<00:34,  2.83it/s]  2%|▏         | 2/100 [00:00<00:31,  3.07it/s]  3%|▎         | 3/100 [00:01<00:32,  2.95it/s]  4%|▍         | 4/100 [00:01<00:33,  2.91it/s]  5%|▌         | 5/100 [00:01<00:32,  2.88it/s]  6%|▌         | 6/100 [00:02<00:33,  2.84it/s]  7%|▋         | 7/100 [00:02<00:30,  3.09it/s]  8%|▊         | 8/100 [00:02<00:30,  2.97it/s]  9%|▉         | 9/100 [00:03<00:31,  2.92it/s] 10%|█         | 10/100 [00:03<00:30,  2.97it/s] 11%|█         | 11/100 [00:03<00:31,  2.83it/s] 12%|█▏        | 12/100 [00:04<00:29,  2.95it/s] 13%|█▎        | 13/100 [00:04<00:29,  2.92it/s] 14%|█▍        | 14/100 [00:04<00:29,  2.96it/s] 15%|█▌        | 15/100 [00:05<00:29,  2.90it/s] 16%|█▌        | 16/100 [00:05<00:28,  2.90it/s] 17%|█▋        | 17/100 [00:05<00:28,  2.96it/s] 18%|█▊        | 18/100 [00:06<00:28,  2.83it/s] 19%|█▉        | 19/100 [00:06<00:27,  2.92it/s] 20%|██        | 20/100 [00:06<00:28,  2.84it/s] 21%|██        | 21/100 [00:07<00:26,  2.94it/s] 22%|██▏       | 22/100 [00:07<00:27,  2.86it/s] 23%|██▎       | 23/100 [00:07<00:26,  2.87it/s] 24%|██▍       | 24/100 [00:08<00:26,  2.86it/s] 25%|██▌       | 25/100 [00:08<00:26,  2.81it/s] 26%|██▌       | 26/100 [00:08<00:25,  2.89it/s] 27%|██▋       | 27/100 [00:09<00:26,  2.79it/s] 28%|██▊       | 28/100 [00:09<00:24,  2.88it/s] 29%|██▉       | 29/100 [00:10<00:25,  2.83it/s] 30%|███       | 30/100 [00:10<00:24,  2.90it/s] 31%|███       | 31/100 [00:10<00:24,  2.83it/s] 32%|███▏      | 32/100 [00:11<00:23,  2.90it/s] 33%|███▎      | 33/100 [00:11<00:23,  2.87it/s] 34%|███▍      | 34/100 [00:11<00:23,  2.82it/s] 35%|███▌      | 35/100 [00:12<00:22,  2.94it/s] 36%|███▌      | 36/100 [00:12<00:22,  2.82it/s] 37%|███▋      | 37/100 [00:12<00:21,  2.92it/s] 38%|███▊      | 38/100 [00:13<00:21,  2.83it/s] 39%|███▉      | 39/100 [00:13<00:21,  2.89it/s] 40%|████      | 40/100 [00:13<00:21,  2.83it/s] 41%|████      | 41/100 [00:14<00:20,  2.84it/s] 42%|████▏     | 42/100 [00:14<00:20,  2.84it/s] 43%|████▎     | 43/100 [00:14<00:20,  2.80it/s] 44%|████▍     | 44/100 [00:15<00:19,  2.86it/s] 45%|████▌     | 45/100 [00:15<00:19,  2.76it/s] 46%|████▌     | 46/100 [00:15<00:18,  2.89it/s] 47%|████▋     | 47/100 [00:16<00:18,  2.84it/s] 48%|████▊     | 48/100 [00:16<00:17,  2.96it/s] 49%|████▉     | 49/100 [00:16<00:16,  3.04it/s] 50%|█████     | 50/100 [00:17<00:17,  2.91it/s] 51%|█████     | 51/100 [00:17<00:16,  2.97it/s] 52%|█████▏    | 52/100 [00:17<00:16,  2.91it/s] 53%|█████▎    | 53/100 [00:18<00:16,  2.87it/s] 54%|█████▍    | 54/100 [00:18<00:15,  2.89it/s] 55%|█████▌    | 55/100 [00:19<00:16,  2.80it/s] 56%|█████▌    | 56/100 [00:19<00:15,  2.90it/s] 57%|█████▋    | 57/100 [00:19<00:14,  2.87it/s] 58%|█████▊    | 58/100 [00:20<00:14,  2.97it/s] 59%|█████▉    | 59/100 [00:20<00:14,  2.86it/s] 60%|██████    | 60/100 [00:20<00:13,  2.86it/s] 61%|██████    | 61/100 [00:21<00:13,  2.86it/s] 62%|██████▏   | 62/100 [00:21<00:13,  2.79it/s] 63%|██████▎   | 63/100 [00:21<00:12,  2.86it/s] 64%|██████▍   | 64/100 [00:22<00:13,  2.75it/s] 65%|██████▌   | 65/100 [00:22<00:12,  2.88it/s] 66%|██████▌   | 66/100 [00:22<00:12,  2.82it/s] 67%|██████▋   | 67/100 [00:23<00:11,  2.91it/s] 68%|██████▊   | 68/100 [00:23<00:11,  2.84it/s] 69%|██████▉   | 69/100 [00:23<00:10,  2.84it/s] 70%|███████   | 70/100 [00:24<00:10,  2.84it/s] 71%|███████   | 71/100 [00:24<00:10,  2.79it/s] 72%|███████▏  | 72/100 [00:25<00:09,  2.91it/s] 73%|███████▎  | 73/100 [00:25<00:09,  2.79it/s] 74%|███████▍  | 74/100 [00:25<00:09,  2.87it/s] 75%|███████▌  | 75/100 [00:26<00:08,  2.80it/s] 76%|███████▌  | 76/100 [00:26<00:08,  2.88it/s] 77%|███████▋  | 77/100 [00:26<00:08,  2.81it/s] 78%|███████▊  | 78/100 [00:27<00:07,  2.83it/s] 79%|███████▉  | 79/100 [00:27<00:07,  2.83it/s] 80%|████████  | 80/100 [00:27<00:07,  2.79it/s] 81%|████████  | 81/100 [00:28<00:06,  2.88it/s] 82%|████████▏ | 82/100 [00:28<00:06,  2.83it/s] 83%|████████▎ | 83/100 [00:28<00:05,  2.95it/s] 84%|████████▍ | 84/100 [00:29<00:05,  2.86it/s] 85%|████████▌ | 85/100 [00:29<00:05,  2.88it/s] 86%|████████▌ | 86/100 [00:29<00:04,  2.83it/s] 87%|████████▋ | 87/100 [00:30<00:04,  2.83it/s] 88%|████████▊ | 88/100 [00:30<00:04,  2.99it/s] 89%|████████▉ | 89/100 [00:30<00:03,  2.88it/s] 90%|█████████ | 90/100 [00:31<00:03,  2.90it/s] 91%|█████████ | 91/100 [00:31<00:03,  2.87it/s] 92%|█████████▏| 92/100 [00:32<00:02,  2.84it/s] 93%|█████████▎| 93/100 [00:32<00:02,  2.92it/s] 94%|█████████▍| 94/100 [00:32<00:02,  2.78it/s] 95%|█████████▌| 95/100 [00:33<00:01,  2.87it/s] 96%|█████████▌| 96/100 [00:33<00:01,  2.77it/s] 97%|█████████▋| 97/100 [00:33<00:01,  2.78it/s] 98%|█████████▊| 98/100 [00:34<00:00,  2.77it/s] 99%|█████████▉| 99/100 [00:34<00:00,  3.04it/s]100%|██████████| 100/100 [00:34<00:00,  3.24it/s]100%|██████████| 100/100 [00:34<00:00,  2.88it/s]
+[CausalAblation] Saved 100 feature importance results to phase3_results/full_scale_v4/16x/causal_results_16x.json
+[FeatureAnalyzer] Saved summary to phase3_results/full_scale_v4/16x/causal_summary_16x.json
+
+================================================================================
+PHASE 3 SUMMARY
+================================================================================
+Examples processed: 7473
+SAEs evaluated: 1
+Probes trained: 1
+
+Results saved to: phase3_results/full_scale_v4/16x
+  Saved incremental results to phase3_results/full_scale_v4/results_gpu2.json
+
+[23:18:51] Starting 18x SAE pipeline...
+[Phase3] Setting up tokenizer and model...
+  Model: gpt2
+  Tokenizer: GPT2Tokenizer
+[Phase3] Loading SAE checkpoints...
+  Loading sae_768d_18x_final.pt...
+  Loaded 1 SAE(s)
+[Phase3Pipeline] Ready. Output: phase3_results/full_scale_v4/18x
+================================================================================
+PHASE 3: CONTROLLED CHAIN-OF-THOUGHT ANALYSIS
+================================================================================
+
+[Phase3] Step 1: Extract and align reasoning steps...
+[GSM8KAligner] Loading GSM8K train split...
+  Processed 100/7473
+  Processed 200/7473
+  Processed 300/7473
+  Processed 400/7473
+  Processed 500/7473
+  Processed 600/7473
+  Processed 700/7473
+  Processed 800/7473
+  Processed 900/7473
+  Processed 1000/7473
+  Processed 1100/7473
+  Processed 1200/7473
+  Processed 1300/7473
+  Processed 1400/7473
+  Processed 1500/7473
+  Processed 1600/7473
+  Processed 1700/7473
+  Processed 1800/7473
+  Processed 1900/7473
+  Processed 2000/7473
+  Processed 2100/7473
+  Processed 2200/7473
+  Processed 2300/7473
+  Processed 2400/7473
+  Processed 2500/7473
+  Processed 2600/7473
+  Processed 2700/7473
+  Processed 2800/7473
+  Processed 2900/7473
+  Processed 3000/7473
+  Processed 3100/7473
+  Processed 3200/7473
+  Processed 3300/7473
+  Processed 3400/7473
+  Processed 3500/7473
+  Processed 3600/7473
+  Processed 3700/7473
+  Processed 3800/7473
+  Processed 3900/7473
+  Processed 4000/7473
+  Processed 4100/7473
+  Processed 4200/7473
+  Processed 4300/7473
+  Processed 4400/7473
+  Processed 4500/7473
+  Processed 4600/7473
+  Processed 4700/7473
+  Processed 4800/7473
+  Processed 4900/7473
+  Processed 5000/7473
+  Processed 5100/7473
+  Processed 5200/7473
+  Processed 5300/7473
+  Processed 5400/7473
+  Processed 5500/7473
+  Processed 5600/7473
+  Processed 5700/7473
+  Processed 5800/7473
+  Processed 5900/7473
+  Processed 6000/7473
+  Processed 6100/7473
+  Processed 6200/7473
+  Processed 6300/7473
+  Processed 6400/7473
+  Processed 6500/7473
+  Processed 6600/7473
+  Processed 6700/7473
+  Processed 6800/7473
+  Processed 6900/7473
+  Processed 7000/7473
+  Processed 7100/7473
+  Processed 7200/7473
+  Processed 7300/7473
+  Processed 7400/7473
+[GSM8KAligner] Processed 7473 examples
+[GSM8KAligner] Saved 7473 aligned examples to phase3_results/full_scale_v4/18x/gsm8k_aligned_train.jsonl
+
+[Phase3] Step 3: Train step type prediction probes...
+  Step types: ['comparison', 'equation', 'other', 'reasoning']
+
+[Phase3] Step 2: Load activations for aligned examples...
+
+  Extracting latents for 18x SAE (13824D)...
+    Loading from 1 shards...
+    ✓ Extracted latents for 7452 examples
+
+  Total: 1 SAE expansion(s) loaded
+
+  Training probe for 18x SAE...
+    Class weights: {'comparison': '384.69', 'equation': '3.11', 'other': '0.27', 'reasoning': '270.52'}
+    Majority-class baseline: 0.918
+Epoch 2/10: train_loss=1.8296 val_acc=0.8356 val_f1=0.8683
+Epoch 4/10: train_loss=1.8267 val_acc=0.8449 val_f1=0.8750
+Epoch 6/10: train_loss=1.8240 val_acc=0.8428 val_f1=0.8735
+Epoch 8/10: train_loss=1.8255 val_acc=0.8611 val_f1=0.8866
+Epoch 10/10: train_loss=1.8263 val_acc=0.9125 val_f1=0.9233
+[ProbeTrainer] Saved to phase3_results/full_scale_v4/18x/probe_18x.pt
+
+  Probe results saved to phase3_results/full_scale_v4/18x/probe_results.json
+
+[Phase3] Step 4: Evaluate causal feature importance...
+  Loading test activations from /scratch2/f004ndc/gpt2_gsm8k_acts_full/gsm8k/test...
+
+  Evaluating 18x SAE (13824D latent)...
+[Dataset] Found 1 shards in /scratch2/f004ndc/gpt2_gsm8k_acts_full/gsm8k/test
+    Loading test batches...
+    Loaded test activations: torch.Size([163840, 768])
+    Test latents: torch.Size([163840, 13824])
+    Evaluating 100 features...
+  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [00:00<00:37,  2.67it/s]  1%|          | 1/100 [00:00<00:40,  2.42it/s]
+Traceback (most recent call last):
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/src/phase3_pipeline.py", line 364, in evaluate_causal_importance
+    results = evaluator.evaluate_feature_importance(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/src/phase3_causal.py", line 203, in evaluate_feature_importance
+    ablated_latents = self.ablate_feature(latents, feature_id, seed=sampling_idx)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/src/phase3_causal.py", line 93, in ablate_feature
+    latents_new = latents.clone()
+                  ^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 8.44 GiB. GPU 0 has a total capacity of 47.38 GiB of which 4.62 GiB is free. Process 3247804 has 16.19 GiB memory in use. Including non-PyTorch memory, this process has 26.55 GiB memory in use. Of the allocated memory 19.13 GiB is allocated by PyTorch, and 6.93 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+    Error evaluating causal importance: CUDA out of memory. Tried to allocate 8.44 GiB. GPU 0 has a total capacity of 47.38 GiB of which 4.62 GiB is free. Process 3247804 has 16.19 GiB memory in use. Including non-PyTorch memory, this process has 26.55 GiB memory in use. Of the allocated memory 19.13 GiB is allocated by PyTorch, and 6.93 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+================================================================================
+PHASE 3 SUMMARY
+================================================================================
+Examples processed: 7473
+SAEs evaluated: 1
+Probes trained: 1
+
+Results saved to: phase3_results/full_scale_v4/18x
+  Saved incremental results to phase3_results/full_scale_v4/results_gpu2.json
+
+[00:21:21] Starting 20x SAE pipeline...
+[Phase3] Setting up tokenizer and model...
+  Model: gpt2
+  Tokenizer: GPT2Tokenizer
+[Phase3] Loading SAE checkpoints...
+  Loading sae_768d_20x_final.pt...
+  Loaded 1 SAE(s)
+[Phase3Pipeline] Ready. Output: phase3_results/full_scale_v4/20x
+================================================================================
+PHASE 3: CONTROLLED CHAIN-OF-THOUGHT ANALYSIS
+================================================================================
+
+[Phase3] Step 1: Extract and align reasoning steps...
+[GSM8KAligner] Loading GSM8K train split...
+  Processed 100/7473
+  Processed 200/7473
+  Processed 300/7473
+  Processed 400/7473
+  Processed 500/7473
+  Processed 600/7473
+  Processed 700/7473
+  Processed 800/7473
+  Processed 900/7473
+  Processed 1000/7473
+  Processed 1100/7473
+  Processed 1200/7473
+  Processed 1300/7473
+  Processed 1400/7473
+  Processed 1500/7473
+  Processed 1600/7473
+  Processed 1700/7473
+  Processed 1800/7473
+  Processed 1900/7473
+  Processed 2000/7473
+  Processed 2100/7473
+  Processed 2200/7473
+  Processed 2300/7473
+  Processed 2400/7473
+  Processed 2500/7473
+  Processed 2600/7473
+  Processed 2700/7473
+  Processed 2800/7473
+  Processed 2900/7473
+  Processed 3000/7473
+  Processed 3100/7473
+  Processed 3200/7473
+  Processed 3300/7473
+  Processed 3400/7473
+  Processed 3500/7473
+  Processed 3600/7473
+  Processed 3700/7473
+  Processed 3800/7473
+  Processed 3900/7473
+  Processed 4000/7473
+  Processed 4100/7473
+  Processed 4200/7473
+  Processed 4300/7473
+  Processed 4400/7473
+  Processed 4500/7473
+  Processed 4600/7473
+  Processed 4700/7473
+  Processed 4800/7473
+  Processed 4900/7473
+  Processed 5000/7473
+  Processed 5100/7473
+  Processed 5200/7473
+  Processed 5300/7473
+  Processed 5400/7473
+  Processed 5500/7473
+  Processed 5600/7473
+  Processed 5700/7473
+  Processed 5800/7473
+  Processed 5900/7473
+  Processed 6000/7473
+  Processed 6100/7473
+  Processed 6200/7473
+  Processed 6300/7473
+  Processed 6400/7473
+  Processed 6500/7473
+  Processed 6600/7473
+  Processed 6700/7473
+  Processed 6800/7473
+  Processed 6900/7473
+  Processed 7000/7473
+  Processed 7100/7473
+  Processed 7200/7473
+  Processed 7300/7473
+  Processed 7400/7473
+[GSM8KAligner] Processed 7473 examples
+[GSM8KAligner] Saved 7473 aligned examples to phase3_results/full_scale_v4/20x/gsm8k_aligned_train.jsonl
+
+[Phase3] Step 3: Train step type prediction probes...
+  Step types: ['comparison', 'equation', 'other', 'reasoning']
+
+[Phase3] Step 2: Load activations for aligned examples...
+
+  Extracting latents for 20x SAE (15360D)...
+    Loading from 1 shards...
+    ✓ Extracted latents for 7452 examples
+
+  Total: 1 SAE expansion(s) loaded
+
+  Training probe for 20x SAE...
+    Class weights: {'comparison': '384.69', 'equation': '3.11', 'other': '0.27', 'reasoning': '270.52'}
+    Majority-class baseline: 0.918
+Epoch 2/10: train_loss=2.0735 val_acc=0.8951 val_f1=0.9109
+Epoch 4/10: train_loss=2.0689 val_acc=0.8739 val_f1=0.8959
+Epoch 6/10: train_loss=2.0669 val_acc=0.9365 val_f1=0.9381
+Epoch 8/10: train_loss=2.0767 val_acc=0.8962 val_f1=0.9119
+Epoch 10/10: train_loss=2.0677 val_acc=0.8877 val_f1=0.9057
+[ProbeTrainer] Saved to phase3_results/full_scale_v4/20x/probe_20x.pt
+
+  Probe results saved to phase3_results/full_scale_v4/20x/probe_results.json
+
+[Phase3] Step 4: Evaluate causal feature importance...
+  Loading test activations from /scratch2/f004ndc/gpt2_gsm8k_acts_full/gsm8k/test...
+
+  Evaluating 20x SAE (15360D latent)...
+[Dataset] Found 1 shards in /scratch2/f004ndc/gpt2_gsm8k_acts_full/gsm8k/test
+    Loading test batches...
+    Loaded test activations: torch.Size([163840, 768])
+    Test latents: torch.Size([163840, 15360])
+    Evaluating 100 features...
+  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [00:00<00:32,  3.05it/s]  2%|▏         | 2/100 [00:00<00:51,  1.91it/s]  3%|▎         | 3/100 [00:01<00:42,  2.30it/s]  4%|▍         | 4/100 [00:01<00:38,  2.52it/s]  5%|▌         | 5/100 [00:01<00:35,  2.66it/s]  6%|▌         | 6/100 [00:02<00:33,  2.76it/s]  7%|▋         | 7/100 [00:02<00:32,  2.84it/s]  8%|▊         | 8/100 [00:02<00:31,  2.88it/s]  9%|▉         | 9/100 [00:03<00:31,  2.91it/s] 10%|█         | 10/100 [00:03<00:30,  2.93it/s] 11%|█         | 11/100 [00:04<00:30,  2.94it/s] 12%|█▏        | 12/100 [00:04<00:29,  2.95it/s] 13%|█▎        | 13/100 [00:04<00:29,  2.96it/s] 14%|█▍        | 14/100 [00:05<00:28,  2.97it/s] 15%|█▌        | 15/100 [00:05<00:28,  2.96it/s] 16%|█▌        | 16/100 [00:05<00:28,  2.96it/s] 17%|█▋        | 17/100 [00:06<00:28,  2.96it/s] 18%|█▊        | 18/100 [00:06<00:27,  2.99it/s] 19%|█▉        | 19/100 [00:06<00:27,  2.97it/s] 20%|██        | 20/100 [00:07<00:26,  2.97it/s] 21%|██        | 21/100 [00:07<00:26,  2.97it/s] 22%|██▏       | 22/100 [00:07<00:26,  2.96it/s] 23%|██▎       | 23/100 [00:08<00:26,  2.96it/s] 24%|██▍       | 24/100 [00:08<00:25,  2.96it/s] 25%|██▌       | 25/100 [00:08<00:25,  2.96it/s] 26%|██▌       | 26/100 [00:09<00:25,  2.96it/s] 27%|██▋       | 27/100 [00:09<00:24,  2.95it/s] 28%|██▊       | 28/100 [00:09<00:24,  2.95it/s] 29%|██▉       | 29/100 [00:10<00:24,  2.95it/s] 30%|███       | 30/100 [00:10<00:23,  2.95it/s] 31%|███       | 31/100 [00:10<00:23,  2.95it/s] 32%|███▏      | 32/100 [00:11<00:23,  2.95it/s] 33%|███▎      | 33/100 [00:11<00:22,  2.94it/s] 34%|███▍      | 34/100 [00:11<00:22,  2.94it/s] 35%|███▌      | 35/100 [00:12<00:22,  2.94it/s] 36%|███▌      | 36/100 [00:12<00:21,  2.94it/s] 37%|███▋      | 37/100 [00:12<00:21,  2.94it/s] 38%|███▊      | 38/100 [00:13<00:21,  2.94it/s] 39%|███▉      | 39/100 [00:13<00:20,  2.94it/s] 40%|████      | 40/100 [00:13<00:20,  2.94it/s] 41%|████      | 41/100 [00:14<00:20,  2.94it/s] 42%|████▏     | 42/100 [00:14<00:19,  2.94it/s] 43%|████▎     | 43/100 [00:14<00:19,  2.94it/s] 44%|████▍     | 44/100 [00:15<00:18,  2.95it/s] 45%|████▌     | 45/100 [00:15<00:18,  2.94it/s] 46%|████▌     | 46/100 [00:15<00:18,  2.93it/s] 47%|████▋     | 47/100 [00:16<00:18,  2.94it/s] 48%|████▊     | 48/100 [00:16<00:17,  2.93it/s] 49%|████▉     | 49/100 [00:16<00:17,  2.92it/s] 50%|█████     | 50/100 [00:17<00:17,  2.93it/s] 51%|█████     | 51/100 [00:17<00:16,  2.93it/s] 52%|█████▏    | 52/100 [00:17<00:16,  2.92it/s] 53%|█████▎    | 53/100 [00:18<00:16,  2.92it/s] 54%|█████▍    | 54/100 [00:18<00:15,  2.92it/s] 55%|█████▌    | 55/100 [00:18<00:15,  2.92it/s] 56%|█████▌    | 56/100 [00:19<00:15,  2.92it/s] 57%|█████▋    | 57/100 [00:19<00:14,  2.92it/s] 58%|█████▊    | 58/100 [00:19<00:14,  2.91it/s] 59%|█████▉    | 59/100 [00:20<00:14,  2.91it/s] 60%|██████    | 60/100 [00:20<00:13,  2.91it/s] 61%|██████    | 61/100 [00:21<00:13,  2.92it/s] 62%|██████▏   | 62/100 [00:21<00:13,  2.91it/s] 63%|██████▎   | 63/100 [00:21<00:12,  2.91it/s] 64%|██████▍   | 64/100 [00:22<00:12,  2.91it/s] 65%|██████▌   | 65/100 [00:22<00:12,  2.91it/s] 66%|██████▌   | 66/100 [00:22<00:11,  2.91it/s] 67%|██████▋   | 67/100 [00:23<00:11,  2.91it/s] 68%|██████▊   | 68/100 [00:23<00:11,  2.91it/s] 69%|██████▉   | 69/100 [00:23<00:10,  2.90it/s] 70%|███████   | 70/100 [00:24<00:10,  2.90it/s] 71%|███████   | 71/100 [00:24<00:09,  2.91it/s] 72%|███████▏  | 72/100 [00:24<00:09,  2.90it/s] 73%|███████▎  | 73/100 [00:25<00:09,  2.90it/s] 74%|███████▍  | 74/100 [00:25<00:08,  2.90it/s] 75%|███████▌  | 75/100 [00:25<00:08,  2.90it/s] 76%|███████▌  | 76/100 [00:26<00:08,  2.93it/s] 77%|███████▋  | 77/100 [00:26<00:07,  2.90it/s] 78%|███████▊  | 78/100 [00:26<00:07,  2.89it/s] 79%|███████▉  | 79/100 [00:27<00:07,  2.90it/s] 80%|████████  | 80/100 [00:27<00:06,  2.90it/s] 81%|████████  | 81/100 [00:27<00:06,  2.89it/s] 82%|████████▏ | 82/100 [00:28<00:06,  2.89it/s] 83%|████████▎ | 83/100 [00:28<00:05,  2.88it/s] 84%|████████▍ | 84/100 [00:28<00:05,  2.89it/s] 85%|████████▌ | 85/100 [00:29<00:05,  2.88it/s] 86%|████████▌ | 86/100 [00:29<00:04,  2.88it/s] 87%|████████▋ | 87/100 [00:29<00:04,  2.89it/s] 88%|████████▊ | 88/100 [00:30<00:04,  2.88it/s] 89%|████████▉ | 89/100 [00:30<00:03,  2.88it/s] 90%|█████████ | 90/100 [00:31<00:03,  2.89it/s] 91%|█████████ | 91/100 [00:31<00:03,  2.88it/s] 92%|█████████▏| 92/100 [00:31<00:02,  2.89it/s] 93%|█████████▎| 93/100 [00:32<00:02,  2.89it/s] 94%|█████████▍| 94/100 [00:32<00:02,  2.88it/s] 95%|█████████▌| 95/100 [00:32<00:01,  2.88it/s] 96%|█████████▌| 96/100 [00:33<00:01,  2.88it/s] 97%|█████████▋| 97/100 [00:33<00:01,  2.87it/s] 98%|█████████▊| 98/100 [00:33<00:00,  2.88it/s] 99%|█████████▉| 99/100 [00:34<00:00,  2.88it/s]100%|██████████| 100/100 [00:34<00:00,  2.87it/s]100%|██████████| 100/100 [00:34<00:00,  2.90it/s]
+[CausalAblation] Saved 100 feature importance results to phase3_results/full_scale_v4/20x/causal_results_20x.json
+[FeatureAnalyzer] Saved summary to phase3_results/full_scale_v4/20x/causal_summary_20x.json
+
+================================================================================
+PHASE 3 SUMMARY
+================================================================================
+Examples processed: 7473
+SAEs evaluated: 1
+Probes trained: 1
+
+Results saved to: phase3_results/full_scale_v4/20x
+  Saved incremental results to phase3_results/full_scale_v4/results_gpu2.json
+
+================================================================================
+PHASE 3 FULL RE-RUN SUMMARY
+================================================================================
+  16x: examples=7473  acc=0.9090351924342245  f1=0.9209041615979545  runtime=4856s
+  18x: examples=7473  acc=0.9124785768564057  f1=0.9233221774088379  runtime=3749s
+  20x: examples=7473  acc=0.8877175719108693  f1=0.9056821268115283  runtime=3538s
+================================================================================

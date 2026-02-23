@@ -1,238 +1,145 @@
-# RL-Decoder with SAE Features - Project Status
+# RL-Decoder with SAE Features — Project Status
 
-**Last Updated:** February 22, 2026
-**Current Phase:** Phase 3 COMPLETE (mixed results) → Phase 4 NEEDS REDO
-
----
-
-## Quick Links
-
-- **[README.md](README.md)** - Project overview and setup instructions
-- **[TODO.md](TODO.md)** - Active tasks and next steps
-- **[Documentation Index](docs/DOCUMENTATION_INDEX.md)** - Complete documentation listing
-- **[Phase 5.4 Analysis Report](docs/PHASE5_TASK4_ANALYSIS_REPORT.md)** - Latest reasoning flow analysis
+**Last Updated:** February 23, 2026
 
 ---
 
-## Current Status Summary
+## Phase Structure
 
-> **⚠️ CRITICAL NOTE — SAE Training Bugs in Previous Phases**
-> Phases 4, 5.1, 5.2, and 5.3 were run with three bugs that invalidate results:
-> 1. `SAEConfig` defaults to `use_relu=False` — L1 sparsity never engaged, features are dense not sparse
-> 2. Missing `normalize_decoder()` after each optimizer step — decoder columns grew unbounded
-> 3. Incorrect decorrelation loss formula — loss could go negative, training was destabilized
->
-> All sparsity percentages, transfer ratios, and causal correlations from those phases are unreliable. Phase 5.4 multilayer SAEs were retrained with fixes (v2 checkpoints), but downstream analysis must be re-run. See `TODO.md` for the redo plan.
+The project follows a four-phase research arc, each phase building on the previous.
 
-### ✅ Valid Completed Work
-
-#### Phase 3: Controlled CoT Probes (COMPLETE — Mixed Results, Feb 22 2026)
-All 9 SAE expansion factors (4x–20x) evaluated with corrected pipeline (v4):
-- **Equation detection**: 83–97% per-class accuracy ✅ — SAE layer 6 features encode arithmetic tokens
-- **Comparison/reasoning detection**: 0% per-class ❌ — connective words not linearly decodable from single layer
-- **Overall accuracy**: All expansions at or below majority-class baseline (91.8%) — no positive probe signal
-- **Key insight**: Single-layer (layer 6, GPT-2 small) cannot capture multi-step reasoning structure. Multi-layer analysis is needed.
-
-**Output Location:** `phase3_results/full_scale_v4/`
-
-#### Phase 5.4: Multilayer SAEs Retrained with Fixes (CHECKPOINTS VALID)
-- **98 SAEs retrained** with use_relu=True, normalize_decoder(), correct decorrelation loss
-- Checkpoints in `phase5_results/multilayer_transfer_v2/saes/` are valid
-- **Transfer matrix analysis and visualizations need to be re-run** using v2 checkpoints (previous analysis used broken v1 SAEs)
-
-**Valid Checkpoint Location:** `phase5_results/multilayer_transfer_v2/saes/`
-
-### 🔴 Needs Redo (broken SAE training)
-
-#### Phase 4: Frontier LLM SAEs — INVALID
-- Claimed 31.7% sparsity is an artifact of use_relu=False (no ReLU gating = no sparsity)
-- All feature statistics, causal rankings, and descriptions are unreliable
-
-#### Phase 5.1–5.3: Causal Ablation, Feature Naming, Transfer Analysis — INVALID
-- All built on Phase 4's broken SAEs
-- Must be redone after Phase 4 SAEs are retrained
+| Phase | Name | Status | Key Result |
+|-------|------|--------|------------|
+| **1** | Ground-Truth Validation | ✅ Complete | R²=0.967–0.999 on BFS/Stack/Logic |
+| **2** | Multi-Layer SAE Training | ✅ Complete | 24 GPT-2 SAEs (12×) + 98 SAEs across 4 models |
+| **3** | Reasoning Flow Tracing | ✅ Complete | Feature-flow heatmaps; ~51% sparsity observed |
+| **4** | Arithmetic Feature Probing | 🔄 In Progress | Data collector + 3 experiment scripts written |
 
 ---
 
-## Research Plan Alignment
+## Phase 1 — Ground-Truth Validation ✅
 
-**Status:** ✅ Fully aligned with overview.tex research plan  
-**See:** [ALIGNMENT_VERIFICATION.md](docs/ALIGNMENT_VERIFICATION.md) for complete alignment analysis
+**Scripts:** `phase1/`
+**Results:** `phase1_results/`
 
-### Phase Status (from overview.tex)
+Trained SAEs on three controlled environments where the ground-truth latent state is known:
 
-| Phase | Name | Status | Notes |
-|-------|------|--------|-------|
-| 1 | Ground-Truth Systems | ✅ COMPLETE | R²=0.967–0.999 across BFS/Stack/Logic (v2/v3) |
-| 2 | Synthetic Transformers | ⏸️ NOT STARTED | Deferred |
-| 3 | Controlled CoT | ✅ COMPLETE (mixed) | Equation detection ✅, reasoning/comparison 0% ❌, all below baseline |
-| 4 | Frontier LLMs | 🔴 NEEDS REDO | Previous SAEs had use_relu=False + no normalize_decoder |
-| 4B | Interpretability Validation | 🔴 NEEDS REDO | Previous sparsity/purity metrics invalid |
-| 5.1 | Causal Ablation | 🔴 NEEDS REDO | Built on broken Phase 4 SAEs |
-| 5.2 | Feature Naming | 🔴 NEEDS REDO | Built on broken Phase 4 SAEs |
-| 5.3 | Transfer Analysis | 🔴 NEEDS REDO | 0.995–1.000 transfer ratio was artifact of degenerate SAEs |
-| 5.4 | Multi-Layer Analysis | ⚠️ CHECKPOINTS VALID | v2 SAEs retrained with fixes; analysis needs re-run with v2 checkpoints |
-| 6 | Controllable CoT | 🔴 NEEDS REDO | Must use corrected SAEs |
+| Environment | R² (best) | R² (worst) | Expansions tested |
+|-------------|-----------|------------|-------------------|
+| BFS graph traversal | 0.987 | 0.976 | 4×, 8×, 12× |
+| Stack machine | 0.989 | 0.967 | 4×, 8×, 12× |
+| Logic puzzle | 0.999 | 0.990 | 4×, 8×, 12× |
 
-**Note on Phase 2:** Synthetic Transformers phase was deferred in favor of phase progression from ground truth (Phase 1, unambiguous systems) → labeled reasoning (Phase 3, real chain-of-thought) → frontier models (Phase 4). This accelerates validation while maintaining the falsification framework's integrity.
+All pass R²>0.95, confirming the SAE can reconstruct known latent states.
 
 ---
 
-#### Phase 5.1: Causal Ablation (COMPLETE)
-- Causal importance scores for features (Phi-2: r=0.75)
+## Phase 2 — Multi-Layer SAE Training ✅
 
-**Output Location:** `phase5_results/causal_ablation/`
+**Scripts:** `phase2/`
+**Results:** `phase2_results/`
+
+```
+phase2_results/
+  activations/        — 98 activation files (4 models × all layers)
+  saes_gpt2_12x/      — 24 SAEs for GPT-2 medium, 12× expansion
+  saes_all_models/    — 98 SAEs across GPT-2 medium, Phi-2, Gemma-2B, Pythia-1.4B
+```
+
+Key facts:
+- GPT-2 medium SAEs: 12× expansion (12 288 features), trained per layer (0–23)
+- All-model SAEs: 8× expansion, one per layer per model
+- Training fixed: `use_relu=True`, `normalize_decoder()` after every step, correct decorrelation loss
 
 ---
 
-## Project Structure
+## Phase 3 — Reasoning Flow Tracing ✅
+
+**Scripts:** `phase3/`
+**Results:** `phase3_results/reasoning_flow/`
+
+`reasoning_flow_tracer.py` registers forward hooks on every GPT-2 medium block, encodes through the layer's SAE, and records active features per token.  Interactive analysis is available in `interactive_reasoning_tracker.ipynb`.
+
+Key finding: ~51% of 12 288 features are active (dense), and computation vs. background tokens differ by only ±58 features (~1%). This motivates Phase 4's targeted probing approach instead of raw feature-count comparisons.
+
+---
+
+## Phase 4 — Arithmetic Feature Probing 🔄
+
+**Scripts:** `phase4/`
+**Results:** `phase4_results/`  (written by the scripts below)
+
+Three progressively stronger experiments to locate arithmetic features:
+
+| Script | Experiment | Question answered |
+|--------|-----------|-------------------|
+| `arithmetic_data_collector.py` | Shared data foundation | Collect SAE features at `=`, operand, result tokens for 200 GSM8K examples |
+| `arithmetic_value_probe.py` | A — Ridge regression | Which layer's SAE features best linearly predict the result value C? |
+| `feature_coactivation.py` | B — Co-activation analysis | Which features fire specifically at operands vs. result tokens? |
+| `causal_patch_test.py` | C — Causal patching | Do swapping SAE features between examples causally change the model's prediction? |
+
+**Run order:**
+```bash
+# 1. Collect (GPU, ~20 min)
+CUDA_VISIBLE_DEVICES=7 .venv/bin/python3 phase4/arithmetic_data_collector.py --device cuda:0
+
+# 2. Value probe (CPU)
+.venv/bin/python3 phase4/arithmetic_value_probe.py
+
+# 3. Co-activation (CPU)
+.venv/bin/python3 phase4/feature_coactivation.py
+
+# 4. Causal patch (GPU)
+CUDA_VISIBLE_DEVICES=7 .venv/bin/python3 phase4/causal_patch_test.py --device cuda:0
+```
+
+---
+
+## Directory Map
 
 ```
 RL-Decoder with SAE Features/
-├── README.md                    # Main project documentation
-├── PROJECT_STATUS.md            # This file - current status
-├── TODO.md                      # Active task list
-├── requirements.txt             # Python dependencies
-├── setup_env.sh                 # Environment setup script
+├── src/                     — SAE library (architecture, training, config)
+├── datasets/                — GSM8K and other raw data
 │
-├── docs/                        # Consolidated documentation
-│   ├── DOCUMENTATION_INDEX.md               # Complete docs listing
-│   ├── ALIGNMENT_VERIFICATION.md            # Research plan alignment check
-│   ├── PHASE5_TASK4_ANALYSIS_REPORT.md      # Latest analysis
-│   ├── PHASE5_TASK4_SPECIFICATION.md        # Phase 5.4 design
-│   └── archived_reports/                    # Historical reports
+├── phase1/                  — Ground-truth environment scripts
+├── phase1_results/          — BFS/Stack/Logic SAE checkpoints + R² metrics
 │
-├── src/                         # Core source code
-│   ├── sae_architecture.py      # SAE implementation
-│   ├── sae_training.py          # Training logic
-│   ├── activation_capture.py   # Activation extraction
-│   └── ...
+├── phase2/                  — Multi-layer activation capture + SAE training
+├── phase2_results/
+│   ├── activations/         — 98 activation files (gpt2-medium_layer{N}_activations.pt …)
+│   ├── saes_gpt2_12x/       — 24 × 12× GPT-2 SAEs
+│   └── saes_all_models/     — 98 SAEs across 4 frontier models
 │
-├── phase1/                      # Ground truth RL training
-├── phase3/                      # Phase 3 implementation
-├── phase4/                      # SAE training & evaluation
-├── phase5/                      # Universality & interpretability
-│   ├── phase5_task4_capture_multi_layer.py
-│   ├── phase5_task4_train_multilayer_saes.py
-│   ├── phase5_task4_reasoning_flow_analysis.py
-│   └── phase5_task4_visualize_reasoning_flow.py
+├── phase3/                  — Reasoning flow tracer + interactive notebook
+├── phase3_results/
+│   └── reasoning_flow/      — Feature-flow PNGs, JSON
 │
-├── phase5_results/              # Phase 5 outputs
-│   └── multilayer_transfer/
-│       └── reasoning_flow/
-│           ├── reasoning_flow_analysis.json
-│           └── visualizations/   # 13 heatmaps & charts
+├── phase4/                  — Arithmetic feature probing (3 experiments)
+├── phase4_results/
+│   ├── collection/          — gsm8k_arithmetic_dataset.pt (shared input)
+│   ├── probe/               — R² by layer, top features per layer
+│   ├── coactivation/        — Selectivity heatmaps, category distribution
+│   └── patching/            — Δlog_prob by layer, causal effect heatmap
 │
-├── sae_logs/                    # All training & execution logs
-├── checkpoints/                 # Model checkpoints
-└── datasets/                    # Training datasets
+├── archived/                — Superseded / broken work (kept for reference)
+│   ├── old_phase3_single_layer_probe/   (GPT-2 small single-layer probes)
+│   ├── old_phase3_results/
+│   ├── old_phase4_broken_sae_training/  (use_relu=False era)
+│   ├── old_phase4_results/
+│   ├── old_phase5_broken_analysis/
+│   ├── old_phase5_broken_results/
+│   └── old_phase6_docs/
+│
+└── docs/                    — Design documents and reports
 ```
 
 ---
 
-## Key Results & Findings
+## Key Environment Details
 
-### Phase 3: Controlled CoT Probe Results (Valid, Feb 22 2026)
-
-| Expansion | Accuracy | vs Baseline | Equation | Comparison | Reasoning |
-|-----------|----------|-------------|----------|------------|-----------|
-| 4x | 91.3% | −0.5pp | 83.3% | 0% | 0% |
-| 6x | 86.8% | −5.0pp | 97.0% | 0% | 0% |
-| 8x | 83.3% | −8.5pp | 34.4% | 0% | 62.6%* |
-| 10x | 87.3% | −4.5pp | 96.7% | 0% | 0% |
-| 12x | 90.5% | −1.3pp | 91.4% | 0% | 0% |
-| 14x | 86.1% | −5.7pp | 97.6% | 0% | 0% |
-| 16x | 90.9% | −0.9pp | 90.7% | 0% | 0% |
-| 18x | 91.2% | −0.6pp | 89.4% | 0% | 0% |
-| 20x | 88.8% | −3.0pp | 94.4% | 0% | 0% |
-
-*8x reasoning result is likely a probe local-minimum artifact, not a genuine signal.
-
-**Majority-class baseline: 91.8%** (sequences padded to 1024 tokens; most tokens are background "other")
-
-**Conclusion:** Single-layer probes detect arithmetic computation tokens but cannot decode multi-step reasoning structure. This motivates the multi-layer analysis approach.
-
-### Phase 5.4: Multilayer SAE Checkpoints (v2, valid training)
-- 98 SAEs across all layers of 4 models, trained with corrected SAE code
-- Transfer matrix analysis using these checkpoints is the correct next step
-- Previous transfer quality numbers (GPT2: 0.428, Phi-2: 0.039) were from broken v1 SAEs and should not be cited
-
----
-
-## Trained Models & Artifacts
-
-### SAE Checkpoints
-- **Phase 5.3:** 4 SAEs (final layer, 8x expansion) - `phase5_results/transfer_analysis/saes/`
-- **Phase 5.4:** 98 SAEs (all layers, 8x expansion) - `phase5_results/multilayer_transfer/saes/`
-
-### Activation Data
-- **Single layer:** `phase4_results/activations/` (4 files, ~200MB)
-- **Multi-layer:** `phase4_results/activations_multilayer/` (98 files, ~906MB)
-
-### Analysis Results
-- **Transfer matrices:** `phase5_results/multilayer_transfer/reasoning_flow/reasoning_flow_analysis.json`
-- **Visualizations:** `phase5_results/multilayer_transfer/reasoning_flow/visualizations/` (13 PNG files)
-
----
-
-## Next Steps
-
-### Priority 1: Retrain Phase 4 SAEs with corrected training
-Retrain single-layer SAEs for GPT-2-medium, Pythia-1.4B, Gemma-2B, Phi-2 using the fixed training loop (use_relu=True, normalize_decoder, correct decorrelation loss). These form the foundation for all downstream analysis.
-
-### Priority 2: Re-run Phase 5.4 transfer matrix analysis using v2 checkpoints
-The 98 multilayer SAE checkpoints in `phase5_results/multilayer_transfer_v2/saes/` are valid. Re-run the transfer matrix computation and visualizations against these checkpoints to get reliable layer-universality data.
-
-### Priority 3: Re-run Phase 5.1–5.3 with corrected SAEs
-Causal ablation, feature naming, and single-layer transfer analysis all need to be redone using the retrained Phase 4 SAEs.
-
-### Priority 4: Multi-layer CoT probe analysis
-Extend the Phase 3 probe approach across multiple layers using the v2 multilayer SAE checkpoints. Phase 3 showed that layer 6 alone is insufficient; probing multiple layers simultaneously may reveal where reasoning connectives are encoded.
-
----
-
-## Documentation
-
-### Active Documents (in `docs/`)
-- **[PHASE5_TASK4_ANALYSIS_REPORT.md](docs/PHASE5_TASK4_ANALYSIS_REPORT.md)** - Complete analysis of reasoning flow
-- **[PHASE5_TASK4_SPECIFICATION.md](docs/PHASE5_TASK4_SPECIFICATION.md)** - Technical design document
-- **[DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)** - Master documentation index
-
-### Archived Reports (in `docs/archived_reports/`)
-- Phase 3-5 execution reports
-- Historical implementation summaries
-- Design specifications
-
----
-
-## Quick Commands
-
-```bash
-# Activate environment
-source setup_env.sh
-
-# View latest results
-cat docs/PHASE5_TASK4_ANALYSIS_REPORT.md
-
-# Check training logs
-tail -50 sae_logs/phase5_task4_reasoning_flow_*.log
-
-# List all SAE checkpoints
-ls phase5_results/multilayer_transfer/saes/*_sae.pt | wc -l
-
-# View visualizations
-ls phase5_results/multilayer_transfer/reasoning_flow/visualizations/
-```
-
----
-
-## Contact & Support
-
-For questions or issues:
-1. Check [DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md) for relevant docs
-2. Review [TODO.md](TODO.md) for active work
-3. Examine logs in `sae_logs/` for debugging
-
----
-
-**Project Status:** Phase 3 COMPLETE (mixed results) | Phase 4/5/6 needs redo with corrected SAE training
+- Python 3.12.3, CUDA 12.8, PyTorch 2.6
+- 4 GPUs (0–3) on primary node; additional GPUs (5, 7) available
+- Activate with `source setup_env.sh` or `.venv/bin/python3`
+- `weights_only=False` required for `torch.load` on SAE checkpoints (contain PosixPath)
+- Hook target for GPT-2 activations: `model.transformer.h[i]` (full block, not `.mlp`)

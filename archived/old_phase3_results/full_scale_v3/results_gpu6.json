@@ -1,0 +1,42 @@
+{
+  "18": {
+    "expansion": 18,
+    "runtime_seconds": 4737.884841,
+    "examples": 7473,
+    "probes": {
+      "18": {
+        "accuracy": 0.9106915452824653,
+        "f1": 0.9219520585431759,
+        "latent_dim": 13824
+      }
+    },
+    "causal": {
+      "18": {
+        "num_features": 100,
+        "top_feature_importance": 0.0,
+        "results_saved": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase3_results/full_scale_v3/18x/causal_results_18x.json",
+        "summary_saved": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase3_results/full_scale_v3/18x/causal_summary_18x.json"
+      }
+    }
+  },
+  "20": {
+    "expansion": 20,
+    "runtime_seconds": 3007.747917,
+    "examples": 7473,
+    "probes": {
+      "20": {
+        "accuracy": 0.9384300649930643,
+        "f1": 0.9388786310069912,
+        "latent_dim": 15360
+      }
+    },
+    "causal": {
+      "20": {
+        "num_features": 100,
+        "top_feature_importance": -0.008136749267578125,
+        "results_saved": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase3_results/full_scale_v3/20x/causal_results_20x.json",
+        "summary_saved": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase3_results/full_scale_v3/20x/causal_summary_20x.json"
+      }
+    }
+  }
+}
