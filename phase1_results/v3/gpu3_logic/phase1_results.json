@@ -1,0 +1,130 @@
+{
+  "gpu_id": 0,
+  "environments": {
+    "logic": {
+      "environment": "logic",
+      "state_dim": 640,
+      "train_samples": 80000,
+      "test_samples": 20000,
+      "expansions": {
+        "4x": {
+          "training": {
+            "expansion": 4,
+            "epochs": 25,
+            "final_loss": 0.00028034975661430506,
+            "best_recon_loss": 6.606430631654802e-05
+          },
+          "reconstruction": {
+            "mse": 0.0004234240623190999,
+            "mae": 0.014044429175555706,
+            "r2_score": 0.9985672235488892,
+            "sparsity": 0.025882167741656303,
+            "mean_active_features": 2493.741455078125
+          },
+          "causal": {
+            "dims_tested": 103,
+            "total_dims": 2560,
+            "fraction_tested": 0.040234375,
+            "add_epsilon": {
+              "mean_error_increase": 1.5690222426201217e-05,
+              "std_error_increase": 2.286770040882402e-06,
+              "max_error_increase": 2.4354609195142984e-05,
+              "percent_positive": 1.0
+            },
+            "scale_2x": {
+              "mean_error_increase": 7.021613419055939e-05,
+              "std_error_increase": 2.5126979380729608e-05,
+              "max_error_increase": 0.0001435405865777284,
+              "percent_positive": 1.0
+            },
+            "random_replacement": {
+              "mean_error_increase": 0.0016443150816485286,
+              "std_error_increase": 0.00010507047409191728,
+              "max_error_increase": 0.0018724072724580765,
+              "percent_positive": 1.0
+            }
+          },
+          "pass": true
+        },
+        "8x": {
+          "training": {
+            "expansion": 8,
+            "epochs": 25,
+            "final_loss": 0.0003164380524074659,
+            "best_recon_loss": 0.00020352843959117308
+          },
+          "reconstruction": {
+            "mse": 0.000496615597512573,
+            "mae": 0.014737526886165142,
+            "r2_score": 0.9983195066452026,
+            "sparsity": 0.04814910888671875,
+            "mean_active_features": 4873.4765625
+          },
+          "causal": {
+            "dims_tested": 101,
+            "total_dims": 5120,
+            "fraction_tested": 0.0197265625,
+            "add_epsilon": {
+              "mean_error_increase": 1.5348643501056358e-05,
+              "std_error_increase": 2.4577473141107475e-06,
+              "max_error_increase": 2.1897692931815982e-05,
+              "percent_positive": 1.0
+            },
+            "scale_2x": {
+              "mean_error_increase": 1.5623701983713545e-05,
+              "std_error_increase": 1.0006788215832785e-05,
+              "max_error_increase": 6.690682494081557e-05,
+              "percent_positive": 0.9900990128517151
+            },
+            "random_replacement": {
+              "mean_error_increase": 0.0015884952154010534,
+              "std_error_increase": 0.00010297583503415808,
+              "max_error_increase": 0.0018404884031042457,
+              "percent_positive": 1.0
+            }
+          },
+          "pass": true
+        },
+        "12x": {
+          "training": {
+            "expansion": 12,
+            "epochs": 25,
+            "final_loss": 0.0007598575741052627,
+            "best_recon_loss": 0.0007037830132059753
+          },
+          "reconstruction": {
+            "mse": 0.002895394805818796,
+            "mae": 0.04107752442359924,
+            "r2_score": 0.9902024269104004,
+            "sparsity": 0.41097280383110046,
+            "mean_active_features": 4523.728515625
+          },
+          "causal": {
+            "dims_tested": 102,
+            "total_dims": 7680,
+            "fraction_tested": 0.01328125,
+            "add_epsilon": {
+              "mean_error_increase": 1.5878200429142453e-05,
+              "std_error_increase": 4.802141120308079e-06,
+              "max_error_increase": 2.9663322493433952e-05,
+              "percent_positive": 1.0
+            },
+            "scale_2x": {
+              "mean_error_increase": 4.72477267976501e-06,
+              "std_error_increase": 3.5326679608260747e-06,
+              "max_error_increase": 1.6173115000128746e-05,
+              "percent_positive": 0.9803921580314636
+            },
+            "random_replacement": {
+              "mean_error_increase": 0.0015532660763710737,
+              "std_error_increase": 0.00010218162788078189,
+              "max_error_increase": 0.0018241566140204668,
+              "percent_positive": 1.0
+            }
+          },
+          "pass": true
+        }
+      }
+    }
+  }
+}

@@ -13,18 +13,21 @@ This repository implements a phased framework for extracting, validating, and an
 - **[Documentation](docs/)** - Complete technical documentation
 - **[Phase 5.4 Analysis](docs/PHASE5_TASK4_ANALYSIS_REPORT.md)** - Latest reasoning flow analysis
 
-## 🎯 Current Status (Feb 18, 2026)
+## 🎯 Current Status (Feb 22, 2026)
 
-**Phase 5.4: Multi-Layer Reasoning Flow Analysis - COMPLETE ✅**
+> ⚠️ **Phases 4, 5.1, 5.2, 5.3, and 6 need to be re-run.** Previous SAE training had critical bugs (`use_relu=False`, missing `normalize_decoder()`, wrong decorrelation loss) that invalidate all results from those phases. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for details.
 
-- ✅ Trained 98 SAEs across all layers of 4 models
-- ✅ Computed 2,500 layer-to-layer transfer metrics
-- ✅ Generated 13 visualizations of reasoning patterns
-- ✅ Discovered fundamental architectural differences:
-  - **GPT2-medium:** Universal features (high reuse, compositional reasoning)
-  - **Phi-2 & Pythia:** Specialized features (hierarchical transformations)
+**Phase 3: Controlled CoT Probes — COMPLETE (mixed results)**
 
-**Next:** Interactive reasoning tracker to visualize feature activation in real-time
+- ✅ 9 expansion factors (4x–20x) evaluated on GPT-2 small, layer 6, GSM8K
+- ✅ Equation token detection works (83–97% per-class accuracy)
+- ❌ Reasoning/comparison connectives: 0% per-class across all expansions
+- ❌ No expansion beats majority-class baseline — single-layer probes insufficient
+- **Conclusion:** Multi-step reasoning requires multi-layer analysis (Phase 5.4)
+
+**Phase 5.4 multilayer SAE checkpoints (v2) are valid** — `phase5_results/multilayer_transfer_v2/saes/`
+
+**Next:** Re-run Phase 4 with corrected SAE training, then re-run Phases 5 and 6
 
 ## 📁 Project Structure
 
@@ -151,5 +154,5 @@ For questions or issues, refer to [TODO.md](TODO.md) for owner contacts per sect
 
 ---
 
-**Last Updated:** February 16, 2026  
-**Framework Version:** 0.1.0 (Sections 0-3 complete, 4-8 planned)
+**Last Updated:** February 22, 2026
+**Framework Version:** 0.2.0 (Phase 1 + Phase 3 complete; Phase 4/5/6 needs redo)

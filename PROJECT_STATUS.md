@@ -1,7 +1,7 @@
 # RL-Decoder with SAE Features - Project Status
 
-**Last Updated:** February 18, 2026  
-**Current Phase:** Phase 5.4 COMPLETE ✅
+**Last Updated:** February 22, 2026
+**Current Phase:** Phase 3 COMPLETE (mixed results) → Phase 4 NEEDS REDO
 
 ---
 
@@ -16,34 +16,41 @@
 
 ## Current Status Summary
 
-### ✅ Completed Work
+> **⚠️ CRITICAL NOTE — SAE Training Bugs in Previous Phases**
+> Phases 4, 5.1, 5.2, and 5.3 were run with three bugs that invalidate results:
+> 1. `SAEConfig` defaults to `use_relu=False` — L1 sparsity never engaged, features are dense not sparse
+> 2. Missing `normalize_decoder()` after each optimizer step — decoder columns grew unbounded
+> 3. Incorrect decorrelation loss formula — loss could go negative, training was destabilized
+>
+> All sparsity percentages, transfer ratios, and causal correlations from those phases are unreliable. Phase 5.4 multilayer SAEs were retrained with fixes (v2 checkpoints), but downstream analysis must be re-run. See `TODO.md` for the redo plan.
 
-#### Phase 5.4: Multi-Layer Reasoning Flow Analysis (COMPLETE)
-- **98 SAEs trained** across all layers of 4 models (Gemma-2B, GPT2-medium, Phi-2, Pythia-1.4B)
-- **2,500 layer-pair transfer metrics** computed
-- **13 visualizations** generated showing reasoning patterns
-- **Key Finding:** Models use dramatically different reasoning architectures:
-  - GPT2-medium: Universal features (high reuse across layers)
-  - Phi-2 & Pythia: Specialized features (hierarchical transformations)
+### ✅ Valid Completed Work
 
-**Output Location:** `phase5_results/multilayer_transfer/reasoning_flow/`
+#### Phase 3: Controlled CoT Probes (COMPLETE — Mixed Results, Feb 22 2026)
+All 9 SAE expansion factors (4x–20x) evaluated with corrected pipeline (v4):
+- **Equation detection**: 83–97% per-class accuracy ✅ — SAE layer 6 features encode arithmetic tokens
+- **Comparison/reasoning detection**: 0% per-class ❌ — connective words not linearly decodable from single layer
+- **Overall accuracy**: All expansions at or below majority-class baseline (91.8%) — no positive probe signal
+- **Key insight**: Single-layer (layer 6, GPT-2 small) cannot capture multi-step reasoning structure. Multi-layer analysis is needed.
 
-#### Phase 5.3: Single-Layer Transfer Analysis (COMPLETE)
-- Proven SAE universality across models (transfer ratio: 0.995-1.000)
-- 4 SAEs trained on final layer activations
+**Output Location:** `phase3_results/full_scale_v4/`
 
-**Output Location:** `phase5_results/transfer_analysis/`
+#### Phase 5.4: Multilayer SAEs Retrained with Fixes (CHECKPOINTS VALID)
+- **98 SAEs retrained** with use_relu=True, normalize_decoder(), correct decorrelation loss
+- Checkpoints in `phase5_results/multilayer_transfer_v2/saes/` are valid
+- **Transfer matrix analysis and visualizations need to be re-run** using v2 checkpoints (previous analysis used broken v1 SAEs)
 
-#### Phase 5.2: Feature Naming (COMPLETE)
-- 40 features with semantic descriptions
-- Feature interpretability analysis
+**Valid Checkpoint Location:** `phase5_results/multilayer_transfer_v2/saes/`
 
-**Output Location:** `phase5_results/feature_naming/`
+### 🔴 Needs Redo (broken SAE training)
 
-#### Phase 5.1: Causal Ablation (COMPLETE)
-- Causal importance scores for features (Phi-2: r=0.75)
+#### Phase 4: Frontier LLM SAEs — INVALID
+- Claimed 31.7% sparsity is an artifact of use_relu=False (no ReLU gating = no sparsity)
+- All feature statistics, causal rankings, and descriptions are unreliable
 
-**Output Location:** `phase5_results/causal_ablation/`
+#### Phase 5.1–5.3: Causal Ablation, Feature Naming, Transfer Analysis — INVALID
+- All built on Phase 4's broken SAEs
+- Must be redone after Phase 4 SAEs are retrained
 
 ---
 
@@ -56,16 +63,16 @@
 
 | Phase | Name | Status | Notes |
 |-------|------|--------|-------|
-| 1 | Ground-Truth Systems | ✅ COMPLETE | BFS/DFS training and SAE alignment validated |
-| 2 | Synthetic Transformers | ⏸️ NOT STARTED | Deferred: Phase 1 (ground truth) + Phase 3 (labeled CoT) provide sufficient falsification framework |
-| 3 | Controlled CoT | ✅ COMPLETE | 100% probe accuracy validated on reasoning steps |
-| 4 | Frontier LLMs | ✅ COMPLETE | 4 models, all specified features trained |
-| 4B | Interpretability Validation | ✅ COMPLETE | 31.7% sparsity, feature naming, selectivity analysis |
-| 5.1 | Causal Ablation | ✅ COMPLETE | r > 0.7 achieved (Phi-2: 0.75) |
-| 5.2 | Feature Naming | ✅ COMPLETE | 40 features named with descriptions |
-| 5.3 | Transfer Analysis | ✅ COMPLETE | 0.995-1.000 reconstruction ratio (exact spec match) |
-| 5.4 | Multi-Layer Analysis | ✅ COMPLETE | 98 SAEs, 2,500 transfers (spec: 20 SAEs, 400 transfers) |
-| 6 | Controllable CoT | ⏳ PLANNED | Awaiting Phase 5.4 findings (now complete) |
+| 1 | Ground-Truth Systems | ✅ COMPLETE | R²=0.967–0.999 across BFS/Stack/Logic (v2/v3) |
+| 2 | Synthetic Transformers | ⏸️ NOT STARTED | Deferred |
+| 3 | Controlled CoT | ✅ COMPLETE (mixed) | Equation detection ✅, reasoning/comparison 0% ❌, all below baseline |
+| 4 | Frontier LLMs | 🔴 NEEDS REDO | Previous SAEs had use_relu=False + no normalize_decoder |
+| 4B | Interpretability Validation | 🔴 NEEDS REDO | Previous sparsity/purity metrics invalid |
+| 5.1 | Causal Ablation | 🔴 NEEDS REDO | Built on broken Phase 4 SAEs |
+| 5.2 | Feature Naming | 🔴 NEEDS REDO | Built on broken Phase 4 SAEs |
+| 5.3 | Transfer Analysis | 🔴 NEEDS REDO | 0.995–1.000 transfer ratio was artifact of degenerate SAEs |
+| 5.4 | Multi-Layer Analysis | ⚠️ CHECKPOINTS VALID | v2 SAEs retrained with fixes; analysis needs re-run with v2 checkpoints |
+| 6 | Controllable CoT | 🔴 NEEDS REDO | Must use corrected SAEs |
 
 **Note on Phase 2:** Synthetic Transformers phase was deferred in favor of phase progression from ground truth (Phase 1, unambiguous systems) → labeled reasoning (Phase 3, real chain-of-thought) → frontier models (Phase 4). This accelerates validation while maintaining the falsification framework's integrity.
 
@@ -125,16 +132,30 @@ RL-Decoder with SAE Features/
 
 ## Key Results & Findings
 
-### Phase 5.4: Reasoning Flow Architecture Comparison
+### Phase 3: Controlled CoT Probe Results (Valid, Feb 22 2026)
 
-| Model | Layers | Transfer Quality | Architecture Type |
-|-------|--------|------------------|-------------------|
-| **GPT2-medium** | 24 | 0.428 (highest) | **Universal** - features reused extensively |
-| **Gemma-2B** | 18 | 0.336 | **Balanced** - moderate reuse/specialization |
-| **Phi-2** | 32 | 0.039 | **Hierarchical** - stage-based transformations |
-| **Pythia-1.4B** | 24 | 0.046 | **Extreme specialization** - each layer unique |
+| Expansion | Accuracy | vs Baseline | Equation | Comparison | Reasoning |
+|-----------|----------|-------------|----------|------------|-----------|
+| 4x | 91.3% | −0.5pp | 83.3% | 0% | 0% |
+| 6x | 86.8% | −5.0pp | 97.0% | 0% | 0% |
+| 8x | 83.3% | −8.5pp | 34.4% | 0% | 62.6%* |
+| 10x | 87.3% | −4.5pp | 96.7% | 0% | 0% |
+| 12x | 90.5% | −1.3pp | 91.4% | 0% | 0% |
+| 14x | 86.1% | −5.7pp | 97.6% | 0% | 0% |
+| 16x | 90.9% | −0.9pp | 90.7% | 0% | 0% |
+| 18x | 91.2% | −0.6pp | 89.4% | 0% | 0% |
+| 20x | 88.8% | −3.0pp | 94.4% | 0% | 0% |
 
-**Insight:** GPT2 has 43 layer pairs with strong bi-directional transfer (>0.7), while Phi-2 and Pythia have ZERO - revealing completely different reasoning strategies despite similar downstream performance.
+*8x reasoning result is likely a probe local-minimum artifact, not a genuine signal.
+
+**Majority-class baseline: 91.8%** (sequences padded to 1024 tokens; most tokens are background "other")
+
+**Conclusion:** Single-layer probes detect arithmetic computation tokens but cannot decode multi-step reasoning structure. This motivates the multi-layer analysis approach.
+
+### Phase 5.4: Multilayer SAE Checkpoints (v2, valid training)
+- 98 SAEs across all layers of 4 models, trained with corrected SAE code
+- Transfer matrix analysis using these checkpoints is the correct next step
+- Previous transfer quality numbers (GPT2: 0.428, Phi-2: 0.039) were from broken v1 SAEs and should not be cited
 
 ---
 
@@ -156,21 +177,17 @@ RL-Decoder with SAE Features/
 
 ## Next Steps
 
-### Priority 1: Interactive Reasoning Tracker
-Build tool to visualize real-time feature activation as inputs propagate through network layers.
+### Priority 1: Retrain Phase 4 SAEs with corrected training
+Retrain single-layer SAEs for GPT-2-medium, Pythia-1.4B, Gemma-2B, Phi-2 using the fixed training loop (use_relu=True, normalize_decoder, correct decorrelation loss). These form the foundation for all downstream analysis.
 
-**Implementation:**
-1. Load input prompt (e.g., "What is 2+2?")
-2. Capture activations at all 98 layers
-3. Decode each layer with corresponding SAE
-4. Visualize which features activate per layer
-5. Show reasoning flow: early detection → intermediate processing → final answer
+### Priority 2: Re-run Phase 5.4 transfer matrix analysis using v2 checkpoints
+The 98 multilayer SAE checkpoints in `phase5_results/multilayer_transfer_v2/saes/` are valid. Re-run the transfer matrix computation and visualizations against these checkpoints to get reliable layer-universality data.
 
-### Priority 2: Cross-Model Reasoning Comparison
-For same input, compare which features activate in GPT2 (universal) vs Phi-2 (specialized) to understand different reasoning paths to the same answer.
+### Priority 3: Re-run Phase 5.1–5.3 with corrected SAEs
+Causal ablation, feature naming, and single-layer transfer analysis all need to be redone using the retrained Phase 4 SAEs.
 
-### Priority 3: Causal Intervention Studies
-Using transfer matrix insights, ablate features at hub layers (e.g., GPT2 layer 11) and measure downstream impact on reasoning capabilities.
+### Priority 4: Multi-layer CoT probe analysis
+Extend the Phase 3 probe approach across multiple layers using the v2 multilayer SAE checkpoints. Phase 3 showed that layer 6 alone is insufficient; probing multiple layers simultaneously may reveal where reasoning connectives are encoded.
 
 ---
 
@@ -218,4 +235,4 @@ For questions or issues:
 
 ---
 
-**Project Status:** Phase 5.4 COMPLETE ✅ | Ready for Phase 6 (Reasoning Tracking Implementation)
+**Project Status:** Phase 3 COMPLETE (mixed results) | Phase 4/5/6 needs redo with corrected SAE training

@@ -1,0 +1,211 @@
+[2026-02-22 21:44:17,730][INFO] Model filter 'gpt2-medium': 24/98 files
+[2026-02-22 21:44:17,730][INFO] Layer filter [8, 9, 10, 11, 12, 13, 14, 15]: 8/24 files
+[2026-02-22 21:44:17,730][INFO] Found 8 activation files
+[2026-02-22 21:44:17,730][INFO] Training SAEs on device cuda:0
+[2026-02-22 21:44:17,730][INFO] Output directory: phase5_results/multilayer_gpt2_12x/saes
+[2026-02-22 21:44:17,730][INFO] 
+======================================================================
+[2026-02-22 21:44:17,730][INFO] [1/8] Processing gpt2-medium_layer10_activations.pt
+[2026-02-22 21:44:17,730][INFO] ======================================================================
+[2026-02-22 21:44:17,730][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer10_activations.pt...
+[2026-02-22 21:44:17,735][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:44:17,742][INFO] Creating SAE for gpt2-medium layer 10 (input_dim=1024)
+[2026-02-22 21:44:17,743][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:44:20,576][INFO]   epoch  1/15: loss=7.290702, sparsity=50.0% [7%]
+[2026-02-22 21:44:21,687][INFO]   epoch  2/15: loss=1.230643, sparsity=50.4% [13%]
+[2026-02-22 21:44:22,815][INFO]   epoch  3/15: loss=0.409265, sparsity=50.7% [20%]
+[2026-02-22 21:44:23,966][INFO]   epoch  4/15: loss=0.150655, sparsity=50.9% [27%]
+[2026-02-22 21:44:25,094][INFO]   epoch  5/15: loss=0.064256, sparsity=51.0% [33%]
+[2026-02-22 21:44:26,229][INFO]   epoch  6/15: loss=0.030127, sparsity=51.0% [40%]
+[2026-02-22 21:44:27,360][INFO]   epoch  7/15: loss=0.015542, sparsity=51.0% [47%]
+[2026-02-22 21:44:28,496][INFO]   epoch  8/15: loss=0.008311, sparsity=51.0% [53%]
+[2026-02-22 21:44:29,625][INFO]   epoch  9/15: loss=0.004934, sparsity=51.0% [60%]
+[2026-02-22 21:44:30,740][INFO]   epoch 10/15: loss=0.002992, sparsity=51.0% [67%]
+[2026-02-22 21:44:31,832][INFO]   epoch 11/15: loss=0.001892, sparsity=51.0% [73%]
+[2026-02-22 21:44:32,959][INFO]   epoch 12/15: loss=0.001233, sparsity=51.0% [80%]
+[2026-02-22 21:44:34,064][INFO]   epoch 13/15: loss=0.000838, sparsity=51.0% [87%]
+[2026-02-22 21:44:35,174][INFO]   epoch 14/15: loss=0.000548, sparsity=51.0% [93%]
+[2026-02-22 21:44:36,306][INFO]   epoch 15/15: loss=0.000402, sparsity=51.0% [100%]
+[2026-02-22 21:44:36,454][INFO] Saved checkpoint to phase5_results/multilayer_gpt2_12x/saes/gpt2-medium_layer10_sae.pt
+[2026-02-22 21:44:36,454][INFO] ✓ Training complete for gpt2-medium layer 10
+[2026-02-22 21:44:36,454][INFO] 
+======================================================================
+[2026-02-22 21:44:36,455][INFO] [2/8] Processing gpt2-medium_layer11_activations.pt
+[2026-02-22 21:44:36,455][INFO] ======================================================================
+[2026-02-22 21:44:36,455][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer11_activations.pt...
+[2026-02-22 21:44:36,458][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:44:36,461][INFO] Creating SAE for gpt2-medium layer 11 (input_dim=1024)
+[2026-02-22 21:44:36,461][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:44:37,757][INFO]   epoch  1/15: loss=6.976122, sparsity=50.0% [7%]
+[2026-02-22 21:44:38,877][INFO]   epoch  2/15: loss=1.230465, sparsity=50.4% [13%]
+[2026-02-22 21:44:40,048][INFO]   epoch  3/15: loss=0.413367, sparsity=50.7% [20%]
+[2026-02-22 21:44:41,235][INFO]   epoch  4/15: loss=0.153350, sparsity=50.9% [27%]
+[2026-02-22 21:44:42,445][INFO]   epoch  5/15: loss=0.063522, sparsity=50.9% [33%]
+[2026-02-22 21:44:43,660][INFO]   epoch  6/15: loss=0.030402, sparsity=51.0% [40%]
+[2026-02-22 21:44:44,851][INFO]   epoch  7/15: loss=0.015036, sparsity=51.0% [47%]
+[2026-02-22 21:44:46,053][INFO]   epoch  8/15: loss=0.008084, sparsity=51.0% [53%]
+[2026-02-22 21:44:47,268][INFO]   epoch  9/15: loss=0.004577, sparsity=51.0% [60%]
+[2026-02-22 21:44:48,476][INFO]   epoch 10/15: loss=0.002828, sparsity=51.0% [67%]
+[2026-02-22 21:44:49,659][INFO]   epoch 11/15: loss=0.001878, sparsity=51.0% [73%]
+[2026-02-22 21:44:50,867][INFO]   epoch 12/15: loss=0.001157, sparsity=51.0% [80%]
+[2026-02-22 21:44:52,059][INFO]   epoch 13/15: loss=0.000801, sparsity=51.0% [87%]
+[2026-02-22 21:44:53,265][INFO]   epoch 14/15: loss=0.000583, sparsity=51.0% [93%]
+[2026-02-22 21:44:54,487][INFO]   epoch 15/15: loss=0.000388, sparsity=51.0% [100%]
+[2026-02-22 21:44:54,633][INFO] Saved checkpoint to phase5_results/multilayer_gpt2_12x/saes/gpt2-medium_layer11_sae.pt
+[2026-02-22 21:44:54,634][INFO] ✓ Training complete for gpt2-medium layer 11
+[2026-02-22 21:44:54,634][INFO] 
+======================================================================
+[2026-02-22 21:44:54,634][INFO] [3/8] Processing gpt2-medium_layer12_activations.pt
+[2026-02-22 21:44:54,634][INFO] ======================================================================
+[2026-02-22 21:44:54,634][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer12_activations.pt...
+[2026-02-22 21:44:54,638][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:44:54,640][INFO] Creating SAE for gpt2-medium layer 12 (input_dim=1024)
+[2026-02-22 21:44:54,640][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:44:56,026][INFO]   epoch  1/15: loss=7.179119, sparsity=50.1% [7%]
+[2026-02-22 21:44:57,227][INFO]   epoch  2/15: loss=1.239365, sparsity=50.4% [13%]
+[2026-02-22 21:44:58,457][INFO]   epoch  3/15: loss=0.425019, sparsity=50.7% [20%]
+[2026-02-22 21:44:59,695][INFO]   epoch  4/15: loss=0.157448, sparsity=50.9% [27%]
+[2026-02-22 21:45:00,901][INFO]   epoch  5/15: loss=0.067210, sparsity=50.9% [33%]
+[2026-02-22 21:45:02,120][INFO]   epoch  6/15: loss=0.030547, sparsity=51.0% [40%]
+[2026-02-22 21:45:03,338][INFO]   epoch  7/15: loss=0.015464, sparsity=51.0% [47%]
+[2026-02-22 21:45:04,535][INFO]   epoch  8/15: loss=0.008469, sparsity=51.0% [53%]
+[2026-02-22 21:45:05,762][INFO]   epoch  9/15: loss=0.005080, sparsity=51.0% [60%]
+[2026-02-22 21:45:06,965][INFO]   epoch 10/15: loss=0.003065, sparsity=51.0% [67%]
+[2026-02-22 21:45:08,150][INFO]   epoch 11/15: loss=0.001900, sparsity=51.0% [73%]
+[2026-02-22 21:45:09,351][INFO]   epoch 12/15: loss=0.001300, sparsity=51.0% [80%]
+[2026-02-22 21:45:10,557][INFO]   epoch 13/15: loss=0.000840, sparsity=51.0% [87%]
+[2026-02-22 21:45:11,755][INFO]   epoch 14/15: loss=0.000559, sparsity=51.0% [93%]
+[2026-02-22 21:45:12,952][INFO]   epoch 15/15: loss=0.000402, sparsity=51.0% [100%]
+[2026-02-22 21:45:13,101][INFO] Saved checkpoint to phase5_results/multilayer_gpt2_12x/saes/gpt2-medium_layer12_sae.pt
+[2026-02-22 21:45:13,102][INFO] ✓ Training complete for gpt2-medium layer 12
+[2026-02-22 21:45:13,102][INFO] 
+======================================================================
+[2026-02-22 21:45:13,102][INFO] [4/8] Processing gpt2-medium_layer13_activations.pt
+[2026-02-22 21:45:13,102][INFO] ======================================================================
+[2026-02-22 21:45:13,102][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer13_activations.pt...
+[2026-02-22 21:45:13,105][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:45:13,107][INFO] Creating SAE for gpt2-medium layer 13 (input_dim=1024)
+[2026-02-22 21:45:13,107][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:45:14,520][INFO]   epoch  1/15: loss=7.115148, sparsity=50.0% [7%]
+[2026-02-22 21:45:15,736][INFO]   epoch  2/15: loss=1.210137, sparsity=50.4% [13%]
+[2026-02-22 21:45:16,983][INFO]   epoch  3/15: loss=0.411011, sparsity=50.7% [20%]
+[2026-02-22 21:45:18,213][INFO]   epoch  4/15: loss=0.150556, sparsity=50.9% [27%]
+[2026-02-22 21:45:19,431][INFO]   epoch  5/15: loss=0.062843, sparsity=50.9% [33%]
+[2026-02-22 21:45:20,641][INFO]   epoch  6/15: loss=0.028893, sparsity=51.0% [40%]
+[2026-02-22 21:45:21,855][INFO]   epoch  7/15: loss=0.014533, sparsity=51.0% [47%]
+[2026-02-22 21:45:23,077][INFO]   epoch  8/15: loss=0.007679, sparsity=51.0% [53%]
+[2026-02-22 21:45:24,294][INFO]   epoch  9/15: loss=0.004447, sparsity=51.0% [60%]
+[2026-02-22 21:45:25,529][INFO]   epoch 10/15: loss=0.002809, sparsity=51.0% [67%]
+[2026-02-22 21:45:26,752][INFO]   epoch 11/15: loss=0.001752, sparsity=51.0% [73%]
+[2026-02-22 21:45:27,985][INFO]   epoch 12/15: loss=0.001106, sparsity=51.0% [80%]
+[2026-02-22 21:45:29,229][INFO]   epoch 13/15: loss=0.000751, sparsity=51.0% [87%]
+[2026-02-22 21:45:30,450][INFO]   epoch 14/15: loss=0.000562, sparsity=51.0% [93%]
+[2026-02-22 21:45:31,650][INFO]   epoch 15/15: loss=0.000410, sparsity=51.0% [100%]
+[2026-02-22 21:45:31,802][INFO] Saved checkpoint to phase5_results/multilayer_gpt2_12x/saes/gpt2-medium_layer13_sae.pt
+[2026-02-22 21:45:31,803][INFO] ✓ Training complete for gpt2-medium layer 13
+[2026-02-22 21:45:31,803][INFO] 
+======================================================================
+[2026-02-22 21:45:31,803][INFO] [5/8] Processing gpt2-medium_layer14_activations.pt
+[2026-02-22 21:45:31,803][INFO] ======================================================================
+[2026-02-22 21:45:31,803][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer14_activations.pt...
+[2026-02-22 21:45:31,806][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:45:31,808][INFO] Creating SAE for gpt2-medium layer 14 (input_dim=1024)
+[2026-02-22 21:45:31,808][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:45:33,213][INFO]   epoch  1/15: loss=7.174537, sparsity=50.0% [7%]
+[2026-02-22 21:45:34,428][INFO]   epoch  2/15: loss=1.191253, sparsity=50.4% [13%]
+[2026-02-22 21:45:35,648][INFO]   epoch  3/15: loss=0.403909, sparsity=50.7% [20%]
+[2026-02-22 21:45:36,890][INFO]   epoch  4/15: loss=0.152664, sparsity=50.8% [27%]
+[2026-02-22 21:45:38,116][INFO]   epoch  5/15: loss=0.062634, sparsity=50.9% [33%]
+[2026-02-22 21:45:39,357][INFO]   epoch  6/15: loss=0.028800, sparsity=51.0% [40%]
+[2026-02-22 21:45:40,593][INFO]   epoch  7/15: loss=0.014088, sparsity=51.0% [47%]
+[2026-02-22 21:45:41,821][INFO]   epoch  8/15: loss=0.007419, sparsity=51.0% [53%]
+[2026-02-22 21:45:43,068][INFO]   epoch  9/15: loss=0.004124, sparsity=51.0% [60%]
+[2026-02-22 21:45:44,293][INFO]   epoch 10/15: loss=0.002530, sparsity=51.0% [67%]
+[2026-02-22 21:45:45,526][INFO]   epoch 11/15: loss=0.001615, sparsity=51.0% [73%]
+[2026-02-22 21:45:46,764][INFO]   epoch 12/15: loss=0.001024, sparsity=51.0% [80%]
+[2026-02-22 21:45:48,010][INFO]   epoch 13/15: loss=0.000732, sparsity=51.0% [87%]
+[2026-02-22 21:45:49,203][INFO]   epoch 14/15: loss=0.000524, sparsity=51.0% [93%]
+[2026-02-22 21:45:50,394][INFO]   epoch 15/15: loss=0.000402, sparsity=50.9% [100%]
+[2026-02-22 21:45:50,541][INFO] Saved checkpoint to phase5_results/multilayer_gpt2_12x/saes/gpt2-medium_layer14_sae.pt
+[2026-02-22 21:45:50,542][INFO] ✓ Training complete for gpt2-medium layer 14
+[2026-02-22 21:45:50,542][INFO] 
+======================================================================
+[2026-02-22 21:45:50,542][INFO] [6/8] Processing gpt2-medium_layer15_activations.pt
+[2026-02-22 21:45:50,542][INFO] ======================================================================
+[2026-02-22 21:45:50,542][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer15_activations.pt...
+[2026-02-22 21:45:50,545][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:45:50,548][INFO] Creating SAE for gpt2-medium layer 15 (input_dim=1024)
+[2026-02-22 21:45:50,548][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:45:51,929][INFO]   epoch  1/15: loss=6.999524, sparsity=50.1% [7%]
+[2026-02-22 21:45:53,106][INFO]   epoch  2/15: loss=1.206408, sparsity=50.4% [13%]
+[2026-02-22 21:45:54,318][INFO]   epoch  3/15: loss=0.412886, sparsity=50.7% [20%]
+[2026-02-22 21:45:55,510][INFO]   epoch  4/15: loss=0.152191, sparsity=50.9% [27%]
+[2026-02-22 21:45:56,716][INFO]   epoch  5/15: loss=0.062853, sparsity=50.9% [33%]
+[2026-02-22 21:45:57,924][INFO]   epoch  6/15: loss=0.028623, sparsity=51.0% [40%]
+[2026-02-22 21:45:59,135][INFO]   epoch  7/15: loss=0.014362, sparsity=51.0% [47%]
+[2026-02-22 21:46:00,334][INFO]   epoch  8/15: loss=0.007655, sparsity=51.0% [53%]
+[2026-02-22 21:46:01,552][INFO]   epoch  9/15: loss=0.004308, sparsity=51.0% [60%]
+[2026-02-22 21:46:02,755][INFO]   epoch 10/15: loss=0.002613, sparsity=51.0% [67%]
+[2026-02-22 21:46:03,954][INFO]   epoch 11/15: loss=0.001827, sparsity=51.0% [73%]
+[2026-02-22 21:46:05,176][INFO]   epoch 12/15: loss=0.001219, sparsity=51.0% [80%]
+[2026-02-22 21:46:06,380][INFO]   epoch 13/15: loss=0.000830, sparsity=51.0% [87%]
+[2026-02-22 21:46:07,584][INFO]   epoch 14/15: loss=0.000559, sparsity=51.0% [93%]
+[2026-02-22 21:46:08,789][INFO]   epoch 15/15: loss=0.000410, sparsity=51.0% [100%]
+[2026-02-22 21:46:08,935][INFO] Saved checkpoint to phase5_results/multilayer_gpt2_12x/saes/gpt2-medium_layer15_sae.pt
+[2026-02-22 21:46:08,936][INFO] ✓ Training complete for gpt2-medium layer 15
+[2026-02-22 21:46:08,936][INFO] 
+======================================================================
+[2026-02-22 21:46:08,936][INFO] [7/8] Processing gpt2-medium_layer8_activations.pt
+[2026-02-22 21:46:08,936][INFO] ======================================================================
+[2026-02-22 21:46:08,936][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer8_activations.pt...
+[2026-02-22 21:46:08,938][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:46:08,941][INFO] Creating SAE for gpt2-medium layer 8 (input_dim=1024)
+[2026-02-22 21:46:08,941][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:46:10,315][INFO]   epoch  1/15: loss=6.983783, sparsity=50.0% [7%]
+[2026-02-22 21:46:11,518][INFO]   epoch  2/15: loss=1.201469, sparsity=50.4% [13%]
+[2026-02-22 21:46:12,712][INFO]   epoch  3/15: loss=0.399000, sparsity=50.7% [20%]
+[2026-02-22 21:46:13,895][INFO]   epoch  4/15: loss=0.150546, sparsity=50.9% [27%]
+[2026-02-22 21:46:15,102][INFO]   epoch  5/15: loss=0.065542, sparsity=51.0% [33%]
+[2026-02-22 21:46:16,292][INFO]   epoch  6/15: loss=0.032255, sparsity=51.0% [40%]
+[2026-02-22 21:46:17,492][INFO]   epoch  7/15: loss=0.017034, sparsity=51.0% [47%]
+[2026-02-22 21:46:18,690][INFO]   epoch  8/15: loss=0.009293, sparsity=51.0% [53%]
+[2026-02-22 21:46:19,887][INFO]   epoch  9/15: loss=0.005715, sparsity=51.0% [60%]
+[2026-02-22 21:46:21,072][INFO]   epoch 10/15: loss=0.003470, sparsity=51.0% [67%]
+[2026-02-22 21:46:22,294][INFO]   epoch 11/15: loss=0.002247, sparsity=51.0% [73%]
+[2026-02-22 21:46:23,492][INFO]   epoch 12/15: loss=0.001500, sparsity=51.0% [80%]
+[2026-02-22 21:46:24,687][INFO]   epoch 13/15: loss=0.001042, sparsity=51.0% [87%]
+[2026-02-22 21:46:25,894][INFO]   epoch 14/15: loss=0.000691, sparsity=51.0% [93%]
+[2026-02-22 21:46:27,088][INFO]   epoch 15/15: loss=0.000492, sparsity=51.0% [100%]
+[2026-02-22 21:46:27,236][INFO] Saved checkpoint to phase5_results/multilayer_gpt2_12x/saes/gpt2-medium_layer8_sae.pt
+[2026-02-22 21:46:27,236][INFO] ✓ Training complete for gpt2-medium layer 8
+[2026-02-22 21:46:27,236][INFO] 
+======================================================================
+[2026-02-22 21:46:27,236][INFO] [8/8] Processing gpt2-medium_layer9_activations.pt
+[2026-02-22 21:46:27,236][INFO] ======================================================================
+[2026-02-22 21:46:27,236][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer9_activations.pt...
+[2026-02-22 21:46:27,239][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:46:27,242][INFO] Creating SAE for gpt2-medium layer 9 (input_dim=1024)
+[2026-02-22 21:46:27,242][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:46:28,641][INFO]   epoch  1/15: loss=7.490802, sparsity=50.0% [7%]
+[2026-02-22 21:46:29,854][INFO]   epoch  2/15: loss=1.212145, sparsity=50.4% [13%]
+[2026-02-22 21:46:31,057][INFO]   epoch  3/15: loss=0.401580, sparsity=50.7% [20%]
+[2026-02-22 21:46:32,291][INFO]   epoch  4/15: loss=0.147965, sparsity=50.9% [27%]
+[2026-02-22 21:46:33,515][INFO]   epoch  5/15: loss=0.063429, sparsity=51.0% [33%]
+[2026-02-22 21:46:34,715][INFO]   epoch  6/15: loss=0.029964, sparsity=51.0% [40%]
+[2026-02-22 21:46:35,942][INFO]   epoch  7/15: loss=0.015353, sparsity=51.0% [47%]
+[2026-02-22 21:46:37,140][INFO]   epoch  8/15: loss=0.008507, sparsity=51.0% [53%]
+[2026-02-22 21:46:38,357][INFO]   epoch  9/15: loss=0.004903, sparsity=51.0% [60%]
+[2026-02-22 21:46:39,563][INFO]   epoch 10/15: loss=0.003136, sparsity=51.0% [67%]
+[2026-02-22 21:46:40,804][INFO]   epoch 11/15: loss=0.001879, sparsity=51.0% [73%]
+[2026-02-22 21:46:42,039][INFO]   epoch 12/15: loss=0.001216, sparsity=51.0% [80%]
+[2026-02-22 21:46:43,312][INFO]   epoch 13/15: loss=0.000873, sparsity=51.0% [87%]
+[2026-02-22 21:46:44,548][INFO]   epoch 14/15: loss=0.000565, sparsity=51.0% [93%]
+[2026-02-22 21:46:45,792][INFO]   epoch 15/15: loss=0.000373, sparsity=51.0% [100%]
+[2026-02-22 21:46:45,941][INFO] Saved checkpoint to phase5_results/multilayer_gpt2_12x/saes/gpt2-medium_layer9_sae.pt
+[2026-02-22 21:46:45,941][INFO] ✓ Training complete for gpt2-medium layer 9
+[2026-02-22 21:46:45,942][INFO] 
+======================================================================
+[2026-02-22 21:46:45,942][INFO] Training complete!
+[2026-02-22 21:46:45,942][INFO] Trained 8 SAEs
+[2026-02-22 21:46:45,942][INFO] Summary saved to phase5_results/multilayer_gpt2_12x/saes/training_summary.json
+[2026-02-22 21:46:45,942][INFO] ======================================================================

@@ -54,11 +54,19 @@ class Phase3Pipeline:
         if self.config.tokenizer_path:
             self.tokenizer = AutoTokenizer.from_pretrained(self.config.tokenizer_path)
         else:
-            # Infer from model registry
+            # The local model snapshot contains only weights (no tokenizer vocab files).
+            # Load from assets/tokenizers/<model_id> which holds the actual vocab.
             model_info = get_model(self.config.model_name)
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                str(model_info.hf_local_path), local_files_only=True
-            )
+            REPO_ROOT = Path(__file__).resolve().parents[1]
+            tokenizer_assets = REPO_ROOT / "assets" / "tokenizers" / model_info.model_id
+            if tokenizer_assets.exists():
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    str(tokenizer_assets), local_files_only=True
+                )
+            else:
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    str(model_info.hf_local_path), local_files_only=True
+                )
 
         # Load model (for future task evaluation)
         self.model = get_model(self.config.model_name)
@@ -92,11 +100,15 @@ class Phase3Pipeline:
 
         aligned_path = self.output_dir / "gsm8k_aligned_train.jsonl"
 
-        # If already exists, load
+        # If already exists, load — but validate step types are non-trivial first
         if aligned_path.exists():
-            print(f"  Loading cached alignments from {aligned_path}")
             examples = GSM8KAligner.load_aligned_dataset(aligned_path)
-            return examples
+            all_types = {s.step_type for ex in examples for s in ex.steps}
+            if all_types <= {"other"}:
+                print(f"  WARNING: cached alignments contain only 'other' steps — re-running alignment")
+            else:
+                print(f"  Loading cached alignments from {aligned_path} (step types: {sorted(all_types)})")
+                return examples
 
         # Otherwise, extract and align
         aligner = GSM8KAligner(
@@ -107,7 +119,7 @@ class Phase3Pipeline:
             max_step_length=self.config.max_step_length,
         )
 
-        examples = aligner.process_dataset(split="train", subsample=500)  # Subsample for efficiency
+        examples = aligner.process_dataset(split="train", subsample=None)  # Full dataset
         aligner.save_aligned_dataset(examples, aligned_path)
 
         return examples
@@ -155,8 +167,8 @@ class Phase3Pipeline:
                             seq_acts = acts[seq_idx]  # [seq_len, hidden_dim]
                             seq_acts = seq_acts.unsqueeze(0).to(self.config.device).float()  # [1, seq_len, hidden_dim]
                             
-                            # Extract SAE latents
-                            latents = sae.encoder(seq_acts)  # [1, seq_len, latent_dim]
+                            # Extract SAE latents (use encode() to apply ReLU, not raw encoder linear)
+                            latents = sae.encode(seq_acts)  # [1, seq_len, latent_dim]
                             
                             example_id = examples[example_idx].example_id
                             latents_dict[example_id] = latents.squeeze(0).cpu()  # [seq_len, latent_dim]
@@ -222,6 +234,14 @@ class Phase3Pipeline:
                 print(f"    Skipping {expansion}x: no training data")
                 continue
 
+            # Compute class weights from dataset if configured
+            class_weights = None
+            if self.config.probe_use_class_weights:
+                class_weights = dataset.class_weights
+                weight_info = {st: f"{class_weights[i]:.2f}" for i, st in enumerate(step_types)}
+                print(f"    Class weights: {weight_info}")
+                print(f"    Majority-class baseline: {dataset.majority_class_baseline:.3f}")
+
             # Split into train/val
             train_size = int(0.8 * len(dataset))
             val_size = len(dataset) - train_size
@@ -240,6 +260,7 @@ class Phase3Pipeline:
                 dropout=self.config.probe_dropout,
                 learning_rate=self.config.probe_learning_rate,
                 weight_decay=self.config.probe_weight_decay,
+                class_weights=class_weights,
                 device=self.config.device,
             )
 
@@ -258,6 +279,13 @@ class Phase3Pipeline:
                 "accuracy": trainer.validation_metrics.get("accuracy", 0.0),
                 "f1": trainer.validation_metrics.get("f1", 0.0),
                 "latent_dim": latent_dim,
+                "majority_class_baseline": dataset.majority_class_baseline,
+                "improvement_over_baseline": trainer.validation_metrics.get("accuracy", 0.0) - dataset.majority_class_baseline,
+                "per_class_accuracy": {
+                    st: trainer.validation_metrics.get(f"acc_{st}", None)
+                    for st in step_types
+                },
+                "class_weights_applied": self.config.probe_use_class_weights,
             }
 
         # Save summary
@@ -302,7 +330,7 @@ class Phase3Pipeline:
 
                     batch = batch.to(self.config.device).float()
                     with torch.no_grad():
-                        latents = sae.encoder(batch)
+                        latents = sae.encode(batch)  # use encode() to apply ReLU
 
                     test_activations_list.append(batch.cpu())
                     test_latents_list.append(latents.cpu())

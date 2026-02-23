@@ -164,14 +164,18 @@ class TokenAligner:
         Align step texts to token indices via character-to-token mapping.
         Returns aligned steps with token spans.
         """
-        # Build character offset to token index mapping
+        # Build character offset to token index mapping.
+        # Use convert_ids_to_tokens + convert_tokens_to_string to get correctly
+        # decoded pieces that round-trip back to the original text (handles BPE
+        # space prefixes like GPT-2's Ġ, which tok.decode([id]) does not).
         char_to_token = {}
         current_char = 0
-        for token_idx, token_id in enumerate(tokens):
-            token_text = self.tokenizer.decode([token_id])
-            for offset in range(len(token_text)):
+        pieces = self.tokenizer.convert_ids_to_tokens(tokens)
+        for token_idx, piece in enumerate(pieces):
+            piece_text = self.tokenizer.convert_tokens_to_string([piece])
+            for offset in range(len(piece_text)):
                 char_to_token[current_char + offset] = token_idx
-            current_char += len(token_text)
+            current_char += len(piece_text)
 
         aligned_steps = []
         step_id = 0

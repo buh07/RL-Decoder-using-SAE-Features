@@ -59,10 +59,10 @@ class Phase1SAETrainer:
         config = SAEConfig(
             input_dim=input_dim,
             expansion_factor=expansion_factor,
-            l1_penalty_coeff=1e-4,  # Reduced from 1e-3 to allow more features to activate
+            l1_penalty_coeff=1e-3,
             reconstruction_coeff=1.0,
-            decorrelation_coeff=0.01,  # Reduced to focus on reconstruction first
-            use_relu=False,  # Disable ReLU to allow negative activations
+            decorrelation_coeff=0.01,
+            use_relu=True,  # Required for L1 sparsity to work
         )
         
         # Initialize SAE
@@ -84,32 +84,24 @@ class Phase1SAETrainer:
             
             for batch in dataloader:
                 x = batch[0]
-                
-                # Forward pass
-                latents = sae.encode(x)
-                recon = sae.decode(latents)
-                
-                # Compute loss components
-                recon_loss = F.mse_loss(recon, x)
-                sparsity_loss = sae.config.l1_penalty_coeff * torch.mean(torch.abs(latents))
-                
-                # Decorrelation loss
-                W = sae.decoder.weight  # [input_dim, latent_dim]
-                gram = torch.matmul(W.T, W)  # [latent_dim, latent_dim]
-                decorr_loss = sae.config.decorrelation_coeff * (
-                    torch.sum(gram ** 2) - torch.trace(gram) ** 2
-                ) / (sae.config.latent_dim ** 2)
-                
-                loss = recon_loss + sparsity_loss + decorr_loss
-                
+
+                # Forward pass using SAE's own loss method (correct decorr formulation)
+                x_hat, latents = sae(x)
+                loss_components = sae.compute_loss_components(x, x_hat, latents)
+                loss = loss_components["total_loss_tensor"]
+
                 # Backward pass
                 optimizer.zero_grad()
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(sae.parameters(), 1.0)
                 optimizer.step()
+
+                # Periodically normalize decoder columns to prevent collapse
+                with torch.no_grad():
+                    sae.normalize_decoder()
                 
-                total_loss += loss.item()
-                total_recon += recon_loss.item()
+                total_loss += loss_components["total_loss"]
+                total_recon += loss_components["recon_loss"]
                 num_batches += 1
             
             avg_loss = total_loss / num_batches
@@ -204,42 +196,42 @@ class Phase1SAETrainer:
                 "scale_2x": [],
                 "random_replacement": [],
             }
-            
-            # Test 1: Add small epsilon to each latent dimension
-            for dim in range(0, baseline_latents.shape[1], max(1, baseline_latents.shape[1] // 20)):
+
+            # Sample up to 100 dims evenly across the latent space
+            latent_dim = baseline_latents.shape[1]
+            step = max(1, latent_dim // 100)
+            dims_to_test = list(range(0, latent_dim, step))
+
+            # Test 1: Add small epsilon to each sampled latent dimension
+            for dim in dims_to_test:
                 perturbed = baseline_latents.clone()
-                perturbed[:, dim] += 0.1  # small epsilon
-                
+                perturbed[:, dim] += 0.1
                 perturbed_recon = sae.decode(perturbed)
                 perturbed_error = F.mse_loss(perturbed_recon, test_batch).item()
-                error_change = perturbed_error - baseline_error
-                
-                perturbation_results["add_epsilon"].append(error_change)
-            
+                perturbation_results["add_epsilon"].append(perturbed_error - baseline_error)
+
             # Test 2: Scale latent dimension by 2x
-            for dim in range(0, baseline_latents.shape[1], max(1, baseline_latents.shape[1] // 20)):
+            for dim in dims_to_test:
                 perturbed = baseline_latents.clone()
                 perturbed[:, dim] *= 2.0
-                
                 perturbed_recon = sae.decode(perturbed)
                 perturbed_error = F.mse_loss(perturbed_recon, test_batch).item()
-                error_change = perturbed_error - baseline_error
-                
-                perturbation_results["scale_2x"].append(error_change)
-            
+                perturbation_results["scale_2x"].append(perturbed_error - baseline_error)
+
             # Test 3: Random replacement of latent
-            for dim in range(0, baseline_latents.shape[1], max(1, baseline_latents.shape[1] // 20)):
+            for dim in dims_to_test:
                 perturbed = baseline_latents.clone()
                 perturbed[:, dim] = torch.randn_like(perturbed[:, dim])
-                
                 perturbed_recon = sae.decode(perturbed)
                 perturbed_error = F.mse_loss(perturbed_recon, test_batch).item()
-                error_change = perturbed_error - baseline_error
-                
-                perturbation_results["random_replacement"].append(error_change)
+                perturbation_results["random_replacement"].append(perturbed_error - baseline_error)
         
         # Compute statistics
-        causal_stats = {}
+        causal_stats = {
+            "dims_tested": len(dims_to_test),
+            "total_dims": latent_dim,
+            "fraction_tested": len(dims_to_test) / latent_dim,
+        }
         for perturbation_type, changes in perturbation_results.items():
             changes = torch.tensor(changes)
             causal_stats[perturbation_type] = {
@@ -248,10 +240,11 @@ class Phase1SAETrainer:
                 "max_error_increase": changes.max().item(),
                 "percent_positive": (changes > 0).float().mean().item(),
             }
-            
+
             logger.info(f"  {perturbation_type}:")
             logger.info(f"    Mean error increase: {causal_stats[perturbation_type]['mean_error_increase']:.6f}")
             logger.info(f"    % dims increase error: {causal_stats[perturbation_type]['percent_positive']:.1%}")
+        logger.info(f"  (Tested {causal_stats['dims_tested']}/{latent_dim} dims)")
         
         return causal_stats
     
@@ -295,8 +288,8 @@ class Phase1SAETrainer:
                 train_data,
                 env_name,
                 expansion_factor=expansion,
-                num_epochs=15,
-                batch_size=32,
+                num_epochs=25,
+                batch_size=64,
                 learning_rate=1e-4,
             )
             
@@ -349,10 +342,11 @@ def main():
     }
     
     # Run selected environments
+    # Logic needs more data to avoid overfitting (deterministic trajectories, correlated states)
     environments = {
-        "bfs": BFSEnvironment(num_sequences=50, max_steps=50),
-        "stack": StackMachineEnvironment(num_sequences=50, max_steps=50),
-        "logic": LogicPuzzleEnvironment(num_sequences=50, max_steps=50),
+        "bfs": BFSEnvironment(num_sequences=500, max_steps=50),
+        "stack": StackMachineEnvironment(num_sequences=500, max_steps=50),
+        "logic": LogicPuzzleEnvironment(num_sequences=2000, max_steps=50),
     }
     
     envs_to_run = ["bfs", "stack", "logic"] if args.env == "all" else [args.env]

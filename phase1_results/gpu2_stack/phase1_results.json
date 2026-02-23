@@ -1,0 +1,130 @@
+{
+  "gpu_id": 0,
+  "environments": {
+    "stack": {
+      "environment": "stack",
+      "state_dim": 516,
+      "train_samples": 20000,
+      "test_samples": 5000,
+      "expansions": {
+        "4x": {
+          "training": {
+            "expansion": 4,
+            "epochs": 15,
+            "final_loss": 0.006360035208240152,
+            "best_recon_loss": 0.006262115679867565
+          },
+          "reconstruction": {
+            "mse": 0.010580685921013355,
+            "mae": 0.04660823196172714,
+            "r2_score": 0.9135043621063232,
+            "sparsity": 0.36831095814704895,
+            "mean_active_features": 1303.80615234375
+          },
+          "causal": {
+            "dims_tested": 104,
+            "total_dims": 2064,
+            "fraction_tested": 0.050387596899224806,
+            "add_epsilon": {
+              "mean_error_increase": 2.0368190234876238e-05,
+              "std_error_increase": 6.15915951129864e-06,
+              "max_error_increase": 3.848085179924965e-05,
+              "percent_positive": 1.0
+            },
+            "scale_2x": {
+              "mean_error_increase": 2.8706217563012615e-05,
+              "std_error_increase": 1.9604602130129933e-05,
+              "max_error_increase": 0.00013123918324708939,
+              "percent_positive": 1.0
+            },
+            "random_replacement": {
+              "mean_error_increase": 0.0019422187469899654,
+              "std_error_increase": 0.00013408307859208435,
+              "max_error_increase": 0.0023797275498509407,
+              "percent_positive": 1.0
+            }
+          },
+          "pass": false
+        },
+        "8x": {
+          "training": {
+            "expansion": 8,
+            "epochs": 15,
+            "final_loss": 0.013574449127539993,
+            "best_recon_loss": 0.013494065390527249
+          },
+          "reconstruction": {
+            "mse": 0.021769274026155472,
+            "mae": 0.06612274050712585,
+            "r2_score": 0.8220392465591431,
+            "sparsity": 0.5146601796150208,
+            "mean_active_features": 2003.4827880859375
+          },
+          "causal": {
+            "dims_tested": 101,
+            "total_dims": 4128,
+            "fraction_tested": 0.02446705426356589,
+            "add_epsilon": {
+              "mean_error_increase": 1.926818731590174e-05,
+              "std_error_increase": 1.3920865967520513e-05,
+              "max_error_increase": 5.106627941131592e-05,
+              "percent_positive": 0.9009901285171509
+            },
+            "scale_2x": {
+              "mean_error_increase": 2.3144204533309676e-05,
+              "std_error_increase": 1.6668185708113015e-05,
+              "max_error_increase": 6.933324038982391e-05,
+              "percent_positive": 0.9603960514068604
+            },
+            "random_replacement": {
+              "mean_error_increase": 0.0019706515595316887,
+              "std_error_increase": 0.00011726511729648337,
+              "max_error_increase": 0.0022894348949193954,
+              "percent_positive": 1.0
+            }
+          },
+          "pass": false
+        },
+        "12x": {
+          "training": {
+            "expansion": 12,
+            "epochs": 15,
+            "final_loss": 0.019959686380252244,
+            "best_recon_loss": 0.019876119916886092
+          },
+          "reconstruction": {
+            "mse": 0.03569541126489639,
+            "mae": 0.08398864418268204,
+            "r2_score": 0.7081950306892395,
+            "sparsity": 0.5474963784217834,
+            "mean_active_features": 2801.902099609375
+          },
+          "causal": {
+            "dims_tested": 102,
+            "total_dims": 6192,
+            "fraction_tested": 0.016472868217054265,
+            "add_epsilon": {
+              "mean_error_increase": 2.2490983610623516e-05,
+              "std_error_increase": 1.4319126421469264e-05,
+              "max_error_increase": 5.744677037000656e-05,
+              "percent_positive": 0.9607843160629272
+            },
+            "scale_2x": {
+              "mean_error_increase": 3.7924532080069184e-05,
+              "std_error_increase": 3.0833860364509746e-05,
+              "max_error_increase": 0.00017252285033464432,
+              "percent_positive": 0.9901960492134094
+            },
+            "random_replacement": {
+              "mean_error_increase": 0.00193695817142725,
+              "std_error_increase": 0.00011711141269188374,
+              "max_error_increase": 0.0022105686366558075,
+              "percent_positive": 1.0
+            }
+          },
+          "pass": false
+        }
+      }
+    }
+  }
+}

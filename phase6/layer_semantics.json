@@ -1,0 +1,30 @@
+{
+  "gpt2-medium": {
+    "0-3": "🟦 Input Tokenization - Converting text to token IDs and embedding lookups",
+    "4-7": "🟩 Basic Syntax Detection - Punctuation, grammar markers, simple patterns",
+    "8-11": "🟨 Semantic Composition - Word meanings in context, compositional semantics",
+    "12-15": "🟧 Reasoning Primitives - Arithmetic operations, logic gates, constraint encoding",
+    "16-19": "🟪 Higher-Order Reasoning - Planning, multi-step inference, abstraction",
+    "20-23": "🔴 Output Formulation - Response generation, token ordering, final encoding"
+  },
+  "phi-2": {
+    "0-5": "🟦 Input Processing - Token embedding and initial encoding",
+    "6-12": "🟩 Problem Decomposition - Breaking down reasoning into steps",
+    "13-20": "🟨 Intermediate Computation - Constraint application and intermediate reasoning",
+    "21-30": "🟪 Advanced Reasoning - Multi-step inference and verification",
+    "31": "🔴 Output Generation - Final token prediction"
+  },
+  "gemma-2b": {
+    "0-3": "🟦 Input Tokenization - Character and subword embeddings",
+    "4-8": "🟩 Initial Pattern Detection - Basic syntactic and semantic patterns",
+    "9-12": "🟨 Semantic Reasoning - Contextual meaning and word relationships",
+    "13-17": "🟧 Advanced Operations - Complex reasoning and constraint handling",
+    "18": "🔴 Output Generation - Response formulation"
+  },
+  "pythia-1.4b": {
+    "0-5": "🟦 Input Processing - Token embedding and position encoding",
+    "6-12": "🟩 Early Reasoning - Initial reasoning operations",
+    "13-18": "🟨 Mid-Level Computation - Main reasoning and computation",
+    "19-24": "🟧 Advanced Processing - Final reasoning stages and output preparation"
+  }
+}

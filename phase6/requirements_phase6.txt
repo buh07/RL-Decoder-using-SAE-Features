@@ -1,0 +1,19 @@
+# Phase 6: Interactive Reasoning Tracker - Jupyter Notebook Requirements
+
+# Core dependencies
+torch>=2.0.0
+transformers>=4.37.0
+accelerate>=0.27.0
+numpy>=1.24.0
+
+# Jupyter environment
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+ipython>=8.0.0
+
+# Visualization
+matplotlib>=3.7.0
+
+# Development (optional)
+ipython>=8.0.0
+jupyter>=1.0.0

@@ -72,6 +72,7 @@ def _get_sae_config_for_layer(
     model_name: str,
     layer_idx: int,
     input_dim: int,
+    _override_expansion_factor: Optional[int] = None,
 ) -> SAEConfig:
     """
     Get SAE configuration tuned for specific layer.
@@ -88,6 +89,11 @@ def _get_sae_config_for_layer(
     if model_name not in base_params:
         logger.warning(f"Unknown model {model_name}, using default config")
         base_params[model_name] = {"input_dim": input_dim, "expansion_factor": 8, "learning_rate": 1e-4}
+
+    # Allow caller to override expansion factor (e.g. 12x from Phase 3 optimal)
+    if _override_expansion_factor is not None:
+        base_params[model_name] = dict(base_params[model_name])
+        base_params[model_name]["expansion_factor"] = _override_expansion_factor
 
     params = base_params[model_name]
 
@@ -110,7 +116,8 @@ def _get_sae_config_for_layer(
         max_epochs=10,
         l1_penalty_coeff=l1_coeff,
         decorrelation_coeff=0.01,
-        use_relu=False,
+        use_relu=True,   # Required for L1 sparsity; was incorrectly False
+        use_amp=False,   # AMP off to avoid loss-scaling confusion in manual loop
     )
 
     return config
@@ -124,6 +131,7 @@ def train_sae_on_layer(
     epochs: int,
     batch_size: int,
     output_path: Optional[Path] = None,
+    expansion_factor: Optional[int] = None,
 ) -> Tuple[SparseAutoencoder, Dict[str, float]]:
     """
     Train SAE on activations from a specific layer.
@@ -136,12 +144,14 @@ def train_sae_on_layer(
         epochs: Number of training epochs
         batch_size: Batch size for training
         output_path: Optional path to save checkpoint
+        expansion_factor: Override expansion factor (default from model config)
 
     Returns:
         Tuple of (trained SAE, summary dict)
     """
     input_dim = activations.shape[-1]
-    config = _get_sae_config_for_layer(model_name, layer_idx, input_dim)
+    config = _get_sae_config_for_layer(model_name, layer_idx, input_dim,
+                                        _override_expansion_factor=expansion_factor)
 
     logger.info(f"Creating SAE for {model_name} layer {layer_idx} (input_dim={input_dim})")
     logger.info(f"  Config: expansion={config.expansion_factor}x, L1={config.l1_penalty_coeff:.2e}")
@@ -168,11 +178,15 @@ def train_sae_on_layer(
             torch.nn.utils.clip_grad_norm_(sae.parameters(), 1.0)
             optimizer.step()
 
+            # Periodically normalize decoder columns to prevent collapse
+            with torch.no_grad():
+                sae.normalize_decoder()
+
             epoch_losses.append(float(loss.detach().cpu()))
 
-            # Compute sparsity
+            # Compute sparsity (fraction of zero/inactive latents)
             with torch.no_grad():
-                sparsity = float((h > 0).float().mean())
+                sparsity = float((h == 0).float().mean())
                 epoch_sparsities.append(sparsity)
 
         avg_loss = float(np.mean(epoch_losses)) if epoch_losses else 0.0
@@ -264,6 +278,25 @@ def main():
         action="store_true",
         help="Verbose logging",
     )
+    parser.add_argument(
+        "--expansion-factor",
+        type=int,
+        default=None,
+        help="Override SAE expansion factor (e.g. 12 for 12x; default uses per-model config of 8x)",
+    )
+    parser.add_argument(
+        "--model-filter",
+        type=str,
+        default=None,
+        help="Only train SAEs for activation files whose name starts with this model name (e.g. gpt2-medium)",
+    )
+    parser.add_argument(
+        "--layers",
+        type=int,
+        nargs="+",
+        default=None,
+        help="Only train SAEs for these layer indices (e.g. --layers 0 1 2 3 4 5 6 7)",
+    )
 
     args = parser.parse_args()
 
@@ -272,10 +305,33 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Find all activation files
-    activation_files = sorted(activations_dir.glob("*_activations.pt"))
+    all_activation_files = sorted(activations_dir.glob("*_activations.pt"))
+
+    # Apply model filter
+    if args.model_filter:
+        activation_files = [f for f in all_activation_files if f.name.startswith(args.model_filter)]
+        logger.info(f"Model filter '{args.model_filter}': {len(activation_files)}/{len(all_activation_files)} files")
+    else:
+        activation_files = all_activation_files
     if not activation_files:
         logger.error(f"No activation files found in {activations_dir}")
         return
+
+    # Apply layer filter
+    if args.layers is not None:
+        layer_set = set(args.layers)
+        filtered = []
+        for f in activation_files:
+            # Parse layer index from filename
+            try:
+                layer_part = [p for p in f.stem.split("_") if p.startswith("layer")][0]
+                lidx = int(layer_part[5:])
+                if lidx in layer_set:
+                    filtered.append(f)
+            except (IndexError, ValueError):
+                pass
+        logger.info(f"Layer filter {sorted(args.layers)}: {len(filtered)}/{len(activation_files)} files")
+        activation_files = filtered
 
     logger.info(f"Found {len(activation_files)} activation files")
     logger.info(f"Training SAEs on device {args.device}")
@@ -332,6 +388,7 @@ def main():
                 epochs=args.epochs,
                 batch_size=args.batch_size,
                 output_path=output_path,
+                expansion_factor=args.expansion_factor,
             )
 
             results.append(summary)

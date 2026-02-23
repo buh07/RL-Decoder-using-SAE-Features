@@ -1,0 +1,195 @@
+[2026-02-22 21:34:07,788][INFO] Model filter 'gpt2-medium': 24/98 files
+[2026-02-22 21:34:07,788][INFO] Layer filter [8, 9, 10, 11, 12, 13, 14, 15]: 8/24 files
+[2026-02-22 21:34:07,788][INFO] Found 8 activation files
+[2026-02-22 21:34:07,788][INFO] Training SAEs on device cuda:0
+[2026-02-22 21:34:07,788][INFO] Output directory: phase5_results/multilayer_gpt2_12x/saes
+[2026-02-22 21:34:07,788][INFO] 
+======================================================================
+[2026-02-22 21:34:07,788][INFO] [1/8] Processing gpt2-medium_layer10_activations.pt
+[2026-02-22 21:34:07,788][INFO] ======================================================================
+[2026-02-22 21:34:07,788][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer10_activations.pt...
+[2026-02-22 21:34:07,795][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:34:07,802][INFO] Creating SAE for gpt2-medium layer 10 (input_dim=1024)
+[2026-02-22 21:34:07,802][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:34:09,871][ERROR] Failed to train SAE: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 383, in main
+    sae, summary = train_sae_on_layer(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 177, in train_sae_on_layer
+    loss.backward()
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/_tensor.py", line 630, in backward
+    torch.autograd.backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/__init__.py", line 364, in backward
+    _engine_run_backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/graph.py", line 865, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[2026-02-22 21:34:09,874][INFO] 
+======================================================================
+[2026-02-22 21:34:09,874][INFO] [2/8] Processing gpt2-medium_layer11_activations.pt
+[2026-02-22 21:34:09,874][INFO] ======================================================================
+[2026-02-22 21:34:09,874][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer11_activations.pt...
+[2026-02-22 21:34:09,879][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:34:09,885][INFO] Creating SAE for gpt2-medium layer 11 (input_dim=1024)
+[2026-02-22 21:34:09,885][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:34:10,097][ERROR] Failed to train SAE: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 383, in main
+    sae, summary = train_sae_on_layer(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 177, in train_sae_on_layer
+    loss.backward()
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/_tensor.py", line 630, in backward
+    torch.autograd.backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/__init__.py", line 364, in backward
+    _engine_run_backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/graph.py", line 865, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[2026-02-22 21:34:10,098][INFO] 
+======================================================================
+[2026-02-22 21:34:10,098][INFO] [3/8] Processing gpt2-medium_layer12_activations.pt
+[2026-02-22 21:34:10,098][INFO] ======================================================================
+[2026-02-22 21:34:10,098][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer12_activations.pt...
+[2026-02-22 21:34:10,102][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:34:10,104][INFO] Creating SAE for gpt2-medium layer 12 (input_dim=1024)
+[2026-02-22 21:34:10,104][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:34:10,333][ERROR] Failed to train SAE: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 383, in main
+    sae, summary = train_sae_on_layer(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 177, in train_sae_on_layer
+    loss.backward()
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/_tensor.py", line 630, in backward
+    torch.autograd.backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/__init__.py", line 364, in backward
+    _engine_run_backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/graph.py", line 865, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[2026-02-22 21:34:10,334][INFO] 
+======================================================================
+[2026-02-22 21:34:10,334][INFO] [4/8] Processing gpt2-medium_layer13_activations.pt
+[2026-02-22 21:34:10,334][INFO] ======================================================================
+[2026-02-22 21:34:10,334][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer13_activations.pt...
+[2026-02-22 21:34:10,338][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:34:10,341][INFO] Creating SAE for gpt2-medium layer 13 (input_dim=1024)
+[2026-02-22 21:34:10,341][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:34:10,576][ERROR] Failed to train SAE: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 383, in main
+    sae, summary = train_sae_on_layer(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 177, in train_sae_on_layer
+    loss.backward()
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/_tensor.py", line 630, in backward
+    torch.autograd.backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/__init__.py", line 364, in backward
+    _engine_run_backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/graph.py", line 865, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[2026-02-22 21:34:10,576][INFO] 
+======================================================================
+[2026-02-22 21:34:10,576][INFO] [5/8] Processing gpt2-medium_layer14_activations.pt
+[2026-02-22 21:34:10,576][INFO] ======================================================================
+[2026-02-22 21:34:10,576][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer14_activations.pt...
+[2026-02-22 21:34:10,581][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:34:10,583][INFO] Creating SAE for gpt2-medium layer 14 (input_dim=1024)
+[2026-02-22 21:34:10,583][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:34:10,819][ERROR] Failed to train SAE: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 383, in main
+    sae, summary = train_sae_on_layer(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 177, in train_sae_on_layer
+    loss.backward()
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/_tensor.py", line 630, in backward
+    torch.autograd.backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/__init__.py", line 364, in backward
+    _engine_run_backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/graph.py", line 865, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[2026-02-22 21:34:10,819][INFO] 
+======================================================================
+[2026-02-22 21:34:10,819][INFO] [6/8] Processing gpt2-medium_layer15_activations.pt
+[2026-02-22 21:34:10,819][INFO] ======================================================================
+[2026-02-22 21:34:10,819][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer15_activations.pt...
+[2026-02-22 21:34:10,824][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:34:10,826][INFO] Creating SAE for gpt2-medium layer 15 (input_dim=1024)
+[2026-02-22 21:34:10,826][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:34:11,059][ERROR] Failed to train SAE: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 383, in main
+    sae, summary = train_sae_on_layer(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 177, in train_sae_on_layer
+    loss.backward()
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/_tensor.py", line 630, in backward
+    torch.autograd.backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/__init__.py", line 364, in backward
+    _engine_run_backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/graph.py", line 865, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[2026-02-22 21:34:11,059][INFO] 
+======================================================================
+[2026-02-22 21:34:11,059][INFO] [7/8] Processing gpt2-medium_layer8_activations.pt
+[2026-02-22 21:34:11,059][INFO] ======================================================================
+[2026-02-22 21:34:11,059][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer8_activations.pt...
+[2026-02-22 21:34:11,063][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:34:11,066][INFO] Creating SAE for gpt2-medium layer 8 (input_dim=1024)
+[2026-02-22 21:34:11,066][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:34:11,280][ERROR] Failed to train SAE: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 383, in main
+    sae, summary = train_sae_on_layer(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 177, in train_sae_on_layer
+    loss.backward()
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/_tensor.py", line 630, in backward
+    torch.autograd.backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/__init__.py", line 364, in backward
+    _engine_run_backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/graph.py", line 865, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[2026-02-22 21:34:11,281][INFO] 
+======================================================================
+[2026-02-22 21:34:11,281][INFO] [8/8] Processing gpt2-medium_layer9_activations.pt
+[2026-02-22 21:34:11,281][INFO] ======================================================================
+[2026-02-22 21:34:11,281][INFO] Loading activations from phase4_results/activations_multilayer/gpt2-medium_layer9_activations.pt...
+[2026-02-22 21:34:11,286][INFO] Loaded 1,045 activations of dim 1024
+[2026-02-22 21:34:11,288][INFO] Creating SAE for gpt2-medium layer 9 (input_dim=1024)
+[2026-02-22 21:34:11,288][INFO]   Config: expansion=12x, L1=1.00e-04
+[2026-02-22 21:34:11,519][ERROR] Failed to train SAE: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 383, in main
+    sae, summary = train_sae_on_layer(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/phase5/phase5_task4_train_multilayer_saes.py", line 177, in train_sae_on_layer
+    loss.backward()
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/_tensor.py", line 630, in backward
+    torch.autograd.backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/__init__.py", line 364, in backward
+    _engine_run_backward(
+  File "/scratch2/f004ndc/RL-Decoder with SAE Features/.venv/lib/python3.12/site-packages/torch/autograd/graph.py", line 865, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 576.00 MiB. GPU 0 has a total capacity of 47.38 GiB of which 429.38 MiB is free. Process 449188 has 44.56 GiB memory in use. Including non-PyTorch memory, this process has 2.39 GiB memory in use. Of the allocated memory 1.84 GiB is allocated by PyTorch, and 57.23 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[2026-02-22 21:34:11,520][INFO] 
+======================================================================
+[2026-02-22 21:34:11,520][INFO] Training complete!
+[2026-02-22 21:34:11,520][INFO] Trained 0 SAEs
+[2026-02-22 21:34:11,520][INFO] Summary saved to phase5_results/multilayer_gpt2_12x/saes/training_summary.json
+[2026-02-22 21:34:11,520][INFO] ======================================================================

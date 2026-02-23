@@ -6,6 +6,7 @@ Supports linear and nonlinear probes with leakage detection.
 from __future__ import annotations
 
 import json
+from collections import Counter
 from pathlib import Path
 from typing import Optional
 
@@ -103,6 +104,16 @@ class ProbeDataset(Dataset):
         self.token_latents = torch.stack(self.token_latents)
         self.token_labels = torch.stack(self.token_labels)
 
+        # Compute inverse-frequency class weights for use in weighted loss
+        label_counts = Counter(self.token_labels.tolist())
+        total = sum(label_counts.values())
+        num_classes = len(step_type_to_id)
+        self.class_weights = torch.tensor([
+            total / (num_classes * max(label_counts.get(i, 1), 1))
+            for i in range(num_classes)
+        ], dtype=torch.float32)
+        self.majority_class_baseline = max(label_counts.values()) / total if label_counts else 0.0
+
     def __len__(self):
         return len(self.token_labels)
 
@@ -121,6 +132,7 @@ class ProbeTrainer:
         dropout: float = 0.1,
         learning_rate: float = 1e-3,
         weight_decay: float = 1e-5,
+        class_weights: Optional[torch.Tensor] = None,
         device: str = "cuda:0",
     ):
         self.latent_dim = latent_dim
@@ -131,6 +143,7 @@ class ProbeTrainer:
         self.dropout = dropout
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
+        self.class_weights_tensor = class_weights
         self.device = device
 
         # Create probe
@@ -142,7 +155,10 @@ class ProbeTrainer:
         ).to(device)
 
         self.optimizer = Adam(self.probe.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        self.criterion = nn.CrossEntropyLoss()
+        if class_weights is not None:
+            self.criterion = nn.CrossEntropyLoss(weight=class_weights.to(device))
+        else:
+            self.criterion = nn.CrossEntropyLoss()
 
         self.training_losses = []
         self.validation_metrics = {}
@@ -246,6 +262,7 @@ class ProbeTrainer:
                 "hidden_dim": self.hidden_dim,
                 "training_losses": self.training_losses,
                 "validation_metrics": self.validation_metrics,
+                "class_weights": self.class_weights_tensor,
             },
             path,
         )

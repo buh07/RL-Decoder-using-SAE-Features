@@ -133,29 +133,31 @@ class StackMachineEnvironment:
     def encode_state(self, operation: str, stack: List[int]) -> np.ndarray:
         """Encode stack machine state to exact latent vector."""
         state = np.zeros(self.state_dim, dtype=np.float32)
-        
+
         # Operation (one-hot, first 4 dims)
         op_to_idx = {"push": 0, "pop": 1, "peek": 2, "idle": 3}
         state[op_to_idx[operation]] = 1.0
-        
-        # Stack encoding (next 512 dims; position-based + magnitude)
-        for pos, value in enumerate(stack[:256]):  # Cap at 256 for encoding
-            # Encode as sin/cos pair for periodicity
-            state[4 + 2*pos] = np.sin(2 * np.pi * value / 256)
-            state[4 + 2*pos + 1] = np.cos(2 * np.pi * value / 256)
-        
+
+        # Stack encoding (next 512 dims; position-based + normalized value)
+        # Use normalized direct encoding: each position gets value/255 in slot [4 + pos]
+        # and presence indicator (1.0) in slot [4 + 256 + pos].
+        # This is injective: (presence=0, value=0) vs (presence=1, value=0) are distinct.
+        for pos, value in enumerate(stack[:256]):  # Cap at 256 positions
+            state[4 + pos] = value / 255.0          # normalized value
+            state[4 + 256 + pos] = 1.0              # presence bit
+
         return state
-    
+
     def generate_trajectory(self, seed: int = 0) -> List[ExactState]:
         """Generate one complete stack machine trajectory."""
         np.random.seed(seed)
         trajectory = []
         stack = []
-        
+
         operations_sequence = np.random.choice(
-            ["push", "push", "pop", "peek"],  # Bias toward push to keep stack growing
+            ["push", "pop", "peek"],
             size=self.max_steps,
-            p=[0.4, 0.2, 0.2, 0.2]
+            p=[0.6, 0.2, 0.2]
         )
         
         for step, op in enumerate(operations_sequence):
@@ -207,29 +209,50 @@ class LogicPuzzleEnvironment:
         self.max_steps = max_steps
         self.state_dim = 512 + 128  # grid encoding + constraint satisfaction
         
+    def _compute_constraints(self, grid: np.ndarray) -> List[bool]:
+        """Compute row/col/box constraint satisfaction deterministically from grid."""
+        constraints = []
+        n = self.grid_size
+        # 9 rows: satisfied if all filled cells in the row have no duplicates
+        for r in range(n):
+            row_vals = grid[r, grid[r] != 0]
+            constraints.append(len(row_vals) == len(set(row_vals.tolist())))
+        # 9 cols
+        for c in range(n):
+            col_vals = grid[grid[:, c] != 0, c]
+            constraints.append(len(col_vals) == len(set(col_vals.tolist())))
+        # 9 boxes (3x3 sub-grids for a 9x9 grid)
+        box_size = 3
+        for br in range(box_size):
+            for bc in range(box_size):
+                box = grid[br*box_size:(br+1)*box_size, bc*box_size:(bc+1)*box_size].flatten()
+                box_vals = box[box != 0]
+                constraints.append(len(box_vals) == len(set(box_vals.tolist())))
+        return constraints  # 27 booleans
+
     def encode_state(self, grid: np.ndarray, constraints_satisfied: List[bool]) -> np.ndarray:
         """Encode logic puzzle state to exact latent vector."""
         state = np.zeros(self.state_dim, dtype=np.float32)
-        
-        # Grid encoding (first 512 dims)
-        flat_grid = grid.flatten()[:81]  # 9x9 grid = 81 cells
+
+        # Grid encoding: first 81*2=162 dims (sin/cos per cell, no aliasing via %)
+        flat_grid = grid.flatten()  # 9x9 = 81 cells
         for i, val in enumerate(flat_grid):
-            # Encode cell value as sine/cosine pair
-            angle = 2 * np.pi * val / 9
-            state[2*i % 512] = np.sin(angle)
-            state[(2*i + 1) % 512] = np.cos(angle)
-        
-        # Constraints satisfied (bitmask, next 128 dims)
+            angle = 2 * np.pi * val / self.grid_size
+            state[2 * i] = np.sin(angle)
+            state[2 * i + 1] = np.cos(angle)
+        # Remaining dims 162..511 left as zero (padding to 512)
+
+        # Constraints satisfied (bitmask, next 128 dims; 27 real constraints)
         for idx, satisfied in enumerate(constraints_satisfied[:128]):
             state[512 + idx] = float(satisfied)
-        
+
         return state
-    
+
     def generate_trajectory(self, puzzle_id: int = 0) -> List[ExactState]:
         """Generate one complete logic puzzle solving trajectory."""
         np.random.seed(puzzle_id)
         trajectory = []
-        
+
         # Initialize partially filled grid
         grid = np.zeros((self.grid_size, self.grid_size), dtype=np.int32)
         # Fill in some random clues
@@ -238,29 +261,26 @@ class LogicPuzzleEnvironment:
         for pos in clue_positions:
             r, c = pos // self.grid_size, pos % self.grid_size
             grid[r, c] = np.random.randint(1, self.grid_size + 1)
-        
-        constraints_satisfied = [False] * 27  # 9 rows + 9 cols + 9 boxes
-        
+
         for step in range(self.max_steps):
             # Randomly fill one empty cell if possible
             empty_cells = np.argwhere(grid == 0)
             if len(empty_cells) > 0:
                 r, c = empty_cells[np.random.randint(len(empty_cells))]
                 grid[r, c] = np.random.randint(1, self.grid_size + 1)
-                
-                # Update some constraint satisfaction status
-                constraints_satisfied[r] = np.random.random() > 0.3
-                constraints_satisfied[9 + c] = np.random.random() > 0.3
-            
+
+            # Compute constraints deterministically from current grid
+            constraints_satisfied = self._compute_constraints(grid)
+
             state_vec = self.encode_state(grid, constraints_satisfied)
-            
+
             trajectory.append(ExactState(
                 step=step,
                 state_vector=state_vec,
                 action="fill_cell",
                 metadata={"empty_cells": len(np.argwhere(grid == 0)), "constraints_met": sum(constraints_satisfied)}
             ))
-        
+
         return trajectory
     
     def generate_dataset(self) -> Tuple[np.ndarray, List[Dict]]:

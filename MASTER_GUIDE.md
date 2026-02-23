@@ -4,12 +4,24 @@
 
 ---
 
+## ⚠️ IMPORTANT — Read Before Citing Any Results
+
+**Phase 4, 5.1, 5.2, 5.3, and 6 results are INVALID** due to SAE training bugs present in the original runs:
+- `SAEConfig` defaulted to `use_relu=False` → L1 sparsity never engaged → features are not sparse
+- `normalize_decoder()` was never called → decoder columns grew unbounded
+- Decorrelation loss formula was incorrect → loss could go negative
+
+The claimed 31.7% sparsity, 0.995–1.000 transfer ratios, Phi-2 r=0.754, and all feature descriptions are artifacts of broken training. These phases need to be re-run.
+
+**Phase 5.4 multilayer SAE checkpoints** (`phase5_results/multilayer_transfer_v2/`) were retrained with the bugs fixed and are valid for use.
+
 ## 🚀 Quick Start (5 minutes)
 
-1. **Understand what we did:** Read [PROJECT_STATUS.md](PROJECT_STATUS.md)
-2. **See the latest results:** Check [Phase 5.4 Analysis](docs/PHASE5_TASK4_ANALYSIS_REPORT.md)
-3. **Set up locally:** Run `./setup_env.sh && source .venv/bin/activate`
-4. **Want to contribute?** Check [TODO.md](TODO.md) for active tasks
+1. **Understand current status:** Read [PROJECT_STATUS.md](PROJECT_STATUS.md)
+2. **See Phase 3 results (valid):** Check `phase3_results/full_scale_v4/`
+3. **See valid SAE checkpoints:** `phase5_results/multilayer_transfer_v2/saes/`
+4. **Set up locally:** Run `./setup_env.sh && source .venv/bin/activate`
+5. **See what needs to be done:** Check [TODO.md](TODO.md)
 
 ---
 
@@ -93,16 +105,24 @@ Interactive Reasoning Tracker (NEXT: To be built)
 
 ---
 
-## 🔬 Key Findings (Phase 5.4)
+## 🔬 Key Findings
 
-| Model | Transfer Quality | Architecture |
-|-------|-----------------|--------------|
-| **GPT2-medium** | 0.428 | **Universal** - features reused extensively |
-| **Gemma-2B** | 0.336 | **Balanced** - moderate specialization |
-| **Phi-2** | 0.039 | **Hierarchical** - stage-based transformations |
-| **Pythia-1.4B** | 0.046 | **Extreme specialization** - each layer unique |
+### Phase 1 (Valid)
+- BFS, Stack Machine, Logic Puzzle SAEs: R²=0.967–0.999 across all expansions
+- Confirmed SAE framework works on ground-truth synthetic systems
 
-**Why it matters:** Different models use fundamentally different reasoning strategies despite similar downstream performance. This reveals that there's no "one way" to solve reasoning tasks.
+### Phase 3 (Valid, Feb 22 2026)
+- **Equation tokens**: detectable at layer 6 (83–97% per-class accuracy)
+- **Reasoning connectives**: not detectable at layer 6 (0% per-class)
+- **Conclusion**: Multi-step reasoning is not linearly encoded in any single layer → motivates Phase 5.4 multi-layer approach
+
+### Phase 5.4 (SAE checkpoints valid; transfer analysis pending re-run)
+- 98 SAEs retrained with corrected training across all layers of 4 models
+- Transfer matrix analysis needs to be re-run against v2 checkpoints
+- Previous transfer quality numbers (GPT2: 0.428, etc.) were from broken SAEs — do not cite
+
+### Phase 4/5.1/5.2/5.3 (INVALID — needs redo)
+- All results based on SAEs with no L1 sparsity (use_relu=False bug)
 
 ---
 
@@ -153,36 +173,22 @@ RL-Decoder with SAE Features/
 
 ---
 
-## 🎯 Current Phase: Phase 5.4 COMPLETE ✅
+## 🎯 Current Phase: Re-run Phase 4 with corrected SAE training
 
-### What We Did
-1. ✅ Captured activations from ALL 98 layers across 4 models
-2. ✅ Fixed layer detection to work with any transformer architecture
-3. ✅ Trained 98 SAEs (one per layer) with 8x expansion
-4. ✅ Computed transfer matrices showing layer-to-layer feature transfer
-5. ✅ Generated visualizations revealing reasoning patterns
-6. ✅ Created comprehensive analysis report
+### What Was Done (Phase 3, valid)
+1. ✅ Re-ran Phase 3 probes with corrected GSM8K regex patterns and class-weighted loss
+2. ✅ Evaluated all 9 expansion factors (4x–20x) on GPT-2 small, layer 6
+3. ✅ Confirmed equation detection works; reasoning/comparison detection fails at single layer
 
-### Key Outputs
-- **SAE Checkpoints:** `phase5_results/multilayer_transfer/saes/`
-- **Analysis Data:** `phase5_results/multilayer_transfer/reasoning_flow/reasoning_flow_analysis.json`
-- **Visualizations:** `phase5_results/multilayer_transfer/reasoning_flow/visualizations/` (13 files)
-- **Report:** [docs/PHASE5_TASK4_ANALYSIS_REPORT.md](docs/PHASE5_TASK4_ANALYSIS_REPORT.md)
+### What Needs to be Done Next
+1. 🔴 Retrain Phase 4 SAEs (GPT-2-medium, Pythia, Gemma, Phi-2) with fixed training
+2. 🔴 Re-run Phase 5.1–5.3 using retrained SAEs
+3. ⚠️ Re-run Phase 5.4 transfer matrix analysis using v2 checkpoints
+4. 🔴 Re-run Phase 6 reasoning tracker using corrected SAEs
 
----
-
-## 🚀 Next Phase: Phase 6 - Interactive Reasoning Tracking
-
-### What We'll Build
-An interactive tool to visualize how reasoning develops through a network:
-1. Load an input prompt (e.g., "What is 2+2?")
-2. Capture activations at all 98 layers
-3. Decode each layer with corresponding SAE
-4. Show which features activate at each depth
-5. Visualize the reasoning flow
-
-### Why It Matters
-Instead of treating models as black boxes, you'll see the actual semantic features the model uses to reason through problems.
+### Valid SAE Checkpoints Available
+- **Phase 3 GPT-2 small (9 expansions):** `checkpoints/gpt2-small/sae/`
+- **Phase 5.4 multilayer (98 SAEs, v2):** `phase5_results/multilayer_transfer_v2/saes/`
 
 ---
 
@@ -273,5 +279,5 @@ If you get stuck:
 
 ---
 
-**Last Updated:** February 18, 2026  
-**Status:** Phase 5.4 COMPLETE ✅ | Ready for Phase 6
+**Last Updated:** February 22, 2026
+**Status:** Phase 3 COMPLETE (mixed results) | Phase 4/5/6 needs redo — see WARNING below

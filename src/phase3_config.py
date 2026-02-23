@@ -50,13 +50,15 @@ class Phase3Config:
 
     step_regex_patterns: dict[str, str] = field(
         default_factory=lambda: {
-            "step_header": r"(?:Step|step)\s+\d+[:.]?",
-            "equation": r"(\d+[\s+\-*/]*)+\s*=",
-            "comparison": r"(>|<|>=|<=|==|!=)",
-            "reasoning": r"(?:therefore|so|thus|hence|thus|which means)",
+            # GSM8K uses calculator annotation format: <<48/2=24>>
+            "equation": r"<<[^>]+=\s*-?\d+\.?\d*>>",
+            # Comparative/quantity language common in GSM8K arithmetic problems
+            "comparison": r"\b(more than|less than|times as many|fewer|greater|smaller|total|combined|difference|twice|half)\b",
+            # Logical connectors GSM8K actually uses in reasoning steps
+            "reasoning": r"\b(so|since|because|this means|in total|altogether|that means|therefore|thus)\b",
         }
     )
-    """Regex patterns for step type detection."""
+    """Regex patterns for step type detection. Defaults are tuned for GSM8K format."""
 
     similarity_threshold: float = 0.5
     """Threshold for similarity-based step boundaries (0-1)."""
@@ -88,6 +90,9 @@ class Phase3Config:
 
     leakage_threshold: float = 0.05
     """Threshold for probe-vs-baseline gap to flag leakage (delta > 5%)."""
+
+    probe_use_class_weights: bool = True
+    """Apply inverse-frequency class weights to probe loss to handle token-level class imbalance."""
 
     # Causal Ablation
     ablation_method: Literal["zero", "mean", "noise"] = "zero"

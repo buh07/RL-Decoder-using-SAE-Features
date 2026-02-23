@@ -1,16 +1,20 @@
 # Active Tasks & Project TODO
 
-**Last Updated:** February 18, 2026
+**Last Updated:** February 22, 2026
 
 For comprehensive status, see [PROJECT_STATUS.md](PROJECT_STATUS.md) and [docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md).
 
-## Current Priority: Phase 6 - Interactive Reasoning Tracking
+## Current Priority: Re-run Phase 4 → 5 → 6 with corrected SAE training
+
+> **⚠️ IMPORTANT — Previous Phase 4/5 results are INVALID.** The SAEs used in Phase 4, 5.1, 5.2, and 5.3 were trained with three critical bugs: (1) `use_relu=False` — L1 sparsity never engaged, features are not sparse; (2) missing `normalize_decoder()` — decoder columns grew unbounded; (3) incorrect decorrelation loss formula — loss could go negative. All sparsity, transfer, and causal ablation numbers from those phases are artifacts of broken training. Phase 5.4 multilayer SAEs were retrained with the fixes (`multilayer_transfer_v2/`), but the downstream analysis should be re-run using those checkpoints.
 
 ### High Priority
-- [ ] Build interactive reasoning tracker for real-time feature visualization
-- [ ] Create cross-model reasoning comparison tool
-- [ ] Implement causal intervention framework using transfer matrix insights
-- [ ] Generate feature evolution trajectories from input to output
+- [ ] Re-run Phase 4: retrain single-layer SAEs on GPT-2-medium, Pythia-1.4B, Gemma-2B, Phi-2 with fixed training (use_relu=True, normalize_decoder, correct decorrelation loss)
+- [ ] Re-run Phase 5.1: causal ablation using fixed SAEs
+- [ ] Re-run Phase 5.2: feature naming using fixed SAEs
+- [ ] Re-run Phase 5.3: single-layer transfer analysis using fixed SAEs
+- [ ] Validate Phase 5.4 analysis against v2 checkpoints (multilayer_transfer_v2/) and re-run transfer matrix computation
+- [ ] Re-run Phase 6 interactive reasoning tracker using corrected SAE checkpoints
 
 ## 1. Environment + Infrastructure
 - [x] Specify supported runtimes (Python >=3.10, CUDA version) and GPU budget (50-100 RTX-equivalent hours) in docs. *(SETUP.md captures Python 3.12.3 + CUDA 12.8.93; still plan to add GPU-hour budgeting details later if needed.)*
@@ -44,13 +48,15 @@ For comprehensive status, see [PROJECT_STATUS.md](PROJECT_STATUS.md) and [docs/D
 
 ## 5. Phased Research Program
 
-### Phase 1 — Ground-Truth Systems [✅ COMPLETE]
-**Status**: Ground-truth validation complete with causal perturbation tests passing.
+### Phase 1 — Ground-Truth Systems [✅ COMPLETE - RE-VALIDATED 2026-02-18]
+**Status**: Ground-truth validation complete. Bugs fixed and all environments re-run.
 - [x] Recreate simple environments (BFS/DFS traversals, stack machines) with exact latent states.
 - [x] Train SAEs on those states to verify reconstruction + monosemanticity; document failure cases as stop criteria.
 - [x] Build causal tests: directly edit SAE latents and ensure decoded state changes behave as predicted.
-- **Timeline**: Completed 2026-02-17
-- **Success criteria**: ✅ Causal tests pass (100% of latents affect outputs), methodology validated
+- **Timeline**: Re-validated 2026-02-18
+- **Bugs fixed**: decorrelation loss formula (negative loss), use_relu=False (zero sparsity), biased causal dim sampling, Stack encoding non-injective (sinusoidal), Logic constraints were random noise (not computed from grid), overfitting (50→500–2000 sequences)
+- **Results (v3)**: BFS all 3 expansions ✅ R²=0.976–0.987 | Stack all 3 expansions ✅ R²=0.967–0.989 | Logic all 3 expansions ✅ R²=0.990–0.999
+- **Checkpoints**: `phase1_results/v3/` (Logic) and `phase1_results/v2/` (BFS, Stack)
 
 ### Phase 2 — Synthetic Transformers [🔴 NOT STARTED - PLACEHOLDER]
 - [ ] Implement tiny transformers solving grid or logic tasks where full attention patterns are known.
@@ -59,31 +65,32 @@ For comprehensive status, see [PROJECT_STATUS.md](PROJECT_STATUS.md) and [docs/D
 - **Timeline**: 7-10 days after Phase 1
 - **Success criteria**: Feature alignment purity ≥80%, causal effects match prediction
 
-### Phase 3 — Controlled Chain-of-Thought LMs [✅ COMPLETE]
-**Status**: Phase 3 validation complete with 100% probe accuracy on GSM8K
-- [x] Collect datasets with labeled reasoning steps (GSM8K ~7,473 examples)
-- [x] Train SAEs on selected layers, integrate probe guidance tied to labeled steps
-- [x] Evaluate SAE probe performance on reasoning tasks (100% accuracy achieved)
-- [x] Aggregate results and identify optimal SAE architecture (8x expansion validated)
-- [x] Results informed Phase 4 architecture choices
+### Phase 3 — Controlled Chain-of-Thought LMs [✅ COMPLETE — Mixed Results]
+**Status**: Phase 3 re-run complete (v4, Feb 22 2026) with correct GSM8K regex patterns and class-weighted probes.
+- [x] Collect datasets with labeled reasoning steps (GSM8K 7,473 examples)
+- [x] Train SAEs on layer 6 (GPT-2 small, 9 expansion factors 4x–20x)
+- [x] Evaluate probes on equation/comparison/reasoning/other step classification
+- [x] Fixed bugs: broken alignment cache, wrong regex patterns, no class weighting, no majority-class baseline
 
-**Results**: 
-- 100% probe accuracy on GSM8K dataset
-- 8x expansion factor optimal for all models
-- **Key files**: `PHASE3_FULLSCALE_EXECUTION_GUIDE.md`, `phase3/PHASE3_RESULTS.md`
+**Results** (`phase3_results/full_scale_v4/`):
+- **Equation detection**: 83–97% per-class accuracy across all expansions ✅
+- **Comparison detection**: 0% across all expansions ❌
+- **Reasoning connective detection**: 0% across all expansions (except 8x anomaly) ❌
+- **All probes at or below majority-class baseline (91.8%)** — no expansion beats the baseline
+- **Conclusion**: A single layer (layer 6, GPT-2 small) cannot linearly decode multi-step reasoning structure. This motivates the multi-layer analysis approach (Phase 5.4 / new Phase 4).
+- **Note**: Previous claim of "100% probe accuracy" was an artifact of broken alignment caching and wrong regex patterns. That result was invalid.
+- **Key files**: `phase3_results/full_scale_v4/results_gpu{0,1,2,4}.json`
 
-### Phase 4 — Frontier LLMs [✅ COMPLETE]
-**Status**: Phase 4 + 4B interpretability analysis complete
-- [x] Select target LLM checkpoints (GPT-2-medium, Pythia-1.4B, Gemma-2B, Phi-2) and reasoning benchmarks (GSM8K, MATH, Logic)
-- [x] Run capture, SAE training, and validation using validated methodology; logged resource utilization
-- [x] Train 4 SAEs to convergence on frontier models (all 4 converged by epoch 20)
-- [x] Execute interpretability analysis: feature purity metrics, causal importance ranking, feature descriptions
+### Phase 4 — Frontier LLMs [🔴 NEEDS REDO]
+**Status**: Previous run INVALID — SAEs trained with use_relu=False (no L1 sparsity), missing normalize_decoder(), and buggy decorrelation loss. All reported results (31.7% sparsity, feature descriptions, causal rankings) are artifacts of broken training. Must retrain from scratch.
+- [ ] Retrain SAEs for GPT-2-medium, Pythia-1.4B, Gemma-2B, Phi-2 with fixed training loop
+- [ ] Re-run interpretability analysis (Phase 4B) with valid SAE checkpoints
+- [ ] Re-validate sparsity, feature purity, and causal importance metrics
 
-**Results**: 
-- 4 models trained successfully with consistent convergence patterns
-- 5,680 activation dimensions analyzed for interpretability
-- 31.7% average feature sparsity (monosemantic)
-- **Key files**: `phase4/phase4_interpretability.py`, `PHASE4_FINAL_SUMMARY.md`, `phase4_results/interpretability/`
+**Previous (invalid) results** (for reference only):
+- Claimed 31.7% average feature sparsity — untrustworthy (use_relu=False means no ReLU gating)
+- Claimed 5,680 dimensions analyzed — the analysis infrastructure is valid but inputs were wrong
+- **Key files (archived)**: `phase4_results/interpretability/`, `docs/archived_reports/PHASE4_FINAL_SUMMARY.md`
 
 ## 6. Validation & Attribution Protocols [✅ SUBSTANTIALLY COMPLETE]
 - [x] Codify purity metrics (sparsity, entropy, selectivity) and automate reporting per feature. *(Phase 4B: computed 5,680 dimension stats)*
@@ -155,10 +162,9 @@ For comprehensive status, see [PROJECT_STATUS.md](PROJECT_STATUS.md) and [docs/D
 
 **Scope**: 3 high-value tasks to maximize research impact (~90 min total)
 
-### Task 1: Real Causal Ablation Tests [✅ COMPLETE]
+### Task 1: Real Causal Ablation Tests [🔴 NEEDS REDO]
 **Objective**: Measure actual task accuracy drops when features are zeroed (validates importance estimates)
-**Estimated Time**: 30 minutes
-**Status**: Completed 2026-02-17 22:00
+**Status**: Previous run INVALID — used SAEs trained with use_relu=False. Phi-2 r=0.754 result is unreliable. Must redo after Phase 4 SAEs are retrained.
 - [x] Load trained SAEs and activation data
 - [x] Implement feature ablation on reasoning tasks
 - [x] Measure accuracy deltas (GSM8K, MATH, Logic benchmarks)
@@ -177,10 +183,9 @@ For comprehensive status, see [PROJECT_STATUS.md](PROJECT_STATUS.md) and [docs/D
 - `phase5_results/PHASE5_TASK1_RESULTS.md` (detailed analysis)
 - `phase5_results/causal_ablation/*.json` (per-model correlation results, 4 models)
 
-### Task 2: LM-based Feature Naming [✅ COMPLETE]
+### Task 2: LM-based Feature Naming [🔴 NEEDS REDO]
 **Objective**: Use LLM to generate semantic descriptions for top 20 features per model
-**Estimated Time**: 10 minutes
-**Status**: Completed 2026-02-17 22:07
+**Status**: Previous run INVALID — feature descriptions were generated from SAEs with no L1 sparsity. Must redo after Phase 4 SAEs are retrained.
 - [x] Load top features from Phase 4B analysis
 - [x] Extract activation examples for each feature
 - [x] Call LLM to generate semantic labels (fallback to templates when API unavailable)
@@ -204,10 +209,9 @@ For comprehensive status, see [PROJECT_STATUS.md](PROJECT_STATUS.md) and [docs/D
 - `phase5/phase5_feature_naming.py` (feature naming implementation)
 - `phase5_results/feature_naming/` directory with 8 files (4 results + 4 updated interpretability JSONs)
 
-### Task 3: Feature Transfer Analysis [✅ COMPLETE]
+### Task 3: Feature Transfer Analysis [🔴 NEEDS REDO]
 **Objective**: Test if top features transfer across models (answers: are features universal?)
-**Estimated Time**: 45 minutes
-**Status**: Completed 2026-02-18 12:14 PM
+**Status**: Previous run INVALID — transfer ratios of 0.995–1.000 are artifacts of degenerate SAEs (no ReLU, decoder collapse). Near-perfect transfer simply reflects that all activations are poorly reconstructed. Must redo after Phase 4 SAEs are retrained.
 - [x] Train SAE on gpt2-medium activations (baseline SAE with 8x expansion)
 - [x] Test transfer: Load gpt2-medium top-50 features, apply decoder to pythia-1.4b activations
 - [x] Measure: Reconstruction quality, feature utility, importance rank preservation
@@ -227,11 +231,10 @@ For comprehensive status, see [PROJECT_STATUS.md](PROJECT_STATUS.md) and [docs/D
 - Decoder similarity: 0.088 (model-specific embeddings, as expected)
 - **Conclusion**: Semantic universality proven; representational differences expected
 
-### Task 4: Multi-Layer Feature Transfer Analysis [⏳ IN PROGRESS - CRITICAL]
+### Task 4: Multi-Layer Feature Transfer Analysis [⚠️ PARTIALLY VALID — Analysis needs re-run]
 **Objective**: Track feature transfer across network depths (WHERE do features become universal?)
-**Estimated Time**: 3-4 hours
-**Status**: Framework designed, ready for execution (see PHASE5_TASK4_SPECIFICATION.md)
-**Priority**: CRITICAL (required for Phase 6 + satisfies framework's "cross-layer consistency" criterion)
+**Status**: 98 SAEs retrained with fixes (use_relu=True, normalize_decoder, correct decorrelation loss) — checkpoints in `phase5_results/multilayer_transfer_v2/saes/` are valid. However, the transfer matrix computation and visualizations were generated from the v1 (broken) checkpoints. Must re-run analysis scripts using v2 checkpoints.
+**SAE fix confirmed**: use_relu=False (→True), missing normalize_decoder(), sparsity metric inverted
 
 **Core Questions Addressed**:
 - Q1: Are early layers' features universal across models?
@@ -282,19 +285,24 @@ For comprehensive status, see [PROJECT_STATUS.md](PROJECT_STATUS.md) and [docs/D
 
 ---
 
-## 📊 PROJECT COMPLETION SUMMARY
+## 📊 PROJECT STATUS SUMMARY (Updated Feb 22, 2026)
 
-**Session Status**: ✅ **PHASES 1-5 SUBSTANTIALLY COMPLETE (43 minutes total)**
+### Valid Completed Work
+✅ Phase 1: Ground-truth validation — BFS/Stack/Logic R²=0.967–0.999 (v2/v3 results)
+✅ Phase 3: Controlled CoT probes — complete with mixed results (v4, Feb 22 2026)
+⚠️ Phase 5.4: Multilayer SAEs retrained with fixes (v2 checkpoints valid) — analysis needs re-run
 
-### Core Milestones Achieved
-✅ Phase 1: Ground-truth validation (causal testing on synthetic tasks)  
-✅ Phase 3: SAE extraction on reasoning dataset (100% probe accuracy)  
-✅ Phase 4: Multi-model training (4 frontier models converged)  
-✅ Phase 4B: Feature interpretability (5,680 dimensions analyzed, 31.7% sparsity)  
-✅ Phase 5.1: Causal ablation validation (Phi-2 r=0.754, average r=0.335)  
-✅ Phase 5.2: Semantic feature naming (40 features with descriptions)  
-✅ Phase 5.3: Feature transfer analysis (COMPLETE - 0.995 transfer ratio!)
-⏳ Phase 5.4: Multi-layer transfer analysis (IN PROGRESS - tracking reasoning evolution)
+### Needs Redo (broken SAE training)
+🔴 Phase 4: Frontier LLM SAE training — use_relu=False, no normalize_decoder
+🔴 Phase 5.1: Causal ablation — based on Phase 4 broken SAEs
+🔴 Phase 5.2: Feature naming — based on Phase 4 broken SAEs
+🔴 Phase 5.3: Single-layer transfer — based on Phase 4 broken SAEs
+🔴 Phase 6: Interactive reasoning tracker — must use corrected SAEs
+
+### Key Phase 3 Finding (motivates multi-layer approach)
+- Layer 6 (GPT-2 small) can detect equation tokens (83–97%) but cannot detect reasoning connectives (0%)
+- No single-layer probe beats the majority-class baseline across any expansion factor (4x–20x)
+- Multi-layer SAE analysis (Phase 5.4) is the correct next step
 
 ### Documentation Generated
 - `PROJECT_COMPLETION_SUMMARY.md` - Full project overview

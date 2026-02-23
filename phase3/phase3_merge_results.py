@@ -72,10 +72,15 @@ def generate_comparison_report(merged: Dict[int, Any], errors: Dict[int, str]) -
     
     for exp in sorted_exps:
         result = merged[exp]
-        examples = result.get("examples_processed", 0)
-        acc = result.get("accuracy", 0)
-        f1 = result.get("f1", 0)
+        examples = result.get("examples", 0)
         runtime = result.get("runtime_seconds", 0)
+
+        # Probe results are nested: result["probes"][expansion_str]
+        probes = result.get("probes", {})
+        # JSON keys are strings; expansion key may be int or str
+        probe_entry = probes.get(exp) or probes.get(str(exp)) or {}
+        acc = probe_entry.get("accuracy", 0)
+        f1 = probe_entry.get("f1", 0)
         
         total_runtime += runtime
         
