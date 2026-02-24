@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Phase 5 Task 4: Multi-Layer SAE Training
+Phase 2: Multi-Layer SAE Training
 
 Trains SAEs on activations from each layer of each model.
 Applies per-layer sparsity tuning (more sparsity for early layers, less for late layers).
 
 Usage:
-    python3 phase5_task4_train_multilayer_saes.py \
-        --activations-dir phase4_results/activations_multilayer \
-        --output-dir phase5_results/multilayer_transfer/saes \
+    python3 phase2/train_multilayer_saes.py \
+        --activations-dir phase2_results/activations \
+        --output-dir phase2_results/saes_gpt2_12x_topk/saes \
         --epochs 10 \
         --batch-size 64 \
-        --device cuda:5 \
+        --device cuda:0 \
         --verbose
 """
 from __future__ import annotations
@@ -73,11 +73,15 @@ def _get_sae_config_for_layer(
     layer_idx: int,
     input_dim: int,
     _override_expansion_factor: Optional[int] = None,
+    use_topk: bool = False,
+    topk_k: int = 0,
 ) -> SAEConfig:
     """
-    Get SAE configuration tuned for specific layer.
-    Early layers: Higher sparsity (more interpretable, less task-specific)
-    Late layers: Lower sparsity (more distributed, more task-specific)
+    Get SAE configuration tuned for a specific layer.
+
+    When use_topk=True the hard-TopK activation is used instead of ReLU+L1.
+    K defaults to 30% of latent_dim when topk_k=0.  L1 penalty is set to 0
+    because it is unnecessary (and counter-productive) with TopK.
     """
     base_params = {
         "gemma-2b": {"input_dim": 2048, "expansion_factor": 8, "learning_rate": 1e-4},
@@ -90,35 +94,48 @@ def _get_sae_config_for_layer(
         logger.warning(f"Unknown model {model_name}, using default config")
         base_params[model_name] = {"input_dim": input_dim, "expansion_factor": 8, "learning_rate": 1e-4}
 
-    # Allow caller to override expansion factor (e.g. 12x from Phase 3 optimal)
     if _override_expansion_factor is not None:
         base_params[model_name] = dict(base_params[model_name])
         base_params[model_name]["expansion_factor"] = _override_expansion_factor
 
     params = base_params[model_name]
 
-    # Adjust L1 penalty by layer depth
-    # Early layers: more sparsity (1.5e-4)
-    # Mid layers: medium sparsity (1e-4)
-    # Late layers: less sparsity (0.5e-4)
-    if layer_idx in [4, 6]:
-        l1_coeff = 1.5e-4
-    elif layer_idx in [16, 20, 24, 30]:
-        l1_coeff = 0.5e-4
+    if use_topk:
+        # TopK mode: no L1 needed, uniform sparsity across all layers
+        config = SAEConfig(
+            input_dim=params["input_dim"],
+            expansion_factor=params["expansion_factor"],
+            learning_rate=params["learning_rate"],
+            batch_size=64,
+            max_epochs=10,
+            l1_penalty_coeff=0.0,    # L1 unused with TopK
+            decorrelation_coeff=0.01,
+            use_relu=False,          # TopK replaces ReLU
+            use_topk=True,
+            topk_k=topk_k,
+            use_amp=False,
+        )
     else:
-        l1_coeff = 1e-4
+        # L1+ReLU mode: adjust sparsity pressure by layer depth
+        if layer_idx in [4, 6]:
+            l1_coeff = 1.5e-4
+        elif layer_idx in [16, 20, 24, 30]:
+            l1_coeff = 0.5e-4
+        else:
+            l1_coeff = 1e-4
 
-    config = SAEConfig(
-        input_dim=params["input_dim"],
-        expansion_factor=params["expansion_factor"],
-        learning_rate=params["learning_rate"],
-        batch_size=64,
-        max_epochs=10,
-        l1_penalty_coeff=l1_coeff,
-        decorrelation_coeff=0.01,
-        use_relu=True,   # Required for L1 sparsity; was incorrectly False
-        use_amp=False,   # AMP off to avoid loss-scaling confusion in manual loop
-    )
+        config = SAEConfig(
+            input_dim=params["input_dim"],
+            expansion_factor=params["expansion_factor"],
+            learning_rate=params["learning_rate"],
+            batch_size=64,
+            max_epochs=10,
+            l1_penalty_coeff=l1_coeff,
+            decorrelation_coeff=0.01,
+            use_relu=True,   # Required for L1 sparsity; was incorrectly False in v1
+            use_topk=False,
+            use_amp=False,
+        )
 
     return config
 
@@ -132,6 +149,8 @@ def train_sae_on_layer(
     batch_size: int,
     output_path: Optional[Path] = None,
     expansion_factor: Optional[int] = None,
+    use_topk: bool = False,
+    topk_k: int = 0,
 ) -> Tuple[SparseAutoencoder, Dict[str, float]]:
     """
     Train SAE on activations from a specific layer.
@@ -145,16 +164,23 @@ def train_sae_on_layer(
         batch_size: Batch size for training
         output_path: Optional path to save checkpoint
         expansion_factor: Override expansion factor (default from model config)
+        use_topk: Use hard TopK activation instead of ReLU+L1
+        topk_k: Number of active features (0 = auto 30%)
 
     Returns:
         Tuple of (trained SAE, summary dict)
     """
     input_dim = activations.shape[-1]
-    config = _get_sae_config_for_layer(model_name, layer_idx, input_dim,
-                                        _override_expansion_factor=expansion_factor)
+    config = _get_sae_config_for_layer(
+        model_name, layer_idx, input_dim,
+        _override_expansion_factor=expansion_factor,
+        use_topk=use_topk,
+        topk_k=topk_k,
+    )
 
+    mode_str = f"TopK(k={config.topk_k or int(0.30*config.latent_dim)})" if use_topk else f"L1={config.l1_penalty_coeff:.2e}"
     logger.info(f"Creating SAE for {model_name} layer {layer_idx} (input_dim={input_dim})")
-    logger.info(f"  Config: expansion={config.expansion_factor}x, L1={config.l1_penalty_coeff:.2e}")
+    logger.info(f"  Config: expansion={config.expansion_factor}x, activation={mode_str}")
 
     sae = SparseAutoencoder(config).to(device)
     optimizer = torch.optim.Adam(sae.parameters(), lr=config.learning_rate)
@@ -297,6 +323,18 @@ def main():
         default=None,
         help="Only train SAEs for these layer indices (e.g. --layers 0 1 2 3 4 5 6 7)",
     )
+    parser.add_argument(
+        "--use-topk",
+        action="store_true",
+        default=False,
+        help="Use hard TopK activation instead of ReLU+L1 (recommended for ~30%% sparsity target).",
+    )
+    parser.add_argument(
+        "--topk-k",
+        type=int,
+        default=0,
+        help="Number of active features when --use-topk is set. 0 = auto (30%% of latent_dim).",
+    )
 
     args = parser.parse_args()
 
@@ -336,6 +374,9 @@ def main():
     logger.info(f"Found {len(activation_files)} activation files")
     logger.info(f"Training SAEs on device {args.device}")
     logger.info(f"Output directory: {output_dir}")
+    if args.use_topk:
+        k_str = str(args.topk_k) if args.topk_k > 0 else "auto (30% of latent_dim)"
+        logger.info(f"Activation mode: TopK  k={k_str}")
 
     results = []
 
@@ -389,6 +430,8 @@ def main():
                 batch_size=args.batch_size,
                 output_path=output_path,
                 expansion_factor=args.expansion_factor,
+                use_topk=args.use_topk,
+                topk_k=args.topk_k,
             )
 
             results.append(summary)

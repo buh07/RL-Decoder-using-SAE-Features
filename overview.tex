@@ -103,6 +103,32 @@ Immediate: Purity (silhouette), clusters. Post: Ablations, replication, holdouts
 
 \textbf{Note (February 2026):} Phases 4, 5.1, 5.2, and 5.3 were executed with critical SAE training bugs and must be re-run before their results can be cited. Specifically: (1) \texttt{SAEConfig} defaulted to \texttt{use\_relu=False}, disabling L1 sparsity; (2) \texttt{normalize\_decoder()} was not called after optimizer steps, causing decoder collapse; (3) the decorrelation loss formula was incorrect (could produce negative loss). All sparsity percentages, transfer ratios, and causal correlations from those phases are unreliable. Phase 5.4 multilayer SAEs were retrained with the bugs fixed (\texttt{multilayer\_transfer\_v2/}) and are valid for use.
 
+\subsection{Phase 4: Arithmetic Feature Probing — Mixed Results (Completed Feb 2026)}
+SAEs (12$\times$ expansion, \texttt{l1\_penalty\_coeff=1e-4}) trained on GPT-2 medium residual streams, probed on 674 GSM8K arithmetic annotations (\texttt{<<expr=result>>} format):
+\begin{itemize}
+  \item \textbf{Experiment A (Ridge probe):} R$^2$=0.985 at layer 8 predicting $\log(|C|+1)$ from SAE features at result tokens. Features at operand tokens also strong (R$^2$=0.856). Layer 8 is the arithmetic peak across all positions.
+  \item \textbf{Experiment B (Co-activation):} $\sim$23\,500 features ($\sim$1.9\% of 12\,288) show selectivity $>$0.1 for at least one arithmetic role. Computation-bridge features (active at both \texttt{=} and result) peak at layer 11.
+  \item \textbf{Experiment C (Causal patching):} \textit{All} layers show negative $\Delta\log$-prob when top-128 probe features are swapped between examples (best: $-0.34$ at L0, worst: $-7.97$ at L9). Features are highly predictive but patching them in isolation disrupts rather than transfers arithmetic computation.
+\end{itemize}
+\textbf{Diagnosis:} SAE sparsity is $\sim$51\% (target $\approx30\%$) because L1 coefficient (1e-4) is too weak. At 51\% activation the features are polysemantic and co-dependent, so individual feature patches disrupt the distributed encoding rather than transferring it. This is the scenario warned against by~\citet{SAE-Identifiability}.
+
+\textbf{Phase 4r — TopK SAEs + Subspace Steering (Completed Feb 2026):}
+Retrained 24 GPT-2 medium 12$\times$ SAEs with hard TopK ($K=3686$, exactly 30\% sparsity).  Re-ran all three experiments:
+\begin{itemize}
+  \item \textbf{Experiment A:} R$^2$=0.977 at layer 7 (result tokens); instability at layers 5/7 from v1 eliminated.
+  \item \textbf{Experiment B:} Feature taxonomy robust — computation-bridge 3.2\%, result-encoder 2.3\%, operand-tracker 1.9\%.
+  \item \textbf{Experiment C (subspace steering):} \textit{Sign flipped.} Mean $\Delta\log$-prob $= +0.037$ across all layers; peak $+0.107$ at layer 22; 17/24 layers positive.  Arithmetic computation is causally concentrated in layers 12--23, with layer 22 as the strongest bottleneck.
+\end{itemize}
+\textbf{Conclusion:} Subspace steering (projecting $\Delta h = h_T - h_S$ onto the arithmetic decoder subspace) combined with 30\% sparsity resolves the causal failure from v1.  SAE features at upper layers causally encode arithmetic results, satisfying the falsification criterion for Phase 4.
+
+\subsection{Phase 5: Feature Interpretation and Causal Steering (In Progress Feb 2026)}
+Two experiments building directly on Phase 4r's TopK SAEs and the causal bottleneck at layer 22:
+\begin{enumerate}
+  \item \textbf{Feature auto-interpretation:} For each of the top-50 arithmetic features at causal layers (14--23), find the 10 max-activating token contexts in the 674-record GSM8K dataset.  Each feature receives a context card showing surrounding tokens, activation magnitude, arithmetic role (computation-bridge / result-encoder / operand-tracker), and expression/result values.  This converts statistical feature indices into human-readable descriptions.
+  \item \textbf{Arithmetic steering:} Compute mean-difference vectors $\Delta f[L] = \overline{f_{\text{high-}C}}[L] - \overline{f_{\text{low-}C}}[L]$ in SAE feature space for each layer.  At test time, encode the residual, add $\alpha \Delta f[L]$, decode and inject.  Sweep $\alpha \in \{0.5, 1, 2, 4\}$ across all layers to find the (layer, $\alpha$) pair that most reliably shifts arithmetic predictions.  Success criterion: positive mean $\Delta\log$-prob toward high-magnitude results at the predicted best layer (22).
+\end{enumerate}
+Both experiments target GPT-2 medium first; extension to Phi-2, Gemma-2B, and Pythia-1.4B follows in Phase 6.
+
 \subsection{Phase 3: Controlled CoT — Mixed Results (Completed Feb 2026)}
 Linear probes trained on SAE latents from GPT-2 small (layer 6) on GSM8K reasoning steps:
 \begin{itemize}

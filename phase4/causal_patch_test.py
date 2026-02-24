@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 7 — Experiment C: Causal Patch Test
+Phase 4 — Experiment C: Causal Patch Test
 ==========================================
 Tests whether specific SAE features at the arithmetic ``=`` token *causally*
 encode the result value by replacing them across example pairs and measuring
@@ -47,7 +47,7 @@ We randomly sample up to ``--num-pairs`` pairs per operator.
 
 Output
 ------
-  phase7/results/patching/
+  phase4_results/topk/patching/
     patching_results.json        — mean Δlog_prob per layer per operator
     delta_logprob_by_layer.png   — line plot of causal effect vs. layer
     causal_effect_heatmap.png    — per-pair Δlog_prob heatmap (pairs × layers)
@@ -55,12 +55,12 @@ Output
 Usage
 -----
   cd "/scratch2/f004ndc/RL-Decoder with SAE Features"
-  CUDA_VISIBLE_DEVICES=7 .venv/bin/python3 phase7/causal_patch_test.py \\
-      --dataset         phase7/results/collection/gsm8k_arithmetic_dataset.pt \\
-      --probe-features  phase7/results/probe/top_features_per_layer.json \\
-      --saes-dir        phase5_results/multilayer_gpt2_12x/saes \\
-      --activations-dir phase4_results/activations_multilayer \\
-      --output-dir      phase7/results/patching \\
+  CUDA_VISIBLE_DEVICES=7 .venv/bin/python3 phase4/causal_patch_test.py \\
+      --dataset         phase4_results/topk/collection/gsm8k_arithmetic_dataset.pt \\
+      --probe-features  phase4_results/topk/probe/top_features_per_layer.json \\
+      --saes-dir        phase2_results/saes_gpt2_12x_topk/saes \\
+      --activations-dir phase2_results/activations \\
+      --output-dir      phase4_results/topk/patching \\
       --num-pairs       30 \\
       --patch-k         128 \\
       --device          cuda:0
@@ -303,8 +303,94 @@ def select_pairs(
 
 
 # ---------------------------------------------------------------------------
-# Core experiment
+# Core experiment — two methods
 # ---------------------------------------------------------------------------
+
+@torch.no_grad()
+def compute_delta_logprob_subspace(
+    source_rec: dict,
+    target_rec: dict,
+    model,
+    tokenizer,
+    saes: Dict[int, SparseAutoencoder],
+    norm_stats: Dict[int, Tuple[torch.Tensor, torch.Tensor]],
+    probe_features: List[List[int]],
+    patch_k: int,
+    device: str,
+) -> List[float]:
+    """Subspace steering: project residual-stream Δh onto the arithmetic subspace.
+
+    For each layer L:
+      1. Capture raw residual-stream activations for both source and target.
+      2. Compute Δh = h_T[eq_tok] − h_S[eq_tok]  in raw activation space.
+      3. Build the arithmetic subspace from the decoder columns of the top-K
+         probe features: D_K  shape (HIDDEN_DIM, K).
+      4. Project Δh onto span(D_K):  proj = D_K @ (D_K^T Δh)  (D_K cols normalised).
+      5. Patch: h_S[eq_tok] + proj  — moves the source activation toward the target
+         only along arithmetic directions, leaving all other features intact.
+      6. Measure Δlog_prob as usual.
+    """
+    src_ids = torch.tensor(source_rec["token_ids"], dtype=torch.long).unsqueeze(0).to(device)
+    tgt_ids = torch.tensor(target_rec["token_ids"], dtype=torch.long).unsqueeze(0).to(device)
+
+    tgt_result_toks = target_rec["result_tok_idxs"]
+    if not tgt_result_toks:
+        return [0.0] * NUM_LAYERS
+    tgt_result_tok_id = target_rec["token_ids"][tgt_result_toks[0]]
+
+    eq_tok_pos_src = source_rec["eq_tok_idx"]
+    eq_tok_pos_tgt = target_rec.get("eq_tok_idx", eq_tok_pos_src)
+    pred_pos = eq_tok_pos_src
+
+    # Capture source residual-stream activations (raw, before un-normalising)
+    src_store, src_handles = register_capture_hooks(model)
+    src_logits = run_forward_capture(model, src_ids, src_store)
+    for h in src_handles:
+        h.remove()
+
+    # Capture target residual-stream activations
+    tgt_store, tgt_handles = register_capture_hooks(model)
+    run_forward_capture(model, tgt_ids, tgt_store)
+    for h in tgt_handles:
+        h.remove()
+
+    # Baseline log-prob
+    log_probs_orig = F.log_softmax(src_logits[0, pred_pos, :], dim=-1)
+    lp_orig = log_probs_orig[tgt_result_tok_id].item()
+
+    delta_lp: List[float] = []
+
+    for L in range(NUM_LAYERS):
+        top_feats = probe_features[L][:patch_k]
+        if not top_feats or L not in src_store or L not in tgt_store:
+            delta_lp.append(0.0)
+            continue
+
+        # Raw residual-stream activations at eq token
+        h_src = src_store[L][0, eq_tok_pos_src, :].to(device).float()
+        tgt_seq_len = tgt_store[L].shape[1]
+        tgt_pos = min(eq_tok_pos_tgt, tgt_seq_len - 1)
+        h_tgt = tgt_store[L][0, tgt_pos, :].to(device).float()
+
+        delta_h = h_tgt - h_src  # (HIDDEN_DIM,)
+
+        # Arithmetic subspace: decoder columns for top-K probe features
+        feat_idx = torch.tensor(top_feats, dtype=torch.long, device=device)
+        D = saes[L].decoder.weight[:, feat_idx].float()       # (HIDDEN_DIM, K)
+        D_norm = F.normalize(D, p=2, dim=0)                   # unit-norm columns
+
+        # Project Δh onto subspace and steer source activation
+        coords = D_norm.T @ delta_h                           # (K,)
+        projected = D_norm @ coords                           # (HIDDEN_DIM,)
+        patch_vec = h_src + projected                         # (HIDDEN_DIM,)
+
+        patched_logits = run_patched_forward(model, src_ids, L, eq_tok_pos_src, patch_vec)
+        log_probs_patch = F.log_softmax(patched_logits[0, pred_pos, :], dim=-1)
+        lp_patch = log_probs_patch[tgt_result_tok_id].item()
+        delta_lp.append(lp_patch - lp_orig)
+
+    return delta_lp
+
 
 @torch.no_grad()
 def compute_delta_logprob(
@@ -498,6 +584,16 @@ def main() -> None:
         type=int,
         default=42,
     )
+    parser.add_argument(
+        "--method",
+        choices=["feature", "subspace"],
+        default="subspace",
+        help=(
+            "Patching method. "
+            "'feature': swap top-K SAE feature values (original method, tends to disrupt). "
+            "'subspace': project residual-stream Δh onto arithmetic decoder subspace (recommended)."
+        ),
+    )
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
@@ -535,11 +631,17 @@ def main() -> None:
     # Run causal patching
     # -----------------------------------------------------------------------
     print(f"\n[5/5] Running causal patch test "
-          f"({len(pairs)} pairs × {NUM_LAYERS} layers × patch_k={args.patch_k}) …")
+          f"({len(pairs)} pairs × {NUM_LAYERS} layers × patch_k={args.patch_k} "
+          f"method={args.method}) …")
+
+    patch_fn = (
+        compute_delta_logprob_subspace if args.method == "subspace"
+        else compute_delta_logprob
+    )
 
     all_deltas: List[List[float]] = []
     for pair_idx, (src, tgt) in enumerate(pairs):
-        deltas = compute_delta_logprob(
+        deltas = patch_fn(
             src, tgt, model, tokenizer, saes, norm_stats,
             probe_features, args.patch_k, args.device,
         )
@@ -558,6 +660,7 @@ def main() -> None:
     results = {
         "num_pairs":              len(pairs),
         "patch_k":                args.patch_k,
+        "method":                 args.method,
         "mean_delta_logprob":     mean_delta.tolist(),
         "std_delta_logprob":      per_pair.std(axis=0).tolist(),
         "best_layer":             int(np.argmax(mean_delta)),

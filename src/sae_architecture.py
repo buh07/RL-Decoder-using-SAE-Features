@@ -48,19 +48,30 @@ class SparseAutoencoder(nn.Module):
     def encode(self, x: torch.Tensor) -> torch.Tensor:
         """
         Encode input to latents.
-        
+
         Args:
             x: Input activations, shape (batch, seq_len, input_dim) or (batch, input_dim)
-        
+
         Returns:
             h: Latents, same shape with input_dim -> latent_dim substituted
         """
-        h = self.encoder(x)
-        
+        h_pre = self.encoder(x)
+
+        if self.config.use_topk:
+            # Hard TopK: keep the K largest pre-activations, ReLU-clamp the selected
+            # values (negatives become 0), zero all others.
+            k = self.config.topk_k if self.config.topk_k > 0 else max(
+                1, int(0.30 * self.config.latent_dim)
+            )
+            topk_vals, topk_idx = h_pre.topk(k, dim=-1)
+            h = torch.zeros_like(h_pre)
+            h.scatter_(-1, topk_idx, topk_vals.clamp(min=0))
+            return h
+
         if self.config.use_relu:
-            h = F.relu(h)
-        
-        return h
+            return F.relu(h_pre)
+
+        return h_pre
     
     def decode(self, h: torch.Tensor) -> torch.Tensor:
         """

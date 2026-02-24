@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 7: Arithmetic Data Collector
+Phase 4: Arithmetic Data Collector
 ====================================
 Collects SAE feature vectors at key token positions for GSM8K arithmetic
 annotations.  This dataset is shared by all three probing experiments
@@ -30,7 +30,7 @@ For each of the first --num-examples GSM8K examples:
 
 Output
 ------
-  phase7/results/collection/gsm8k_arithmetic_dataset.pt
+  phase4_results/topk/collection/gsm8k_arithmetic_dataset.pt
     A list of record dicts, one per annotation, containing:
       - 'example_idx'    : int
       - 'ann_text'       : str (full <<expression=result>>)
@@ -50,11 +50,11 @@ Output
 Usage
 -----
   cd "/scratch2/f004ndc/RL-Decoder with SAE Features"
-  CUDA_VISIBLE_DEVICES=7 .venv/bin/python3 phase7/arithmetic_data_collector.py \\
-      --saes-dir      phase5_results/multilayer_gpt2_12x/saes \\
-      --activations-dir phase4_results/activations_multilayer \\
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 phase4/arithmetic_data_collector.py \\
+      --saes-dir      phase2_results/saes_gpt2_12x_topk/saes \\
+      --activations-dir phase2_results/activations \\
       --gsm8k-path    datasets/raw/gsm8k/train.jsonl \\
-      --output-dir    phase7/results/collection \\
+      --output-dir    phase4_results/topk/collection \\
       --num-examples  200 \\
       --device        cuda:0
 """

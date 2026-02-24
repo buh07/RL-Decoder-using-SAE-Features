@@ -1,0 +1,6752 @@
+[
+  {
+    "feature_idx": 5266,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.002967359032481909,
+      "background": 0.0
+    },
+    "mean_activation": 0.33385267814000447,
+    "active_count": 150,
+    "top_examples": [
+      {
+        "activation": 1.6279,
+        "expression": "83*2",
+        "result_value": 166.0,
+        "context": " $<<83*2=[166]>>166 on necklaces"
+      },
+      {
+        "activation": 1.3242,
+        "expression": "400+76",
+        "result_value": 476.0,
+        "context": " $<<400+76=[476]>>476.\n#### 4"
+      },
+      {
+        "activation": 1.1494,
+        "expression": "400-240",
+        "result_value": 160.0,
+        "context": " = <<400-240=[160]>>160\nTo write his"
+      },
+      {
+        "activation": 0.9194,
+        "expression": "6*18",
+        "result_value": 108.0,
+        "context": " = <<6*18=[108]>>108 sentences after her meeting"
+      },
+      {
+        "activation": 0.917,
+        "expression": "780-260",
+        "result_value": 520.0,
+        "context": " $<<780-260=[520]>>520.\n#### 520"
+      },
+      {
+        "activation": 0.8672,
+        "expression": "100-10",
+        "result_value": 90.0,
+        "context": " = <<100-10=[90]>>90 available rooms.\n"
+      },
+      {
+        "activation": 0.8599,
+        "expression": "400+20",
+        "result_value": 420.0,
+        "context": " = <<400+20=[420]>>420\nThe next two"
+      },
+      {
+        "activation": 0.8477,
+        "expression": "6*15",
+        "result_value": 90.0,
+        "context": " = <<6*15=[90]>>90 sentences after her break"
+      },
+      {
+        "activation": 0.8281,
+        "expression": "48/3",
+        "result_value": 16.0,
+        "context": " = <<48/3=[16]>>16 fish in the first"
+      },
+      {
+        "activation": 0.7939,
+        "expression": "237-60",
+        "result_value": 177.0,
+        "context": " = <<237-60=[177]>>177 cucumbers.\n"
+      },
+      {
+        "activation": 0.7358,
+        "expression": "15+35+35+50",
+        "result_value": 135.0,
+        "context": "35+35+50=[135]>>135 coins\nThe number"
+      },
+      {
+        "activation": 0.7085,
+        "expression": "11*75",
+        "result_value": 825.0,
+        "context": " = <<11*75=[825]>>825 pieces\nThen subtract"
+      },
+      {
+        "activation": 0.7017,
+        "expression": "840-825",
+        "result_value": 15.0,
+        "context": " = <<840-825=[15]>>15 pieces\n#### 15"
+      },
+      {
+        "activation": 0.6836,
+        "expression": "6*9*14",
+        "result_value": 756.0,
+        "context": "6*9*14=[756]>>756 bananas.\nThere"
+      },
+      {
+        "activation": 0.6821,
+        "expression": "15/3",
+        "result_value": 5.0,
+        "context": " = <<15/3=[5]>>5 baseball cards.\n"
+      },
+      {
+        "activation": 0.6577,
+        "expression": "30+140",
+        "result_value": 170.0,
+        "context": " $<<30+140=[170]>>170.\nTherefore,"
+      },
+      {
+        "activation": 0.6553,
+        "expression": "3/4*360",
+        "result_value": 270.0,
+        "context": "3/4*360=[270]>>270 coins.\nShe"
+      },
+      {
+        "activation": 0.647,
+        "expression": "2*2",
+        "result_value": 4.0,
+        "context": " = <<2*2=[4]>>4 hours a week to"
+      },
+      {
+        "activation": 0.6445,
+        "expression": "36/4",
+        "result_value": 9.0,
+        "context": " = <<36/4=[9]>>9 sales in the jewelry"
+      },
+      {
+        "activation": 0.6191,
+        "expression": "24+16+10",
+        "result_value": 50.0,
+        "context": "24+16+10=[50]>>50 inches long.\n"
+      }
+    ]
+  },
+  {
+    "feature_idx": 4195,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.031157270073890686,
+      "result": 0.007418397814035416,
+      "eq_sign": 0.0,
+      "background": 0.08753709495067596
+    },
+    "mean_activation": 1.147963882586278,
+    "active_count": 654,
+    "top_examples": [
+      {
+        "activation": 2.709,
+        "expression": "13-4",
+        "result_value": 9.0,
+        "context": " = <<13-4=[9]>>9 crayons left"
+      },
+      {
+        "activation": 2.5801,
+        "expression": "3+1",
+        "result_value": 4.0,
+        "context": " = <<3+1=[4]>>4 crayons to"
+      },
+      {
+        "activation": 2.5352,
+        "expression": "140-30",
+        "result_value": 110.0,
+        "context": " = <<140-30=[110]>>110 seashells\n"
+      },
+      {
+        "activation": 2.4941,
+        "expression": "16-10",
+        "result_value": 6.0,
+        "context": " = <<16-10=[6]>>6 pizza pieces uneat"
+      },
+      {
+        "activation": 2.4785,
+        "expression": "30-10-2",
+        "result_value": 18.0,
+        "context": "30-10-2=[18]>>18\nJesse has"
+      },
+      {
+        "activation": 2.4316,
+        "expression": "30-19",
+        "result_value": 11.0,
+        "context": " = <<30-19=[11]>>11 situps\nOn"
+      },
+      {
+        "activation": 2.4141,
+        "expression": "110-55",
+        "result_value": 55.0,
+        "context": "= <<110-55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 2.4004,
+        "expression": "250*8",
+        "result_value": 2000.0,
+        "context": " = <<250*8=[2000]>>2000 blocks in one hour"
+      },
+      {
+        "activation": 2.3926,
+        "expression": "55",
+        "result_value": 55.0,
+        "context": "*110 = <<55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 2.3789,
+        "expression": "10-3",
+        "result_value": 7.0,
+        "context": " = <<10-3=[7]>>7 letters in Samantha\ufffd"
+      },
+      {
+        "activation": 2.3184,
+        "expression": "16-3",
+        "result_value": 13.0,
+        "context": " = <<16-3=[13]>>13.\nIn round"
+      },
+      {
+        "activation": 2.3105,
+        "expression": "36/4",
+        "result_value": 9.0,
+        "context": " = <<36/4=[9]>>9 sales in the jewelry"
+      },
+      {
+        "activation": 2.3086,
+        "expression": "14/2",
+        "result_value": 7.0,
+        "context": " = <<14/2=[7]>>7 in 3 years\n"
+      },
+      {
+        "activation": 2.2852,
+        "expression": "38/2",
+        "result_value": 19.0,
+        "context": " = <<38/2=[19]>>19 apples.\n####"
+      },
+      {
+        "activation": 2.2754,
+        "expression": "20-17",
+        "result_value": 3.0,
+        "context": "=<<20-17=[3]>>3 miles on Friday."
+      },
+      {
+        "activation": 2.2656,
+        "expression": "3+16",
+        "result_value": 19.0,
+        "context": " = <<3+16=[19]>>19 hard hats in the"
+      },
+      {
+        "activation": 2.25,
+        "expression": "3*3",
+        "result_value": 9.0,
+        "context": " = <<3*3=[9]>>9 flights of stairs\n"
+      },
+      {
+        "activation": 2.248,
+        "expression": "10+8",
+        "result_value": 18.0,
+        "context": " = <<10+8=[18]>>18 purple flowers.\n"
+      },
+      {
+        "activation": 2.2383,
+        "expression": "64+32",
+        "result_value": 96.0,
+        "context": " = <<64+32=[96]>>96 weasels and"
+      },
+      {
+        "activation": 2.2266,
+        "expression": "24+1+1",
+        "result_value": 26.0,
+        "context": "24+1+1=[26]>>26 people who ate the"
+      }
+    ]
+  },
+  {
+    "feature_idx": 3302,
+    "layer": 14,
+    "role": "operand",
+    "activation_rates": {
+      "operand": 0.11721068620681763,
+      "result": 0.0014836795162409544,
+      "eq_sign": 0.0014836795162409544,
+      "background": 0.0014836795162409544
+    },
+    "mean_activation": 0.46526961553664437,
+    "active_count": 105,
+    "top_examples": [
+      {
+        "activation": 2.6113,
+        "expression": "13+36+15+35",
+        "result_value": 99.0,
+        "context": "36+15+35=[99]>>99.\n#### 99"
+      },
+      {
+        "activation": 2.5723,
+        "expression": "1188/12",
+        "result_value": 99.0,
+        "context": " <<1188/12=[99]>>99 bananas.\n####"
+      },
+      {
+        "activation": 1.7715,
+        "expression": "100*1000",
+        "result_value": 100000.0,
+        "context": " $<<100*1000=[100]000>>100,000\n"
+      },
+      {
+        "activation": 1.5664,
+        "expression": "4500*5",
+        "result_value": 22500.0,
+        "context": "<<4500*5=[225]00>>22,500\n"
+      },
+      {
+        "activation": 1.3438,
+        "expression": "8*1000",
+        "result_value": 8000.0,
+        "context": " $<<8*1000=[8000]>>8000\nHe buys 1000"
+      },
+      {
+        "activation": 1.2871,
+        "expression": "100000+18000+16000",
+        "result_value": 134000.0,
+        "context": "18000+16000=[134]000>>134,000\n"
+      },
+      {
+        "activation": 1.2803,
+        "expression": "30000*.9",
+        "result_value": 27000.0,
+        "context": "<<30000*.9=[27]000>>27,000\n"
+      },
+      {
+        "activation": 1.251,
+        "expression": "12",
+        "result_value": 12.0,
+        "context": " to run is <<12=[12]>>12 miles a day\n"
+      },
+      {
+        "activation": 1.2139,
+        "expression": "2*3",
+        "result_value": 6.0,
+        "context": " $<<2*3=[6]>>6.\nTheir breakfast"
+      },
+      {
+        "activation": 1.21,
+        "expression": "25*.01*1000",
+        "result_value": 250.0,
+        "context": "25*.01*1000=[250]>>250\nCoursework materials"
+      },
+      {
+        "activation": 1.1748,
+        "expression": "500-426",
+        "result_value": 74.0,
+        "context": " $<<500-426=[74]>>74.\n#### 74"
+      },
+      {
+        "activation": 1.1553,
+        "expression": "1750+3500",
+        "result_value": 5250.0,
+        "context": "1750+3500=[52]50>>5250\n####"
+      },
+      {
+        "activation": 1.1182,
+        "expression": "300*.75",
+        "result_value": 225.0,
+        "context": "=$<<300*.75=[225]>>225\nSo he had"
+      },
+      {
+        "activation": 1.0332,
+        "expression": "3*(2/3)",
+        "result_value": 2.0,
+        "context": "*(2/3)=[2]>>2\nJesse has"
+      },
+      {
+        "activation": 0.9834,
+        "expression": "450000-2000",
+        "result_value": 448000.0,
+        "context": "<<450000-2000=[448]000>>448,000\n"
+      },
+      {
+        "activation": 0.9624,
+        "expression": "38*2",
+        "result_value": 76.0,
+        "context": " $<<38*2=[76]>>76.\nAnd the"
+      },
+      {
+        "activation": 0.8535,
+        "expression": "20000*.8",
+        "result_value": 16000.0,
+        "context": "<<20000*.8=[16]000>>16,000\n"
+      },
+      {
+        "activation": 0.8413,
+        "expression": "400+76",
+        "result_value": 476.0,
+        "context": " $<<400+76=[476]>>476.\n#### 4"
+      },
+      {
+        "activation": 0.7656,
+        "expression": "2*1",
+        "result_value": 2.0,
+        "context": " $<<2*1=[2]>>2.\nThe cost"
+      },
+      {
+        "activation": 0.7593,
+        "expression": "109*2",
+        "result_value": 218.0,
+        "context": " $<<109*2=[218]>>218.\nThus,"
+      }
+    ]
+  },
+  {
+    "feature_idx": 6675,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.005934718064963818,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.6111481456080964,
+    "active_count": 367,
+    "top_examples": [
+      {
+        "activation": 2.3867,
+        "expression": "4*4",
+        "result_value": 16.0,
+        "context": " = <<4*4=[16]>>16 pizza pieces.\n"
+      },
+      {
+        "activation": 2.0215,
+        "expression": "4*2",
+        "result_value": 8.0,
+        "context": "=<<4*2=[8]>>8 gumballs,\n"
+      },
+      {
+        "activation": 1.959,
+        "expression": "16*1/2",
+        "result_value": 8.0,
+        "context": "16*1/2=[8]>>8 teaspoons of salt."
+      },
+      {
+        "activation": 1.9492,
+        "expression": "8*2",
+        "result_value": 16.0,
+        "context": " = <<8*2=[16]>>16 unused crayons"
+      },
+      {
+        "activation": 1.9336,
+        "expression": "8*3",
+        "result_value": 24.0,
+        "context": " = <<8*3=[24]>>24 pages in an hour"
+      },
+      {
+        "activation": 1.9053,
+        "expression": "2*4",
+        "result_value": 8.0,
+        "context": " = <<2*4=[8]>>8 buildings to collapse."
+      },
+      {
+        "activation": 1.8574,
+        "expression": "8*2",
+        "result_value": 16.0,
+        "context": " = <<8*2=[16]>>16 hours watching one daughter"
+      },
+      {
+        "activation": 1.8154,
+        "expression": "120*.6",
+        "result_value": 72.0,
+        "context": "=<<120*.6=[72]>>72 minutes longer\nSo"
+      },
+      {
+        "activation": 1.8076,
+        "expression": "33*16",
+        "result_value": 528.0,
+        "context": " $<<33*16=[528]>>528\n3 * 10"
+      },
+      {
+        "activation": 1.7354,
+        "expression": "8*4",
+        "result_value": 32.0,
+        "context": " = <<8*4=[32]>>32 hours watching one daughter"
+      },
+      {
+        "activation": 1.6465,
+        "expression": "8+2",
+        "result_value": 10.0,
+        "context": "= <<8+2=[10]>>10 hours for his work"
+      },
+      {
+        "activation": 1.6328,
+        "expression": "2*12",
+        "result_value": 24.0,
+        "context": "=<<2*12=[24]>>24 years old.\n"
+      },
+      {
+        "activation": 1.6289,
+        "expression": "4*2",
+        "result_value": 8.0,
+        "context": " = <<4*2=[8]>>8 glasses.\nSo"
+      },
+      {
+        "activation": 1.6279,
+        "expression": "16*12",
+        "result_value": 192.0,
+        "context": " = <<16*12=[192]>>192 square feet\nThen"
+      },
+      {
+        "activation": 1.6182,
+        "expression": "40*.6",
+        "result_value": 24.0,
+        "context": "=<<40*.6=[24]>>24 trees\n#### 24"
+      },
+      {
+        "activation": 1.5977,
+        "expression": "5*4",
+        "result_value": 20.0,
+        "context": "=<<5*4=[20]>>20 pounds of beef\n"
+      },
+      {
+        "activation": 1.5918,
+        "expression": "11*75",
+        "result_value": 825.0,
+        "context": " = <<11*75=[825]>>825 pieces\nThen subtract"
+      },
+      {
+        "activation": 1.5684,
+        "expression": "40*2",
+        "result_value": 80.0,
+        "context": "=<<40*2=[80]>>80 people.\nIf"
+      },
+      {
+        "activation": 1.4941,
+        "expression": "104*2",
+        "result_value": 208.0,
+        "context": " $<<104*2=[208]>>208.\nThe couple"
+      },
+      {
+        "activation": 1.4912,
+        "expression": "4*6*3",
+        "result_value": 72.0,
+        "context": "4*6*3=[72]>>72 cubic ft\nThen"
+      }
+    ]
+  },
+  {
+    "feature_idx": 455,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.601327623639788,
+    "active_count": 406,
+    "top_examples": [
+      {
+        "activation": 2.4023,
+        "expression": "83*2",
+        "result_value": 166.0,
+        "context": " $<<83*2=[166]>>166 on necklaces"
+      },
+      {
+        "activation": 2.3535,
+        "expression": "33*7",
+        "result_value": 231.0,
+        "context": " = <<33*7=[231]>>231 birds would be lost"
+      },
+      {
+        "activation": 2.082,
+        "expression": "20*8",
+        "result_value": 160.0,
+        "context": "= <<20*8=[160]>>160 pieces of mangoes"
+      },
+      {
+        "activation": 1.9834,
+        "expression": "847/7",
+        "result_value": 121.0,
+        "context": " <<847/7=[121]>>121 people on it."
+      },
+      {
+        "activation": 1.9541,
+        "expression": "20*30",
+        "result_value": 600.0,
+        "context": "=$<<20*30=[600]>>600\nHe works 30"
+      },
+      {
+        "activation": 1.9141,
+        "expression": "105*1.2",
+        "result_value": 126.0,
+        "context": "105*1.2=[126]>>126 from selling the water"
+      },
+      {
+        "activation": 1.8047,
+        "expression": "90*12",
+        "result_value": 1080.0,
+        "context": " = <<90*12=[1080]>>1080 beetles\n#### 1080"
+      },
+      {
+        "activation": 1.79,
+        "expression": "65*4",
+        "result_value": 260.0,
+        "context": " $<<65*4=[260]>>260.\nTherefore,"
+      },
+      {
+        "activation": 1.75,
+        "expression": "120+90+50",
+        "result_value": 260.0,
+        "context": "120+90+50=[260]>>260 kids\nThen subtract"
+      },
+      {
+        "activation": 1.7051,
+        "expression": "(2*111)-50",
+        "result_value": 172.0,
+        "context": "2*111)-50=[172]>>172 texts\n111 +"
+      },
+      {
+        "activation": 1.6436,
+        "expression": "400-240",
+        "result_value": 160.0,
+        "context": " = <<400-240=[160]>>160\nTo write his"
+      },
+      {
+        "activation": 1.5889,
+        "expression": "27+5",
+        "result_value": 32.0,
+        "context": " = <<27+5=[32]>>32 baseball cards.\n"
+      },
+      {
+        "activation": 1.5869,
+        "expression": "200+16",
+        "result_value": 216.0,
+        "context": " = <<200+16=[216]>>216 books.\n####"
+      },
+      {
+        "activation": 1.5762,
+        "expression": "48/3",
+        "result_value": 16.0,
+        "context": " = <<48/3=[16]>>16 fish in the first"
+      },
+      {
+        "activation": 1.5762,
+        "expression": "16*2",
+        "result_value": 32.0,
+        "context": " = <<16*2=[32]>>32 hours watching both daughters"
+      },
+      {
+        "activation": 1.5635,
+        "expression": "300+200+80",
+        "result_value": 580.0,
+        "context": "300+200+80=[580]>>580 birds in total\n"
+      },
+      {
+        "activation": 1.5254,
+        "expression": "6*9*14",
+        "result_value": 756.0,
+        "context": "6*9*14=[756]>>756 bananas.\nThere"
+      },
+      {
+        "activation": 1.5195,
+        "expression": "12+4",
+        "result_value": 16.0,
+        "context": " = <<12+4=[16]>>16 hour a week to"
+      },
+      {
+        "activation": 1.498,
+        "expression": "4*500",
+        "result_value": 2000.0,
+        "context": " = <<4*500=[2000]>>2000 blocks into the truck"
+      },
+      {
+        "activation": 1.4873,
+        "expression": "400*1.5",
+        "result_value": 600.0,
+        "context": "400*1.5=[600]>>600 pounds\nSo it"
+      }
+    ]
+  },
+  {
+    "feature_idx": 2257,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.09495548903942108,
+      "result": 0.0,
+      "eq_sign": 0.011869436129927635,
+      "background": 0.013353115878999233
+    },
+    "mean_activation": 0.49993000030517576,
+    "active_count": 290,
+    "top_examples": [
+      {
+        "activation": 2.3066,
+        "expression": "55",
+        "result_value": 55.0,
+        "context": "*110 = <<55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 1.8506,
+        "expression": "16/2",
+        "result_value": 8.0,
+        "context": " = <<16/2=[8]>>8.\nJeff completed"
+      },
+      {
+        "activation": 1.7783,
+        "expression": "15+35+35+50",
+        "result_value": 135.0,
+        "context": "35+35+50=[135]>>135 coins\nThe number"
+      },
+      {
+        "activation": 1.6055,
+        "expression": "450000-2000",
+        "result_value": 448000.0,
+        "context": "<<450000-2000=[448]000>>448,000\n"
+      },
+      {
+        "activation": 1.5947,
+        "expression": "5*2",
+        "result_value": 10.0,
+        "context": " = <<5*2=[10]>>10 cars are passing."
+      },
+      {
+        "activation": 1.584,
+        "expression": "11*75",
+        "result_value": 825.0,
+        "context": " = <<11*75=[825]>>825 pieces\nThen subtract"
+      },
+      {
+        "activation": 1.5039,
+        "expression": "12",
+        "result_value": 12.0,
+        "context": " to run is <<12=[12]>>12 miles a day\n"
+      },
+      {
+        "activation": 1.4932,
+        "expression": "400-200",
+        "result_value": 200.0,
+        "context": " = <<400-200=[200]>>200 pounds from small animals"
+      },
+      {
+        "activation": 1.4482,
+        "expression": "30-15",
+        "result_value": 15.0,
+        "context": " $<<30-15=[15]>>15 more than Tommy."
+      },
+      {
+        "activation": 1.4082,
+        "expression": "1000-200-400",
+        "result_value": 400.0,
+        "context": "1000-200-400=[400]>>400 pounds.\nThus"
+      },
+      {
+        "activation": 1.3643,
+        "expression": "7*15",
+        "result_value": 105.0,
+        "context": "=<<7*15=[105]>>105 gallons\nSo he"
+      },
+      {
+        "activation": 1.2871,
+        "expression": "6*18",
+        "result_value": 108.0,
+        "context": " = <<6*18=[108]>>108 sentences after her meeting"
+      },
+      {
+        "activation": 1.2754,
+        "expression": "2*3",
+        "result_value": 6.0,
+        "context": " $<<2*3=[6]>>6.\nTheir breakfast"
+      },
+      {
+        "activation": 1.2354,
+        "expression": "2*20",
+        "result_value": 40.0,
+        "context": "=<<2*20=[40]>>40 minutes each.\n"
+      },
+      {
+        "activation": 1.2344,
+        "expression": "133*3",
+        "result_value": 399.0,
+        "context": " $<<133*3=[399]>>399.\nOn all"
+      },
+      {
+        "activation": 1.2119,
+        "expression": "580-231",
+        "result_value": 349.0,
+        "context": " = <<580-231=[349]>>349 birds left in the"
+      },
+      {
+        "activation": 1.2012,
+        "expression": "22500*20",
+        "result_value": 450000.0,
+        "context": "<<22500*20=[45]0000>>450,000\n"
+      },
+      {
+        "activation": 1.1992,
+        "expression": "80*.05",
+        "result_value": 4.0,
+        "context": " = <<80*.05=[4]>>4\nHer money is"
+      },
+      {
+        "activation": 1.1934,
+        "expression": "97-12",
+        "result_value": 85.0,
+        "context": " = <<97-12=[85]>>85 kilograms.\n####"
+      },
+      {
+        "activation": 1.1865,
+        "expression": "86+172",
+        "result_value": 258.0,
+        "context": "=<<86+172=[258]>>258 geckos\n"
+      }
+    ]
+  },
+  {
+    "feature_idx": 1413,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.25281016031901044,
+    "active_count": 69,
+    "top_examples": [
+      {
+        "activation": 1.8252,
+        "expression": "134000/200",
+        "result_value": 670.0,
+        "context": "<<134000/200=[670]>>670\n#### 670"
+      },
+      {
+        "activation": 0.834,
+        "expression": "20+25+22+20+10",
+        "result_value": 97.0,
+        "context": "22+20+10=[97]>>97 cars traveling down the"
+      },
+      {
+        "activation": 0.769,
+        "expression": "480*4",
+        "result_value": 1920.0,
+        "context": " = <<480*4=[1920]>>1920 minutes/month\n"
+      },
+      {
+        "activation": 0.666,
+        "expression": "72-30",
+        "result_value": 42.0,
+        "context": " = <<72-30=[42]>>42 stickers.\n####"
+      },
+      {
+        "activation": 0.5288,
+        "expression": "840-825",
+        "result_value": 15.0,
+        "context": " = <<840-825=[15]>>15 pieces\n#### 15"
+      },
+      {
+        "activation": 0.5039,
+        "expression": "15+9",
+        "result_value": 24.0,
+        "context": "=<<15+9=[24]>>24 flights of stairs in"
+      },
+      {
+        "activation": 0.4954,
+        "expression": "19+24",
+        "result_value": 43.0,
+        "context": " = <<19+24=[43]>>43 hard hats remained in"
+      },
+      {
+        "activation": 0.4939,
+        "expression": "12+8+4+11+5+6",
+        "result_value": 46.0,
+        "context": "11+5+6=[46]>>46 books total\n####"
+      },
+      {
+        "activation": 0.4912,
+        "expression": "500-426",
+        "result_value": 74.0,
+        "context": " $<<500-426=[74]>>74.\n#### 74"
+      },
+      {
+        "activation": 0.4321,
+        "expression": "48+16",
+        "result_value": 64.0,
+        "context": " = <<48+16=[64]>>64 hats.\nWhen"
+      },
+      {
+        "activation": 0.4106,
+        "expression": "30/5",
+        "result_value": 6.0,
+        "context": " = <<30/5=[6]>>6 rooms to fit everyone"
+      },
+      {
+        "activation": 0.3936,
+        "expression": "30-5",
+        "result_value": 25.0,
+        "context": " = <<30-5=[25]>>25 coconut trees.\n"
+      },
+      {
+        "activation": 0.3716,
+        "expression": "20-2",
+        "result_value": 18.0,
+        "context": " = <<20-2=[18]>>18 seconds\n#### 18"
+      },
+      {
+        "activation": 0.363,
+        "expression": "380/4",
+        "result_value": 95.0,
+        "context": "=$<<380/4=[95]>>95\nThen adding in"
+      },
+      {
+        "activation": 0.3396,
+        "expression": "60/5",
+        "result_value": 12.0,
+        "context": " = <<60/5=[12]>>12 minutes every day feeding"
+      },
+      {
+        "activation": 0.3054,
+        "expression": "56/4",
+        "result_value": 14.0,
+        "context": " = <<56/4=[14]>>14 skips per round"
+      },
+      {
+        "activation": 0.303,
+        "expression": "100-68",
+        "result_value": 32.0,
+        "context": " = <<100-68=[32]>>32 pounds\nIt therefore"
+      },
+      {
+        "activation": 0.3013,
+        "expression": "36*3/4",
+        "result_value": 27.0,
+        "context": "36*3/4=[27]>>27 students are in the"
+      },
+      {
+        "activation": 0.2971,
+        "expression": "32*2",
+        "result_value": 64.0,
+        "context": " = <<32*2=[64]>>64 hours watching both daughters"
+      },
+      {
+        "activation": 0.2881,
+        "expression": "10+3",
+        "result_value": 13.0,
+        "context": " = <<10+3=[13]>>13 objects\n#### 13"
+      }
+    ]
+  },
+  {
+    "feature_idx": 2595,
+    "layer": 14,
+    "role": "eq_sign",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.02818991057574749,
+      "eq_sign": 0.3768545985221863,
+      "background": 0.026706231757998466
+    },
+    "mean_activation": 1.1430928999377836,
+    "active_count": 620,
+    "top_examples": [
+      {
+        "activation": 2.9727,
+        "expression": "6/3",
+        "result_value": 2.0,
+        "context": "=<<6/3=[2]>>2 meows per minute"
+      },
+      {
+        "activation": 2.9434,
+        "expression": "16-10",
+        "result_value": 6.0,
+        "context": " = <<16-10=[6]>>6 pizza pieces uneat"
+      },
+      {
+        "activation": 2.8633,
+        "expression": "10*2",
+        "result_value": 20.0,
+        "context": " = <<10*2=[20]>>20 cars passing.\n"
+      },
+      {
+        "activation": 2.8633,
+        "expression": "2*3",
+        "result_value": 6.0,
+        "context": " $<<2*3=[6]>>6.\nTheir breakfast"
+      },
+      {
+        "activation": 2.8633,
+        "expression": "400-200",
+        "result_value": 200.0,
+        "context": " = <<400-200=[200]>>200 pounds from small animals"
+      },
+      {
+        "activation": 2.834,
+        "expression": "4*500",
+        "result_value": 2000.0,
+        "context": " = <<4*500=[2000]>>2000 blocks into the truck"
+      },
+      {
+        "activation": 2.832,
+        "expression": "75-55",
+        "result_value": 20.0,
+        "context": " $<<75-55=[20]>>20\nShe bought 4"
+      },
+      {
+        "activation": 2.8203,
+        "expression": "4+2",
+        "result_value": 6.0,
+        "context": " = <<4+2=[6]>>6 hours.\n####"
+      },
+      {
+        "activation": 2.7891,
+        "expression": "12+8",
+        "result_value": 20.0,
+        "context": " = <<12+8=[20]>>20 sticks of wax for"
+      },
+      {
+        "activation": 2.7598,
+        "expression": "4000/2000",
+        "result_value": 2.0,
+        "context": " = <<4000/2000=[2]>>2 hours to fill the"
+      },
+      {
+        "activation": 2.7344,
+        "expression": "1*12",
+        "result_value": 12.0,
+        "context": " = <<1*12=[12]>>12 towels a day\n"
+      },
+      {
+        "activation": 2.7188,
+        "expression": "120-60",
+        "result_value": 60.0,
+        "context": "=$<<120-60=[60]>>60\nSo in total"
+      },
+      {
+        "activation": 2.6406,
+        "expression": "9*2",
+        "result_value": 18.0,
+        "context": " = <<9*2=[18]>>18 feet of yarn."
+      },
+      {
+        "activation": 2.6348,
+        "expression": "200-170",
+        "result_value": 30.0,
+        "context": " $<<200-170=[30]>>30 after paying all the"
+      },
+      {
+        "activation": 2.6309,
+        "expression": "15*16",
+        "result_value": 240.0,
+        "context": "=$<<15*16=[240]>>240\nSo he earns"
+      },
+      {
+        "activation": 2.623,
+        "expression": "6*3",
+        "result_value": 18.0,
+        "context": " = <<6*3=[18]>>18 rabbits\nThere were"
+      },
+      {
+        "activation": 2.6074,
+        "expression": "30-12",
+        "result_value": 18.0,
+        "context": " = <<30-12=[18]>>18\nShe has to"
+      },
+      {
+        "activation": 2.5781,
+        "expression": "40+80",
+        "result_value": 120.0,
+        "context": "=<<40+80=[120]>>120 minutes of TV."
+      },
+      {
+        "activation": 2.5742,
+        "expression": "16+4",
+        "result_value": 20.0,
+        "context": " = <<16+4=[20]>>20.\nIn round"
+      },
+      {
+        "activation": 2.5508,
+        "expression": "600+320",
+        "result_value": 920.0,
+        "context": " = <<600+320=[920]>>920\n#### 920"
+      }
+    ]
+  },
+  {
+    "feature_idx": 4776,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.36288098089709253,
+    "active_count": 167,
+    "top_examples": [
+      {
+        "activation": 1.2783,
+        "expression": "400+20",
+        "result_value": 420.0,
+        "context": " = <<400+20=[420]>>420\nThe next two"
+      },
+      {
+        "activation": 1.1133,
+        "expression": "100+20+80",
+        "result_value": 200.0,
+        "context": "100+20+80=[200]>>200\nThe average cost"
+      },
+      {
+        "activation": 1.1035,
+        "expression": "10*20",
+        "result_value": 200.0,
+        "context": " $<<10*20=[200]>>200 in overtime.\n"
+      },
+      {
+        "activation": 1.0625,
+        "expression": "400/2",
+        "result_value": 200.0,
+        "context": " = <<400/2=[200]>>200 pounds from salmon."
+      },
+      {
+        "activation": 1.0605,
+        "expression": "420+80",
+        "result_value": 500.0,
+        "context": " = <<420+80=[500]>>500 pages of the book"
+      },
+      {
+        "activation": 1.0547,
+        "expression": "3+1",
+        "result_value": 4.0,
+        "context": " = <<3+1=[4]>>4 crayons to"
+      },
+      {
+        "activation": 1.0371,
+        "expression": "1/5*1000",
+        "result_value": 200.0,
+        "context": "1/5*1000=[200]>>200 pounds from berries."
+      },
+      {
+        "activation": 1.0303,
+        "expression": "109*2",
+        "result_value": 218.0,
+        "context": " $<<109*2=[218]>>218.\nThus,"
+      },
+      {
+        "activation": 1.0186,
+        "expression": "600-400",
+        "result_value": 200.0,
+        "context": " = <<600-400=[200]>>200 pounds\nSo its"
+      },
+      {
+        "activation": 1.0029,
+        "expression": "56/2",
+        "result_value": 28.0,
+        "context": " = <<56/2=[28]>>28 kg\nThe last"
+      },
+      {
+        "activation": 1.001,
+        "expression": "5*40",
+        "result_value": 200.0,
+        "context": " = <<5*40=[200]>>200 books during that time"
+      },
+      {
+        "activation": 0.9873,
+        "expression": "318-40",
+        "result_value": 278.0,
+        "context": " = <<318-40=[278]>>278 sentences that she typed"
+      },
+      {
+        "activation": 0.9868,
+        "expression": "35/7",
+        "result_value": 5.0,
+        "context": " = <<35/7=[5]>>5\n#### 5"
+      },
+      {
+        "activation": 0.9785,
+        "expression": "30-12",
+        "result_value": 18.0,
+        "context": " = <<30-12=[18]>>18\nShe has to"
+      },
+      {
+        "activation": 0.9731,
+        "expression": "2*200",
+        "result_value": 400.0,
+        "context": " = <<2*200=[400]>>400 pounds from acorns"
+      },
+      {
+        "activation": 0.9395,
+        "expression": "0.50-.25",
+        "result_value": 0.25,
+        "context": "0.50-.25=[0].25>>0.25"
+      },
+      {
+        "activation": 0.9106,
+        "expression": "400-200",
+        "result_value": 200.0,
+        "context": " = <<400-200=[200]>>200 pounds from small animals"
+      },
+      {
+        "activation": 0.856,
+        "expression": "16/2",
+        "result_value": 8.0,
+        "context": " = <<16/2=[8]>>8.\nJeff completed"
+      },
+      {
+        "activation": 0.855,
+        "expression": "3*2",
+        "result_value": 6.0,
+        "context": " = <<3*2=[6]>>6 rabbits\n6 rabbits"
+      },
+      {
+        "activation": 0.8433,
+        "expression": "38/2",
+        "result_value": 19.0,
+        "context": " = <<38/2=[19]>>19 apples.\n####"
+      }
+    ]
+  },
+  {
+    "feature_idx": 6334,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.5196003835709369,
+    "active_count": 244,
+    "top_examples": [
+      {
+        "activation": 1.7568,
+        "expression": "60/5",
+        "result_value": 12.0,
+        "context": "=<<60/5=[12]>>12 seconds.\nThere"
+      },
+      {
+        "activation": 1.6914,
+        "expression": "2*20",
+        "result_value": 40.0,
+        "context": "=<<2*20=[40]>>40 minutes of Jeopard"
+      },
+      {
+        "activation": 1.5391,
+        "expression": "10*4",
+        "result_value": 40.0,
+        "context": " $<<10*4=[40]>>40.\nThe cost"
+      },
+      {
+        "activation": 1.4902,
+        "expression": "9*4",
+        "result_value": 36.0,
+        "context": " $<<9*4=[36]>>36.\nThe three"
+      },
+      {
+        "activation": 1.4297,
+        "expression": "32/2",
+        "result_value": 16.0,
+        "context": " $<<32/2=[16]>>16 million.\nThe"
+      },
+      {
+        "activation": 1.4238,
+        "expression": "3*4",
+        "result_value": 12.0,
+        "context": " =<<3*4=[12]>>12 people in the vacation"
+      },
+      {
+        "activation": 1.3594,
+        "expression": "5*4",
+        "result_value": 20.0,
+        "context": "=<<5*4=[20]>>20 pounds of beef\n"
+      },
+      {
+        "activation": 1.3057,
+        "expression": "2*15",
+        "result_value": 30.0,
+        "context": " $<<2*15=[30].00>>30.00"
+      },
+      {
+        "activation": 1.2529,
+        "expression": "20*2",
+        "result_value": 40.0,
+        "context": "=<<20*2=[40]>>40 miles each day for"
+      },
+      {
+        "activation": 1.25,
+        "expression": "10*4",
+        "result_value": 40.0,
+        "context": " = <<10*4=[40]>>40 pounds\nThe second"
+      },
+      {
+        "activation": 1.2344,
+        "expression": "5+6",
+        "result_value": 11.0,
+        "context": " = <<5+6=[11]>>11 mystery novels.\n"
+      },
+      {
+        "activation": 1.2236,
+        "expression": "40-10",
+        "result_value": 30.0,
+        "context": "=<<40-10=[30]>>30 years\nSo together"
+      },
+      {
+        "activation": 1.2188,
+        "expression": "3*10",
+        "result_value": 30.0,
+        "context": " = <<3*10=[30]>>30 inches.\nIf"
+      },
+      {
+        "activation": 1.2051,
+        "expression": "5*2",
+        "result_value": 10.0,
+        "context": "=$<<5*2=[10]>>10 on Wednesday to pay"
+      },
+      {
+        "activation": 1.2031,
+        "expression": "16*1/2",
+        "result_value": 8.0,
+        "context": "16*1/2=[8]>>8 teaspoons of salt."
+      },
+      {
+        "activation": 1.2002,
+        "expression": "10+5+20",
+        "result_value": 35.0,
+        "context": "10+5+20=[35]>>35 on the ingredients."
+      },
+      {
+        "activation": 1.1836,
+        "expression": "3+6+2",
+        "result_value": 11.0,
+        "context": "3+6+2=[11]>>11 times per minute."
+      },
+      {
+        "activation": 1.1562,
+        "expression": "2*10",
+        "result_value": 20.0,
+        "context": " = <<2*10=[20]>>20ml of oil."
+      },
+      {
+        "activation": 1.1406,
+        "expression": "12.50+12.50+5.00",
+        "result_value": 30.0,
+        "context": "50+5.00=[30].00>>30.00"
+      },
+      {
+        "activation": 1.1406,
+        "expression": "3*4",
+        "result_value": 12.0,
+        "context": " = <<3*4=[12]>>12 kilograms.\nSo"
+      }
+    ]
+  },
+  {
+    "feature_idx": 8283,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.3611104091008504,
+    "active_count": 96,
+    "top_examples": [
+      {
+        "activation": 1.3496,
+        "expression": "1000-200-400",
+        "result_value": 400.0,
+        "context": "1000-200-400=[400]>>400 pounds.\nThus"
+      },
+      {
+        "activation": 1.2412,
+        "expression": "25+40+35",
+        "result_value": 100.0,
+        "context": "25+40+35=[100]>>100 flowers total.\n"
+      },
+      {
+        "activation": 1.041,
+        "expression": "400/2",
+        "result_value": 200.0,
+        "context": " = <<400/2=[200]>>200 pounds from salmon."
+      },
+      {
+        "activation": 0.9907,
+        "expression": "346-80",
+        "result_value": 266.0,
+        "context": " = <<346-80=[266]>>266 games.\n50"
+      },
+      {
+        "activation": 0.8979,
+        "expression": "12*2",
+        "result_value": 24.0,
+        "context": " = <<12*2=[24]>>24 pages today.\n"
+      },
+      {
+        "activation": 0.8936,
+        "expression": "800-560",
+        "result_value": 240.0,
+        "context": " = <<800-560=[240]>>240\nWhen he downloaded"
+      },
+      {
+        "activation": 0.8877,
+        "expression": "400/2",
+        "result_value": 200.0,
+        "context": " = <<400/2=[200]>>200 photos.\nThe"
+      },
+      {
+        "activation": 0.8481,
+        "expression": "16*12",
+        "result_value": 192.0,
+        "context": " = <<16*12=[192]>>192 square feet\nThen"
+      },
+      {
+        "activation": 0.8003,
+        "expression": "86+172",
+        "result_value": 258.0,
+        "context": "=<<86+172=[258]>>258 geckos\n"
+      },
+      {
+        "activation": 0.7979,
+        "expression": "48/2",
+        "result_value": 24.0,
+        "context": " = <<48/2=[24]>>24 clips in May."
+      },
+      {
+        "activation": 0.7954,
+        "expression": "70/100*800",
+        "result_value": 560.0,
+        "context": "70/100*800=[560]>>560 files.\nThe"
+      },
+      {
+        "activation": 0.7432,
+        "expression": "10*10",
+        "result_value": 100.0,
+        "context": " = <<10*10=[100]>>100 rooms.\nOne"
+      },
+      {
+        "activation": 0.7427,
+        "expression": "1000*20/100",
+        "result_value": 200.0,
+        "context": "1000*20/100=[200]>>200 down payment.\n"
+      },
+      {
+        "activation": 0.7363,
+        "expression": "100*1000",
+        "result_value": 100000.0,
+        "context": " $<<100*1000=[100]000>>100,000\n"
+      },
+      {
+        "activation": 0.7339,
+        "expression": "1/5*1000",
+        "result_value": 200.0,
+        "context": "1/5*1000=[200]>>200 pounds from berries."
+      },
+      {
+        "activation": 0.7222,
+        "expression": "48/2",
+        "result_value": 24.0,
+        "context": " = <<48/2=[24]>>24 gallons.\nFollowing"
+      },
+      {
+        "activation": 0.6748,
+        "expression": "237-60",
+        "result_value": 177.0,
+        "context": " = <<237-60=[177]>>177 cucumbers.\n"
+      },
+      {
+        "activation": 0.6743,
+        "expression": "16/2",
+        "result_value": 8.0,
+        "context": " = <<16/2=[8]>>8 people.\n8"
+      },
+      {
+        "activation": 0.645,
+        "expression": "4*4",
+        "result_value": 16.0,
+        "context": " = <<4*4=[16]>>16 pizza pieces.\n"
+      },
+      {
+        "activation": 0.6201,
+        "expression": "100000+18000+16000",
+        "result_value": 134000.0,
+        "context": "18000+16000=[134]000>>134,000\n"
+      }
+    ]
+  },
+  {
+    "feature_idx": 402,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.002967359032481909,
+      "eq_sign": 0.0014836795162409544,
+      "background": 0.005934718064963818
+    },
+    "mean_activation": 0.8112954822837883,
+    "active_count": 564,
+    "top_examples": [
+      {
+        "activation": 3.0957,
+        "expression": "250*8",
+        "result_value": 2000.0,
+        "context": " = <<250*8=[2000]>>2000 blocks in one hour"
+      },
+      {
+        "activation": 2.5566,
+        "expression": "420+80",
+        "result_value": 500.0,
+        "context": " = <<420+80=[500]>>500 pages of the book"
+      },
+      {
+        "activation": 2.3633,
+        "expression": "6*15",
+        "result_value": 90.0,
+        "context": " = <<6*15=[90]>>90 sentences after her break"
+      },
+      {
+        "activation": 2.3457,
+        "expression": "30+140",
+        "result_value": 170.0,
+        "context": " $<<30+140=[170]>>170.\nTherefore,"
+      },
+      {
+        "activation": 2.2598,
+        "expression": "10+60+20",
+        "result_value": 90.0,
+        "context": "10+60+20=[90]>>90.\nLisa and"
+      },
+      {
+        "activation": 2.25,
+        "expression": "40+80",
+        "result_value": 120.0,
+        "context": "=<<40+80=[120]>>120 minutes of TV."
+      },
+      {
+        "activation": 2.2227,
+        "expression": "200-170",
+        "result_value": 30.0,
+        "context": " $<<200-170=[30]>>30 after paying all the"
+      },
+      {
+        "activation": 2.2207,
+        "expression": "780-260",
+        "result_value": 520.0,
+        "context": " $<<780-260=[520]>>520.\n#### 520"
+      },
+      {
+        "activation": 2.1914,
+        "expression": "100-10",
+        "result_value": 90.0,
+        "context": " = <<100-10=[90]>>90 available rooms.\n"
+      },
+      {
+        "activation": 2.1895,
+        "expression": "50/100*266",
+        "result_value": 133.0,
+        "context": "50/100*266=[133]>>133 games.\nDaniel"
+      },
+      {
+        "activation": 2.1699,
+        "expression": "24-10",
+        "result_value": 14.0,
+        "context": " =<<24-10=[14]>>14 cans left\nEach"
+      },
+      {
+        "activation": 2.1191,
+        "expression": "133*7",
+        "result_value": 931.0,
+        "context": " $<<133*7=[9]31>>931 on them"
+      },
+      {
+        "activation": 2.0957,
+        "expression": "192-24-8",
+        "result_value": 160.0,
+        "context": "192-24-8=[160]>>160 square feet\n####"
+      },
+      {
+        "activation": 2.0801,
+        "expression": "40+30",
+        "result_value": 70.0,
+        "context": "=<<40+30=[70]>>70 years of experience\n"
+      },
+      {
+        "activation": 2.0508,
+        "expression": "24-10",
+        "result_value": 14.0,
+        "context": " = <<24-10=[14]>>14 years old now."
+      },
+      {
+        "activation": 2.0273,
+        "expression": "50/10",
+        "result_value": 5.0,
+        "context": " = <<50/10=[5]>>5 pencils inside."
+      },
+      {
+        "activation": 2.0117,
+        "expression": "2*365",
+        "result_value": 730.0,
+        "context": " $<<2*365=[730]>>730/year\nIn"
+      },
+      {
+        "activation": 2.0098,
+        "expression": "80*200",
+        "result_value": 16000.0,
+        "context": " $<<80*200=[16]000>>16,000\n"
+      },
+      {
+        "activation": 2.0078,
+        "expression": "30+16+24",
+        "result_value": 70.0,
+        "context": "30+16+24=[70]>>70 unused crayons"
+      },
+      {
+        "activation": 1.958,
+        "expression": "8*2",
+        "result_value": 16.0,
+        "context": " = <<8*2=[16]>>16 unused crayons"
+      }
+    ]
+  },
+  {
+    "feature_idx": 400,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.3652970495150071,
+    "active_count": 129,
+    "top_examples": [
+      {
+        "activation": 1.3867,
+        "expression": "100-38",
+        "result_value": 62.0,
+        "context": "=$<<100-38=[62]>>62\n#### 62"
+      },
+      {
+        "activation": 1.1914,
+        "expression": "64+32",
+        "result_value": 96.0,
+        "context": " = <<64+32=[96]>>96 weasels and"
+      },
+      {
+        "activation": 1.1709,
+        "expression": "11+20+7",
+        "result_value": 38.0,
+        "context": "11+20+7=[38]>>38 stamps in all."
+      },
+      {
+        "activation": 1.1445,
+        "expression": "4+8+27+6",
+        "result_value": 45.0,
+        "context": "8+27+6=[45]>>45 gumballs.\n"
+      },
+      {
+        "activation": 1.082,
+        "expression": "40+28",
+        "result_value": 68.0,
+        "context": " = <<40+28=[68]>>68 pounds\nSubt"
+      },
+      {
+        "activation": 1.0645,
+        "expression": "28/7",
+        "result_value": 4.0,
+        "context": " $<<28/7=[4]>>4 on a milksh"
+      },
+      {
+        "activation": 0.9937,
+        "expression": "22+25+21",
+        "result_value": 68.0,
+        "context": "22+25+21=[68]>>68 minutes in all."
+      },
+      {
+        "activation": 0.9897,
+        "expression": "3-2",
+        "result_value": 1.0,
+        "context": " $<<3-2=[1]>>1.\nSo the"
+      },
+      {
+        "activation": 0.9526,
+        "expression": "260-24-63-25",
+        "result_value": 148.0,
+        "context": "24-63-25=[148]>>148 kids\n#### 148"
+      },
+      {
+        "activation": 0.9341,
+        "expression": "40-2",
+        "result_value": 38.0,
+        "context": " $<<40-2=[38]>>38 each.\nThus"
+      },
+      {
+        "activation": 0.8535,
+        "expression": "72-30",
+        "result_value": 42.0,
+        "context": " = <<72-30=[42]>>42 stickers.\n####"
+      },
+      {
+        "activation": 0.8296,
+        "expression": "38*2",
+        "result_value": 76.0,
+        "context": " $<<38*2=[76]>>76.\nAnd the"
+      },
+      {
+        "activation": 0.793,
+        "expression": "2*4*75*.01",
+        "result_value": 6.0,
+        "context": "4*75*.01=[6]>>6 pieces.\nThe"
+      },
+      {
+        "activation": 0.7393,
+        "expression": "40+20+80",
+        "result_value": 140.0,
+        "context": "40+20+80=[140]>>140.\nCarly"
+      },
+      {
+        "activation": 0.7285,
+        "expression": "15+13+20+8",
+        "result_value": 56.0,
+        "context": "13+20+8=[56]>>56 skips in total"
+      },
+      {
+        "activation": 0.7275,
+        "expression": "9*4",
+        "result_value": 36.0,
+        "context": " $<<9*4=[36]>>36.\nThe three"
+      },
+      {
+        "activation": 0.6948,
+        "expression": "24/2",
+        "result_value": 12.0,
+        "context": " $<<24/2=[12]>>12 in her wallet."
+      },
+      {
+        "activation": 0.6846,
+        "expression": "120-75",
+        "result_value": 45.0,
+        "context": " = <<120-75=[45]>>45 minutes to finish the"
+      },
+      {
+        "activation": 0.6826,
+        "expression": "32+64",
+        "result_value": 96.0,
+        "context": " = <<32+64=[96]>>96 hours.\n####"
+      },
+      {
+        "activation": 0.6792,
+        "expression": "50-18",
+        "result_value": 32.0,
+        "context": " = <<50-18=[32]>>32 rabbits left\nThere"
+      }
+    ]
+  },
+  {
+    "feature_idx": 1547,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.3539786028438771,
+    "active_count": 169,
+    "top_examples": [
+      {
+        "activation": 1.8916,
+        "expression": "2*20",
+        "result_value": 40.0,
+        "context": "=<<2*20=[40]>>40 minutes each.\n"
+      },
+      {
+        "activation": 1.3662,
+        "expression": "3*10",
+        "result_value": 30.0,
+        "context": " = <<3*10=[30]>>30 cookie slices.\n"
+      },
+      {
+        "activation": 1.3066,
+        "expression": "1*1",
+        "result_value": 1.0,
+        "context": " $<<1*1=[1]>>1.\nThe cost"
+      },
+      {
+        "activation": 1.1396,
+        "expression": "12*2",
+        "result_value": 24.0,
+        "context": " = <<12*2=[24]>>24 pages today.\n"
+      },
+      {
+        "activation": 1.043,
+        "expression": "100-20",
+        "result_value": 80.0,
+        "context": " = <<100-20=[80]>>80\nThe iron nic"
+      },
+      {
+        "activation": 0.9888,
+        "expression": "5*6",
+        "result_value": 30.0,
+        "context": " $<<5*6=[30]>>30 on drinks.\n"
+      },
+      {
+        "activation": 0.8696,
+        "expression": "16-3",
+        "result_value": 13.0,
+        "context": " = <<16-3=[13]>>13.\nIn round"
+      },
+      {
+        "activation": 0.8643,
+        "expression": "8*1/2",
+        "result_value": 4.0,
+        "context": "8*1/2=[4]>>4 dinner rolls eaten."
+      },
+      {
+        "activation": 0.8555,
+        "expression": "1200/20",
+        "result_value": 60.0,
+        "context": "=<<1200/20=[60]>>60 days\n#### 60"
+      },
+      {
+        "activation": 0.8179,
+        "expression": "18/3",
+        "result_value": 6.0,
+        "context": " = <<18/3=[6]>>6\nThe total they"
+      },
+      {
+        "activation": 0.8115,
+        "expression": "20*2",
+        "result_value": 40.0,
+        "context": "=<<20*2=[40]>>40 miles each day for"
+      },
+      {
+        "activation": 0.8105,
+        "expression": "2*10",
+        "result_value": 20.0,
+        "context": "=$<<2*10=[20]>>20\nThe shorts and"
+      },
+      {
+        "activation": 0.8042,
+        "expression": "80*6",
+        "result_value": 480.0,
+        "context": " = <<80*6=[480]>>480 minutes/week\n"
+      },
+      {
+        "activation": 0.7988,
+        "expression": "3*2",
+        "result_value": 6.0,
+        "context": "=<<3*2=[6]>>6 pages a week\n"
+      },
+      {
+        "activation": 0.688,
+        "expression": "2*20",
+        "result_value": 40.0,
+        "context": "=<<2*20=[40]>>40 minutes of Jeopard"
+      },
+      {
+        "activation": 0.6729,
+        "expression": "60*2/3",
+        "result_value": 40.0,
+        "context": "60*2/3=[40]>>40 students who have a"
+      },
+      {
+        "activation": 0.6709,
+        "expression": "60*1/2",
+        "result_value": 30.0,
+        "context": "60*1/2=[30]>>30.\nTommy"
+      },
+      {
+        "activation": 0.6665,
+        "expression": "5*4",
+        "result_value": 20.0,
+        "context": "=<<5*4=[20]>>20 pounds of beef\n"
+      },
+      {
+        "activation": 0.6606,
+        "expression": "28/7",
+        "result_value": 4.0,
+        "context": " $<<28/7=[4]>>4 on a milksh"
+      },
+      {
+        "activation": 0.6479,
+        "expression": "30*4",
+        "result_value": 120.0,
+        "context": " $<<30*4=[120]>>120 for the small paintings"
+      }
+    ]
+  },
+  {
+    "feature_idx": 6941,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.4768393025595761,
+    "active_count": 169,
+    "top_examples": [
+      {
+        "activation": 1.6533,
+        "expression": "10+60+20",
+        "result_value": 90.0,
+        "context": "10+60+20=[90]>>90.\nLisa and"
+      },
+      {
+        "activation": 1.2861,
+        "expression": "1188/12",
+        "result_value": 99.0,
+        "context": " <<1188/12=[99]>>99 bananas.\n####"
+      },
+      {
+        "activation": 1.2568,
+        "expression": "13+36+15+35",
+        "result_value": 99.0,
+        "context": "36+15+35=[99]>>99.\n#### 99"
+      },
+      {
+        "activation": 1.2549,
+        "expression": "360-270",
+        "result_value": 90.0,
+        "context": " = <<360-270=[90]>>90 coins\n#### 90"
+      },
+      {
+        "activation": 1.2168,
+        "expression": "40+20",
+        "result_value": 60.0,
+        "context": " = <<40+20=[60]>>60 marbles\n####"
+      },
+      {
+        "activation": 1.2109,
+        "expression": "184-143",
+        "result_value": 41.0,
+        "context": " $<<184-143=[41]>>41 for the shoes."
+      },
+      {
+        "activation": 1.2031,
+        "expression": "6000/60",
+        "result_value": 100.0,
+        "context": " $<<6000/60=[100]>>100 per month\nTo"
+      },
+      {
+        "activation": 1.1396,
+        "expression": "720+270",
+        "result_value": 990.0,
+        "context": " $<<720+270=[990].00>>990.00"
+      },
+      {
+        "activation": 1.1191,
+        "expression": "97-12",
+        "result_value": 85.0,
+        "context": " = <<97-12=[85]>>85 kilograms.\n####"
+      },
+      {
+        "activation": 1.0918,
+        "expression": "134000/200",
+        "result_value": 670.0,
+        "context": "<<134000/200=[670]>>670\n#### 670"
+      },
+      {
+        "activation": 1.0645,
+        "expression": "100-38",
+        "result_value": 62.0,
+        "context": "=$<<100-38=[62]>>62\n#### 62"
+      },
+      {
+        "activation": 1.0566,
+        "expression": "30*3",
+        "result_value": 90.0,
+        "context": " = <<30*3=[90]>>90 snakes\nThen multiply"
+      },
+      {
+        "activation": 1.0303,
+        "expression": "20+25+22+20+10",
+        "result_value": 97.0,
+        "context": "22+20+10=[97]>>97 cars traveling down the"
+      },
+      {
+        "activation": 1.002,
+        "expression": "13-3",
+        "result_value": 10.0,
+        "context": "=<<13-3=[10]>>10 beads from each part"
+      },
+      {
+        "activation": 0.9922,
+        "expression": "40/4",
+        "result_value": 10.0,
+        "context": " $<<40/4=[10]>>10 on t-shirts"
+      },
+      {
+        "activation": 0.9917,
+        "expression": "6*15",
+        "result_value": 90.0,
+        "context": " = <<6*15=[90]>>90 sentences after her break"
+      },
+      {
+        "activation": 0.9663,
+        "expression": "756+432",
+        "result_value": 1188.0,
+        "context": " = <<756+432=[11]88>>1188 bananas\n"
+      },
+      {
+        "activation": 0.9565,
+        "expression": "50*2",
+        "result_value": 100.0,
+        "context": "=$<<50*2=[100]>>100 per minute to film"
+      },
+      {
+        "activation": 0.9438,
+        "expression": "4+8+27+6",
+        "result_value": 45.0,
+        "context": "8+27+6=[45]>>45 gumballs.\n"
+      },
+      {
+        "activation": 0.9434,
+        "expression": "5*2",
+        "result_value": 10.0,
+        "context": " = <<5*2=[10]>>10 cars are passing."
+      }
+    ]
+  },
+  {
+    "feature_idx": 10832,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.004451038781553507,
+      "result": 0.007418397814035416,
+      "eq_sign": 0.0,
+      "background": 0.0014836795162409544
+    },
+    "mean_activation": 0.8078687214067412,
+    "active_count": 517,
+    "top_examples": [
+      {
+        "activation": 3.0352,
+        "expression": "334-12",
+        "result_value": 322.0,
+        "context": " $<<334-12=[322]>>322.\n#### 322"
+      },
+      {
+        "activation": 2.7773,
+        "expression": "109*2",
+        "result_value": 218.0,
+        "context": " $<<109*2=[218]>>218.\nThus,"
+      },
+      {
+        "activation": 2.5801,
+        "expression": "300*.75",
+        "result_value": 225.0,
+        "context": "=$<<300*.75=[225]>>225\nSo he had"
+      },
+      {
+        "activation": 2.5664,
+        "expression": "600+120",
+        "result_value": 720.0,
+        "context": " $<<600+120=[720]>>720\n#### 720"
+      },
+      {
+        "activation": 2.4316,
+        "expression": "140+90",
+        "result_value": 230.0,
+        "context": " $<<140+90=[230]>>230.\n#### 230"
+      },
+      {
+        "activation": 2.3809,
+        "expression": "450000-2000",
+        "result_value": 448000.0,
+        "context": "<<450000-2000=[448]000>>448,000\n"
+      },
+      {
+        "activation": 2.375,
+        "expression": "200+95",
+        "result_value": 295.0,
+        "context": "=$<<200+95=[295]>>295\n#### 295"
+      },
+      {
+        "activation": 2.3652,
+        "expression": "318-40",
+        "result_value": 278.0,
+        "context": " = <<318-40=[278]>>278 sentences that she typed"
+      },
+      {
+        "activation": 2.2734,
+        "expression": "1456/13",
+        "result_value": 112.0,
+        "context": " <<1456/13=[112]>>112 years old\nPeter"
+      },
+      {
+        "activation": 2.2324,
+        "expression": "600+320",
+        "result_value": 920.0,
+        "context": " = <<600+320=[920]>>920\n#### 920"
+      },
+      {
+        "activation": 2.2168,
+        "expression": "1120-400",
+        "result_value": 720.0,
+        "context": "<<1120-400=[720]>>720 is left over after"
+      },
+      {
+        "activation": 2.2109,
+        "expression": "2*365",
+        "result_value": 730.0,
+        "context": " $<<2*365=[730]>>730/year\nIn"
+      },
+      {
+        "activation": 2.1719,
+        "expression": "15*16",
+        "result_value": 240.0,
+        "context": "=$<<15*16=[240]>>240\nSo he earns"
+      },
+      {
+        "activation": 2.1543,
+        "expression": "960+931+399",
+        "result_value": 2290.0,
+        "context": "+931+399=[22]90>>2290.\n"
+      },
+      {
+        "activation": 2.1328,
+        "expression": "4500*5",
+        "result_value": 22500.0,
+        "context": "<<4500*5=[225]00>>22,500\n"
+      },
+      {
+        "activation": 2.1152,
+        "expression": "1000-220",
+        "result_value": 780.0,
+        "context": " $<<1000-220=[780]>>780.\nTara"
+      },
+      {
+        "activation": 2.1055,
+        "expression": "33*7",
+        "result_value": 231.0,
+        "context": " = <<33*7=[231]>>231 birds would be lost"
+      },
+      {
+        "activation": 2.082,
+        "expression": "200+20",
+        "result_value": 220.0,
+        "context": " $<<200+20=[220]>>220.\nSo her"
+      },
+      {
+        "activation": 2.0625,
+        "expression": "65*4",
+        "result_value": 260.0,
+        "context": " $<<65*4=[260]>>260.\nTherefore,"
+      },
+      {
+        "activation": 2.0195,
+        "expression": "360+12",
+        "result_value": 372.0,
+        "context": "=<<360+12=[372]>>372 points\nThat means"
+      }
+    ]
+  },
+  {
+    "feature_idx": 5428,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.011869436129927635,
+      "background": 0.0
+    },
+    "mean_activation": 0.23011652161093318,
+    "active_count": 34,
+    "top_examples": [
+      {
+        "activation": 1.1084,
+        "expression": "2000/1000",
+        "result_value": 2.0,
+        "context": " = <<2000/1000=[2]>>2 kilograms of sugar are"
+      },
+      {
+        "activation": 0.7979,
+        "expression": "4000/2000",
+        "result_value": 2.0,
+        "context": " = <<4000/2000=[2]>>2 hours to fill the"
+      },
+      {
+        "activation": 0.6313,
+        "expression": "10-8",
+        "result_value": 2.0,
+        "context": " = <<10-8=[2]>>2 hours of overtime\n"
+      },
+      {
+        "activation": 0.5391,
+        "expression": "38*2",
+        "result_value": 76.0,
+        "context": " $<<38*2=[76]>>76.\nAnd the"
+      },
+      {
+        "activation": 0.4722,
+        "expression": "3*10",
+        "result_value": 30.0,
+        "context": " = <<3*10=[30]>>30 cookie slices.\n"
+      },
+      {
+        "activation": 0.4111,
+        "expression": "12+14+4",
+        "result_value": 30.0,
+        "context": "12+14+4=[30]>>30 stickers.\nCol"
+      },
+      {
+        "activation": 0.3318,
+        "expression": "120/60",
+        "result_value": 2.0,
+        "context": "=<<120/60=[2]>>2 hours of TV."
+      },
+      {
+        "activation": 0.3152,
+        "expression": "14/2",
+        "result_value": 7.0,
+        "context": " = <<14/2=[7]>>7 in 3 years\n"
+      },
+      {
+        "activation": 0.3083,
+        "expression": "20*3",
+        "result_value": 60.0,
+        "context": " $<<20*3=[60]>>60 on jeans.\n"
+      },
+      {
+        "activation": 0.2737,
+        "expression": "134000/200",
+        "result_value": 670.0,
+        "context": "<<134000/200=[670]>>670\n#### 670"
+      },
+      {
+        "activation": 0.2712,
+        "expression": "5*6",
+        "result_value": 30.0,
+        "context": " = <<5*6=[30]>>30 snakes\nThen find"
+      },
+      {
+        "activation": 0.2554,
+        "expression": "20/10",
+        "result_value": 2.0,
+        "context": " = <<20/10=[2]>>2 seconds\nWe can"
+      },
+      {
+        "activation": 0.2452,
+        "expression": "140+90",
+        "result_value": 230.0,
+        "context": " $<<140+90=[230]>>230.\n#### 230"
+      },
+      {
+        "activation": 0.24,
+        "expression": "25/100*28",
+        "result_value": 7.0,
+        "context": "25/100*28=[7]>>7 green flowers.\n"
+      },
+      {
+        "activation": 0.2114,
+        "expression": "30+140",
+        "result_value": 170.0,
+        "context": " $<<30+140=[170]>>170.\nTherefore,"
+      },
+      {
+        "activation": 0.1671,
+        "expression": "3*10",
+        "result_value": 30.0,
+        "context": " $<<3*10=[30]>>30\n528 + 30"
+      },
+      {
+        "activation": 0.1544,
+        "expression": "90-60",
+        "result_value": 30.0,
+        "context": "=<<90-60=[30]>>30 remaining megabytes."
+      },
+      {
+        "activation": 0.1392,
+        "expression": "12-10",
+        "result_value": 2.0,
+        "context": " = <<12-10=[2]>>2 tickets.\nSo"
+      },
+      {
+        "activation": 0.1227,
+        "expression": "600+120",
+        "result_value": 720.0,
+        "context": " $<<600+120=[720]>>720\n#### 720"
+      },
+      {
+        "activation": 0.1157,
+        "expression": "12.50+12.50+5.00",
+        "result_value": 30.0,
+        "context": "50+5.00=[30].00>>30.00"
+      }
+    ]
+  },
+  {
+    "feature_idx": 424,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.4028160375192625,
+    "active_count": 218,
+    "top_examples": [
+      {
+        "activation": 2.0273,
+        "expression": "111+172",
+        "result_value": 283.0,
+        "context": " = <<111+172=[283]>>283 texts\nKeiko"
+      },
+      {
+        "activation": 1.8057,
+        "expression": "20-13",
+        "result_value": 7.0,
+        "context": " = <<20-13=[7]>>7.\nBella"
+      },
+      {
+        "activation": 1.6699,
+        "expression": "14/2",
+        "result_value": 7.0,
+        "context": " = <<14/2=[7]>>7 in 3 years\n"
+      },
+      {
+        "activation": 1.4893,
+        "expression": "8*1000",
+        "result_value": 8000.0,
+        "context": " $<<8*1000=[8000]>>8000\nHe buys 1000"
+      },
+      {
+        "activation": 1.4551,
+        "expression": "25/100*28",
+        "result_value": 7.0,
+        "context": "25/100*28=[7]>>7 green flowers.\n"
+      },
+      {
+        "activation": 1.4316,
+        "expression": "10-3",
+        "result_value": 7.0,
+        "context": " = <<10-3=[7]>>7 letters in Samantha\ufffd"
+      },
+      {
+        "activation": 1.1885,
+        "expression": "177*2",
+        "result_value": 354.0,
+        "context": " = <<177*2=[354]>>354 peppers.\nThe"
+      },
+      {
+        "activation": 1.1787,
+        "expression": "6*18",
+        "result_value": 108.0,
+        "context": " = <<6*18=[108]>>108 sentences after her meeting"
+      },
+      {
+        "activation": 1.1416,
+        "expression": "120+90+108",
+        "result_value": 318.0,
+        "context": "120+90+108=[318]>>318 sentences today in all"
+      },
+      {
+        "activation": 1.1113,
+        "expression": "40*.6",
+        "result_value": 24.0,
+        "context": "=<<40*.6=[24]>>24 trees\n#### 24"
+      },
+      {
+        "activation": 1.1094,
+        "expression": "(2*111)-50",
+        "result_value": 172.0,
+        "context": "2*111)-50=[172]>>172 texts\n111 +"
+      },
+      {
+        "activation": 1.0859,
+        "expression": "97-12",
+        "result_value": 85.0,
+        "context": " = <<97-12=[85]>>85 kilograms.\n####"
+      },
+      {
+        "activation": 1.0625,
+        "expression": "30-15",
+        "result_value": 15.0,
+        "context": " $<<30-15=[15]>>15 more than Tommy."
+      },
+      {
+        "activation": 1.0449,
+        "expression": "50/100*266",
+        "result_value": 133.0,
+        "context": "50/100*266=[133]>>133 games.\nDaniel"
+      },
+      {
+        "activation": 1.0127,
+        "expression": "78+166+90",
+        "result_value": 334.0,
+        "context": "78+166+90=[334]>>334 for the gifts."
+      },
+      {
+        "activation": 1.002,
+        "expression": "30000*.9",
+        "result_value": 27000.0,
+        "context": "<<30000*.9=[27]000>>27,000\n"
+      },
+      {
+        "activation": 0.9849,
+        "expression": "12-4",
+        "result_value": 8.0,
+        "context": " = <<12-4=[8]>>8\nHe needs to"
+      },
+      {
+        "activation": 0.9072,
+        "expression": "80*200",
+        "result_value": 16000.0,
+        "context": " $<<80*200=[16]000>>16,000\n"
+      },
+      {
+        "activation": 0.8784,
+        "expression": "35/7",
+        "result_value": 5.0,
+        "context": " = <<35/7=[5]>>5\n#### 5"
+      },
+      {
+        "activation": 0.8687,
+        "expression": "15+35+35+50",
+        "result_value": 135.0,
+        "context": "35+35+50=[135]>>135 coins\nThe number"
+      }
+    ]
+  },
+  {
+    "feature_idx": 3608,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0014836795162409544,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0014836795162409544
+    },
+    "mean_activation": 0.30818865376134075,
+    "active_count": 31,
+    "top_examples": [
+      {
+        "activation": 1.5078,
+        "expression": "3-2",
+        "result_value": 1.0,
+        "context": " $<<3-2=[1]>>1.\nSo the"
+      },
+      {
+        "activation": 0.8408,
+        "expression": "2*15",
+        "result_value": 30.0,
+        "context": " $<<2*15=[30].00>>30.00"
+      },
+      {
+        "activation": 0.7261,
+        "expression": "0.50-.25",
+        "result_value": 0.25,
+        "context": "0.50-.25=[0].25>>0.25"
+      },
+      {
+        "activation": 0.5669,
+        "expression": "1/2+1/2",
+        "result_value": 1.0,
+        "context": "2+1/2=[1]>>1 cup per day\n"
+      },
+      {
+        "activation": 0.5605,
+        "expression": "12/60",
+        "result_value": 0.2,
+        "context": " $<<12/60=[0].2>>0.2"
+      },
+      {
+        "activation": 0.4392,
+        "expression": "10-6",
+        "result_value": 4.0,
+        "context": " = <<10-6=[4]>>4 remaining bunches."
+      },
+      {
+        "activation": 0.4236,
+        "expression": "25*.01*1000",
+        "result_value": 250.0,
+        "context": "25*.01*1000=[250]>>250\nCoursework materials"
+      },
+      {
+        "activation": 0.3979,
+        "expression": "3*1",
+        "result_value": 3.0,
+        "context": " = <<3*1=[3]>>3 thank you cards to"
+      },
+      {
+        "activation": 0.343,
+        "expression": "184-143",
+        "result_value": 41.0,
+        "context": " $<<184-143=[41]>>41 for the shoes."
+      },
+      {
+        "activation": 0.3428,
+        "expression": "2*16",
+        "result_value": 32.0,
+        "context": " = <<2*16=[32]>>32\nHe eats 16"
+      },
+      {
+        "activation": 0.3308,
+        "expression": "12-10",
+        "result_value": 2.0,
+        "context": " = <<12-10=[2]>>2 tickets.\nSo"
+      },
+      {
+        "activation": 0.3254,
+        "expression": "6*2",
+        "result_value": 12.0,
+        "context": " $<<6*2=[12].00>>12.00"
+      },
+      {
+        "activation": 0.3083,
+        "expression": "110+11",
+        "result_value": 121.0,
+        "context": " = <<110+11=[121]>>121 meters.\nTherefore"
+      },
+      {
+        "activation": 0.2788,
+        "expression": "10-8",
+        "result_value": 2.0,
+        "context": " = <<10-8=[2]>>2 hours of overtime\n"
+      },
+      {
+        "activation": 0.2213,
+        "expression": "1000-200-400",
+        "result_value": 400.0,
+        "context": "1000-200-400=[400]>>400 pounds.\nThus"
+      },
+      {
+        "activation": 0.2124,
+        "expression": "30+18+12",
+        "result_value": 60.0,
+        "context": "30+18+12=[60].00>>60.00"
+      },
+      {
+        "activation": 0.1846,
+        "expression": "20/10",
+        "result_value": 2.0,
+        "context": " = <<20/10=[2]>>2 seconds\nWe can"
+      },
+      {
+        "activation": 0.1755,
+        "expression": "100+20+80",
+        "result_value": 200.0,
+        "context": "100+20+80=[200]>>200\nThe average cost"
+      },
+      {
+        "activation": 0.1613,
+        "expression": "20+1",
+        "result_value": 21.0,
+        "context": " = <<20+1=[21]>>21 stamps.\n####"
+      },
+      {
+        "activation": 0.1589,
+        "expression": "18/6",
+        "result_value": 3.0,
+        "context": " = <<18/6=[3]>>3 packs of trail mix"
+      }
+    ]
+  },
+  {
+    "feature_idx": 12170,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.32121405802981956,
+    "active_count": 71,
+    "top_examples": [
+      {
+        "activation": 0.9424,
+        "expression": "22500*20",
+        "result_value": 450000.0,
+        "context": "<<22500*20=[45]0000>>450,000\n"
+      },
+      {
+        "activation": 0.8906,
+        "expression": "16-1",
+        "result_value": 15.0,
+        "context": " = <<16-1=[15]>>15.\nIn round"
+      },
+      {
+        "activation": 0.8628,
+        "expression": "24+10",
+        "result_value": 34.0,
+        "context": " = <<24+10=[34]>>34\n#### 34"
+      },
+      {
+        "activation": 0.832,
+        "expression": "16-1",
+        "result_value": 15.0,
+        "context": " = <<16-1=[15]>>15\nDallas was 3"
+      },
+      {
+        "activation": 0.7949,
+        "expression": "28+7",
+        "result_value": 35.0,
+        "context": " = <<28+7=[35]>>35 plants in his garden"
+      },
+      {
+        "activation": 0.7085,
+        "expression": "8000+6000",
+        "result_value": 14000.0,
+        "context": " $<<8000+6000=[14]000>>14,000\n"
+      },
+      {
+        "activation": 0.6958,
+        "expression": "2*15",
+        "result_value": 30.0,
+        "context": " $<<2*15=[30].00>>30.00"
+      },
+      {
+        "activation": 0.6919,
+        "expression": "840-825",
+        "result_value": 15.0,
+        "context": " = <<840-825=[15]>>15 pieces\n#### 15"
+      },
+      {
+        "activation": 0.6914,
+        "expression": "450000-2000",
+        "result_value": 448000.0,
+        "context": "<<450000-2000=[448]000>>448,000\n"
+      },
+      {
+        "activation": 0.6836,
+        "expression": "120+90+108",
+        "result_value": 318.0,
+        "context": "120+90+108=[318]>>318 sentences today in all"
+      },
+      {
+        "activation": 0.665,
+        "expression": "580-231",
+        "result_value": 349.0,
+        "context": " = <<580-231=[349]>>349 birds left in the"
+      },
+      {
+        "activation": 0.6558,
+        "expression": "2450+1500",
+        "result_value": 3950.0,
+        "context": " <<2450+1500=[39]50>>3950 cases."
+      },
+      {
+        "activation": 0.6436,
+        "expression": "40-10",
+        "result_value": 30.0,
+        "context": "=<<40-10=[30]>>30 years\nSo together"
+      },
+      {
+        "activation": 0.6099,
+        "expression": "10-8",
+        "result_value": 2.0,
+        "context": " = <<10-8=[2]>>2 hours of overtime\n"
+      },
+      {
+        "activation": 0.5635,
+        "expression": "68-30",
+        "result_value": 38.0,
+        "context": " = <<68-30=[38]>>38 apples.\nHarry"
+      },
+      {
+        "activation": 0.5337,
+        "expression": "24-10",
+        "result_value": 14.0,
+        "context": " = <<24-10=[14]>>14 years old now."
+      },
+      {
+        "activation": 0.4932,
+        "expression": "15+23",
+        "result_value": 38.0,
+        "context": "=$<<15+23=[38]>>38 of the credit."
+      },
+      {
+        "activation": 0.45,
+        "expression": "4*100",
+        "result_value": 400.0,
+        "context": " = <<4*100=[400]>>400\nHe has 8"
+      },
+      {
+        "activation": 0.4417,
+        "expression": "12-10",
+        "result_value": 2.0,
+        "context": " = <<12-10=[2]>>2 tickets.\nSo"
+      },
+      {
+        "activation": 0.4355,
+        "expression": "1188/12",
+        "result_value": 99.0,
+        "context": " <<1188/12=[99]>>99 bananas.\n####"
+      }
+    ]
+  },
+  {
+    "feature_idx": 8021,
+    "layer": 14,
+    "role": "eq_sign",
+    "activation_rates": {
+      "operand": 0.016320474445819855,
+      "result": 0.0014836795162409544,
+      "eq_sign": 0.13204747438430786,
+      "background": 0.017804155126214027
+    },
+    "mean_activation": 0.611610041724311,
+    "active_count": 360,
+    "top_examples": [
+      {
+        "activation": 2.3418,
+        "expression": "95+15",
+        "result_value": 110.0,
+        "context": " = <<95+15=[110]>>110\nHe saved $"
+      },
+      {
+        "activation": 1.9229,
+        "expression": "50*2",
+        "result_value": 100.0,
+        "context": " $<<50*2=[100]>>100.\nThe cost"
+      },
+      {
+        "activation": 1.7207,
+        "expression": "400/2",
+        "result_value": 200.0,
+        "context": " = <<400/2=[200]>>200 pounds from salmon."
+      },
+      {
+        "activation": 1.6699,
+        "expression": "1188/12",
+        "result_value": 99.0,
+        "context": " <<1188/12=[99]>>99 bananas.\n####"
+      },
+      {
+        "activation": 1.6582,
+        "expression": "20*30",
+        "result_value": 600.0,
+        "context": "=$<<20*30=[600]>>600\nHe works 30"
+      },
+      {
+        "activation": 1.6104,
+        "expression": "100*3",
+        "result_value": 300.0,
+        "context": "=$<<100*3=[300]>>300\nIn addition to"
+      },
+      {
+        "activation": 1.583,
+        "expression": "60+50",
+        "result_value": 110.0,
+        "context": " = <<60+50=[110]>>110 tennis balls Ralph didn"
+      },
+      {
+        "activation": 1.5615,
+        "expression": "960/2",
+        "result_value": 480.0,
+        "context": " = <<960/2=[480]>>480 dollars.\nAmount"
+      },
+      {
+        "activation": 1.5596,
+        "expression": "13+36+15+35",
+        "result_value": 99.0,
+        "context": "36+15+35=[99]>>99.\n#### 99"
+      },
+      {
+        "activation": 1.5322,
+        "expression": "9*4",
+        "result_value": 36.0,
+        "context": " $<<9*4=[36]>>36.\nThe three"
+      },
+      {
+        "activation": 1.4805,
+        "expression": "5+6",
+        "result_value": 11.0,
+        "context": " = <<5+6=[11]>>11 mystery novels.\n"
+      },
+      {
+        "activation": 1.4307,
+        "expression": "1456/13",
+        "result_value": 112.0,
+        "context": " <<1456/13=[112]>>112 years old\nPeter"
+      },
+      {
+        "activation": 1.4131,
+        "expression": "400/2",
+        "result_value": 200.0,
+        "context": " = <<400/2=[200]>>200 photos.\nThe"
+      },
+      {
+        "activation": 1.4092,
+        "expression": "2500/5",
+        "result_value": 500.0,
+        "context": " $<<2500/5=[500]>>500\nMike will get"
+      },
+      {
+        "activation": 1.4062,
+        "expression": "90*2",
+        "result_value": 180.0,
+        "context": " = <<90*2=[180]>>180 kilograms of grapes per"
+      },
+      {
+        "activation": 1.3838,
+        "expression": "(60+72+42)/3",
+        "result_value": 58.0,
+        "context": "72+42)/3=[58]>>58 mph.\n####"
+      },
+      {
+        "activation": 1.3584,
+        "expression": "100-50",
+        "result_value": 50.0,
+        "context": " = <<100-50=[50]>>50% left.\n"
+      },
+      {
+        "activation": 1.3545,
+        "expression": "3*400",
+        "result_value": 1200.0,
+        "context": "=<<3*400=[1200]>>1200 pages\nSo it"
+      },
+      {
+        "activation": 1.3457,
+        "expression": "140+40",
+        "result_value": 180.0,
+        "context": " = <<140+40=[180]>>180 goats.\nIn"
+      },
+      {
+        "activation": 1.3428,
+        "expression": "6*9*14",
+        "result_value": 756.0,
+        "context": "6*9*14=[756]>>756 bananas.\nThere"
+      }
+    ]
+  },
+  {
+    "feature_idx": 4400,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.005934718064963818,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.7762646217064317,
+    "active_count": 406,
+    "top_examples": [
+      {
+        "activation": 2.5059,
+        "expression": "26*3",
+        "result_value": 78.0,
+        "context": " $<<26*3=[78]>>78 on polo shirts"
+      },
+      {
+        "activation": 2.4766,
+        "expression": "16*12",
+        "result_value": 192.0,
+        "context": " = <<16*12=[192]>>192 square feet\nThen"
+      },
+      {
+        "activation": 2.3574,
+        "expression": "100000+18000+16000",
+        "result_value": 134000.0,
+        "context": "18000+16000=[134]000>>134,000\n"
+      },
+      {
+        "activation": 2.1699,
+        "expression": "4*500",
+        "result_value": 2000.0,
+        "context": " = <<4*500=[2000]>>2000 blocks into the truck"
+      },
+      {
+        "activation": 2.1562,
+        "expression": "15+35+35+50",
+        "result_value": 135.0,
+        "context": "35+35+50=[135]>>135 coins\nThe number"
+      },
+      {
+        "activation": 2.082,
+        "expression": "1000*2",
+        "result_value": 2000.0,
+        "context": " = <<1000*2=[2000]>>2000 pounds of chicken\n"
+      },
+      {
+        "activation": 1.999,
+        "expression": "10+25",
+        "result_value": 35.0,
+        "context": "=$<<10+25=[35]>>35.\n#### 35"
+      },
+      {
+        "activation": 1.9912,
+        "expression": "250*8",
+        "result_value": 2000.0,
+        "context": " = <<250*8=[2000]>>2000 blocks in one hour"
+      },
+      {
+        "activation": 1.9893,
+        "expression": "68*2",
+        "result_value": 136.0,
+        "context": " = <<68*2=[136]>>136 minutes cleaning their rooms"
+      },
+      {
+        "activation": 1.9434,
+        "expression": "104*2",
+        "result_value": 208.0,
+        "context": " $<<104*2=[208]>>208.\nThe couple"
+      },
+      {
+        "activation": 1.8633,
+        "expression": "2*1750",
+        "result_value": 3500.0,
+        "context": "<<2*1750=[35]00>>3500\nThe"
+      },
+      {
+        "activation": 1.8545,
+        "expression": "6*9*14",
+        "result_value": 756.0,
+        "context": "6*9*14=[756]>>756 bananas.\nThere"
+      },
+      {
+        "activation": 1.7793,
+        "expression": "12+24",
+        "result_value": 36.0,
+        "context": " = <<12+24=[36]>>36 pages since yesterday."
+      },
+      {
+        "activation": 1.7666,
+        "expression": "50/100*266",
+        "result_value": 133.0,
+        "context": "50/100*266=[133]>>133 games.\nDaniel"
+      },
+      {
+        "activation": 1.7529,
+        "expression": "100*3",
+        "result_value": 300.0,
+        "context": "=$<<100*3=[300]>>300\nIn addition to"
+      },
+      {
+        "activation": 1.7227,
+        "expression": "12*52",
+        "result_value": 624.0,
+        "context": "=<<12*52=[6]24>>624 pages a"
+      },
+      {
+        "activation": 1.7168,
+        "expression": "5*40",
+        "result_value": 200.0,
+        "context": " = <<5*40=[200]>>200 books during that time"
+      },
+      {
+        "activation": 1.6797,
+        "expression": "22+25+21",
+        "result_value": 68.0,
+        "context": "22+25+21=[68]>>68 minutes in all."
+      },
+      {
+        "activation": 1.6729,
+        "expression": "45/55*440",
+        "result_value": 360.0,
+        "context": "45/55*440=[360]>>360 coins.\nWhen"
+      },
+      {
+        "activation": 1.6582,
+        "expression": "12*3",
+        "result_value": 36.0,
+        "context": " = <<12*3=[36]>>36 weasels\n"
+      }
+    ]
+  },
+  {
+    "feature_idx": 10978,
+    "layer": 14,
+    "role": "eq_sign",
+    "activation_rates": {
+      "operand": 0.017804155126214027,
+      "result": 0.0014836795162409544,
+      "eq_sign": 0.7047477960586548,
+      "background": 0.035608310252428055
+    },
+    "mean_activation": 0.6738962603639589,
+    "active_count": 419,
+    "top_examples": [
+      {
+        "activation": 2.4922,
+        "expression": "400/2",
+        "result_value": 200.0,
+        "context": " = <<400/2=[200]>>200 pounds from salmon."
+      },
+      {
+        "activation": 2.1992,
+        "expression": "10*2",
+        "result_value": 20.0,
+        "context": " = <<10*2=[20]>>20 cars passing.\n"
+      },
+      {
+        "activation": 1.918,
+        "expression": "250*8",
+        "result_value": 2000.0,
+        "context": " = <<250*8=[2000]>>2000 blocks in one hour"
+      },
+      {
+        "activation": 1.8887,
+        "expression": "1/5*1000",
+        "result_value": 200.0,
+        "context": "1/5*1000=[200]>>200 pounds from berries."
+      },
+      {
+        "activation": 1.8711,
+        "expression": "11*75",
+        "result_value": 825.0,
+        "context": " = <<11*75=[825]>>825 pieces\nThen subtract"
+      },
+      {
+        "activation": 1.7939,
+        "expression": "237-60",
+        "result_value": 177.0,
+        "context": " = <<237-60=[177]>>177 cucumbers.\n"
+      },
+      {
+        "activation": 1.7686,
+        "expression": "300*.75",
+        "result_value": 225.0,
+        "context": "=$<<300*.75=[225]>>225\nSo he had"
+      },
+      {
+        "activation": 1.7256,
+        "expression": "40*5",
+        "result_value": 200.0,
+        "context": "=<<40*5=[200]>>200 miles for work\n"
+      },
+      {
+        "activation": 1.7051,
+        "expression": "5*40",
+        "result_value": 200.0,
+        "context": " = <<5*40=[200]>>200 books during that time"
+      },
+      {
+        "activation": 1.6992,
+        "expression": "50/2",
+        "result_value": 25.0,
+        "context": " = <<50/2=[25]>>25 kids\nThen add"
+      },
+      {
+        "activation": 1.6836,
+        "expression": "20*8",
+        "result_value": 160.0,
+        "context": "= <<20*8=[160]>>160 pieces of mangoes"
+      },
+      {
+        "activation": 1.6689,
+        "expression": "20000*.8",
+        "result_value": 16000.0,
+        "context": "<<20000*.8=[16]000>>16,000\n"
+      },
+      {
+        "activation": 1.6572,
+        "expression": "14+1",
+        "result_value": 15.0,
+        "context": " = <<14+1=[15]>>15 years old next year"
+      },
+      {
+        "activation": 1.6504,
+        "expression": ".4*1000",
+        "result_value": 400.0,
+        "context": " <<.4*1000=[400]>>400 ml\n#### 400"
+      },
+      {
+        "activation": 1.6367,
+        "expression": "600-400",
+        "result_value": 200.0,
+        "context": " = <<600-400=[200]>>200 pounds\nSo its"
+      },
+      {
+        "activation": 1.5947,
+        "expression": "20*100",
+        "result_value": 2000.0,
+        "context": " = <<20*100=[2000]>>2000 grams are sold every"
+      },
+      {
+        "activation": 1.5938,
+        "expression": "50/100*266",
+        "result_value": 133.0,
+        "context": "50/100*266=[133]>>133 games.\nDaniel"
+      },
+      {
+        "activation": 1.5508,
+        "expression": "80*6",
+        "result_value": 480.0,
+        "context": " = <<80*6=[480]>>480 minutes/week\n"
+      },
+      {
+        "activation": 1.542,
+        "expression": "100+20+80",
+        "result_value": 200.0,
+        "context": "100+20+80=[200]>>200\nThe average cost"
+      },
+      {
+        "activation": 1.5391,
+        "expression": "1000*20/100",
+        "result_value": 200.0,
+        "context": "1000*20/100=[200]>>200 down payment.\n"
+      }
+    ]
+  },
+  {
+    "feature_idx": 10021,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.351194409356601,
+    "active_count": 138,
+    "top_examples": [
+      {
+        "activation": 1.4033,
+        "expression": "100*1000",
+        "result_value": 100000.0,
+        "context": " $<<100*1000=[100]000>>100,000\n"
+      },
+      {
+        "activation": 1.1816,
+        "expression": "210/14",
+        "result_value": 15.0,
+        "context": " = <<210/14=[15]>>15 liters each\n"
+      },
+      {
+        "activation": 0.9326,
+        "expression": "36*3/4",
+        "result_value": 27.0,
+        "context": "36*3/4=[27]>>27 students are in the"
+      },
+      {
+        "activation": 0.9287,
+        "expression": "50/2",
+        "result_value": 25.0,
+        "context": " = <<50/2=[25]>>25 kids\nThen add"
+      },
+      {
+        "activation": 0.9106,
+        "expression": "90*12",
+        "result_value": 1080.0,
+        "context": " = <<90*12=[1080]>>1080 beetles\n#### 1080"
+      },
+      {
+        "activation": 0.9072,
+        "expression": "9-4",
+        "result_value": 5.0,
+        "context": " = <<9-4=[5]>>5 other pills\nEach"
+      },
+      {
+        "activation": 0.8818,
+        "expression": "111+172",
+        "result_value": 283.0,
+        "context": " = <<111+172=[283]>>283 texts\nKeiko"
+      },
+      {
+        "activation": 0.8481,
+        "expression": "36-27",
+        "result_value": 9.0,
+        "context": " = <<36-27=[9]>>9 students are in the"
+      },
+      {
+        "activation": 0.8359,
+        "expression": "2+12",
+        "result_value": 14.0,
+        "context": " = <<2+12=[14]>>14 stickers.\nCol"
+      },
+      {
+        "activation": 0.8359,
+        "expression": "3*5",
+        "result_value": 15.0,
+        "context": " = <<3*5=[15]>>15\nHe earned $"
+      },
+      {
+        "activation": 0.8291,
+        "expression": "400-200",
+        "result_value": 200.0,
+        "context": " = <<400-200=[200]>>200 pounds from small animals"
+      },
+      {
+        "activation": 0.8135,
+        "expression": "580-231",
+        "result_value": 349.0,
+        "context": " = <<580-231=[349]>>349 birds left in the"
+      },
+      {
+        "activation": 0.8018,
+        "expression": "2*4*50*.01",
+        "result_value": 4.0,
+        "context": "4*50*.01=[4]>>4 pieces.\nAnn"
+      },
+      {
+        "activation": 0.7891,
+        "expression": "5+20",
+        "result_value": 25.0,
+        "context": " = <<5+20=[25]>>25 roommates\n####"
+      },
+      {
+        "activation": 0.7886,
+        "expression": "1188/12",
+        "result_value": 99.0,
+        "context": " <<1188/12=[99]>>99 bananas.\n####"
+      },
+      {
+        "activation": 0.7026,
+        "expression": "56/2",
+        "result_value": 28.0,
+        "context": " = <<56/2=[28]>>28 kg\nThe last"
+      },
+      {
+        "activation": 0.6729,
+        "expression": "30-19",
+        "result_value": 11.0,
+        "context": " = <<30-19=[11]>>11 situps\nOn"
+      },
+      {
+        "activation": 0.666,
+        "expression": "8*1000",
+        "result_value": 8000.0,
+        "context": " $<<8*1000=[8000]>>8000\nHe buys 1000"
+      },
+      {
+        "activation": 0.665,
+        "expression": "40-16",
+        "result_value": 24.0,
+        "context": " = <<40-16=[24]>>24 dinner rolls leftover."
+      },
+      {
+        "activation": 0.6465,
+        "expression": "35/7",
+        "result_value": 5.0,
+        "context": " = <<35/7=[5]>>5\n#### 5"
+      }
+    ]
+  },
+  {
+    "feature_idx": 3053,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.004451038781553507,
+      "result": 0.0,
+      "eq_sign": 0.0014836795162409544,
+      "background": 0.010385756380856037
+    },
+    "mean_activation": 0.6781494793724921,
+    "active_count": 257,
+    "top_examples": [
+      {
+        "activation": 2.1523,
+        "expression": "18/3",
+        "result_value": 6.0,
+        "context": " = <<18/3=[6]>>6\nMia runs"
+      },
+      {
+        "activation": 2.1445,
+        "expression": "2+6",
+        "result_value": 8.0,
+        "context": " = <<2+6=[8]>>8 people were filling the"
+      },
+      {
+        "activation": 1.8633,
+        "expression": "32/4",
+        "result_value": 8.0,
+        "context": " = <<32/4=[8]>>8 packages.\n####"
+      },
+      {
+        "activation": 1.8291,
+        "expression": "16/2",
+        "result_value": 8.0,
+        "context": " = <<16/2=[8]>>8.\nJeff completed"
+      },
+      {
+        "activation": 1.7949,
+        "expression": "6+2",
+        "result_value": 8.0,
+        "context": "=<<6+2=[8]>>8 pounds.\nAnd"
+      },
+      {
+        "activation": 1.7939,
+        "expression": "2*365",
+        "result_value": 730.0,
+        "context": " $<<2*365=[730]>>730/year\nIn"
+      },
+      {
+        "activation": 1.7861,
+        "expression": "2*3",
+        "result_value": 6.0,
+        "context": " $<<2*3=[6]>>6.\nTheir breakfast"
+      },
+      {
+        "activation": 1.7793,
+        "expression": "12/2",
+        "result_value": 6.0,
+        "context": " = <<12/2=[6]>>6\n#### 6"
+      },
+      {
+        "activation": 1.7578,
+        "expression": "25/5",
+        "result_value": 5.0,
+        "context": " $<<25/5=[5]>>5.\n#### 5"
+      },
+      {
+        "activation": 1.7383,
+        "expression": "35/7",
+        "result_value": 5.0,
+        "context": " = <<35/7=[5]>>5\n#### 5"
+      },
+      {
+        "activation": 1.667,
+        "expression": "20-13",
+        "result_value": 7.0,
+        "context": " = <<20-13=[7]>>7.\nBella"
+      },
+      {
+        "activation": 1.582,
+        "expression": "2*4",
+        "result_value": 8.0,
+        "context": " = <<2*4=[8]>>8 square feet\nFinally"
+      },
+      {
+        "activation": 1.5176,
+        "expression": "3*2",
+        "result_value": 6.0,
+        "context": " = <<3*2=[6]>>6 rabbits\n6 rabbits"
+      },
+      {
+        "activation": 1.5049,
+        "expression": "18/3",
+        "result_value": 6.0,
+        "context": " = <<18/3=[6]>>6\nThe total they"
+      },
+      {
+        "activation": 1.46,
+        "expression": "150-144",
+        "result_value": 6.0,
+        "context": " = <<150-144=[6]>>6 miles on the 13"
+      },
+      {
+        "activation": 1.4482,
+        "expression": "600+120",
+        "result_value": 720.0,
+        "context": " $<<600+120=[720]>>720\n#### 720"
+      },
+      {
+        "activation": 1.4473,
+        "expression": "12-4",
+        "result_value": 8.0,
+        "context": " = <<12-4=[8]>>8\nHe needs to"
+      },
+      {
+        "activation": 1.4375,
+        "expression": "2*4*50*.01",
+        "result_value": 4.0,
+        "context": "4*50*.01=[4]>>4 pieces.\nAnn"
+      },
+      {
+        "activation": 1.4307,
+        "expression": ".25/.05",
+        "result_value": 5.0,
+        "context": " <<.25/.05=[5]>>5\nShe gets 100"
+      },
+      {
+        "activation": 1.4014,
+        "expression": "4+2",
+        "result_value": 6.0,
+        "context": " = <<4+2=[6]>>6 hours.\n####"
+      }
+    ]
+  },
+  {
+    "feature_idx": 555,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.4839727020593663,
+    "active_count": 289,
+    "top_examples": [
+      {
+        "activation": 1.8135,
+        "expression": "20+25+22+20+10",
+        "result_value": 97.0,
+        "context": "22+20+10=[97]>>97 cars traveling down the"
+      },
+      {
+        "activation": 1.7979,
+        "expression": "780-260",
+        "result_value": 520.0,
+        "context": " $<<780-260=[520]>>520.\n#### 520"
+      },
+      {
+        "activation": 1.7646,
+        "expression": "2*24",
+        "result_value": 48.0,
+        "context": " = <<2*24=[48]>>48 blue hats.\n"
+      },
+      {
+        "activation": 1.5967,
+        "expression": "8+2",
+        "result_value": 10.0,
+        "context": " = <<8+2=[10]>>10 glasses.\n####"
+      },
+      {
+        "activation": 1.5967,
+        "expression": "24+16+10",
+        "result_value": 50.0,
+        "context": "24+16+10=[50]>>50 inches long.\n"
+      },
+      {
+        "activation": 1.5654,
+        "expression": "12*4",
+        "result_value": 48.0,
+        "context": "=<<12*4=[48]>>48 shells\n#### 48"
+      },
+      {
+        "activation": 1.5391,
+        "expression": "31+31+28",
+        "result_value": 90.0,
+        "context": "31+31+28=[90]>>90 days\nHe feeds"
+      },
+      {
+        "activation": 1.5215,
+        "expression": "0.2*50",
+        "result_value": 10.0,
+        "context": "0.2*50=[10]>>10.\n#### 10"
+      },
+      {
+        "activation": 1.498,
+        "expression": "5*2",
+        "result_value": 10.0,
+        "context": " = <<5*2=[10]>>10 cars are passing."
+      },
+      {
+        "activation": 1.4092,
+        "expression": "64+44",
+        "result_value": 108.0,
+        "context": " = <<64+44=[108]>>108 hats\nIf they"
+      },
+      {
+        "activation": 1.3896,
+        "expression": "360-270",
+        "result_value": 90.0,
+        "context": " = <<360-270=[90]>>90 coins\n#### 90"
+      },
+      {
+        "activation": 1.3662,
+        "expression": "32+16",
+        "result_value": 48.0,
+        "context": " = <<32+16=[48]>>48\n#### 48"
+      },
+      {
+        "activation": 1.3545,
+        "expression": "72*3/4",
+        "result_value": 54.0,
+        "context": "72*3/4=[54]>>54 cubic ft\n####"
+      },
+      {
+        "activation": 1.3486,
+        "expression": "13-3",
+        "result_value": 10.0,
+        "context": "=<<13-3=[10]>>10 beads from each part"
+      },
+      {
+        "activation": 1.2979,
+        "expression": "2*5",
+        "result_value": 10.0,
+        "context": " = <<2*5=[10]>>10 applications to mail."
+      },
+      {
+        "activation": 1.2803,
+        "expression": "5*2",
+        "result_value": 10.0,
+        "context": "=$<<5*2=[10]>>10 on Wednesday to pay"
+      },
+      {
+        "activation": 1.2646,
+        "expression": "2*5",
+        "result_value": 10.0,
+        "context": " = <<2*5=[10]>>10 fish\nTherefore,"
+      },
+      {
+        "activation": 1.2568,
+        "expression": "1750+3500",
+        "result_value": 5250.0,
+        "context": "1750+3500=[52]50>>5250\n####"
+      },
+      {
+        "activation": 1.2539,
+        "expression": "103-27-20",
+        "result_value": 56.0,
+        "context": "103-27-20=[56]>>56 kg\n56/"
+      },
+      {
+        "activation": 1.2412,
+        "expression": "20+30",
+        "result_value": 50.0,
+        "context": " = <<20+30=[50]>>50 inches.\n####"
+      }
+    ]
+  },
+  {
+    "feature_idx": 8959,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.057863499969244,
+      "result": 0.0,
+      "eq_sign": 0.014836795628070831,
+      "background": 0.059347182512283325
+    },
+    "mean_activation": 0.7020197729779105,
+    "active_count": 468,
+    "top_examples": [
+      {
+        "activation": 2.4434,
+        "expression": "60-18",
+        "result_value": 42.0,
+        "context": "=<<60-18=[42]>>42 mph.\nIf"
+      },
+      {
+        "activation": 2.0254,
+        "expression": "40*5/100",
+        "result_value": 2.0,
+        "context": "40*5/100=[2]>>2 discount each.\n"
+      },
+      {
+        "activation": 2.0156,
+        "expression": "600+240",
+        "result_value": 840.0,
+        "context": "=$<<600+240=[840]>>840 a week\n####"
+      },
+      {
+        "activation": 1.9863,
+        "expression": "4*12*9",
+        "result_value": 432.0,
+        "context": "4*12*9=[432]>>432 bananas.\nAll"
+      },
+      {
+        "activation": 1.9727,
+        "expression": "20*2",
+        "result_value": 40.0,
+        "context": " = <<20*2=[40]>>40\nAdding those mar"
+      },
+      {
+        "activation": 1.9316,
+        "expression": "100*.20",
+        "result_value": 20.0,
+        "context": " = <<100*.20=[20]>>20\n80 of the"
+      },
+      {
+        "activation": 1.8828,
+        "expression": "100-25",
+        "result_value": 75.0,
+        "context": " = <<100-25=[75]>>75\nThere are 45"
+      },
+      {
+        "activation": 1.8418,
+        "expression": "72-30",
+        "result_value": 42.0,
+        "context": " = <<72-30=[42]>>42 stickers.\n####"
+      },
+      {
+        "activation": 1.8398,
+        "expression": "4000/2000",
+        "result_value": 2.0,
+        "context": " = <<4000/2000=[2]>>2 hours to fill the"
+      },
+      {
+        "activation": 1.8076,
+        "expression": "10*4",
+        "result_value": 40.0,
+        "context": " $<<10*4=[40]>>40.\nThe cost"
+      },
+      {
+        "activation": 1.8027,
+        "expression": "2/5*80",
+        "result_value": 32.0,
+        "context": "2/5*80=[32]>>32 people missed the board"
+      },
+      {
+        "activation": 1.7891,
+        "expression": "6/3",
+        "result_value": 2.0,
+        "context": "=<<6/3=[2]>>2 meows per minute"
+      },
+      {
+        "activation": 1.7773,
+        "expression": "1000-200",
+        "result_value": 800.0,
+        "context": " $<<1000-200=[800]>>800 left\n#### 800"
+      },
+      {
+        "activation": 1.7607,
+        "expression": "6*(20/60)",
+        "result_value": 2.0,
+        "context": "*(20/60)=[2]>>2 miles.\nSo"
+      },
+      {
+        "activation": 1.7607,
+        "expression": "2*1",
+        "result_value": 2.0,
+        "context": " $<<2*1=[2]>>2.\nThe cost"
+      },
+      {
+        "activation": 1.7529,
+        "expression": "8*1/2",
+        "result_value": 4.0,
+        "context": "8*1/2=[4]>>4 dinner rolls eaten."
+      },
+      {
+        "activation": 1.752,
+        "expression": "20-2",
+        "result_value": 18.0,
+        "context": " = <<20-2=[18]>>18 seconds\n#### 18"
+      },
+      {
+        "activation": 1.7158,
+        "expression": "24/2",
+        "result_value": 12.0,
+        "context": " $<<24/2=[12]>>12 in her wallet."
+      },
+      {
+        "activation": 1.6943,
+        "expression": "4*6*3",
+        "result_value": 72.0,
+        "context": "4*6*3=[72]>>72 cubic ft\nThen"
+      },
+      {
+        "activation": 1.6465,
+        "expression": "84/2",
+        "result_value": 42.0,
+        "context": " = <<84/2=[42]>>42 pages.\n####"
+      }
+    ]
+  },
+  {
+    "feature_idx": 9502,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.002967359032481909,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.8706555728254647,
+    "active_count": 580,
+    "top_examples": [
+      {
+        "activation": 2.5215,
+        "expression": "50/10",
+        "result_value": 5.0,
+        "context": " = <<50/10=[5]>>5 pencils inside."
+      },
+      {
+        "activation": 2.4688,
+        "expression": "100*.20",
+        "result_value": 20.0,
+        "context": " = <<100*.20=[20]>>20\n80 of the"
+      },
+      {
+        "activation": 2.457,
+        "expression": "25/100*28",
+        "result_value": 7.0,
+        "context": "25/100*28=[7]>>7 green flowers.\n"
+      },
+      {
+        "activation": 2.4414,
+        "expression": "6000/60",
+        "result_value": 100.0,
+        "context": " $<<6000/60=[100]>>100 per month\nTo"
+      },
+      {
+        "activation": 2.4297,
+        "expression": "84/14",
+        "result_value": 6.0,
+        "context": " =<<84/14=[6]>>6 loads of laundry\n"
+      },
+      {
+        "activation": 2.3828,
+        "expression": "20+30",
+        "result_value": 50.0,
+        "context": " = <<20+30=[50]>>50 inches.\n####"
+      },
+      {
+        "activation": 2.3281,
+        "expression": "6/3",
+        "result_value": 2.0,
+        "context": "=<<6/3=[2]>>2 meows per minute"
+      },
+      {
+        "activation": 2.2285,
+        "expression": "50/5",
+        "result_value": 10.0,
+        "context": " = <<50/5=[10]>>10\n#### 10"
+      },
+      {
+        "activation": 2.207,
+        "expression": "400/8",
+        "result_value": 50.0,
+        "context": " = <<400/8=[50]>>50\nHe needs to"
+      },
+      {
+        "activation": 2.1777,
+        "expression": "18/3",
+        "result_value": 6.0,
+        "context": " = <<18/3=[6]>>6\nMia runs"
+      },
+      {
+        "activation": 2.1719,
+        "expression": "13-3",
+        "result_value": 10.0,
+        "context": "=<<13-3=[10]>>10 beads from each part"
+      },
+      {
+        "activation": 2.1582,
+        "expression": "3*2",
+        "result_value": 6.0,
+        "context": " = <<3*2=[6]>>6 rabbits\n6 rabbits"
+      },
+      {
+        "activation": 2.082,
+        "expression": "780-260",
+        "result_value": 520.0,
+        "context": " $<<780-260=[520]>>520.\n#### 520"
+      },
+      {
+        "activation": 2.0215,
+        "expression": "25+40+35",
+        "result_value": 100.0,
+        "context": "25+40+35=[100]>>100 flowers total.\n"
+      },
+      {
+        "activation": 2.0215,
+        "expression": "2*4*75*.01",
+        "result_value": 6.0,
+        "context": "4*75*.01=[6]>>6 pieces.\nThe"
+      },
+      {
+        "activation": 2.0059,
+        "expression": "10+40",
+        "result_value": 50.0,
+        "context": " = <<10+40=[50]>>50 pencils in all"
+      },
+      {
+        "activation": 1.9971,
+        "expression": "1.50*4",
+        "result_value": 6.0,
+        "context": "1.50*4=[6]>>6 dollars in total."
+      },
+      {
+        "activation": 1.9932,
+        "expression": "25-5",
+        "result_value": 20.0,
+        "context": " = <<25-5=[20]>>20\nHer friend gives"
+      },
+      {
+        "activation": 1.9932,
+        "expression": "72*3/4",
+        "result_value": 54.0,
+        "context": "72*3/4=[54]>>54 cubic ft\n####"
+      },
+      {
+        "activation": 1.9531,
+        "expression": "60*.75",
+        "result_value": 45.0,
+        "context": " = <<60*.75=[45]>>45\n#### 45"
+      }
+    ]
+  },
+  {
+    "feature_idx": 8123,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.014836795628070831,
+      "result": 0.004451038781553507,
+      "eq_sign": 0.026706231757998466,
+      "background": 0.05044510215520859
+    },
+    "mean_activation": 0.7014013239219363,
+    "active_count": 531,
+    "top_examples": [
+      {
+        "activation": 2.5625,
+        "expression": "30-10-2",
+        "result_value": 18.0,
+        "context": "30-10-2=[18]>>18\nJesse has"
+      },
+      {
+        "activation": 2.5508,
+        "expression": "20-2",
+        "result_value": 18.0,
+        "context": " = <<20-2=[18]>>18 seconds\n#### 18"
+      },
+      {
+        "activation": 2.291,
+        "expression": ".25/.05",
+        "result_value": 5.0,
+        "context": " <<.25/.05=[5]>>5\nShe gets 100"
+      },
+      {
+        "activation": 2.2344,
+        "expression": "30-12",
+        "result_value": 18.0,
+        "context": " = <<30-12=[18]>>18 situps\nOn"
+      },
+      {
+        "activation": 2.1543,
+        "expression": "50/100*266",
+        "result_value": 133.0,
+        "context": "50/100*266=[133]>>133 games.\nDaniel"
+      },
+      {
+        "activation": 2.0586,
+        "expression": "72*3/4",
+        "result_value": 54.0,
+        "context": "72*3/4=[54]>>54 cubic ft\n####"
+      },
+      {
+        "activation": 1.9971,
+        "expression": "6",
+        "result_value": 6.0,
+        "context": " .25 = <<6=[6]>>6\n#### 6"
+      },
+      {
+        "activation": 1.9814,
+        "expression": "5+8+0",
+        "result_value": 13.0,
+        "context": "5+8+0=[13]>>13 meters around the ring"
+      },
+      {
+        "activation": 1.9541,
+        "expression": "20/100*25",
+        "result_value": 5.0,
+        "context": "20/100*25=[5]>>5 cars passing the street"
+      },
+      {
+        "activation": 1.9502,
+        "expression": "50/10",
+        "result_value": 5.0,
+        "context": " = <<50/10=[5]>>5\n#### 5"
+      },
+      {
+        "activation": 1.9473,
+        "expression": "25/5",
+        "result_value": 5.0,
+        "context": " $<<25/5=[5]>>5.\n#### 5"
+      },
+      {
+        "activation": 1.9336,
+        "expression": "100+400",
+        "result_value": 500.0,
+        "context": " $<<100+400=[500]>>500.\n#### 500"
+      },
+      {
+        "activation": 1.8467,
+        "expression": "105*1.2",
+        "result_value": 126.0,
+        "context": "105*1.2=[126]>>126 from selling the water"
+      },
+      {
+        "activation": 1.8457,
+        "expression": "780-260",
+        "result_value": 520.0,
+        "context": " $<<780-260=[520]>>520.\n#### 520"
+      },
+      {
+        "activation": 1.832,
+        "expression": "25*.2",
+        "result_value": 5.0,
+        "context": " = <<25*.2=[5]>>5\nShe has 20"
+      },
+      {
+        "activation": 1.8174,
+        "expression": "32+16",
+        "result_value": 48.0,
+        "context": " = <<32+16=[48]>>48\n#### 48"
+      },
+      {
+        "activation": 1.8086,
+        "expression": "60*.75",
+        "result_value": 45.0,
+        "context": " = <<60*.75=[45]>>45\n#### 45"
+      },
+      {
+        "activation": 1.7256,
+        "expression": "528+30",
+        "result_value": 558.0,
+        "context": " $<<528+30=[558]>>558\nLee earned $"
+      },
+      {
+        "activation": 1.6768,
+        "expression": "15+35+35+50",
+        "result_value": 135.0,
+        "context": "35+35+50=[135]>>135 coins\nThe number"
+      },
+      {
+        "activation": 1.666,
+        "expression": "(75/100)*100",
+        "result_value": 75.0,
+        "context": "75/100)*100=[75]>>75% of the flowers"
+      }
+    ]
+  },
+  {
+    "feature_idx": 6333,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.42633972780771523,
+    "active_count": 249,
+    "top_examples": [
+      {
+        "activation": 1.3857,
+        "expression": "3*(2/3)",
+        "result_value": 2.0,
+        "context": "*(2/3)=[2]>>2\nJesse has"
+      },
+      {
+        "activation": 1.3418,
+        "expression": "5+8+0",
+        "result_value": 13.0,
+        "context": "5+8+0=[13]>>13 meters around the ring"
+      },
+      {
+        "activation": 1.2832,
+        "expression": "134000/200",
+        "result_value": 670.0,
+        "context": "<<134000/200=[670]>>670\n#### 670"
+      },
+      {
+        "activation": 1.25,
+        "expression": "12-10",
+        "result_value": 2.0,
+        "context": " = <<12-10=[2]>>2 tickets.\nSo"
+      },
+      {
+        "activation": 1.2402,
+        "expression": "70*.01*90",
+        "result_value": 63.0,
+        "context": "70*.01*90=[63]>>63 kids\nThen find"
+      },
+      {
+        "activation": 1.2334,
+        "expression": "100*10/100",
+        "result_value": 10.0,
+        "context": "100*10/100=[10]>>10 meters more.\n"
+      },
+      {
+        "activation": 1.208,
+        "expression": "20/100*25",
+        "result_value": 5.0,
+        "context": "20/100*25=[5]>>5 cars passing the street"
+      },
+      {
+        "activation": 1.2002,
+        "expression": "780/12",
+        "result_value": 65.0,
+        "context": " $<<780/12=[65]>>65/month.\n"
+      },
+      {
+        "activation": 1.1758,
+        "expression": "80*45/100",
+        "result_value": 36.0,
+        "context": "80*45/100=[36]>>36\nSo, the"
+      },
+      {
+        "activation": 1.1689,
+        "expression": "5*1",
+        "result_value": 5.0,
+        "context": " $<<5*1=[5].00>>5.00"
+      },
+      {
+        "activation": 1.167,
+        "expression": "3+4",
+        "result_value": 7.0,
+        "context": "=<<3+4=[7]>>7 inches\nSo he"
+      },
+      {
+        "activation": 1.1494,
+        "expression": ".25/.05",
+        "result_value": 5.0,
+        "context": " <<.25/.05=[5]>>5\nShe gets 100"
+      },
+      {
+        "activation": 1.1494,
+        "expression": "2*16",
+        "result_value": 32.0,
+        "context": " = <<2*16=[32]>>32\nHe eats 16"
+      },
+      {
+        "activation": 1.1084,
+        "expression": "20*30",
+        "result_value": 600.0,
+        "context": "=$<<20*30=[600]>>600\nHe works 30"
+      },
+      {
+        "activation": 1.0703,
+        "expression": "20-13",
+        "result_value": 7.0,
+        "context": " = <<20-13=[7]>>7.\nBella"
+      },
+      {
+        "activation": 1.0596,
+        "expression": "300-225",
+        "result_value": 75.0,
+        "context": "=$<<300-225=[75]>>75\nThe cats visit"
+      },
+      {
+        "activation": 1.0586,
+        "expression": "346-80",
+        "result_value": 266.0,
+        "context": " = <<346-80=[266]>>266 games.\n50"
+      },
+      {
+        "activation": 1.0303,
+        "expression": "150-144",
+        "result_value": 6.0,
+        "context": " = <<150-144=[6]>>6 miles on the 13"
+      },
+      {
+        "activation": 1.0225,
+        "expression": "180*0.20",
+        "result_value": 36.0,
+        "context": "180*0.20=[36]>>36.\nTherefore,"
+      },
+      {
+        "activation": 0.9927,
+        "expression": "30/10",
+        "result_value": 3.0,
+        "context": "=<<30/10=[3]>>3 seconds.\nAnd"
+      }
+    ]
+  },
+  {
+    "feature_idx": 3243,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0014836795162409544,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.5298188236024645,
+    "active_count": 270,
+    "top_examples": [
+      {
+        "activation": 2.1992,
+        "expression": "18/3",
+        "result_value": 6.0,
+        "context": " = <<18/3=[6]>>6\nMia runs"
+      },
+      {
+        "activation": 2.041,
+        "expression": "6",
+        "result_value": 6.0,
+        "context": " .25 = <<6=[6]>>6\n#### 6"
+      },
+      {
+        "activation": 1.8125,
+        "expression": "4+2",
+        "result_value": 6.0,
+        "context": " = <<4+2=[6]>>6 hours.\n####"
+      },
+      {
+        "activation": 1.8115,
+        "expression": "100*1000",
+        "result_value": 100000.0,
+        "context": " $<<100*1000=[100]000>>100,000\n"
+      },
+      {
+        "activation": 1.8086,
+        "expression": "25/5",
+        "result_value": 5.0,
+        "context": " $<<25/5=[5]>>5.\n#### 5"
+      },
+      {
+        "activation": 1.6553,
+        "expression": "84/14",
+        "result_value": 6.0,
+        "context": " =<<84/14=[6]>>6 loads of laundry\n"
+      },
+      {
+        "activation": 1.6387,
+        "expression": "2*3",
+        "result_value": 6.0,
+        "context": "=<<2*3=[6]>>6 movies.\nThus"
+      },
+      {
+        "activation": 1.4795,
+        "expression": "150-144",
+        "result_value": 6.0,
+        "context": " = <<150-144=[6]>>6 miles on the 13"
+      },
+      {
+        "activation": 1.4678,
+        "expression": "20*5",
+        "result_value": 100.0,
+        "context": " = <<20*5=[100]>>100\n20 of the"
+      },
+      {
+        "activation": 1.4512,
+        "expression": "11*75",
+        "result_value": 825.0,
+        "context": " = <<11*75=[825]>>825 pieces\nThen subtract"
+      },
+      {
+        "activation": 1.4453,
+        "expression": "30/5",
+        "result_value": 6.0,
+        "context": " = <<30/5=[6]>>6 rooms to fit everyone"
+      },
+      {
+        "activation": 1.4385,
+        "expression": "2000/1000",
+        "result_value": 2.0,
+        "context": " = <<2000/1000=[2]>>2 kilograms of sugar are"
+      },
+      {
+        "activation": 1.4111,
+        "expression": "15-9",
+        "result_value": 6.0,
+        "context": " $<<15-9=[6]>>6 left.\n####"
+      },
+      {
+        "activation": 1.4102,
+        "expression": "2*3",
+        "result_value": 6.0,
+        "context": " $<<2*3=[6]>>6.\nThe cost"
+      },
+      {
+        "activation": 1.4014,
+        "expression": "50*2",
+        "result_value": 100.0,
+        "context": "=$<<50*2=[100]>>100 per minute to film"
+      },
+      {
+        "activation": 1.3496,
+        "expression": "2*3",
+        "result_value": 6.0,
+        "context": "=<<2*3=[6]>>6 meows per minute"
+      },
+      {
+        "activation": 1.3242,
+        "expression": "100-50-30-15",
+        "result_value": 5.0,
+        "context": "50-30-15=[5]>>5 more.\n####"
+      },
+      {
+        "activation": 1.3135,
+        "expression": "200*3",
+        "result_value": 600.0,
+        "context": " $<<200*3=[600]>>600\n#### 600"
+      },
+      {
+        "activation": 1.2988,
+        "expression": "55",
+        "result_value": 55.0,
+        "context": "*110 = <<55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 1.2793,
+        "expression": "6*2.5",
+        "result_value": 15.0,
+        "context": "6*2.5=[15]>>15\nSo he makes"
+      }
+    ]
+  },
+  {
+    "feature_idx": 5855,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.3405370404643397,
+    "active_count": 124,
+    "top_examples": [
+      {
+        "activation": 1.3799,
+        "expression": "16*2",
+        "result_value": 32.0,
+        "context": " = <<16*2=[32]>>32 buildings to collapse."
+      },
+      {
+        "activation": 1.168,
+        "expression": "12*3",
+        "result_value": 36.0,
+        "context": " = <<12*3=[36]>>36 people.\n####"
+      },
+      {
+        "activation": 1.1348,
+        "expression": "120*.6",
+        "result_value": 72.0,
+        "context": "=<<120*.6=[72]>>72 minutes longer\nSo"
+      },
+      {
+        "activation": 1.1191,
+        "expression": "(2*111)-50",
+        "result_value": 172.0,
+        "context": "2*111)-50=[172]>>172 texts\n111 +"
+      },
+      {
+        "activation": 1.1084,
+        "expression": "12*3",
+        "result_value": 36.0,
+        "context": " = <<12*3=[36]>>36 weasels\n"
+      },
+      {
+        "activation": 1.1084,
+        "expression": "60+12",
+        "result_value": 72.0,
+        "context": " = <<60+12=[72]>>72 minutes per day on"
+      },
+      {
+        "activation": 1.0166,
+        "expression": "35+14",
+        "result_value": 49.0,
+        "context": " = <<35+14=[49]>>49 arms\n#### 49"
+      },
+      {
+        "activation": 0.9751,
+        "expression": "121-100",
+        "result_value": 21.0,
+        "context": " = <<121-100=[21]>>21 meters.\n####"
+      },
+      {
+        "activation": 0.9214,
+        "expression": "180*0.20",
+        "result_value": 36.0,
+        "context": "180*0.20=[36]>>36.\nTherefore,"
+      },
+      {
+        "activation": 0.896,
+        "expression": "12+4",
+        "result_value": 16.0,
+        "context": " = <<12+4=[16]>>16 hour a week to"
+      },
+      {
+        "activation": 0.8604,
+        "expression": "8*2",
+        "result_value": 16.0,
+        "context": "=<<8*2=[16]>>16 pounds.\n####"
+      },
+      {
+        "activation": 0.8462,
+        "expression": "22+25+21",
+        "result_value": 68.0,
+        "context": "22+25+21=[68]>>68 minutes in all."
+      },
+      {
+        "activation": 0.8208,
+        "expression": "16*2",
+        "result_value": 32.0,
+        "context": " = <<16*2=[32]>>32 hours watching both daughters"
+      },
+      {
+        "activation": 0.7881,
+        "expression": "40+28",
+        "result_value": 68.0,
+        "context": " = <<40+28=[68]>>68 pounds\nSubt"
+      },
+      {
+        "activation": 0.7178,
+        "expression": "177*2",
+        "result_value": 354.0,
+        "context": " = <<177*2=[354]>>354 peppers.\nThe"
+      },
+      {
+        "activation": 0.6958,
+        "expression": "580-231",
+        "result_value": 349.0,
+        "context": " = <<580-231=[349]>>349 birds left in the"
+      },
+      {
+        "activation": 0.6372,
+        "expression": "110+11",
+        "result_value": 121.0,
+        "context": " = <<110+11=[121]>>121 meters.\nTherefore"
+      },
+      {
+        "activation": 0.6245,
+        "expression": "20+1",
+        "result_value": 21.0,
+        "context": " = <<20+1=[21]>>21 stamps.\n####"
+      },
+      {
+        "activation": 0.5903,
+        "expression": "27+5",
+        "result_value": 32.0,
+        "context": " = <<27+5=[32]>>32 baseball cards.\n"
+      },
+      {
+        "activation": 0.5854,
+        "expression": "2*8",
+        "result_value": 16.0,
+        "context": " = <<2*8=[16]>>16 buildings to collapse."
+      }
+    ]
+  },
+  {
+    "feature_idx": 12237,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.5616046957773705,
+    "active_count": 219,
+    "top_examples": [
+      {
+        "activation": 2.25,
+        "expression": "2*6",
+        "result_value": 12.0,
+        "context": "=<<2*6=[12]>>12 points from the 2"
+      },
+      {
+        "activation": 2.1875,
+        "expression": "600*2",
+        "result_value": 1200.0,
+        "context": " $<<600*2=[1200]>>1200.\n#### 1200"
+      },
+      {
+        "activation": 1.918,
+        "expression": "1.50*4",
+        "result_value": 6.0,
+        "context": "1.50*4=[6]>>6 dollars in total."
+      },
+      {
+        "activation": 1.7686,
+        "expression": "3*2",
+        "result_value": 6.0,
+        "context": " = <<3*2=[6]>>6 rabbits\n6 rabbits"
+      },
+      {
+        "activation": 1.6582,
+        "expression": "2*3",
+        "result_value": 6.0,
+        "context": "=<<2*3=[6]>>6 movies.\nThus"
+      },
+      {
+        "activation": 1.6543,
+        "expression": "2*500",
+        "result_value": 1000.0,
+        "context": " $<<2*500=[1000]>>1000\nAfter buying the"
+      },
+      {
+        "activation": 1.6484,
+        "expression": "4+2",
+        "result_value": 6.0,
+        "context": " = <<4+2=[6]>>6 hours.\n####"
+      },
+      {
+        "activation": 1.6357,
+        "expression": "4+2",
+        "result_value": 6.0,
+        "context": " = <<4+2=[6]>>6 hours.\n####"
+      },
+      {
+        "activation": 1.6025,
+        "expression": "24/2",
+        "result_value": 12.0,
+        "context": " = <<24/2=[12]>>12 two-inch fish"
+      },
+      {
+        "activation": 1.501,
+        "expression": "40*10",
+        "result_value": 400.0,
+        "context": " $<<40*10=[400]>>400.\nHence"
+      },
+      {
+        "activation": 1.4678,
+        "expression": "6*2",
+        "result_value": 12.0,
+        "context": " = <<6*2=[12]>>12 hours a week to"
+      },
+      {
+        "activation": 1.4629,
+        "expression": "24/2",
+        "result_value": 12.0,
+        "context": " $<<24/2=[12]>>12 in her wallet."
+      },
+      {
+        "activation": 1.4268,
+        "expression": "24-8",
+        "result_value": 16.0,
+        "context": " = <<24-8=[16]>>16 clownfish in the"
+      },
+      {
+        "activation": 1.3643,
+        "expression": "24*2/3",
+        "result_value": 16.0,
+        "context": "24*2/3=[16]>>16 used crayons"
+      },
+      {
+        "activation": 1.3613,
+        "expression": "420+80",
+        "result_value": 500.0,
+        "context": " = <<420+80=[500]>>500 pages of the book"
+      },
+      {
+        "activation": 1.3037,
+        "expression": "90*12",
+        "result_value": 1080.0,
+        "context": " = <<90*12=[1080]>>1080 beetles\n#### 1080"
+      },
+      {
+        "activation": 1.2695,
+        "expression": "480+120",
+        "result_value": 600.0,
+        "context": " $<<480+120=[600]>>600.\nSo,"
+      },
+      {
+        "activation": 1.2451,
+        "expression": "3000/3*4",
+        "result_value": 4000.0,
+        "context": "3000/3*4=[4000]>>4000 jelly beans in the"
+      },
+      {
+        "activation": 1.2363,
+        "expression": "65*4",
+        "result_value": 260.0,
+        "context": " $<<65*4=[260]>>260.\nTherefore,"
+      },
+      {
+        "activation": 1.1865,
+        "expression": "20*30",
+        "result_value": 600.0,
+        "context": "=$<<20*30=[600]>>600\nHe works 30"
+      }
+    ]
+  },
+  {
+    "feature_idx": 8839,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.5087957382202148,
+    "active_count": 260,
+    "top_examples": [
+      {
+        "activation": 1.8975,
+        "expression": "134000/200",
+        "result_value": 670.0,
+        "context": "<<134000/200=[670]>>670\n#### 670"
+      },
+      {
+        "activation": 1.6328,
+        "expression": "15*.01*1000",
+        "result_value": 150.0,
+        "context": "15*.01*1000=[150]>>150\nFood is "
+      },
+      {
+        "activation": 1.4727,
+        "expression": "420+80",
+        "result_value": 500.0,
+        "context": " = <<420+80=[500]>>500 pages of the book"
+      },
+      {
+        "activation": 1.4414,
+        "expression": "100+400",
+        "result_value": 500.0,
+        "context": " $<<100+400=[500]>>500.\n#### 500"
+      },
+      {
+        "activation": 1.4365,
+        "expression": "100000+18000+16000",
+        "result_value": 134000.0,
+        "context": "18000+16000=[134]000>>134,000\n"
+      },
+      {
+        "activation": 1.3936,
+        "expression": "120-75",
+        "result_value": 45.0,
+        "context": " = <<120-75=[45]>>45 minutes to finish the"
+      },
+      {
+        "activation": 1.376,
+        "expression": "19+24",
+        "result_value": 43.0,
+        "context": " = <<19+24=[43]>>43 hard hats remained in"
+      },
+      {
+        "activation": 1.3594,
+        "expression": "72-30",
+        "result_value": 42.0,
+        "context": " = <<72-30=[42]>>42 stickers.\n####"
+      },
+      {
+        "activation": 1.3438,
+        "expression": "15+35+35+50",
+        "result_value": 135.0,
+        "context": "35+35+50=[135]>>135 coins\nThe number"
+      },
+      {
+        "activation": 1.3379,
+        "expression": "5+8",
+        "result_value": 13.0,
+        "context": " = <<5+8=[13]>>13 crayons to"
+      },
+      {
+        "activation": 1.3076,
+        "expression": "60+50",
+        "result_value": 110.0,
+        "context": " = <<60+50=[110]>>110 tennis balls Ralph didn"
+      },
+      {
+        "activation": 1.3066,
+        "expression": "10+45",
+        "result_value": 55.0,
+        "context": " = <<10+45=[55]>>55\nThe fraction of"
+      },
+      {
+        "activation": 1.3018,
+        "expression": "1000-220",
+        "result_value": 780.0,
+        "context": " $<<1000-220=[780]>>780.\nTara"
+      },
+      {
+        "activation": 1.3008,
+        "expression": "260-24-63-25",
+        "result_value": 148.0,
+        "context": "24-63-25=[148]>>148 kids\n#### 148"
+      },
+      {
+        "activation": 1.2598,
+        "expression": "1000-200-400",
+        "result_value": 400.0,
+        "context": "1000-200-400=[400]>>400 pounds.\nThus"
+      },
+      {
+        "activation": 1.2422,
+        "expression": "100+20+80",
+        "result_value": 200.0,
+        "context": "100+20+80=[200]>>200\nThe average cost"
+      },
+      {
+        "activation": 1.2373,
+        "expression": "23+16",
+        "result_value": 39.0,
+        "context": "=<<23+16=[39]>>39 beads in the bowl"
+      },
+      {
+        "activation": 1.2158,
+        "expression": "60*8",
+        "result_value": 480.0,
+        "context": " $<<60*8=[480]>>480 for the large paintings"
+      },
+      {
+        "activation": 1.2139,
+        "expression": "30+16+24",
+        "result_value": 70.0,
+        "context": "30+16+24=[70]>>70 unused crayons"
+      },
+      {
+        "activation": 1.1924,
+        "expression": "10+5+20",
+        "result_value": 35.0,
+        "context": "10+5+20=[35]>>35 on the ingredients."
+      }
+    ]
+  },
+  {
+    "feature_idx": 9775,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0014836795162409544,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.6679532580671057,
+    "active_count": 452,
+    "top_examples": [
+      {
+        "activation": 2.2969,
+        "expression": "40+60",
+        "result_value": 100.0,
+        "context": " = <<40+60=[100]>>100 cans of milk."
+      },
+      {
+        "activation": 2.2715,
+        "expression": "80+20",
+        "result_value": 100.0,
+        "context": "=<<80+20=[100]>>100 dollars a day."
+      },
+      {
+        "activation": 2.2422,
+        "expression": "50*2",
+        "result_value": 100.0,
+        "context": " $<<50*2=[100]>>100.\nThe cost"
+      },
+      {
+        "activation": 1.9199,
+        "expression": "109*2",
+        "result_value": 218.0,
+        "context": " $<<109*2=[218]>>218.\nThus,"
+      },
+      {
+        "activation": 1.918,
+        "expression": "10*10",
+        "result_value": 100.0,
+        "context": " = <<10*10=[100]>>100 rooms.\nOne"
+      },
+      {
+        "activation": 1.8623,
+        "expression": "3*400",
+        "result_value": 1200.0,
+        "context": "=<<3*400=[1200]>>1200 pages\nSo it"
+      },
+      {
+        "activation": 1.8477,
+        "expression": "60+50",
+        "result_value": 110.0,
+        "context": " = <<60+50=[110]>>110 tennis balls Ralph didn"
+      },
+      {
+        "activation": 1.8252,
+        "expression": "2*4",
+        "result_value": 8.0,
+        "context": " $<<2*4=[8]>>8.\nThe juice"
+      },
+      {
+        "activation": 1.8096,
+        "expression": "50*2",
+        "result_value": 100.0,
+        "context": "=$<<50*2=[100]>>100 per minute to film"
+      },
+      {
+        "activation": 1.7646,
+        "expression": "6000/60",
+        "result_value": 100.0,
+        "context": " $<<6000/60=[100]>>100 per month\nTo"
+      },
+      {
+        "activation": 1.7373,
+        "expression": "8+2",
+        "result_value": 10.0,
+        "context": "= <<8+2=[10]>>10 hours for his work"
+      },
+      {
+        "activation": 1.7051,
+        "expression": "10+3",
+        "result_value": 13.0,
+        "context": " = <<10+3=[13]>>13 objects\n#### 13"
+      },
+      {
+        "activation": 1.667,
+        "expression": "200+16",
+        "result_value": 216.0,
+        "context": " = <<200+16=[216]>>216 books.\n####"
+      },
+      {
+        "activation": 1.6426,
+        "expression": "64+44",
+        "result_value": 108.0,
+        "context": " = <<64+44=[108]>>108 hats\nIf they"
+      },
+      {
+        "activation": 1.6357,
+        "expression": "104*2",
+        "result_value": 208.0,
+        "context": " $<<104*2=[208]>>208.\nThe couple"
+      },
+      {
+        "activation": 1.624,
+        "expression": "10*20",
+        "result_value": 200.0,
+        "context": " $<<10*20=[200]>>200 in overtime.\n"
+      },
+      {
+        "activation": 1.6211,
+        "expression": "3+16",
+        "result_value": 19.0,
+        "context": " = <<3+16=[19]>>19 hard hats in the"
+      },
+      {
+        "activation": 1.6016,
+        "expression": "2+12",
+        "result_value": 14.0,
+        "context": " = <<2+12=[14]>>14 stickers.\nCol"
+      },
+      {
+        "activation": 1.542,
+        "expression": "25+40+35",
+        "result_value": 100.0,
+        "context": "25+40+35=[100]>>100 flowers total.\n"
+      },
+      {
+        "activation": 1.5107,
+        "expression": "20-2",
+        "result_value": 18.0,
+        "context": " = <<20-2=[18]>>18 seconds\n#### 18"
+      }
+    ]
+  },
+  {
+    "feature_idx": 765,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0014836795162409544,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.6381889895388955,
+    "active_count": 304,
+    "top_examples": [
+      {
+        "activation": 2.3125,
+        "expression": "40*.6",
+        "result_value": 24.0,
+        "context": "=<<40*.6=[24]>>24 trees\n#### 24"
+      },
+      {
+        "activation": 2.0547,
+        "expression": "180*0.20",
+        "result_value": 36.0,
+        "context": "180*0.20=[36]>>36.\nTherefore,"
+      },
+      {
+        "activation": 2.0527,
+        "expression": "24/2",
+        "result_value": 12.0,
+        "context": " = <<24/2=[12]>>12 two-inch fish"
+      },
+      {
+        "activation": 2.0293,
+        "expression": "39/3",
+        "result_value": 13.0,
+        "context": "=<<39/3=[13]>>13 beads each\nBefore"
+      },
+      {
+        "activation": 1.9072,
+        "expression": "22-6",
+        "result_value": 16.0,
+        "context": " = <<22-6=[16]>>16 pink hard hats in"
+      },
+      {
+        "activation": 1.7305,
+        "expression": "24/2",
+        "result_value": 12.0,
+        "context": " $<<24/2=[12]>>12 in her wallet."
+      },
+      {
+        "activation": 1.7285,
+        "expression": "18/3",
+        "result_value": 6.0,
+        "context": " = <<18/3=[6]>>6\nThe total they"
+      },
+      {
+        "activation": 1.6436,
+        "expression": "60/5",
+        "result_value": 12.0,
+        "context": " = <<60/5=[12]>>12 minutes every day feeding"
+      },
+      {
+        "activation": 1.6299,
+        "expression": "400/25",
+        "result_value": 16.0,
+        "context": "=<<400/25=[16]>>16 hours\n#### 16"
+      },
+      {
+        "activation": 1.6025,
+        "expression": "4/5*20",
+        "result_value": 16.0,
+        "context": "4/5*20=[16]>>16 hats\nZola"
+      },
+      {
+        "activation": 1.5996,
+        "expression": "80+20",
+        "result_value": 100.0,
+        "context": "=<<80+20=[100]>>100 dollars a day."
+      },
+      {
+        "activation": 1.5898,
+        "expression": "50/5",
+        "result_value": 10.0,
+        "context": " = <<50/5=[10]>>10\n#### 10"
+      },
+      {
+        "activation": 1.5625,
+        "expression": "14/2",
+        "result_value": 7.0,
+        "context": " = <<14/2=[7]>>7 in 3 years\n"
+      },
+      {
+        "activation": 1.5498,
+        "expression": "24/3",
+        "result_value": 8.0,
+        "context": " = <<24/3=[8]>>8 clownfish swam"
+      },
+      {
+        "activation": 1.5361,
+        "expression": "12-4",
+        "result_value": 8.0,
+        "context": " = <<12-4=[8]>>8\nHe needs to"
+      },
+      {
+        "activation": 1.5273,
+        "expression": "60/5",
+        "result_value": 12.0,
+        "context": "=<<60/5=[12]>>12 seconds.\nThere"
+      },
+      {
+        "activation": 1.4941,
+        "expression": "2/5*80",
+        "result_value": 32.0,
+        "context": "2/5*80=[32]>>32 people missed the board"
+      },
+      {
+        "activation": 1.4443,
+        "expression": "3+1",
+        "result_value": 4.0,
+        "context": " = <<3+1=[4]>>4 crayons to"
+      },
+      {
+        "activation": 1.4365,
+        "expression": "40*5",
+        "result_value": 200.0,
+        "context": "=<<40*5=[200]>>200 miles for work\n"
+      },
+      {
+        "activation": 1.4277,
+        "expression": "6*2",
+        "result_value": 12.0,
+        "context": " = <<6*2=[12]>>12 green hard hats."
+      }
+    ]
+  },
+  {
+    "feature_idx": 2733,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0014836795162409544,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.004451038781553507
+    },
+    "mean_activation": 0.5929203604937493,
+    "active_count": 267,
+    "top_examples": [
+      {
+        "activation": 2.4785,
+        "expression": "35+14",
+        "result_value": 49.0,
+        "context": " = <<35+14=[49]>>49 arms\n#### 49"
+      },
+      {
+        "activation": 2.4414,
+        "expression": "12*4",
+        "result_value": 48.0,
+        "context": "=<<12*4=[48]>>48 shells\n#### 48"
+      },
+      {
+        "activation": 1.9678,
+        "expression": "120/60",
+        "result_value": 2.0,
+        "context": "=<<120/60=[2]>>2 hours of TV."
+      },
+      {
+        "activation": 1.9082,
+        "expression": "30/2",
+        "result_value": 15.0,
+        "context": "=<<30/2=[15]>>15 hours at his second"
+      },
+      {
+        "activation": 1.8818,
+        "expression": "16+32",
+        "result_value": 48.0,
+        "context": " = <<16+32=[48]>>48 years old\n####"
+      },
+      {
+        "activation": 1.8535,
+        "expression": "112/7",
+        "result_value": 16.0,
+        "context": " = <<112/7=[16]>>16 years old\nIron"
+      },
+      {
+        "activation": 1.8047,
+        "expression": "30*1/2",
+        "result_value": 15.0,
+        "context": "30*1/2=[15]>>15.\nLisa earned"
+      },
+      {
+        "activation": 1.7832,
+        "expression": "25*.01*1000",
+        "result_value": 250.0,
+        "context": "25*.01*1000=[250]>>250\nCoursework materials"
+      },
+      {
+        "activation": 1.7334,
+        "expression": "120-75",
+        "result_value": 45.0,
+        "context": " = <<120-75=[45]>>45 minutes to finish the"
+      },
+      {
+        "activation": 1.7256,
+        "expression": "80-32",
+        "result_value": 48.0,
+        "context": "=<<80-32=[48]>>48\n#### 48"
+      },
+      {
+        "activation": 1.6816,
+        "expression": "1/2*4",
+        "result_value": 2.0,
+        "context": "1/2*4=[2]>>2/day.\n"
+      },
+      {
+        "activation": 1.666,
+        "expression": "10-8",
+        "result_value": 2.0,
+        "context": " = <<10-8=[2]>>2 hours of overtime\n"
+      },
+      {
+        "activation": 1.6602,
+        "expression": "24/6",
+        "result_value": 4.0,
+        "context": "=<<24/6=[4]>>4 digits of pi."
+      },
+      {
+        "activation": 1.5234,
+        "expression": "400/25",
+        "result_value": 16.0,
+        "context": "=<<400/25=[16]>>16 hours\n#### 16"
+      },
+      {
+        "activation": 1.5088,
+        "expression": "100/2",
+        "result_value": 50.0,
+        "context": " = <<100/2=[50]>>50\nHe gave away"
+      },
+      {
+        "activation": 1.502,
+        "expression": "2000/1000",
+        "result_value": 2.0,
+        "context": " = <<2000/1000=[2]>>2 kilograms of sugar are"
+      },
+      {
+        "activation": 1.4717,
+        "expression": "840-825",
+        "result_value": 15.0,
+        "context": " = <<840-825=[15]>>15 pieces\n#### 15"
+      },
+      {
+        "activation": 1.4443,
+        "expression": "12*6",
+        "result_value": 72.0,
+        "context": " = <<12*6=[72]>>72\nShe needs 9"
+      },
+      {
+        "activation": 1.3984,
+        "expression": "400/8",
+        "result_value": 50.0,
+        "context": " = <<400/8=[50]>>50\nHe needs to"
+      },
+      {
+        "activation": 1.3584,
+        "expression": "100/2",
+        "result_value": 50.0,
+        "context": " $<<100/2=[50]>>50.\nBetty"
+      }
+    ]
+  },
+  {
+    "feature_idx": 8604,
+    "layer": 14,
+    "role": "eq_sign",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0014836795162409544,
+      "eq_sign": 0.12314540147781372,
+      "background": 0.02818991057574749
+    },
+    "mean_activation": 0.7831709843761516,
+    "active_count": 530,
+    "top_examples": [
+      {
+        "activation": 2.5586,
+        "expression": "6000/24",
+        "result_value": 250.0,
+        "context": " $<<6000/24=[250]>>250 per month\nIf"
+      },
+      {
+        "activation": 2.375,
+        "expression": "45/55*440",
+        "result_value": 360.0,
+        "context": "45/55*440=[360]>>360 coins.\nWhen"
+      },
+      {
+        "activation": 2.332,
+        "expression": "55",
+        "result_value": 55.0,
+        "context": "*110 = <<55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 2.1582,
+        "expression": "200*3",
+        "result_value": 600.0,
+        "context": " $<<200*3=[600]>>600\n#### 600"
+      },
+      {
+        "activation": 2.125,
+        "expression": "1*90",
+        "result_value": 90.0,
+        "context": " = <<1*90=[90]>>90 cups of birdseed"
+      },
+      {
+        "activation": 2.1133,
+        "expression": "528+30",
+        "result_value": 558.0,
+        "context": " $<<528+30=[558]>>558\nLee earned $"
+      },
+      {
+        "activation": 2.0625,
+        "expression": "65*4",
+        "result_value": 260.0,
+        "context": " $<<65*4=[260]>>260.\nTherefore,"
+      },
+      {
+        "activation": 2.0488,
+        "expression": "20*3",
+        "result_value": 60.0,
+        "context": " = <<20*3=[60]>>60\nThe regular nic"
+      },
+      {
+        "activation": 2.0469,
+        "expression": "960-480-120",
+        "result_value": 360.0,
+        "context": "960-480-120=[360]>>360 dollars.\n####"
+      },
+      {
+        "activation": 2.0273,
+        "expression": "108/2",
+        "result_value": 54.0,
+        "context": " = <<108/2=[54]>>54 hats/person\n"
+      },
+      {
+        "activation": 2.0117,
+        "expression": "90+50",
+        "result_value": 140.0,
+        "context": " = <<90+50=[140]>>140 cupcakes\n####"
+      },
+      {
+        "activation": 1.9814,
+        "expression": "4*15",
+        "result_value": 60.0,
+        "context": " = <<4*15=[60]>>60\nHe earned $"
+      },
+      {
+        "activation": 1.9736,
+        "expression": "(60+72+42)/3",
+        "result_value": 58.0,
+        "context": "72+42)/3=[58]>>58 mph.\n####"
+      },
+      {
+        "activation": 1.9678,
+        "expression": "1*3",
+        "result_value": 3.0,
+        "context": " $<<1*3=[3]>>3.\nThe total"
+      },
+      {
+        "activation": 1.9473,
+        "expression": "35/7",
+        "result_value": 5.0,
+        "context": " = <<35/7=[5]>>5\n#### 5"
+      },
+      {
+        "activation": 1.9443,
+        "expression": "1200/20",
+        "result_value": 60.0,
+        "context": "=<<1200/20=[60]>>60 days\n#### 60"
+      },
+      {
+        "activation": 1.8799,
+        "expression": "97-12",
+        "result_value": 85.0,
+        "context": " = <<97-12=[85]>>85 kilograms.\n####"
+      },
+      {
+        "activation": 1.8154,
+        "expression": "40*5/100",
+        "result_value": 2.0,
+        "context": "40*5/100=[2]>>2 discount each.\n"
+      },
+      {
+        "activation": 1.792,
+        "expression": "100-10",
+        "result_value": 90.0,
+        "context": " = <<100-10=[90]>>90 available rooms.\n"
+      },
+      {
+        "activation": 1.7646,
+        "expression": "120-60",
+        "result_value": 60.0,
+        "context": "=$<<120-60=[60]>>60\nSo in total"
+      }
+    ]
+  },
+  {
+    "feature_idx": 2190,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.005934718064963818,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.5447032628375273,
+    "active_count": 317,
+    "top_examples": [
+      {
+        "activation": 2.4453,
+        "expression": "25*.01*1000",
+        "result_value": 250.0,
+        "context": "25*.01*1000=[250]>>250\nCoursework materials"
+      },
+      {
+        "activation": 2.0469,
+        "expression": "80*.05",
+        "result_value": 4.0,
+        "context": " = <<80*.05=[4]>>4\nHer money is"
+      },
+      {
+        "activation": 1.9102,
+        "expression": "250-100",
+        "result_value": 150.0,
+        "context": " $<<250-100=[150]>>150 more per month\n"
+      },
+      {
+        "activation": 1.5928,
+        "expression": "5+20",
+        "result_value": 25.0,
+        "context": " = <<5+20=[25]>>25 roommates\n####"
+      },
+      {
+        "activation": 1.5889,
+        "expression": "12.50+12.50+5.00",
+        "result_value": 30.0,
+        "context": "50+5.00=[30].00>>30.00"
+      },
+      {
+        "activation": 1.541,
+        "expression": "120-75",
+        "result_value": 45.0,
+        "context": " = <<120-75=[45]>>45 minutes to finish the"
+      },
+      {
+        "activation": 1.5146,
+        "expression": "20+1",
+        "result_value": 21.0,
+        "context": " = <<20+1=[21]>>21 stamps.\n####"
+      },
+      {
+        "activation": 1.5049,
+        "expression": "6*3",
+        "result_value": 18.0,
+        "context": " = <<6*3=[18]>>18 rabbits\nThere were"
+      },
+      {
+        "activation": 1.4922,
+        "expression": "3*15",
+        "result_value": 45.0,
+        "context": " = <<3*15=[45]>>45\nDallas is a"
+      },
+      {
+        "activation": 1.4893,
+        "expression": "60*.75",
+        "result_value": 45.0,
+        "context": " = <<60*.75=[45]>>45\n#### 45"
+      },
+      {
+        "activation": 1.4824,
+        "expression": "20+30",
+        "result_value": 50.0,
+        "context": " = <<20+30=[50]>>50 inches.\n####"
+      },
+      {
+        "activation": 1.4785,
+        "expression": "55",
+        "result_value": 55.0,
+        "context": "*110 = <<55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 1.4131,
+        "expression": "6*(20/60)",
+        "result_value": 2.0,
+        "context": "*(20/60)=[2]>>2 miles.\nSo"
+      },
+      {
+        "activation": 1.3701,
+        "expression": "6000/24",
+        "result_value": 250.0,
+        "context": " $<<6000/24=[250]>>250 per month\nIf"
+      },
+      {
+        "activation": 1.3701,
+        "expression": "60+60",
+        "result_value": 120.0,
+        "context": " $<<60+60=[120]>>120\nThe total amount"
+      },
+      {
+        "activation": 1.3516,
+        "expression": "50/2",
+        "result_value": 25.0,
+        "context": " = <<50/2=[25]>>25 kids\nThen add"
+      },
+      {
+        "activation": 1.3477,
+        "expression": "100+10",
+        "result_value": 110.0,
+        "context": " = <<100+10=[110]>>110 meters.\nAt"
+      },
+      {
+        "activation": 1.3398,
+        "expression": "30-26",
+        "result_value": 4.0,
+        "context": " = <<30-26=[4]>>4 cookie slices left."
+      },
+      {
+        "activation": 1.3223,
+        "expression": "10+25",
+        "result_value": 35.0,
+        "context": "=$<<10+25=[35]>>35.\n#### 35"
+      },
+      {
+        "activation": 1.3076,
+        "expression": "300*.75",
+        "result_value": 225.0,
+        "context": "=$<<300*.75=[225]>>225\nSo he had"
+      }
+    ]
+  },
+  {
+    "feature_idx": 9287,
+    "layer": 14,
+    "role": "operand",
+    "activation_rates": {
+      "operand": 0.27151334285736084,
+      "result": 0.0771513357758522,
+      "eq_sign": 0.0014836795162409544,
+      "background": 0.07270029932260513
+    },
+    "mean_activation": 1.3366727216528096,
+    "active_count": 654,
+    "top_examples": [
+      {
+        "activation": 3.707,
+        "expression": "+30+46+38+11+18",
+        "result_value": 143.0,
+        "context": "38+11+18=[143]>>143.\nShe used"
+      },
+      {
+        "activation": 3.3281,
+        "expression": "600+320",
+        "result_value": 920.0,
+        "context": " = <<600+320=[920]>>920\n#### 920"
+      },
+      {
+        "activation": 3.2207,
+        "expression": "200*2",
+        "result_value": 400.0,
+        "context": " $<<200*2=[400]>>400.\nThe total"
+      },
+      {
+        "activation": 3.1934,
+        "expression": "3000/3*4",
+        "result_value": 4000.0,
+        "context": "3000/3*4=[4000]>>4000 jelly beans in the"
+      },
+      {
+        "activation": 3.1113,
+        "expression": "10*20",
+        "result_value": 200.0,
+        "context": " $<<10*20=[200]>>200 in overtime.\n"
+      },
+      {
+        "activation": 3.0449,
+        "expression": "6000-2000",
+        "result_value": 4000.0,
+        "context": " = <<6000-2000=[4000]>>4000\nWhen 6 more"
+      },
+      {
+        "activation": 2.998,
+        "expression": "500+200",
+        "result_value": 700.0,
+        "context": " $<<500+200=[700]>>700\n#### 700"
+      },
+      {
+        "activation": 2.9961,
+        "expression": "5+10",
+        "result_value": 15.0,
+        "context": " = <<5+10=[15]>>15 pets\n#### 15"
+      },
+      {
+        "activation": 2.959,
+        "expression": "15*5",
+        "result_value": 75.0,
+        "context": " = <<15*5=[75]>>75 origami stars\n"
+      },
+      {
+        "activation": 2.875,
+        "expression": "300-225",
+        "result_value": 75.0,
+        "context": "=$<<300-225=[75]>>75\nThe cats visit"
+      },
+      {
+        "activation": 2.8672,
+        "expression": "600*2",
+        "result_value": 1200.0,
+        "context": " $<<600*2=[1200]>>1200.\n#### 1200"
+      },
+      {
+        "activation": 2.8594,
+        "expression": "20+1",
+        "result_value": 21.0,
+        "context": " = <<20+1=[21]>>21 stamps.\n####"
+      },
+      {
+        "activation": 2.7891,
+        "expression": "300*.75",
+        "result_value": 225.0,
+        "context": "=$<<300*.75=[225]>>225\nSo he had"
+      },
+      {
+        "activation": 2.7871,
+        "expression": "40+35",
+        "result_value": 75.0,
+        "context": "=<<40+35=[75]>>75 flowers that are not"
+      },
+      {
+        "activation": 2.7773,
+        "expression": "2*200",
+        "result_value": 400.0,
+        "context": " = <<2*200=[400]>>400 pounds from acorns"
+      },
+      {
+        "activation": 2.7637,
+        "expression": "80+20",
+        "result_value": 100.0,
+        "context": "=<<80+20=[100]>>100 dollars a day."
+      },
+      {
+        "activation": 2.748,
+        "expression": "110-60-15",
+        "result_value": 35.0,
+        "context": "110-60-15=[35]>>35\nHe shoveled"
+      },
+      {
+        "activation": 2.7441,
+        "expression": "60*.75",
+        "result_value": 45.0,
+        "context": " = <<60*.75=[45]>>45\n#### 45"
+      },
+      {
+        "activation": 2.7188,
+        "expression": "400*1.5",
+        "result_value": 600.0,
+        "context": "400*1.5=[600]>>600 pounds\nSo it"
+      },
+      {
+        "activation": 2.6953,
+        "expression": "14+1",
+        "result_value": 15.0,
+        "context": " = <<14+1=[15]>>15 years old next year"
+      }
+    ]
+  },
+  {
+    "feature_idx": 6210,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.017804155126214027,
+      "result": 0.01928783394396305,
+      "eq_sign": 0.004451038781553507,
+      "background": 0.016320474445819855
+    },
+    "mean_activation": 1.1342950989686587,
+    "active_count": 599,
+    "top_examples": [
+      {
+        "activation": 3.1211,
+        "expression": "18/3",
+        "result_value": 6.0,
+        "context": " = <<18/3=[6]>>6\nThe total they"
+      },
+      {
+        "activation": 2.7383,
+        "expression": "110*10/100",
+        "result_value": 11.0,
+        "context": "110*10/100=[11]>>11 meters more.\n"
+      },
+      {
+        "activation": 2.7305,
+        "expression": "10/5",
+        "result_value": 2.0,
+        "context": " = <<10/5=[2]>>2 kilograms of butter for"
+      },
+      {
+        "activation": 2.6191,
+        "expression": "25-4",
+        "result_value": 21.0,
+        "context": " = <<25-4=[21]>>21 minutes to clean his"
+      },
+      {
+        "activation": 2.6172,
+        "expression": "121-100",
+        "result_value": 21.0,
+        "context": " = <<121-100=[21]>>21 meters.\n####"
+      },
+      {
+        "activation": 2.6074,
+        "expression": "20+25+22+20+10",
+        "result_value": 97.0,
+        "context": "22+20+10=[97]>>97 cars traveling down the"
+      },
+      {
+        "activation": 2.5645,
+        "expression": "3/3",
+        "result_value": 1.0,
+        "context": " = <<3/3=[1]>>1 kilograms of butter for"
+      },
+      {
+        "activation": 2.4941,
+        "expression": "30-19",
+        "result_value": 11.0,
+        "context": " = <<30-19=[11]>>11 situps\nOn"
+      },
+      {
+        "activation": 2.416,
+        "expression": "400/8",
+        "result_value": 50.0,
+        "context": " = <<400/8=[50]>>50\nHe needs to"
+      },
+      {
+        "activation": 2.4023,
+        "expression": "184-143",
+        "result_value": 41.0,
+        "context": " $<<184-143=[41]>>41 for the shoes."
+      },
+      {
+        "activation": 2.3906,
+        "expression": "36+7",
+        "result_value": 43.0,
+        "context": " $<<36+7=[43]>>43\nShe then deposits"
+      },
+      {
+        "activation": 2.3906,
+        "expression": "120-75",
+        "result_value": 45.0,
+        "context": " = <<120-75=[45]>>45 minutes to finish the"
+      },
+      {
+        "activation": 2.377,
+        "expression": "24+1+1",
+        "result_value": 26.0,
+        "context": "24+1+1=[26]>>26 people who ate the"
+      },
+      {
+        "activation": 2.375,
+        "expression": "84/14",
+        "result_value": 6.0,
+        "context": " =<<84/14=[6]>>6 loads of laundry\n"
+      },
+      {
+        "activation": 2.375,
+        "expression": "16-10",
+        "result_value": 6.0,
+        "context": " = <<16-10=[6]>>6 pizza pieces uneat"
+      },
+      {
+        "activation": 2.3711,
+        "expression": "1/2*4",
+        "result_value": 2.0,
+        "context": "1/2*4=[2]>>2/day.\n"
+      },
+      {
+        "activation": 2.3594,
+        "expression": "0.5*5",
+        "result_value": 2.5,
+        "context": "0.5*5=[2].50>>2.50"
+      },
+      {
+        "activation": 2.3535,
+        "expression": "4+2",
+        "result_value": 6.0,
+        "context": " = <<4+2=[6]>>6 hours.\n####"
+      },
+      {
+        "activation": 2.3535,
+        "expression": "4000/2000",
+        "result_value": 2.0,
+        "context": " = <<4000/2000=[2]>>2 hours to fill the"
+      },
+      {
+        "activation": 2.3438,
+        "expression": "38/2",
+        "result_value": 19.0,
+        "context": " = <<38/2=[19]>>19 apples.\n####"
+      }
+    ]
+  },
+  {
+    "feature_idx": 9089,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.6409521758995712,
+    "active_count": 407,
+    "top_examples": [
+      {
+        "activation": 1.8232,
+        "expression": "30/2",
+        "result_value": 15.0,
+        "context": " = <<30/2=[15]>>15 baseball cards.\n"
+      },
+      {
+        "activation": 1.7139,
+        "expression": "5+6",
+        "result_value": 11.0,
+        "context": " = <<5+6=[11]>>11 mystery novels.\n"
+      },
+      {
+        "activation": 1.71,
+        "expression": "24-8",
+        "result_value": 16.0,
+        "context": " = <<24-8=[16]>>16 clownfish in the"
+      },
+      {
+        "activation": 1.7051,
+        "expression": "10+45",
+        "result_value": 55.0,
+        "context": " = <<10+45=[55]>>55\nThe fraction of"
+      },
+      {
+        "activation": 1.6914,
+        "expression": "27+5",
+        "result_value": 32.0,
+        "context": " = <<27+5=[32]>>32 baseball cards.\n"
+      },
+      {
+        "activation": 1.6777,
+        "expression": "16-1",
+        "result_value": 15.0,
+        "context": " = <<16-1=[15]>>15 fish in the first"
+      },
+      {
+        "activation": 1.582,
+        "expression": "10-3",
+        "result_value": 7.0,
+        "context": " = <<10-3=[7]>>7 letters in Samantha\ufffd"
+      },
+      {
+        "activation": 1.5811,
+        "expression": "20/4",
+        "result_value": 5.0,
+        "context": " = <<20/4=[5]>>5 uncommons\nSo"
+      },
+      {
+        "activation": 1.5654,
+        "expression": "100-68",
+        "result_value": 32.0,
+        "context": " = <<100-68=[32]>>32 pounds\nIt therefore"
+      },
+      {
+        "activation": 1.5586,
+        "expression": "4*4",
+        "result_value": 16.0,
+        "context": " = <<4*4=[16]>>16 pizza pieces.\n"
+      },
+      {
+        "activation": 1.4648,
+        "expression": "16-1",
+        "result_value": 15.0,
+        "context": " = <<16-1=[15]>>15.\nIn round"
+      },
+      {
+        "activation": 1.4619,
+        "expression": "39/3",
+        "result_value": 13.0,
+        "context": "=<<39/3=[13]>>13 beads each\nBefore"
+      },
+      {
+        "activation": 1.4502,
+        "expression": "23+16",
+        "result_value": 39.0,
+        "context": "=<<23+16=[39]>>39 beads in the bowl"
+      },
+      {
+        "activation": 1.4502,
+        "expression": "400/25",
+        "result_value": 16.0,
+        "context": "=<<400/25=[16]>>16 hours\n#### 16"
+      },
+      {
+        "activation": 1.3975,
+        "expression": "27/3",
+        "result_value": 9.0,
+        "context": " = <<27/3=[9]>>9 feet of yarn."
+      },
+      {
+        "activation": 1.3945,
+        "expression": "840-825",
+        "result_value": 15.0,
+        "context": " = <<840-825=[15]>>15 pieces\n#### 15"
+      },
+      {
+        "activation": 1.3887,
+        "expression": "2+3",
+        "result_value": 5.0,
+        "context": " = <<2+3=[5]>>5 glass bottles.\n"
+      },
+      {
+        "activation": 1.3555,
+        "expression": "22-6",
+        "result_value": 16.0,
+        "context": " = <<22-6=[16]>>16 pink hard hats in"
+      },
+      {
+        "activation": 1.3555,
+        "expression": "26-4",
+        "result_value": 22.0,
+        "context": " = <<26-4=[22]>>22\nJohn also took"
+      },
+      {
+        "activation": 1.3398,
+        "expression": "48/2",
+        "result_value": 24.0,
+        "context": " = <<48/2=[24]>>24 clips in May."
+      }
+    ]
+  },
+  {
+    "feature_idx": 9492,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.33222970209623637,
+    "active_count": 76,
+    "top_examples": [
+      {
+        "activation": 1.3154,
+        "expression": "70*.01*90",
+        "result_value": 63.0,
+        "context": "70*.01*90=[63]>>63 kids\nThen find"
+      },
+      {
+        "activation": 1.3105,
+        "expression": "110*10/100",
+        "result_value": 11.0,
+        "context": "110*10/100=[11]>>11 meters more.\n"
+      },
+      {
+        "activation": 1.2588,
+        "expression": "210/14",
+        "result_value": 15.0,
+        "context": " = <<210/14=[15]>>15 liters each\n"
+      },
+      {
+        "activation": 1.0967,
+        "expression": "30*.01*1000",
+        "result_value": 300.0,
+        "context": "30*.01*1000=[300]>>300\nEntertainment is"
+      },
+      {
+        "activation": 1.0293,
+        "expression": "1/2*4",
+        "result_value": 2.0,
+        "context": "1/2*4=[2]>>2/day.\n"
+      },
+      {
+        "activation": 0.9492,
+        "expression": "50-20",
+        "result_value": 30.0,
+        "context": " = <<50-20=[30]>>30% left.\n"
+      },
+      {
+        "activation": 0.8223,
+        "expression": "38/2",
+        "result_value": 19.0,
+        "context": " = <<38/2=[19]>>19 apples.\n####"
+      },
+      {
+        "activation": 0.7983,
+        "expression": "40+35",
+        "result_value": 75.0,
+        "context": "=<<40+35=[75]>>75 flowers that are not"
+      },
+      {
+        "activation": 0.7632,
+        "expression": "25/100*28",
+        "result_value": 7.0,
+        "context": "25/100*28=[7]>>7 green flowers.\n"
+      },
+      {
+        "activation": 0.7524,
+        "expression": "100/10",
+        "result_value": 10.0,
+        "context": "= <<100/10=[10]>>10 dollars an hour."
+      },
+      {
+        "activation": 0.6523,
+        "expression": "30000*.9",
+        "result_value": 27000.0,
+        "context": "<<30000*.9=[27]000>>27,000\n"
+      },
+      {
+        "activation": 0.6509,
+        "expression": "2*10",
+        "result_value": 20.0,
+        "context": "=$<<2*10=[20]>>20\nThe shorts and"
+      },
+      {
+        "activation": 0.54,
+        "expression": "36*3/4",
+        "result_value": 27.0,
+        "context": "36*3/4=[27]>>27 students are in the"
+      },
+      {
+        "activation": 0.5396,
+        "expression": "200+20",
+        "result_value": 220.0,
+        "context": " $<<200+20=[220]>>220.\nSo her"
+      },
+      {
+        "activation": 0.5303,
+        "expression": "580-231",
+        "result_value": 349.0,
+        "context": " = <<580-231=[349]>>349 birds left in the"
+      },
+      {
+        "activation": 0.5225,
+        "expression": "0.5*5",
+        "result_value": 2.5,
+        "context": "0.5*5=[2].50>>2.50"
+      },
+      {
+        "activation": 0.519,
+        "expression": "140-30",
+        "result_value": 110.0,
+        "context": " = <<140-30=[110]>>110 seashells\n"
+      },
+      {
+        "activation": 0.5093,
+        "expression": "5+20",
+        "result_value": 25.0,
+        "context": " = <<5+20=[25]>>25 roommates\n####"
+      },
+      {
+        "activation": 0.4692,
+        "expression": "15/3",
+        "result_value": 5.0,
+        "context": " = <<15/3=[5]>>5 baseball cards.\n"
+      },
+      {
+        "activation": 0.4644,
+        "expression": "15+12",
+        "result_value": 27.0,
+        "context": " = <<15+12=[27]>>27 baseball cards.\n"
+      }
+    ]
+  },
+  {
+    "feature_idx": 2242,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.011869436129927635,
+      "result": 0.059347182512283325,
+      "eq_sign": 0.04599406570196152,
+      "background": 0.11275964230298996
+    },
+    "mean_activation": 1.2139211566631611,
+    "active_count": 650,
+    "top_examples": [
+      {
+        "activation": 2.7949,
+        "expression": "5*11",
+        "result_value": 55.0,
+        "context": "=<<5*11=[55]>>55 times.\n####"
+      },
+      {
+        "activation": 2.7402,
+        "expression": "32/4",
+        "result_value": 8.0,
+        "context": " = <<32/4=[8]>>8 packages.\n####"
+      },
+      {
+        "activation": 2.6992,
+        "expression": "150-144",
+        "result_value": 6.0,
+        "context": " = <<150-144=[6]>>6 miles on the 13"
+      },
+      {
+        "activation": 2.6465,
+        "expression": "180*0.20",
+        "result_value": 36.0,
+        "context": "180*0.20=[36]>>36.\nTherefore,"
+      },
+      {
+        "activation": 2.6328,
+        "expression": "80-32",
+        "result_value": 48.0,
+        "context": "=<<80-32=[48]>>48\n#### 48"
+      },
+      {
+        "activation": 2.5879,
+        "expression": "10*4",
+        "result_value": 40.0,
+        "context": " = <<10*4=[40]>>40 pounds\nThe second"
+      },
+      {
+        "activation": 2.5879,
+        "expression": "840-825",
+        "result_value": 15.0,
+        "context": " = <<840-825=[15]>>15 pieces\n#### 15"
+      },
+      {
+        "activation": 2.5664,
+        "expression": "1200/20",
+        "result_value": 60.0,
+        "context": "=<<1200/20=[60]>>60 days\n#### 60"
+      },
+      {
+        "activation": 2.541,
+        "expression": "400/25",
+        "result_value": 16.0,
+        "context": "=<<400/25=[16]>>16 hours\n#### 16"
+      },
+      {
+        "activation": 2.5234,
+        "expression": "15+13+20+8",
+        "result_value": 56.0,
+        "context": "13+20+8=[56]>>56 skips in total"
+      },
+      {
+        "activation": 2.5215,
+        "expression": "24-16",
+        "result_value": 8.0,
+        "context": " = <<24-16=[8]>>8 unused crayons"
+      },
+      {
+        "activation": 2.5137,
+        "expression": "4+8+16+32",
+        "result_value": 60.0,
+        "context": "8+16+32=[60]>>60 buildings to collapse."
+      },
+      {
+        "activation": 2.4941,
+        "expression": "60/5",
+        "result_value": 12.0,
+        "context": " = <<60/5=[12]>>12 minutes every day feeding"
+      },
+      {
+        "activation": 2.4922,
+        "expression": "30*2",
+        "result_value": 60.0,
+        "context": " = <<30*2=[60]>>60 minutes per day walking"
+      },
+      {
+        "activation": 2.4629,
+        "expression": "4*12",
+        "result_value": 48.0,
+        "context": " = <<4*12=[48]>>48 people in total."
+      },
+      {
+        "activation": 2.4492,
+        "expression": "25/5",
+        "result_value": 5.0,
+        "context": " $<<25/5=[5]>>5.\n#### 5"
+      },
+      {
+        "activation": 2.4336,
+        "expression": "36/3",
+        "result_value": 12.0,
+        "context": "=<<36/3=[12]>>12 shells\nAlan collected"
+      },
+      {
+        "activation": 2.3984,
+        "expression": "40*40/100",
+        "result_value": 16.0,
+        "context": "40*40/100=[16]>>16 books.\nThere"
+      },
+      {
+        "activation": 2.3711,
+        "expression": "16+32",
+        "result_value": 48.0,
+        "context": " = <<16+32=[48]>>48 years old\n####"
+      },
+      {
+        "activation": 2.3672,
+        "expression": "26-4",
+        "result_value": 22.0,
+        "context": " = <<26-4=[22]>>22\nJohn also took"
+      }
+    ]
+  },
+  {
+    "feature_idx": 5151,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.31958646774291993,
+    "active_count": 85,
+    "top_examples": [
+      {
+        "activation": 1.0723,
+        "expression": "55",
+        "result_value": 55.0,
+        "context": "*110 = <<55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 0.9956,
+        "expression": "110-55",
+        "result_value": 55.0,
+        "context": "= <<110-55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 0.9023,
+        "expression": "400-200",
+        "result_value": 200.0,
+        "context": " = <<400-200=[200]>>200 pounds from small animals"
+      },
+      {
+        "activation": 0.8843,
+        "expression": "12",
+        "result_value": 12.0,
+        "context": " to run is <<12=[12]>>12 miles a day\n"
+      },
+      {
+        "activation": 0.7773,
+        "expression": "95+15",
+        "result_value": 110.0,
+        "context": " = <<95+15=[110]>>110\nHe saved $"
+      },
+      {
+        "activation": 0.7378,
+        "expression": "120-60",
+        "result_value": 60.0,
+        "context": "=$<<120-60=[60]>>60\nSo in total"
+      },
+      {
+        "activation": 0.7314,
+        "expression": "1188/12",
+        "result_value": 99.0,
+        "context": " <<1188/12=[99]>>99 bananas.\n####"
+      },
+      {
+        "activation": 0.7256,
+        "expression": "9-4",
+        "result_value": 5.0,
+        "context": " = <<9-4=[5]>>5 other pills\nEach"
+      },
+      {
+        "activation": 0.6753,
+        "expression": "420+80",
+        "result_value": 500.0,
+        "context": " = <<420+80=[500]>>500 pages of the book"
+      },
+      {
+        "activation": 0.6738,
+        "expression": "30*2",
+        "result_value": 60.0,
+        "context": " = <<30*2=[60]>>60 minutes per day walking"
+      },
+      {
+        "activation": 0.6494,
+        "expression": "32*2",
+        "result_value": 64.0,
+        "context": " = <<32*2=[64]>>64 hours watching both daughters"
+      },
+      {
+        "activation": 0.6313,
+        "expression": "6*20",
+        "result_value": 120.0,
+        "context": " = <<6*20=[120]>>120 sentences before her break"
+      },
+      {
+        "activation": 0.6221,
+        "expression": "55+10",
+        "result_value": 65.0,
+        "context": " = <<55+10=[65]>>65 miles going back to"
+      },
+      {
+        "activation": 0.5894,
+        "expression": "40+80",
+        "result_value": 120.0,
+        "context": "=<<40+80=[120]>>120 minutes of TV."
+      },
+      {
+        "activation": 0.5571,
+        "expression": "90*12",
+        "result_value": 1080.0,
+        "context": " = <<90*12=[1080]>>1080 beetles\n#### 1080"
+      },
+      {
+        "activation": 0.5376,
+        "expression": "528+30",
+        "result_value": 558.0,
+        "context": " $<<528+30=[558]>>558\nLee earned $"
+      },
+      {
+        "activation": 0.5137,
+        "expression": "2*24",
+        "result_value": 48.0,
+        "context": " = <<2*24=[48]>>48 blue hats.\n"
+      },
+      {
+        "activation": 0.4966,
+        "expression": "100*1000",
+        "result_value": 100000.0,
+        "context": " $<<100*1000=[100]000>>100,000\n"
+      },
+      {
+        "activation": 0.4846,
+        "expression": "109-5",
+        "result_value": 104.0,
+        "context": " $<<109-5=[104]>>104 for each child."
+      },
+      {
+        "activation": 0.481,
+        "expression": "5*12",
+        "result_value": 60.0,
+        "context": " = <<5*12=[60]>>60 months\n$6"
+      }
+    ]
+  },
+  {
+    "feature_idx": 5597,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.010385756380856037,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.2694433345351108,
+    "active_count": 86,
+    "top_examples": [
+      {
+        "activation": 1.4014,
+        "expression": "133*3",
+        "result_value": 399.0,
+        "context": " $<<133*3=[399]>>399.\nOn all"
+      },
+      {
+        "activation": 1.0098,
+        "expression": "960-480-120",
+        "result_value": 360.0,
+        "context": "960-480-120=[360]>>360 dollars.\n####"
+      },
+      {
+        "activation": 0.9619,
+        "expression": "30+18+11",
+        "result_value": 59.0,
+        "context": "30+18+11=[59]>>59 situps\n####"
+      },
+      {
+        "activation": 0.8989,
+        "expression": "840-825",
+        "result_value": 15.0,
+        "context": " = <<840-825=[15]>>15 pieces\n#### 15"
+      },
+      {
+        "activation": 0.8853,
+        "expression": "6000-2000",
+        "result_value": 4000.0,
+        "context": " = <<6000-2000=[4000]>>4000\nWhen 6 more"
+      },
+      {
+        "activation": 0.7119,
+        "expression": "120-75",
+        "result_value": 45.0,
+        "context": " = <<120-75=[45]>>45 minutes to finish the"
+      },
+      {
+        "activation": 0.5869,
+        "expression": "140-30",
+        "result_value": 110.0,
+        "context": " = <<140-30=[110]>>110 seashells\n"
+      },
+      {
+        "activation": 0.5469,
+        "expression": "55",
+        "result_value": 55.0,
+        "context": "*110 = <<55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 0.519,
+        "expression": "536-278",
+        "result_value": 258.0,
+        "context": " = <<536-278=[258]>>258 sentences typed on the"
+      },
+      {
+        "activation": 0.5142,
+        "expression": "2000+500",
+        "result_value": 2500.0,
+        "context": " = <<2000+500=[2500]>>2500 cases.\nWith"
+      },
+      {
+        "activation": 0.502,
+        "expression": "19+24",
+        "result_value": 43.0,
+        "context": " = <<19+24=[43]>>43 hard hats remained in"
+      },
+      {
+        "activation": 0.4817,
+        "expression": "16-3",
+        "result_value": 13.0,
+        "context": " = <<16-3=[13]>>13.\nIn round"
+      },
+      {
+        "activation": 0.4751,
+        "expression": "100-36",
+        "result_value": 64.0,
+        "context": " = <<100-36=[64]>>64 weasels left"
+      },
+      {
+        "activation": 0.4683,
+        "expression": "200+120",
+        "result_value": 320.0,
+        "context": " = <<200+120=[320]>>320 photos.\nAfter"
+      },
+      {
+        "activation": 0.4585,
+        "expression": "134000/200",
+        "result_value": 670.0,
+        "context": "<<134000/200=[670]>>670\n#### 670"
+      },
+      {
+        "activation": 0.4285,
+        "expression": "110+11",
+        "result_value": 121.0,
+        "context": " = <<110+11=[121]>>121 meters.\nTherefore"
+      },
+      {
+        "activation": 0.4214,
+        "expression": "3*15",
+        "result_value": 45.0,
+        "context": " = <<3*15=[45]>>45\nDallas is a"
+      },
+      {
+        "activation": 0.4058,
+        "expression": "40-10",
+        "result_value": 30.0,
+        "context": "=<<40-10=[30]>>30 years\nSo together"
+      },
+      {
+        "activation": 0.3948,
+        "expression": "60-18",
+        "result_value": 42.0,
+        "context": "=<<60-18=[42]>>42 mph.\nIf"
+      },
+      {
+        "activation": 0.3862,
+        "expression": "+30+46+38+11+18",
+        "result_value": 143.0,
+        "context": "38+11+18=[143]>>143.\nShe used"
+      }
+    ]
+  },
+  {
+    "feature_idx": 8464,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.05044510215520859,
+      "result": 0.016320474445819855,
+      "eq_sign": 0.0,
+      "background": 0.002967359032481909
+    },
+    "mean_activation": 0.852276093067695,
+    "active_count": 457,
+    "top_examples": [
+      {
+        "activation": 2.7988,
+        "expression": "200*3",
+        "result_value": 600.0,
+        "context": " $<<200*3=[600]>>600\n#### 600"
+      },
+      {
+        "activation": 2.748,
+        "expression": "11*75",
+        "result_value": 825.0,
+        "context": " = <<11*75=[825]>>825 pieces\nThen subtract"
+      },
+      {
+        "activation": 2.5645,
+        "expression": "4*100",
+        "result_value": 400.0,
+        "context": " = <<4*100=[400]>>400\nHe has 8"
+      },
+      {
+        "activation": 2.543,
+        "expression": "33*16",
+        "result_value": 528.0,
+        "context": " $<<33*16=[528]>>528\n3 * 10"
+      },
+      {
+        "activation": 2.498,
+        "expression": "70/100*800",
+        "result_value": 560.0,
+        "context": "70/100*800=[560]>>560 files.\nThe"
+      },
+      {
+        "activation": 2.4922,
+        "expression": "12*6",
+        "result_value": 72.0,
+        "context": " = <<12*6=[72]>>72\nShe needs 9"
+      },
+      {
+        "activation": 2.4395,
+        "expression": "15/.25",
+        "result_value": 60.0,
+        "context": " = <<15/.25=[60]>>60\n75% of"
+      },
+      {
+        "activation": 2.4062,
+        "expression": "95+15",
+        "result_value": 110.0,
+        "context": " = <<95+15=[110]>>110\nHe saved $"
+      },
+      {
+        "activation": 2.293,
+        "expression": "2000*3",
+        "result_value": 6000.0,
+        "context": " $<<2000*3=[6000]>>6000\nSo the total"
+      },
+      {
+        "activation": 2.293,
+        "expression": "8*1000",
+        "result_value": 8000.0,
+        "context": " $<<8*1000=[8000]>>8000\nHe buys 1000"
+      },
+      {
+        "activation": 2.1621,
+        "expression": "10*40",
+        "result_value": 400.0,
+        "context": " = <<10*40=[400]>>400 pages from the first"
+      },
+      {
+        "activation": 2.123,
+        "expression": "400+200",
+        "result_value": 600.0,
+        "context": " = <<400+200=[600]>>600\nOn the second"
+      },
+      {
+        "activation": 2.123,
+        "expression": "237-60",
+        "result_value": 177.0,
+        "context": " = <<237-60=[177]>>177 cucumbers.\n"
+      },
+      {
+        "activation": 2.1094,
+        "expression": "400*1.5",
+        "result_value": 600.0,
+        "context": "400*1.5=[600]>>600 pounds\nSo it"
+      },
+      {
+        "activation": 2.082,
+        "expression": "6*20",
+        "result_value": 120.0,
+        "context": " = <<6*20=[120]>>120 sentences before her break"
+      },
+      {
+        "activation": 2.0371,
+        "expression": "100*1000",
+        "result_value": 100000.0,
+        "context": " $<<100*1000=[100]000>>100,000\n"
+      },
+      {
+        "activation": 1.9941,
+        "expression": "9*500",
+        "result_value": 4500.0,
+        "context": "=$<<9*500=[45]00>>4500\nSo"
+      },
+      {
+        "activation": 1.9629,
+        "expression": "4*12",
+        "result_value": 48.0,
+        "context": " = <<4*12=[48]>>48 people in total."
+      },
+      {
+        "activation": 1.9531,
+        "expression": "400/2",
+        "result_value": 200.0,
+        "context": " = <<400/2=[200]>>200 photos.\nThe"
+      },
+      {
+        "activation": 1.9375,
+        "expression": "3*1",
+        "result_value": 3.0,
+        "context": " = <<3*1=[3]>>3 thank you cards to"
+      }
+    ]
+  },
+  {
+    "feature_idx": 10732,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.002967359032481909,
+      "background": 0.0
+    },
+    "mean_activation": 0.3218974186823918,
+    "active_count": 65,
+    "top_examples": [
+      {
+        "activation": 1.3262,
+        "expression": "380/4",
+        "result_value": 95.0,
+        "context": "=$<<380/4=[95]>>95\nThen adding in"
+      },
+      {
+        "activation": 0.9766,
+        "expression": "200+95",
+        "result_value": 295.0,
+        "context": "=$<<200+95=[295]>>295\n#### 295"
+      },
+      {
+        "activation": 0.7231,
+        "expression": "1188/12",
+        "result_value": 99.0,
+        "context": " <<1188/12=[99]>>99 bananas.\n####"
+      },
+      {
+        "activation": 0.6968,
+        "expression": "2*15",
+        "result_value": 30.0,
+        "context": " $<<2*15=[30].00>>30.00"
+      },
+      {
+        "activation": 0.6934,
+        "expression": "40+35",
+        "result_value": 75.0,
+        "context": "=<<40+35=[75]>>75 flowers that are not"
+      },
+      {
+        "activation": 0.6641,
+        "expression": "6*9*14",
+        "result_value": 756.0,
+        "context": "6*9*14=[756]>>756 bananas.\nThere"
+      },
+      {
+        "activation": 0.6567,
+        "expression": "8*18",
+        "result_value": 144.0,
+        "context": " $<<8*18=[144].00>>144.00"
+      },
+      {
+        "activation": 0.6313,
+        "expression": "133*3",
+        "result_value": 399.0,
+        "context": " $<<133*3=[399]>>399.\nOn all"
+      },
+      {
+        "activation": 0.6294,
+        "expression": "300-225",
+        "result_value": 75.0,
+        "context": "=$<<300-225=[75]>>75\nThe cats visit"
+      },
+      {
+        "activation": 0.6201,
+        "expression": "15*5",
+        "result_value": 75.0,
+        "context": " = <<15*5=[75]>>75 origami stars\n"
+      },
+      {
+        "activation": 0.5933,
+        "expression": "720+270",
+        "result_value": 990.0,
+        "context": " $<<720+270=[990].00>>990.00"
+      },
+      {
+        "activation": 0.562,
+        "expression": "20+24",
+        "result_value": 44.0,
+        "context": " = <<20+24=[44]>>44 hats.\nThe"
+      },
+      {
+        "activation": 0.5459,
+        "expression": "26*3",
+        "result_value": 78.0,
+        "context": " $<<26*3=[78]>>78 on polo shirts"
+      },
+      {
+        "activation": 0.54,
+        "expression": "2000+500",
+        "result_value": 2500.0,
+        "context": " = <<2000+500=[2500]>>2500 cases.\nWith"
+      },
+      {
+        "activation": 0.5181,
+        "expression": "7*5",
+        "result_value": 35.0,
+        "context": " = <<7*5=[35]>>35 arms\nThen add"
+      },
+      {
+        "activation": 0.5171,
+        "expression": "100/2",
+        "result_value": 50.0,
+        "context": " = <<100/2=[50]>>50 blowfish.\n"
+      },
+      {
+        "activation": 0.5034,
+        "expression": "13+36+15+35",
+        "result_value": 99.0,
+        "context": "36+15+35=[99]>>99.\n#### 99"
+      },
+      {
+        "activation": 0.4316,
+        "expression": "6*15",
+        "result_value": 90.0,
+        "context": " = <<6*15=[90]>>90 sentences after her break"
+      },
+      {
+        "activation": 0.4163,
+        "expression": "177*2",
+        "result_value": 354.0,
+        "context": " = <<177*2=[354]>>354 peppers.\nThe"
+      },
+      {
+        "activation": 0.416,
+        "expression": "500-426",
+        "result_value": 74.0,
+        "context": " $<<500-426=[74]>>74.\n#### 74"
+      }
+    ]
+  },
+  {
+    "feature_idx": 10078,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0014836795162409544,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.5664823340752364,
+    "active_count": 309,
+    "top_examples": [
+      {
+        "activation": 2.5254,
+        "expression": "400-200",
+        "result_value": 200.0,
+        "context": " = <<400-200=[200]>>200 pounds from small animals"
+      },
+      {
+        "activation": 2.4316,
+        "expression": "1*1",
+        "result_value": 1.0,
+        "context": " $<<1*1=[1]>>1.\nThe cost"
+      },
+      {
+        "activation": 2.2461,
+        "expression": "6*(20/60)",
+        "result_value": 2.0,
+        "context": "*(20/60)=[2]>>2 miles.\nSo"
+      },
+      {
+        "activation": 1.9248,
+        "expression": "20*3",
+        "result_value": 60.0,
+        "context": " = <<20*3=[60]>>60\nThe regular nic"
+      },
+      {
+        "activation": 1.9014,
+        "expression": "1*5",
+        "result_value": 5.0,
+        "context": " $<<1*5=[5]>>5.\nYou will"
+      },
+      {
+        "activation": 1.8809,
+        "expression": "55",
+        "result_value": 55.0,
+        "context": "*110 = <<55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 1.8066,
+        "expression": "8*2",
+        "result_value": 16.0,
+        "context": " = <<8*2=[16]>>16 unused crayons"
+      },
+      {
+        "activation": 1.7979,
+        "expression": "20/1",
+        "result_value": 20.0,
+        "context": " = <<20/1=[20]>>20 seconds\nFinally,"
+      },
+      {
+        "activation": 1.7646,
+        "expression": "100-25",
+        "result_value": 75.0,
+        "context": " = <<100-25=[75]>>75\nThere are 45"
+      },
+      {
+        "activation": 1.7275,
+        "expression": "20+1",
+        "result_value": 21.0,
+        "context": " = <<20+1=[21]>>21 stamps.\n####"
+      },
+      {
+        "activation": 1.7227,
+        "expression": "400/2",
+        "result_value": 200.0,
+        "context": " = <<400/2=[200]>>200 pounds from salmon."
+      },
+      {
+        "activation": 1.6924,
+        "expression": "4*3",
+        "result_value": 12.0,
+        "context": " = <<4*3=[12]>>12\nShe has 18"
+      },
+      {
+        "activation": 1.6914,
+        "expression": "60*.75",
+        "result_value": 45.0,
+        "context": " = <<60*.75=[45]>>45\n#### 45"
+      },
+      {
+        "activation": 1.6348,
+        "expression": "100-20",
+        "result_value": 80.0,
+        "context": " = <<100-20=[80]>>80\nThe iron nic"
+      },
+      {
+        "activation": 1.626,
+        "expression": "(75/100)*100",
+        "result_value": 75.0,
+        "context": "75/100)*100=[75]>>75% of the flowers"
+      },
+      {
+        "activation": 1.6064,
+        "expression": "25*.01*1000",
+        "result_value": 250.0,
+        "context": "25*.01*1000=[250]>>250\nCoursework materials"
+      },
+      {
+        "activation": 1.6016,
+        "expression": "110-55",
+        "result_value": 55.0,
+        "context": "= <<110-55=[55]>>55 seashells\n"
+      },
+      {
+        "activation": 1.584,
+        "expression": "60+4",
+        "result_value": 64.0,
+        "context": " = <<60+4=[64]>>64\n#### 64"
+      },
+      {
+        "activation": 1.5107,
+        "expression": "16-1",
+        "result_value": 15.0,
+        "context": " = <<16-1=[15]>>15 fish in the first"
+      },
+      {
+        "activation": 1.3789,
+        "expression": "30-15",
+        "result_value": 15.0,
+        "context": " $<<30-15=[15]>>15 more than Tommy."
+      }
+    ]
+  },
+  {
+    "feature_idx": 1885,
+    "layer": 14,
+    "role": "background",
+    "activation_rates": {
+      "operand": 0.0,
+      "result": 0.0,
+      "eq_sign": 0.0,
+      "background": 0.0
+    },
+    "mean_activation": 0.4494035508897569,
+    "active_count": 27,
+    "top_examples": [
+      {
+        "activation": 1.2715,
+        "expression": "24-10",
+        "result_value": 14.0,
+        "context": " =<<24-10=[14]>>14 cans left\nEach"
+      },
+      {
+        "activation": 1.2363,
+        "expression": "210/14",
+        "result_value": 15.0,
+        "context": " = <<210/14=[15]>>15 liters each\n"
+      },
+      {
+        "activation": 1.1621,
+        "expression": "840-825",
+        "result_value": 15.0,
+        "context": " = <<840-825=[15]>>15 pieces\n#### 15"
+      },
+      {
+        "activation": 0.9287,
+        "expression": "2+12",
+        "result_value": 14.0,
+        "context": " = <<2+12=[14]>>14 stickers.\nCol"
+      },
+      {
+        "activation": 0.874,
+        "expression": "56/4",
+        "result_value": 14.0,
+        "context": " = <<56/4=[14]>>14 skips per round"
+      },
+      {
+        "activation": 0.8525,
+        "expression": "2+1+6+6",
+        "result_value": 15.0,
+        "context": "1+6+6=[15]>>15.\n#### 15"
+      },
+      {
+        "activation": 0.7686,
+        "expression": "14+1",
+        "result_value": 15.0,
+        "context": " = <<14+1=[15]>>15 years old next year"
+      },
+      {
+        "activation": 0.6377,
+        "expression": "8000+6000",
+        "result_value": 14000.0,
+        "context": " $<<8000+6000=[14]000>>14,000\n"
+      },
+      {
+        "activation": 0.5942,
+        "expression": "12+3",
+        "result_value": 15.0,
+        "context": "=<<12+3=[15]>>15 seconds.\n####"
+      },
+      {
+        "activation": 0.4302,
+        "expression": "75/100*12",
+        "result_value": 9.0,
+        "context": "75/100*12=[9]>>9.\nIn total"
+      },
+      {
+        "activation": 0.3936,
+        "expression": "30/2",
+        "result_value": 15.0,
+        "context": "=<<30/2=[15]>>15 hours at his second"
+      },
+      {
+        "activation": 0.3896,
+        "expression": "1188/12",
+        "result_value": 99.0,
+        "context": " <<1188/12=[99]>>99 bananas.\n####"
+      },
+      {
+        "activation": 0.2954,
+        "expression": "36-12-9",
+        "result_value": 15.0,
+        "context": "36-12-9=[15]>>15 sales in the station"
+      },
+      {
+        "activation": 0.2876,
+        "expression": "5+10",
+        "result_value": 15.0,
+        "context": " = <<5+10=[15]>>15 pets\n#### 15"
+      },
+      {
+        "activation": 0.2854,
+        "expression": "39/3",
+        "result_value": 13.0,
+        "context": "=<<39/3=[13]>>13 beads each\nBefore"
+      },
+      {
+        "activation": 0.2737,
+        "expression": "3+16",
+        "result_value": 19.0,
+        "context": " = <<3+16=[19]>>19 hard hats in the"
+      },
+      {
+        "activation": 0.2129,
+        "expression": "2+6",
+        "result_value": 8.0,
+        "context": " = <<2+6=[8]>>8 people were filling the"
+      },
+      {
+        "activation": 0.2012,
+        "expression": "11+3",
+        "result_value": 14.0,
+        "context": " = <<11+3=[14]>>14\nJayden ="
+      },
+      {
+        "activation": 0.1926,
+        "expression": "120-75",
+        "result_value": 45.0,
+        "context": " = <<120-75=[45]>>45 minutes to finish the"
+      },
+      {
+        "activation": 0.1862,
+        "expression": "780/12",
+        "result_value": 65.0,
+        "context": " $<<780/12=[65]>>65/month.\n"
+      }
+    ]
+  }
+]

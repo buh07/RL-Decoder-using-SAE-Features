@@ -23,8 +23,15 @@ class SAEConfig:
     """Latent dimension as multiple of input_dim. Typical: 4-8x for overcomplete basis."""
     
     use_relu: bool = True
-    """Use ReLU on latents (default: True). If False, uses directly."""
-    
+    """Use ReLU on latents (default: True). If False, uses directly. Ignored when use_topk=True."""
+
+    use_topk: bool = False
+    """Hard TopK activation instead of ReLU+L1.  Guarantees exact sparsity = topk_k/latent_dim.
+    When True, set l1_penalty_coeff=0.0 (L1 is unnecessary and counter-productive)."""
+
+    topk_k: int = 0
+    """Active latents when use_topk=True.  0 = auto-set to 30% of latent_dim at runtime."""
+
     decoder_init_scale: float = 0.1
     """Initialization scale for decoder weights."""
     

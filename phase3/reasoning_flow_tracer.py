@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Phase 5.4: Reasoning Flow Tracer
-=================================
+Phase 3: Reasoning Flow Tracer
+================================
 Traces how mathematical reasoning features evolve layer-by-layer through
 GPT-2 medium, using the 24 trained multi-layer SAEs (one per transformer
 block).  For every token in an input sequence the script:
@@ -33,10 +33,10 @@ Output files (all in --output-dir):
 Usage
 -----
   cd /scratch2/f004ndc/RL-Decoder\\ with\\ SAE\\ Features
-  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 phase5/reasoning_flow_tracer.py \\
-      --saes-dir phase5_results/multilayer_gpt2_12x/saes \\
-      --activations-dir phase4_results/activations_multilayer \\
-      --output-dir phase5_results/reasoning_flow_analysis \\
+  CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 phase3/reasoning_flow_tracer.py \\
+      --saes-dir phase2_results/saes_gpt2_12x_topk/saes \\
+      --activations-dir phase2_results/activations \\
+      --output-dir phase3_results/reasoning_flow \\
       --device cuda:0
 
 To analyse a custom prompt instead of the built-in GSM8K examples:
@@ -44,7 +44,8 @@ To analyse a custom prompt instead of the built-in GSM8K examples:
 
 Notes
 -----
-- SAEs were trained with use_relu=True, so active features are h_i > 0.
+- SAEs were trained with use_topk=True (TopK activation, K=3686 ≈ 30%),
+  so active features are those in the top-K pre-activations.
 - Hooks attach to transformer.h[i] (full block output), matching the
   capture script that produced the training activation files.
 - Normalization statistics are loaded from the training activation files;

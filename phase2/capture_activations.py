@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
-Phase 5 Task 4: Multi-Layer Activation Capture
+Phase 2: Multi-Layer Activation Capture
 
-Captures activations from multiple intermediate layers (not just final layer)
-for each of the 4 frontier LLMs to enable layer-wise transfer analysis.
+Captures activations from all intermediate layers for each frontier LLM.
 
 Usage:
-    python3 phase5_task4_capture_multi_layer.py \
+    python3 phase2/capture_activations.py \
         --models gemma-2b gpt2-medium phi-2 pythia-1.4b \
-        --layers 4 8 12 16 20 \
-        --output-dir phase4_results/activations_multilayer \
+        --output-dir phase2_results/activations \
         --batch-size 32 \
         --num-batches 50 \
-        --device cuda:5
+        --device cuda:0
 """
 from __future__ import annotations
 
