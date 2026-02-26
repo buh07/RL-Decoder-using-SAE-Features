@@ -1,0 +1,1393 @@
+{
+  "config_name": "hybrid_multi_l7_l12_l17_l22",
+  "stage": "rl",
+  "initialized_from": "phase6_results/checkpoints/hybrid_multi_l7_l12_l17_l22_supervised.pt",
+  "dataset_train_path": "phase6_results/dataset/gsm8k_expanded_train.pt",
+  "num_train_records": 17128,
+  "num_val_records": 4274,
+  "best_epoch": 7,
+  "best_val": {
+    "num_records": 4274,
+    "top1_accuracy": 0.5124005615348619,
+    "top5_accuracy": 0.7550304164716893,
+    "mean_logprob_correct": -2.2230967111867312,
+    "mean_baseline_logprob": -4.459693723281948,
+    "delta_logprob_vs_gpt2": 2.236597012095216,
+    "per_operator": {
+      "*": {
+        "n": 1684,
+        "top1_accuracy": 0.6490498812351544,
+        "top5_accuracy": 0.8491686460807601
+      },
+      "+": {
+        "n": 1103,
+        "top1_accuracy": 0.32819582955575705,
+        "top5_accuracy": 0.6237533998186764
+      },
+      "-": {
+        "n": 774,
+        "top1_accuracy": 0.35917312661498707,
+        "top5_accuracy": 0.6589147286821705
+      },
+      "/": {
+        "n": 667,
+        "top1_accuracy": 0.6461769115442278,
+        "top5_accuracy": 0.841079460269865
+      },
+      "unknown": {
+        "n": 46,
+        "top1_accuracy": 0.5652173913043478,
+        "top5_accuracy": 0.8260869565217391
+      }
+    },
+    "per_magnitude_bucket": {
+      "[0,10)": {
+        "n": 851,
+        "top1_accuracy": 0.6897767332549941,
+        "top5_accuracy": 0.9083431257344301
+      },
+      "[10,100)": {
+        "n": 2282,
+        "top1_accuracy": 0.5499561787905346,
+        "top5_accuracy": 0.7887817703768624
+      },
+      "[100,1000)": {
+        "n": 989,
+        "top1_accuracy": 0.31243680485338726,
+        "top5_accuracy": 0.5611729019211324
+      },
+      "[1000+)": {
+        "n": 152,
+        "top1_accuracy": 0.2565789473684211,
+        "top5_accuracy": 0.6513157894736842
+      }
+    }
+  },
+  "kl_coeff": 0.01,
+  "learning_rate": 1e-05,
+  "reward_scheme": "sampled_exact_only",
+  "kl_direction": "current_to_ref",
+  "history": [
+    {
+      "epoch": 1,
+      "train_mean_reward": 0.6216020569629839,
+      "train_policy_loss": -0.781005862451279,
+      "train_kl": 0.28948791948004005,
+      "running_reward_baseline": 0.6428056507661788,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5035095928872251,
+        "top5_accuracy": 0.7545624707533926,
+        "mean_logprob_correct": -2.223354253158625,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.2363394701233226,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6395486935866983,
+            "top5_accuracy": 0.8467933491686461
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.32456935630099726,
+            "top5_accuracy": 0.6210335448776065
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.34108527131782945,
+            "top5_accuracy": 0.661498708010336
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6401799100449775,
+            "top5_accuracy": 0.848575712143928
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5652173913043478,
+            "top5_accuracy": 0.782608695652174
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6827262044653349,
+            "top5_accuracy": 0.9071680376028202
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.537248028045574,
+            "top5_accuracy": 0.791849255039439
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.30738119312436807,
+            "top5_accuracy": 0.5480283114256825
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.26973684210526316,
+            "top5_accuracy": 0.6842105263157895
+          }
+        }
+      }
+    },
+    {
+      "epoch": 2,
+      "train_mean_reward": 0.6247489529199436,
+      "train_policy_loss": -0.8295497290723962,
+      "train_kl": 0.29907009016682423,
+      "running_reward_baseline": 0.6244131788737481,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5025737014506317,
+        "top5_accuracy": 0.7482452035563875,
+        "mean_logprob_correct": -2.234761583894586,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.2249321393873616,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6478622327790974,
+            "top5_accuracy": 0.8402612826603325
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.31368993653671806,
+            "top5_accuracy": 0.6255666364460563
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3385012919896641,
+            "top5_accuracy": 0.6395348837209303
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6356821589205397,
+            "top5_accuracy": 0.841079460269865
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5434782608695652,
+            "top5_accuracy": 0.8043478260869565
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6768507638072856,
+            "top5_accuracy": 0.9059929494712103
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5328659070990359,
+            "top5_accuracy": 0.7813321647677476
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.320525783619818,
+            "top5_accuracy": 0.5520728008088979
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.2565789473684211,
+            "top5_accuracy": 0.6447368421052632
+          }
+        }
+      }
+    },
+    {
+      "epoch": 3,
+      "train_mean_reward": 0.628730740740944,
+      "train_policy_loss": -0.826951493564358,
+      "train_kl": 0.2951623360334518,
+      "running_reward_baseline": 0.6366821215737695,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.4971923256902199,
+        "top5_accuracy": 0.7501169864295741,
+        "mean_logprob_correct": -2.2495454284372354,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.2101482948447124,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6288598574821853,
+            "top5_accuracy": 0.8432304038004751
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.31640979147778786,
+            "top5_accuracy": 0.6183136899365367
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3359173126614987,
+            "top5_accuracy": 0.6511627906976745
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6476761619190404,
+            "top5_accuracy": 0.8455772113943029
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5434782608695652,
+            "top5_accuracy": 0.782608695652174
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6686251468860165,
+            "top5_accuracy": 0.900117508813161
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5359333917616126,
+            "top5_accuracy": 0.7879053461875548
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.2891809908998989,
+            "top5_accuracy": 0.5419615773508595
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.3092105263157895,
+            "top5_accuracy": 0.6973684210526315
+          }
+        }
+      }
+    },
+    {
+      "epoch": 4,
+      "train_mean_reward": 0.6348318588171312,
+      "train_policy_loss": -0.8233299847659191,
+      "train_kl": 0.29450141901949867,
+      "running_reward_baseline": 0.6422020381736768,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.49906410856340666,
+        "top5_accuracy": 0.740290126345344,
+        "mean_logprob_correct": -2.2543708760337324,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.2053228472482154,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6288598574821853,
+            "top5_accuracy": 0.833729216152019
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.32819582955575705,
+            "top5_accuracy": 0.6019945602901179
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3423772609819121,
+            "top5_accuracy": 0.6459948320413437
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.631184407796102,
+            "top5_accuracy": 0.841079460269865
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5652173913043478,
+            "top5_accuracy": 0.7608695652173914
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6803760282021152,
+            "top5_accuracy": 0.9012925969447708
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5319894829097284,
+            "top5_accuracy": 0.7751971954425942
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.3063700707785642,
+            "top5_accuracy": 0.544994944388271
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.24342105263157895,
+            "top5_accuracy": 0.5855263157894737
+          }
+        }
+      }
+    },
+    {
+      "epoch": 5,
+      "train_mean_reward": 0.6329694088236966,
+      "train_policy_loss": -0.8151975453094811,
+      "train_kl": 0.3017420041636294,
+      "running_reward_baseline": 0.6443937121440937,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.49789424426766493,
+        "top5_accuracy": 0.7447356106691624,
+        "mean_logprob_correct": -2.2619047246427924,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.197788998639155,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6419239904988123,
+            "top5_accuracy": 0.8396674584323041
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3155031731640979,
+            "top5_accuracy": 0.6092475067996374
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.32299741602067183,
+            "top5_accuracy": 0.6498708010335917
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6356821589205397,
+            "top5_accuracy": 0.8350824587706147
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5434782608695652,
+            "top5_accuracy": 0.8043478260869565
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6745005875440658,
+            "top5_accuracy": 0.8977673325499412
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5311130587204207,
+            "top5_accuracy": 0.7773882559158632
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.3063700707785642,
+            "top5_accuracy": 0.5540950455005056
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.2565789473684211,
+            "top5_accuracy": 0.6381578947368421
+          }
+        }
+      }
+    },
+    {
+      "epoch": 6,
+      "train_mean_reward": 0.6375934191253463,
+      "train_policy_loss": -0.7996377106416677,
+      "train_kl": 0.301280151970862,
+      "running_reward_baseline": 0.6422072584846694,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5063172671970051,
+        "top5_accuracy": 0.7454375292466074,
+        "mean_logprob_correct": -2.2405311551205176,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.2191625681614298,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6448931116389549,
+            "top5_accuracy": 0.8479809976247031
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3236627379873073,
+            "top5_accuracy": 0.614687216681777
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3488372093023256,
+            "top5_accuracy": 0.6382428940568475
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.638680659670165,
+            "top5_accuracy": 0.8260869565217391
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5434782608695652,
+            "top5_accuracy": 0.7608695652173914
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6862514688601645,
+            "top5_accuracy": 0.9012925969447708
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5394390885188431,
+            "top5_accuracy": 0.7751971954425942
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.3114256825075834,
+            "top5_accuracy": 0.5520728008088979
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.26973684210526316,
+            "top5_accuracy": 0.6842105263157895
+          }
+        }
+      }
+    },
+    {
+      "epoch": 7,
+      "train_mean_reward": 0.6362447514816847,
+      "train_policy_loss": -0.8003028699139021,
+      "train_kl": 0.3004377072991082,
+      "running_reward_baseline": 0.6348175211724573,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5124005615348619,
+        "top5_accuracy": 0.7550304164716893,
+        "mean_logprob_correct": -2.2230967111867312,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.236597012095216,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6490498812351544,
+            "top5_accuracy": 0.8491686460807601
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.32819582955575705,
+            "top5_accuracy": 0.6237533998186764
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.35917312661498707,
+            "top5_accuracy": 0.6589147286821705
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6461769115442278,
+            "top5_accuracy": 0.841079460269865
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5652173913043478,
+            "top5_accuracy": 0.8260869565217391
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6897767332549941,
+            "top5_accuracy": 0.9083431257344301
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5499561787905346,
+            "top5_accuracy": 0.7887817703768624
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.31243680485338726,
+            "top5_accuracy": 0.5611729019211324
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.2565789473684211,
+            "top5_accuracy": 0.6513157894736842
+          }
+        }
+      }
+    },
+    {
+      "epoch": 8,
+      "train_mean_reward": 0.6405476453648389,
+      "train_policy_loss": -0.8073910954175626,
+      "train_kl": 0.29603840620202587,
+      "running_reward_baseline": 0.6535622213609802,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5042115114646701,
+        "top5_accuracy": 0.7454375292466074,
+        "mean_logprob_correct": -2.2854941104578272,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.17419961282412,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6442992874109263,
+            "top5_accuracy": 0.8467933491686461
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3236627379873073,
+            "top5_accuracy": 0.6056210335448776
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.35917312661498707,
+            "top5_accuracy": 0.6434108527131783
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6176911544227887,
+            "top5_accuracy": 0.8365817091454273
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5,
+            "top5_accuracy": 0.782608695652174
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6944770857814336,
+            "top5_accuracy": 0.9048178613396005
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5328659070990359,
+            "top5_accuracy": 0.7791411042944786
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.3104145601617796,
+            "top5_accuracy": 0.5460060667340748
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.26973684210526316,
+            "top5_accuracy": 0.6447368421052632
+          }
+        }
+      }
+    },
+    {
+      "epoch": 9,
+      "train_mean_reward": 0.6498598860892555,
+      "train_policy_loss": -0.8145648925758756,
+      "train_kl": 0.2847949571973639,
+      "running_reward_baseline": 0.6586763781724783,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5044454843238184,
+        "top5_accuracy": 0.7442676649508657,
+        "mean_logprob_correct": -2.287659587436809,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.1720341358451383,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6413301662707839,
+            "top5_accuracy": 0.8408551068883611
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3182230281051677,
+            "top5_accuracy": 0.6137805983680871
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.35142118863049093,
+            "top5_accuracy": 0.6421188630490956
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6371814092953523,
+            "top5_accuracy": 0.8335832083958021
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.6086956521739131,
+            "top5_accuracy": 0.7608695652173914
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.690951821386604,
+            "top5_accuracy": 0.8965922444183314
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5333041191936897,
+            "top5_accuracy": 0.7769500438212095
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.3134479271991911,
+            "top5_accuracy": 0.5510616784630941
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.26973684210526316,
+            "top5_accuracy": 0.6578947368421053
+          }
+        }
+      }
+    },
+    {
+      "epoch": 10,
+      "train_mean_reward": 0.6453643221545587,
+      "train_policy_loss": -0.8033076896393538,
+      "train_kl": 0.2873832687686838,
+      "running_reward_baseline": 0.6611066204338437,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5,
+        "top5_accuracy": 0.7487131492746841,
+        "mean_logprob_correct": -2.3094692719416927,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.1502244513402546,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6336104513064132,
+            "top5_accuracy": 0.8450118764845606
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3082502266545784,
+            "top5_accuracy": 0.6110607434270172
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.36046511627906974,
+            "top5_accuracy": 0.6472868217054264
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6356821589205397,
+            "top5_accuracy": 0.8470764617691154
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5869565217391305,
+            "top5_accuracy": 0.8043478260869565
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.690951821386604,
+            "top5_accuracy": 0.9142185663924794
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5271691498685364,
+            "top5_accuracy": 0.7835232252410167
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.3023255813953488,
+            "top5_accuracy": 0.537917087967644
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.3092105263157895,
+            "top5_accuracy": 0.6710526315789473
+          }
+        }
+      }
+    },
+    {
+      "epoch": 11,
+      "train_mean_reward": 0.6524287775708715,
+      "train_policy_loss": -0.7897699618662478,
+      "train_kl": 0.28587088423151663,
+      "running_reward_baseline": 0.6610998994725417,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5042115114646701,
+        "top5_accuracy": 0.7456715021057557,
+        "mean_logprob_correct": -2.3008028641351355,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.158890859146812,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6401425178147269,
+            "top5_accuracy": 0.8408551068883611
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.32456935630099726,
+            "top5_accuracy": 0.6155938349954669
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.35142118863049093,
+            "top5_accuracy": 0.6498708010335917
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.631184407796102,
+            "top5_accuracy": 0.8320839580209896
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5652173913043478,
+            "top5_accuracy": 0.7391304347826086
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6756756756756757,
+            "top5_accuracy": 0.8954171562867215
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5468886941279579,
+            "top5_accuracy": 0.7870289219982471
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.29221435793731043,
+            "top5_accuracy": 0.5338725985844287
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.28289473684210525,
+            "top5_accuracy": 0.6644736842105263
+          }
+        }
+      }
+    },
+    {
+      "epoch": 12,
+      "train_mean_reward": 0.650823219531833,
+      "train_policy_loss": -0.8033722341199837,
+      "train_kl": 0.2962910685651718,
+      "running_reward_baseline": 0.6350746610806783,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5070191857744502,
+        "top5_accuracy": 0.7517547964436125,
+        "mean_logprob_correct": -2.2647756835676436,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.1949180397143038,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6442992874109263,
+            "top5_accuracy": 0.8485748218527316
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3209428830462375,
+            "top5_accuracy": 0.6246600181323663
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.35658914728682173,
+            "top5_accuracy": 0.6447028423772609
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6401799100449775,
+            "top5_accuracy": 0.841079460269865
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5434782608695652,
+            "top5_accuracy": 0.7608695652173914
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6827262044653349,
+            "top5_accuracy": 0.8954171562867215
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5416301489921121,
+            "top5_accuracy": 0.7892199824715163
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.3083923154701719,
+            "top5_accuracy": 0.5530839231547017
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.29605263157894735,
+            "top5_accuracy": 0.6776315789473685
+          }
+        }
+      }
+    },
+    {
+      "epoch": 13,
+      "train_mean_reward": 0.6486396564606582,
+      "train_policy_loss": -0.8067517582081791,
+      "train_kl": 0.29878906442817266,
+      "running_reward_baseline": 0.6468397461572618,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5042115114646701,
+        "top5_accuracy": 0.7491810949929808,
+        "mean_logprob_correct": -2.2985559228451775,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.1611378004367703,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6377672209026128,
+            "top5_accuracy": 0.8456057007125891
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3272892112420671,
+            "top5_accuracy": 0.6228467815049864
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3475452196382429,
+            "top5_accuracy": 0.6447028423772609
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6356821589205397,
+            "top5_accuracy": 0.8350824587706147
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5869565217391305,
+            "top5_accuracy": 0.7608695652173914
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6745005875440658,
+            "top5_accuracy": 0.8907168037602821
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5381244522348817,
+            "top5_accuracy": 0.7861524978089395
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.31648129423660265,
+            "top5_accuracy": 0.5591506572295247
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.2631578947368421,
+            "top5_accuracy": 0.6381578947368421
+          }
+        }
+      }
+    },
+    {
+      "epoch": 14,
+      "train_mean_reward": 0.6540985576241221,
+      "train_policy_loss": -0.7984853900241718,
+      "train_kl": 0.2891118013931178,
+      "running_reward_baseline": 0.6454984747725814,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.49508656995788486,
+        "top5_accuracy": 0.7496490407112775,
+        "mean_logprob_correct": -2.3694367558765714,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.090256967405376,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6247030878859857,
+            "top5_accuracy": 0.8438242280285035
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3155031731640979,
+            "top5_accuracy": 0.6210335448776065
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3462532299741602,
+            "top5_accuracy": 0.6511627906976745
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6326836581709145,
+            "top5_accuracy": 0.8380809595202399
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5652173913043478,
+            "top5_accuracy": 0.7608695652173914
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.681551116333725,
+            "top5_accuracy": 0.9083431257344301
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5254163014899211,
+            "top5_accuracy": 0.7857142857142857
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.2992922143579373,
+            "top5_accuracy": 0.5460060667340748
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.26973684210526316,
+            "top5_accuracy": 0.6447368421052632
+          }
+        }
+      }
+    },
+    {
+      "epoch": 15,
+      "train_mean_reward": 0.6558325624755474,
+      "train_policy_loss": -0.7993393101073046,
+      "train_kl": 0.28501874566189545,
+      "running_reward_baseline": 0.6717350905272138,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.49789424426766493,
+        "top5_accuracy": 0.7358446420215256,
+        "mean_logprob_correct": -2.325772579707815,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.1339211435741325,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6359857482185273,
+            "top5_accuracy": 0.8366983372921615
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.31368993653671806,
+            "top5_accuracy": 0.5965548504079783
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3397932816537468,
+            "top5_accuracy": 0.6266149870801033
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6371814092953523,
+            "top5_accuracy": 0.8365817091454273
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5,
+            "top5_accuracy": 0.7608695652173914
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6686251468860165,
+            "top5_accuracy": 0.9012925969447708
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5315512708150745,
+            "top5_accuracy": 0.7655565293602103
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.31243680485338726,
+            "top5_accuracy": 0.5399393326592518
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.24342105263157895,
+            "top5_accuracy": 0.6381578947368421
+          }
+        }
+      }
+    },
+    {
+      "epoch": 16,
+      "train_mean_reward": 0.6643741321251917,
+      "train_policy_loss": -0.777458573309187,
+      "train_kl": 0.29332223862395673,
+      "running_reward_baseline": 0.6749186846711244,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5044454843238184,
+        "top5_accuracy": 0.7489471221338325,
+        "mean_logprob_correct": -2.3179153854978862,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.141778337784061,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6466745843230404,
+            "top5_accuracy": 0.8479809976247031
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3173164097914778,
+            "top5_accuracy": 0.6219401631912964
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.35400516795865633,
+            "top5_accuracy": 0.6356589147286822
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6251874062968515,
+            "top5_accuracy": 0.8380809595202399
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5652173913043478,
+            "top5_accuracy": 0.782608695652174
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6698002350176263,
+            "top5_accuracy": 0.8965922444183314
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5385626643295355,
+            "top5_accuracy": 0.7813321647677476
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.320525783619818,
+            "top5_accuracy": 0.5551061678463094
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.2631578947368421,
+            "top5_accuracy": 0.6973684210526315
+          }
+        }
+      }
+    },
+    {
+      "epoch": 17,
+      "train_mean_reward": 0.6637319086423159,
+      "train_policy_loss": -0.777217477434765,
+      "train_kl": 0.29768878323126485,
+      "running_reward_baseline": 0.6680781773351804,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5035095928872251,
+        "top5_accuracy": 0.7449695835283107,
+        "mean_logprob_correct": -2.3402113368213615,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.119482386460586,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6389548693586699,
+            "top5_accuracy": 0.8420427553444181
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3300090661831369,
+            "top5_accuracy": 0.6110607434270172
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3449612403100775,
+            "top5_accuracy": 0.6382428940568475
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.631184407796102,
+            "top5_accuracy": 0.8425787106446777
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5217391304347826,
+            "top5_accuracy": 0.782608695652174
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6792009400705052,
+            "top5_accuracy": 0.8930669800235017
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5433829973707275,
+            "top5_accuracy": 0.7808939526730938
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.30030333670374115,
+            "top5_accuracy": 0.5429726996966633
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.24342105263157895,
+            "top5_accuracy": 0.6907894736842105
+          }
+        }
+      }
+    },
+    {
+      "epoch": 18,
+      "train_mean_reward": 0.6614199066652087,
+      "train_policy_loss": -0.774915148976917,
+      "train_kl": 0.3038669839633619,
+      "running_reward_baseline": 0.6563426922086143,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5093589143659335,
+        "top5_accuracy": 0.7421619092185306,
+        "mean_logprob_correct": -2.353222984161319,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.1064707391206285,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6478622327790974,
+            "top5_accuracy": 0.8479809976247031
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3236627379873073,
+            "top5_accuracy": 0.6019945602901179
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3578811369509044,
+            "top5_accuracy": 0.6304909560723514
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6416791604197901,
+            "top5_accuracy": 0.8365817091454273
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5217391304347826,
+            "top5_accuracy": 0.7391304347826086
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6662749706227967,
+            "top5_accuracy": 0.8895417156286721
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5477651183172656,
+            "top5_accuracy": 0.7769500438212095
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.3195146612740142,
+            "top5_accuracy": 0.5460060667340748
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.2894736842105263,
+            "top5_accuracy": 0.6710526315789473
+          }
+        }
+      }
+    },
+    {
+      "epoch": 19,
+      "train_mean_reward": 0.6621263480420315,
+      "train_policy_loss": -0.7792769844762525,
+      "train_kl": 0.30078734339174407,
+      "running_reward_baseline": 0.652815155486813,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.49976602714085167,
+        "top5_accuracy": 0.7494150678521292,
+        "mean_logprob_correct": -2.353598704398272,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.1060950188836753,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6330166270783848,
+            "top5_accuracy": 0.8426365795724465
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3263825929283772,
+            "top5_accuracy": 0.6174070716228468
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.3423772609819121,
+            "top5_accuracy": 0.6498708010335917
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6266866566716641,
+            "top5_accuracy": 0.8440779610194903
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5869565217391305,
+            "top5_accuracy": 0.8043478260869565
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6862514688601645,
+            "top5_accuracy": 0.9083431257344301
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5337423312883436,
+            "top5_accuracy": 0.7865907099035934
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.30030333670374115,
+            "top5_accuracy": 0.5480283114256825
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.24342105263157895,
+            "top5_accuracy": 0.6118421052631579
+          }
+        }
+      }
+    },
+    {
+      "epoch": 20,
+      "train_mean_reward": 0.6636676861826698,
+      "train_policy_loss": -0.7820655418188424,
+      "train_kl": 0.2957261203327562,
+      "running_reward_baseline": 0.6584403257624574,
+      "reward_scheme": "sampled_exact_only",
+      "kl_direction": "current_to_ref",
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.5077211043518952,
+        "top5_accuracy": 0.7454375292466074,
+        "mean_logprob_correct": -2.370049025977503,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 2.0896446973044442,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.6395486935866983,
+            "top5_accuracy": 0.8456057007125891
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.3263825929283772,
+            "top5_accuracy": 0.6137805983680871
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.35917312661498707,
+            "top5_accuracy": 0.6291989664082688
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.6431784107946027,
+            "top5_accuracy": 0.841079460269865
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5652173913043478,
+            "top5_accuracy": 0.8043478260869565
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.6933019976498237,
+            "top5_accuracy": 0.9048178613396005
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.5403155127081507,
+            "top5_accuracy": 0.7817703768624014
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.3033367037411527,
+            "top5_accuracy": 0.5369059656218402
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.3092105263157895,
+            "top5_accuracy": 0.6644736842105263
+          }
+        }
+      }
+    }
+  ],
+  "checkpoint_path": "/scratch2/f004ndc/RL-Decoder with SAE Features/phase6_results/rl_runs/20260226_104147_p6rl/checkpoints/hybrid_multi_l7_l12_l17_l22_rl.pt"
+}

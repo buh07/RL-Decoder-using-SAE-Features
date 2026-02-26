@@ -1,0 +1,83 @@
+{
+  "schema_version": "causal_patch_spec_v1",
+  "probe_top_features": "phase4_results/topk/probe/top_features_per_layer.json",
+  "decoder_saliency": "phase7_results/interp_smoke/grad_sae_saliency_state_sae_multi.json",
+  "combine_policy": "union",
+  "layers": [
+    22
+  ],
+  "variables": [
+    "subresult_value",
+    "result_token_id"
+  ],
+  "specs": [
+    {
+      "schema_version": "causal_patch_spec_v1",
+      "variable": "subresult_value",
+      "step_idx": null,
+      "layer": 22,
+      "token_position_role": "eq_or_result",
+      "subspace_source": "union",
+      "feature_indices": [
+        4122,
+        8713,
+        120,
+        9262,
+        3028,
+        6644,
+        10786,
+        8399,
+        760,
+        1420,
+        1796,
+        7536,
+        2952,
+        11775,
+        7194,
+        4469
+      ],
+      "method": "subspace_patch",
+      "donor_match_rules": [
+        "same_operator",
+        "same_step_type",
+        "magnitude_bucket_close"
+      ],
+      "probe_position": "result",
+      "top_k": 16
+    },
+    {
+      "schema_version": "causal_patch_spec_v1",
+      "variable": "result_token_id",
+      "step_idx": null,
+      "layer": 22,
+      "token_position_role": "eq_or_result",
+      "subspace_source": "union",
+      "feature_indices": [
+        4122,
+        8713,
+        120,
+        9262,
+        3028,
+        6644,
+        10786,
+        8399,
+        760,
+        1420,
+        1796,
+        7536,
+        2952,
+        11775,
+        7194,
+        4469
+      ],
+      "method": "subspace_patch",
+      "donor_match_rules": [
+        "same_operator",
+        "same_step_type",
+        "magnitude_bucket_close"
+      ],
+      "probe_position": "result",
+      "top_k": 16
+    }
+  ]
+}

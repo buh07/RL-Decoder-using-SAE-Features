@@ -1,0 +1,222 @@
+{
+  "schema_version": "layer_sweep_result_v1",
+  "checkpoint": "phase6_results/sweeps/20260226_121004_layer_sweep_calib/calibration/checkpoints/hybrid_every2_even_supervised.pt",
+  "stage": "supervised",
+  "config_name": "hybrid_every2_even",
+  "experiment_config": {
+    "name": "hybrid_every2_even",
+    "input_variant": "hybrid",
+    "layers": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22
+    ],
+    "d_model": 256,
+    "n_heads": 4,
+    "n_decoder_layers": 2,
+    "dropout": 0.1,
+    "vocab_size": 50257,
+    "aggregator": "transformer",
+    "hybrid_topk_values": 50,
+    "batch_size": 64,
+    "epochs": 50,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_steps": 100,
+    "seed": 17,
+    "val_fraction": 0.2,
+    "early_stop_patience": 10,
+    "input_dim": 1074
+  },
+  "model_config": {
+    "input_dim": 1074,
+    "n_layers_input": 12,
+    "d_model": 256,
+    "n_heads": 4,
+    "n_decoder_layers": 2,
+    "vocab_size": 50257,
+    "dropout": 0.1,
+    "aggregator": "transformer",
+    "use_sparse_input": false
+  },
+  "evaluations": {
+    "val": {
+      "num_records": 4274,
+      "top1_accuracy": 0.4681796911558259,
+      "top5_accuracy": 0.7461394478240524,
+      "mean_logprob_correct": -2.259836069395179,
+      "mean_baseline_logprob": -4.459693723281948,
+      "delta_logprob_vs_gpt2": 2.199857653886769,
+      "per_operator": {
+        "*": {
+          "n": 1684,
+          "top1_accuracy": 0.6051068883610451,
+          "top5_accuracy": 0.8402612826603325
+        },
+        "+": {
+          "n": 1103,
+          "top1_accuracy": 0.2873980054397099,
+          "top5_accuracy": 0.6056210335448776
+        },
+        "-": {
+          "n": 774,
+          "top1_accuracy": 0.3062015503875969,
+          "top5_accuracy": 0.6640826873385013
+        },
+        "/": {
+          "n": 667,
+          "top1_accuracy": 0.6041979010494752,
+          "top5_accuracy": 0.8380809595202399
+        },
+        "unknown": {
+          "n": 46,
+          "top1_accuracy": 0.5434782608695652,
+          "top5_accuracy": 0.717391304347826
+        }
+      },
+      "per_magnitude_bucket": {
+        "[0,10)": {
+          "n": 851,
+          "top1_accuracy": 0.6239717978848414,
+          "top5_accuracy": 0.9200940070505288
+        },
+        "[10,100)": {
+          "n": 2282,
+          "top1_accuracy": 0.5021910604732691,
+          "top5_accuracy": 0.7642418930762489
+        },
+        "[100,1000)": {
+          "n": 989,
+          "top1_accuracy": 0.29221435793731043,
+          "top5_accuracy": 0.5631951466127402
+        },
+        "[1000+)": {
+          "n": 152,
+          "top1_accuracy": 0.23026315789473684,
+          "top5_accuracy": 0.6907894736842105
+        }
+      },
+      "num_examples": 1422,
+      "dataset_path": "phase6_results/dataset/gsm8k_expanded_train.pt"
+    },
+    "test": {
+      "num_records": 3799,
+      "top1_accuracy": 0.47617794156356935,
+      "top5_accuracy": 0.750460647538826,
+      "mean_logprob_correct": -2.228807861202501,
+      "mean_baseline_logprob": -4.445945903574045,
+      "delta_logprob_vs_gpt2": 2.2171380423715443,
+      "per_operator": {
+        "*": {
+          "n": 1585,
+          "top1_accuracy": 0.6195583596214511,
+          "top5_accuracy": 0.8353312302839117
+        },
+        "+": {
+          "n": 939,
+          "top1_accuracy": 0.2715654952076677,
+          "top5_accuracy": 0.5878594249201278
+        },
+        "-": {
+          "n": 675,
+          "top1_accuracy": 0.3111111111111111,
+          "top5_accuracy": 0.6844444444444444
+        },
+        "/": {
+          "n": 529,
+          "top1_accuracy": 0.5954631379962193,
+          "top5_accuracy": 0.8506616257088847
+        },
+        "unknown": {
+          "n": 71,
+          "top1_accuracy": 0.6619718309859155,
+          "top5_accuracy": 0.8873239436619719
+        }
+      },
+      "per_magnitude_bucket": {
+        "[0,10)": {
+          "n": 851,
+          "top1_accuracy": 0.6028202115158637,
+          "top5_accuracy": 0.9142185663924794
+        },
+        "[10,100)": {
+          "n": 2008,
+          "top1_accuracy": 0.5024900398406374,
+          "top5_accuracy": 0.7514940239043825
+        },
+        "[100,1000)": {
+          "n": 820,
+          "top1_accuracy": 0.31097560975609756,
+          "top5_accuracy": 0.5792682926829268
+        },
+        "[1000+)": {
+          "n": 120,
+          "top1_accuracy": 0.26666666666666666,
+          "top5_accuracy": 0.7416666666666667
+        }
+      },
+      "num_examples": 1248,
+      "dataset_path": "phase6_results/dataset/gsm8k_expanded_test.pt"
+    }
+  },
+  "sweep_metadata": {
+    "schema_version": "layer_sweep_result_v1",
+    "phase": "phase6",
+    "input_variant": "hybrid",
+    "layers": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22
+    ],
+    "num_layers": 12,
+    "layer_set_id": "every2_even",
+    "layer_set_family": "strided",
+    "layer_set_sweep_group": "broad",
+    "sweep_run_id": "20260226_121004_layer_sweep_calib",
+    "seed": 17,
+    "parent_baseline": "spread4_current",
+    "manifest_path": "experiments/layer_sweep_manifest_v1.json"
+  },
+  "phase": "phase6",
+  "input_variant": "hybrid",
+  "layers": [
+    0,
+    2,
+    4,
+    6,
+    8,
+    10,
+    12,
+    14,
+    16,
+    18,
+    20,
+    22
+  ],
+  "num_layers": 12,
+  "layer_set_id": "every2_even",
+  "layer_set_family": "strided",
+  "layer_set_sweep_group": "broad",
+  "sweep_run_id": "20260226_121004_layer_sweep_calib",
+  "seed": 17,
+  "parent_baseline": "spread4_current",
+  "manifest_path": "experiments/layer_sweep_manifest_v1.json"
+}

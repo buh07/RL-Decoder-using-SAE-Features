@@ -1,0 +1,152 @@
+{
+  "thresholds_version": "phase7_thresholds_v1",
+  "source_audit": "phase7_results/audits_smoke/text_causal_audit_controls.json",
+  "target_fpr": 0.05,
+  "selected_point": {
+    "threshold": 0.270001,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "tp": 0,
+    "fp": 0,
+    "tn": 32,
+    "fn": 8
+  },
+  "thresholds": {
+    "text_latent_match_min": 0.75,
+    "text_latent_hard_fail": 0.5,
+    "necessity_max_delta_logprob": -0.02,
+    "sufficiency_min_delta_logprob": 0.02,
+    "specificity_min_margin": 0.01,
+    "off_manifold_max_ratio": 0.75,
+    "overall_score_faithful_min": 0.270001
+  },
+  "roc_points": [
+    {
+      "threshold": 0.270001,
+      "tpr": 0.0,
+      "fpr": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 32,
+      "fn": 8
+    },
+    {
+      "threshold": 0.27,
+      "tpr": 0.0,
+      "fpr": 0.0625,
+      "tp": 0,
+      "fp": 2,
+      "tn": 30,
+      "fn": 8
+    },
+    {
+      "threshold": 0.245,
+      "tpr": 0.125,
+      "fpr": 0.0625,
+      "tp": 1,
+      "fp": 2,
+      "tn": 30,
+      "fn": 7
+    },
+    {
+      "threshold": 0.21999999999999997,
+      "tpr": 0.125,
+      "fpr": 0.09375,
+      "tp": 1,
+      "fp": 3,
+      "tn": 29,
+      "fn": 7
+    },
+    {
+      "threshold": 0.20000000000000004,
+      "tpr": 0.125,
+      "fpr": 0.125,
+      "tp": 1,
+      "fp": 4,
+      "tn": 28,
+      "fn": 7
+    },
+    {
+      "threshold": 0.2,
+      "tpr": 0.125,
+      "fpr": 0.34375,
+      "tp": 1,
+      "fp": 11,
+      "tn": 21,
+      "fn": 7
+    },
+    {
+      "threshold": 0.18666666666666665,
+      "tpr": 0.25,
+      "fpr": 0.4375,
+      "tp": 2,
+      "fp": 14,
+      "tn": 18,
+      "fn": 6
+    },
+    {
+      "threshold": 0.16199999999999998,
+      "tpr": 0.25,
+      "fpr": 0.46875,
+      "tp": 2,
+      "fp": 15,
+      "tn": 17,
+      "fn": 6
+    },
+    {
+      "threshold": 0.13999999999999999,
+      "tpr": 0.375,
+      "fpr": 0.5625,
+      "tp": 3,
+      "fp": 18,
+      "tn": 14,
+      "fn": 5
+    },
+    {
+      "threshold": 0.13399999999999998,
+      "tpr": 0.5,
+      "fpr": 0.625,
+      "tp": 4,
+      "fp": 20,
+      "tn": 12,
+      "fn": 4
+    },
+    {
+      "threshold": 0.13,
+      "tpr": 0.625,
+      "fpr": 0.71875,
+      "tp": 5,
+      "fp": 23,
+      "tn": 9,
+      "fn": 3
+    },
+    {
+      "threshold": 0.10999999999999999,
+      "tpr": 0.75,
+      "fpr": 0.90625,
+      "tp": 6,
+      "fp": 29,
+      "tn": 3,
+      "fn": 2
+    },
+    {
+      "threshold": 0.08499999999999999,
+      "tpr": 1.0,
+      "fpr": 1.0,
+      "tp": 8,
+      "fp": 32,
+      "tn": 0,
+      "fn": 0
+    },
+    {
+      "threshold": 0.08499899999999999,
+      "tpr": 1.0,
+      "fpr": 1.0,
+      "tp": 8,
+      "fp": 32,
+      "tn": 0,
+      "fn": 0
+    }
+  ],
+  "num_labeled_audits": 40
+}

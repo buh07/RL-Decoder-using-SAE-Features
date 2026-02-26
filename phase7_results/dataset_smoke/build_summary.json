@@ -1,0 +1,66 @@
+{
+  "schema_version": "phase7_trace_v1",
+  "source_phase6": {
+    "train": "phase6_results/dataset/gsm8k_expanded_train.pt",
+    "test": "phase6_results/dataset/gsm8k_expanded_test.pt"
+  },
+  "outputs": {
+    "train": "phase7_results/dataset_smoke/gsm8k_step_traces_train.pt",
+    "test": "phase7_results/dataset_smoke/gsm8k_step_traces_test.pt",
+    "all": "phase7_results/dataset_smoke/gsm8k_step_traces_all.pt"
+  },
+  "splits": {
+    "train": {
+      "split": "train",
+      "num_step_records": 200,
+      "num_traces": 63,
+      "step_type_counts": {
+        "operate": 137,
+        "emit_result": 63
+      },
+      "operator_counts": {
+        "/": 33,
+        "+": 43,
+        "*": 82,
+        "-": 41,
+        "unknown": 1
+      },
+      "magnitude_bucket_counts": {
+        "[10,100)": 107,
+        "[0,10)": 44,
+        "[100,1000)": 45,
+        "[1000+)": 4
+      },
+      "parse_error_counts": {
+        "has_error": 1,
+        "no_error": 199
+      }
+    },
+    "test": {
+      "split": "test",
+      "num_step_records": 80,
+      "num_traces": 25,
+      "step_type_counts": {
+        "operate": 55,
+        "emit_result": 25
+      },
+      "operator_counts": {
+        "-": 15,
+        "*": 33,
+        "/": 13,
+        "+": 16,
+        "unknown": 3
+      },
+      "magnitude_bucket_counts": {
+        "[0,10)": 24,
+        "[10,100)": 29,
+        "[1000+)": 1,
+        "[100,1000)": 26
+      },
+      "parse_error_counts": {
+        "has_error": 2,
+        "no_error": 78
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+from .gpt2_medium_adapter import GPT2MediumAdapter

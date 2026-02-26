@@ -1,0 +1,159 @@
+{
+  "checkpoint": "phase6_results/checkpoints/sae_single_l22_supervised.pt",
+  "stage": "supervised",
+  "config_name": "sae_single_l22",
+  "experiment_config": {
+    "name": "sae_single_l22",
+    "input_variant": "sae",
+    "layers": [
+      22
+    ],
+    "d_model": 256,
+    "n_heads": 4,
+    "n_decoder_layers": 2,
+    "dropout": 0.1,
+    "vocab_size": 50257,
+    "aggregator": "transformer",
+    "hybrid_topk_values": 50,
+    "batch_size": 64,
+    "epochs": 50,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_steps": 100,
+    "seed": 17,
+    "val_fraction": 0.2,
+    "early_stop_patience": 10,
+    "input_dim": 12288
+  },
+  "model_config": {
+    "input_dim": 12288,
+    "n_layers_input": 1,
+    "d_model": 256,
+    "n_heads": 4,
+    "n_decoder_layers": 2,
+    "vocab_size": 50257,
+    "dropout": 0.1,
+    "aggregator": "transformer",
+    "use_sparse_input": true
+  },
+  "evaluations": {
+    "val": {
+      "num_records": 4274,
+      "top1_accuracy": 0.21127749181094993,
+      "top5_accuracy": 0.5049134300421151,
+      "mean_logprob_correct": -3.4381655031988623,
+      "mean_baseline_logprob": -4.459693723281948,
+      "delta_logprob_vs_gpt2": 1.021528220083085,
+      "per_operator": {
+        "*": {
+          "n": 1684,
+          "top1_accuracy": 0.2820665083135392,
+          "top5_accuracy": 0.5932304038004751
+        },
+        "+": {
+          "n": 1103,
+          "top1_accuracy": 0.12783318223028106,
+          "top5_accuracy": 0.3680870353581142
+        },
+        "-": {
+          "n": 774,
+          "top1_accuracy": 0.14599483204134367,
+          "top5_accuracy": 0.4444444444444444
+        },
+        "/": {
+          "n": 667,
+          "top1_accuracy": 0.24437781109445278,
+          "top5_accuracy": 0.5697151424287856
+        },
+        "unknown": {
+          "n": 46,
+          "top1_accuracy": 0.2391304347826087,
+          "top5_accuracy": 0.6304347826086957
+        }
+      },
+      "per_magnitude_bucket": {
+        "[0,10)": {
+          "n": 851,
+          "top1_accuracy": 0.30317273795534666,
+          "top5_accuracy": 0.690951821386604
+        },
+        "[10,100)": {
+          "n": 2282,
+          "top1_accuracy": 0.23006134969325154,
+          "top5_accuracy": 0.5284837861524978
+        },
+        "[100,1000)": {
+          "n": 989,
+          "top1_accuracy": 0.09908998988877654,
+          "top5_accuracy": 0.31749241658240646
+        },
+        "[1000+)": {
+          "n": 152,
+          "top1_accuracy": 0.14473684210526316,
+          "top5_accuracy": 0.32894736842105265
+        }
+      },
+      "num_examples": 1422,
+      "dataset_path": "phase6_results/dataset/gsm8k_expanded_train.pt"
+    },
+    "test": {
+      "num_records": 3799,
+      "top1_accuracy": 0.2050539615688339,
+      "top5_accuracy": 0.5196104237957357,
+      "mean_logprob_correct": -3.409740197174418,
+      "mean_baseline_logprob": -4.445945903574045,
+      "delta_logprob_vs_gpt2": 1.0362057063996275,
+      "per_operator": {
+        "*": {
+          "n": 1585,
+          "top1_accuracy": 0.2744479495268139,
+          "top5_accuracy": 0.61198738170347
+        },
+        "+": {
+          "n": 939,
+          "top1_accuracy": 0.12034078807241747,
+          "top5_accuracy": 0.37912673056443025
+        },
+        "-": {
+          "n": 675,
+          "top1_accuracy": 0.12296296296296297,
+          "top5_accuracy": 0.43703703703703706
+        },
+        "/": {
+          "n": 529,
+          "top1_accuracy": 0.24007561436672967,
+          "top5_accuracy": 0.5784499054820416
+        },
+        "unknown": {
+          "n": 71,
+          "top1_accuracy": 0.29577464788732394,
+          "top5_accuracy": 0.6619718309859155
+        }
+      },
+      "per_magnitude_bucket": {
+        "[0,10)": {
+          "n": 851,
+          "top1_accuracy": 0.27262044653349,
+          "top5_accuracy": 0.6756756756756757
+        },
+        "[10,100)": {
+          "n": 2008,
+          "top1_accuracy": 0.21663346613545817,
+          "top5_accuracy": 0.5423306772908366
+        },
+        "[100,1000)": {
+          "n": 820,
+          "top1_accuracy": 0.11829268292682926,
+          "top5_accuracy": 0.325609756097561
+        },
+        "[1000+)": {
+          "n": 120,
+          "top1_accuracy": 0.125,
+          "top5_accuracy": 0.35833333333333334
+        }
+      },
+      "num_examples": 1248,
+      "dataset_path": "phase6_results/dataset/gsm8k_expanded_test.pt"
+    }
+  }
+}

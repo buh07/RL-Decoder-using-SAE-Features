@@ -1,6 +1,6 @@
 # RL-Decoder with SAE Features — Project Status
 
-**Last Updated:** February 23, 2026 (Phase 5 complete)
+**Last Updated:** February 26, 2026 (Phase 5 complete; Phase 6 scaffolding started)
 
 ---
 
@@ -11,9 +11,9 @@
 | **1** | Ground-Truth Validation | ✅ Complete | R²=0.967–0.999 on BFS/Stack/Logic |
 | **2** | Multi-Layer SAE Training | ✅ Complete | 24 GPT-2 SAEs (12×) + 98 SAEs across 4 models |
 | **2r** | SAE Retrain — TopK (GPT-2) | ✅ Complete | 24 TopK SAEs, exactly 30% sparsity, loss 0.019–0.033 |
-| **3** | Reasoning Flow Tracing | ✅ Complete | Feature-flow heatmaps; ~51% sparsity observed |
+| **3** | Reasoning Flow Tracing | ✅ Complete | Feature-flow heatmaps; ~50% active (~50% sparse) |
 | **4** | Arithmetic Feature Probing | ✅ Complete (v1) | R²=0.985 at layer 8; features predictive but not causally sufficient |
-| **4r** | Arithmetic Probing — TopK + Subspace | ✅ Complete | R²=0.977 (L7); causal Δlog_prob=+0.107 at L22 (17/24 layers positive) |
+| **4r** | Arithmetic Probing — TopK + Subspace | ✅ Complete | R²=0.977 (L7); causal Δlog_prob=+0.107 at L22 (21/24 layers positive) |
 | **5** | Feature Interpretation + Causal Steering | ✅ Complete | Feature contexts (L22 F11823 active 97%); mean-diff steering uniformly negative → confirms distributed encoding |
 
 ---
@@ -32,6 +32,13 @@ Trained SAEs on three controlled environments where the ground-truth latent stat
 | Logic puzzle | 0.999 | 0.990 | 4×, 8×, 12× |
 
 All pass R²>0.95, confirming the SAE can reconstruct known latent states.
+
+**Canonical artifact paths (current references):**
+- BFS: `phase1_results/v2/gpu1_bfs/phase1_results.json`
+- Stack: `phase1_results/v2/gpu2_stack/phase1_results.json`
+- Logic: `phase1_results/v3/gpu3_logic/phase1_results.json`
+
+Note: `phase1_results/` also contains earlier exploratory and intermediate runs.
 
 ---
 
@@ -91,7 +98,7 @@ tmux send-keys -t retrain "cd '/scratch2/f004ndc/RL-Decoder with SAE Features' &
 |---|---|
 | A — Ridge probe | R²=0.977 (result tok, layer 7); no instability vs v1 |
 | B — Co-activation | computation-bridge 3.2%, result-encoder 2.3%, operand-tracker 1.9% |
-| C — Subspace steering | **+0.107 Δlog_prob at layer 22**; 17/24 layers positive (mean +0.037) |
+| C — Subspace steering | **+0.107 Δlog_prob at layer 22**; 21/24 layers positive (mean +0.037) |
 
 **Key findings:**
 - TopK SAEs (30% sparsity) produce stable probing targets — the extreme instability at layers 5/7 in v1 is gone.
@@ -108,7 +115,7 @@ tmux send-keys -t retrain "cd '/scratch2/f004ndc/RL-Decoder with SAE Features' &
 
 `reasoning_flow_tracer.py` registers forward hooks on every GPT-2 medium block, encodes through the layer's SAE, and records active features per token.  Interactive analysis is available in `interactive_reasoning_tracker.ipynb`.
 
-Key finding: ~51% of 12 288 features are active (dense), and computation vs. background tokens differ by only ±58 features (~1%). This motivates Phase 4's targeted probing approach instead of raw feature-count comparisons.
+Key finding: roughly half of the 12 288 features are active on average (~50% active, ~50% sparse), and computation vs. background tokens differ by only a small amount in raw active-feature count (~1%). This motivates Phase 4's targeted probing approach instead of raw feature-count comparisons.
 
 ---
 
@@ -184,6 +191,18 @@ produced positive causal effects is the *subspace projection* approach from Phas
 preserves non-arithmetic co-dependent features). This confirms that arithmetic representation is
 highly distributed and non-linear: the mean-diff direction in feature space is not an
 independently-editable causal knob.
+
+---
+
+## Phase 6 — RL Decoder with SAE Features (Scaffolding Started, Not Yet Run) 🚧
+
+**Scripts:** `phase6/`
+**Results target:** `phase6_results/`
+
+Current repo state:
+- `phase6_implementation.md` contains the design/specification
+- `phase6/collect_expanded_dataset.py` is implemented (fused annotation + feature collector)
+- `phase6_results/{dataset,checkpoints,results,plots}/` directories exist but are currently scaffold-only (no generated artifacts yet)
 
 **Run order:**
 ```bash

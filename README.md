@@ -5,8 +5,9 @@
 *Benjamin Huh, February 2026*
 
 This repository implements a phased framework for extracting, validating, and analyzing
-reasoning features from LLM activations using sparse autoencoders (SAEs). All five
-research phases are complete, with the primary target being GPT-2 medium (24-layer, 1024D).
+reasoning features from LLM activations using sparse autoencoders (SAEs). Phases 1–5 are
+complete, with the primary target being GPT-2 medium (24-layer, 1024D). Phase 6 (RL decoder)
+has scaffolding in place but has not been executed yet.
 
 ## Quick Navigation
 
@@ -29,11 +30,14 @@ source setup_env.sh          # activates .venv and sets PYTHONPATH
 |-------|------|--------|------------|
 | **1** | Ground-Truth Validation | ✅ | R²=0.967–0.999 on BFS/Stack/Logic |
 | **2** | Multi-Layer SAE Training | ✅ | 24 TopK SAEs for GPT-2 medium (12×) |
-| **3** | Reasoning Flow Tracing | ✅ | Layer×token feature heatmaps; ~51% dense |
+| **3** | Reasoning Flow Tracing | ✅ | Layer×token feature heatmaps; ~50% active (~50% sparse) |
 | **4** | Arithmetic Feature Probing | ✅ | R²=0.977; +0.107 Δlog_prob at L22 (subspace) |
 | **5** | Feature Interpretation + Steering | ✅ | Mean-diff steering uniformly negative → distributed encoding |
 
 See [PROJECT_STATUS.md](PROJECT_STATUS.md) for full details and key findings.
+
+Phase 1 note: `phase1_results/` contains multiple generations (including early runs); use the
+canonical paths listed in `PROJECT_STATUS.md`.
 
 ## Project Structure
 

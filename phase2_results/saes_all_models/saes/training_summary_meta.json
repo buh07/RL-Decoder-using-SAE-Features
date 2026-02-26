@@ -1,0 +1,21 @@
+{
+  "source_dir": "phase2_results/saes_all_models/saes",
+  "num_entries": 98,
+  "counts_by_model": {
+    "gemma-2b": 18,
+    "gpt2-medium": 24,
+    "phi-2": 32,
+    "pythia-1.4b": 24
+  },
+  "final_loss": {
+    "min": 0.00010286549577893525,
+    "max": 0.02402521505513612,
+    "mean": 0.0045998633491356865
+  },
+  "final_sparsity": {
+    "min": 0.5092182334731606,
+    "max": 0.5217617259306067,
+    "mean": 0.5162313235317674
+  },
+  "format_note": "training_summary.json is a list for compatibility with phase2/train_multilayer_saes.py"
+}

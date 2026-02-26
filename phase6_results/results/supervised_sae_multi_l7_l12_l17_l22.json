@@ -1,0 +1,1179 @@
+{
+  "config_name": "sae_multi_l7_l12_l17_l22",
+  "stage": "supervised",
+  "dataset_train_path": "phase6_results/dataset/gsm8k_expanded_train.pt",
+  "num_train_records": 17128,
+  "num_val_records": 4274,
+  "num_train_examples": 5690,
+  "num_val_examples": 1422,
+  "best_epoch": 7,
+  "best_val": {
+    "num_records": 4274,
+    "top1_accuracy": 0.3348151614412728,
+    "top5_accuracy": 0.6321946654188114,
+    "mean_logprob_correct": -2.832026498374792,
+    "mean_baseline_logprob": -4.459693723281948,
+    "delta_logprob_vs_gpt2": 1.6276672249071555,
+    "per_operator": {
+      "*": {
+        "n": 1684,
+        "top1_accuracy": 0.45724465558194777,
+        "top5_accuracy": 0.7214964370546318
+      },
+      "+": {
+        "n": 1103,
+        "top1_accuracy": 0.18313689936536717,
+        "top5_accuracy": 0.47778785131459656
+      },
+      "-": {
+        "n": 774,
+        "top1_accuracy": 0.20025839793281655,
+        "top5_accuracy": 0.5439276485788114
+      },
+      "/": {
+        "n": 667,
+        "top1_accuracy": 0.4257871064467766,
+        "top5_accuracy": 0.760119940029985
+      },
+      "unknown": {
+        "n": 46,
+        "top1_accuracy": 0.43478260869565216,
+        "top5_accuracy": 0.6956521739130435
+      }
+    },
+    "per_magnitude_bucket": {
+      "[0,10)": {
+        "n": 851,
+        "top1_accuracy": 0.4406580493537015,
+        "top5_accuracy": 0.8460634547591069
+      },
+      "[10,100)": {
+        "n": 2282,
+        "top1_accuracy": 0.38475021910604734,
+        "top5_accuracy": 0.6621384750219106
+      },
+      "[100,1000)": {
+        "n": 989,
+        "top1_accuracy": 0.14964610717896865,
+        "top5_accuracy": 0.40040444893832156
+      },
+      "[1000+)": {
+        "n": 152,
+        "top1_accuracy": 0.19736842105263158,
+        "top5_accuracy": 0.4934210526315789
+      }
+    },
+    "cross_entropy_loss": 2.832026510635826
+  },
+  "checkpoint_path": "phase6_results/checkpoints/sae_multi_l7_l12_l17_l22_supervised.pt",
+  "experiment_config": {
+    "name": "sae_multi_l7_l12_l17_l22",
+    "input_variant": "sae",
+    "layers": [
+      7,
+      12,
+      17,
+      22
+    ],
+    "d_model": 256,
+    "n_heads": 4,
+    "n_decoder_layers": 2,
+    "dropout": 0.1,
+    "vocab_size": 50257,
+    "aggregator": "transformer",
+    "hybrid_topk_values": 50,
+    "batch_size": 64,
+    "epochs": 50,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_steps": 100,
+    "seed": 17,
+    "val_fraction": 0.2,
+    "early_stop_patience": 10,
+    "input_dim": 12288
+  },
+  "model_config": {
+    "input_dim": 12288,
+    "n_layers_input": 4,
+    "d_model": 256,
+    "n_heads": 4,
+    "n_decoder_layers": 2,
+    "vocab_size": 50257,
+    "dropout": 0.1,
+    "aggregator": "transformer",
+    "use_sparse_input": true
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_cross_entropy_loss": 6.983721483872907,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.1043518951801591,
+        "top5_accuracy": 0.35938231165184836,
+        "mean_logprob_correct": -4.41671866362598,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 0.04297505965596697,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.14192399049881235,
+            "top5_accuracy": 0.39489311163895485
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.044424297370806894,
+            "top5_accuracy": 0.22665457842248413
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.07493540051679587,
+            "top5_accuracy": 0.3397932816537468
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.13943028485757122,
+            "top5_accuracy": 0.5052473763118441
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.15217391304347827,
+            "top5_accuracy": 0.45652173913043476
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.1692126909518214,
+            "top5_accuracy": 0.5910693301997649
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.10955302366345311,
+            "top5_accuracy": 0.3733567046450482
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.0525783619817998,
+            "top5_accuracy": 0.1769464105156724
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.0,
+            "top5_accuracy": 0.039473684210526314
+          }
+        },
+        "cross_entropy_loss": 4.416718696733474
+      },
+      "lr": 9.996063610703137e-05
+    },
+    {
+      "epoch": 2,
+      "train_cross_entropy_loss": 3.9642966400513524,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.17103416003743566,
+        "top5_accuracy": 0.4649040711277492,
+        "mean_logprob_correct": -3.718258703492711,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 0.7414350197892365,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.22980997624703087,
+            "top5_accuracy": 0.5415676959619953
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.08612873980054397,
+            "top5_accuracy": 0.3173164097914778
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.11369509043927649,
+            "top5_accuracy": 0.40568475452196384
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.22038980509745126,
+            "top5_accuracy": 0.5742128935532234
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.30434782608695654,
+            "top5_accuracy": 0.6086956521739131
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.2878965922444183,
+            "top5_accuracy": 0.7391304347826086
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.1730937773882559,
+            "top5_accuracy": 0.46669588080631025
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.09201213346814964,
+            "top5_accuracy": 0.2871587462082912
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.0,
+            "top5_accuracy": 0.05921052631578947
+          }
+        },
+        "cross_entropy_loss": 3.7182586912691566
+      },
+      "lr": 9.973507340540291e-05
+    },
+    {
+      "epoch": 3,
+      "train_cross_entropy_loss": 3.3651612195830545,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.22882545624707534,
+        "top5_accuracy": 0.5357978474496958,
+        "mean_logprob_correct": -3.362460785904079,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.0972329373778684,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.3188836104513064,
+            "top5_accuracy": 0.6021377672209026
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.09791477787851315,
+            "top5_accuracy": 0.3626473254759746
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.14470284237726097,
+            "top5_accuracy": 0.4844961240310077
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.30134932533733133,
+            "top5_accuracy": 0.7076461769115442
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.43478260869565216,
+            "top5_accuracy": 0.6304347826086957
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.3525264394829612,
+            "top5_accuracy": 0.8155111633372503
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.24233128834355827,
+            "top5_accuracy": 0.5394390885188431
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.11425682507583418,
+            "top5_accuracy": 0.32962588473205257
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.07894736842105263,
+            "top5_accuracy": 0.2565789473684211
+          }
+        },
+        "cross_entropy_loss": 3.362460781270564
+      },
+      "lr": 9.931026738084659e-05
+    },
+    {
+      "epoch": 4,
+      "train_cross_entropy_loss": 2.939609257098059,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.259007955077211,
+        "top5_accuracy": 0.5690219934487599,
+        "mean_logprob_correct": -3.207903642809671,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.2517900804722761,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.36342042755344417,
+            "top5_accuracy": 0.6579572446555819
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.13236627379873073,
+            "top5_accuracy": 0.3798730734360834
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.13953488372093023,
+            "top5_accuracy": 0.5051679586563308
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.335832083958021,
+            "top5_accuracy": 0.7241379310344828
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.3695652173913043,
+            "top5_accuracy": 0.6739130434782609
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.31139835487661577,
+            "top5_accuracy": 0.781433607520564
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.28702892199824714,
+            "top5_accuracy": 0.5915863277826467
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.16481294236602628,
+            "top5_accuracy": 0.36804853387259856
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.15789473684210525,
+            "top5_accuracy": 0.34868421052631576
+          }
+        },
+        "cross_entropy_loss": 3.207903646452158
+      },
+      "lr": 9.868791984574829e-05
+    },
+    {
+      "epoch": 5,
+      "train_cross_entropy_loss": 2.5919645687844475,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.29714553111839026,
+        "top5_accuracy": 0.6073935423490875,
+        "mean_logprob_correct": -2.9531467380311565,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.506546985250791,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.40676959619952496,
+            "top5_accuracy": 0.6923990498812351
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.16228467815049863,
+            "top5_accuracy": 0.43336355394378967
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.1847545219638243,
+            "top5_accuracy": 0.5387596899224806
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.36731634182908546,
+            "top5_accuracy": 0.7556221889055472
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.391304347826087,
+            "top5_accuracy": 0.6739130434782609
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.4112808460634548,
+            "top5_accuracy": 0.863689776733255
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.33610867659947413,
+            "top5_accuracy": 0.6275197195442594
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.13751263902932254,
+            "top5_accuracy": 0.3741152679474216
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.1118421052631579,
+            "top5_accuracy": 0.3881578947368421
+          }
+        },
+        "cross_entropy_loss": 2.953146763588705
+      },
+      "lr": 9.787052398213062e-05
+    },
+    {
+      "epoch": 6,
+      "train_cross_entropy_loss": 2.2646785976172943,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.3081422554983622,
+        "top5_accuracy": 0.6106691623771643,
+        "mean_logprob_correct": -2.934543834045655,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.5251498892362925,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.42755344418052255,
+            "top5_accuracy": 0.6882422802850356
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.1541251133272892,
+            "top5_accuracy": 0.4514959202175884
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.21188630490956073,
+            "top5_accuracy": 0.5542635658914729
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.36731634182908546,
+            "top5_accuracy": 0.7346326836581709
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.391304347826087,
+            "top5_accuracy": 0.7391304347826086
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.43243243243243246,
+            "top5_accuracy": 0.8437132784958872
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.3343558282208589,
+            "top5_accuracy": 0.6323400525854513
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.16279069767441862,
+            "top5_accuracy": 0.4024266936299292
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.16447368421052633,
+            "top5_accuracy": 0.3355263157894737
+          }
+        },
+        "cross_entropy_loss": 2.934543847033617
+      },
+      "lr": 9.686135435373428e-05
+    },
+    {
+      "epoch": 7,
+      "train_cross_entropy_loss": 1.959141375471754,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.3348151614412728,
+        "top5_accuracy": 0.6321946654188114,
+        "mean_logprob_correct": -2.832026498374792,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.6276672249071555,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.45724465558194777,
+            "top5_accuracy": 0.7214964370546318
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.18313689936536717,
+            "top5_accuracy": 0.47778785131459656
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.20025839793281655,
+            "top5_accuracy": 0.5439276485788114
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.4257871064467766,
+            "top5_accuracy": 0.760119940029985
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.43478260869565216,
+            "top5_accuracy": 0.6956521739130435
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.4406580493537015,
+            "top5_accuracy": 0.8460634547591069
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.38475021910604734,
+            "top5_accuracy": 0.6621384750219106
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.14964610717896865,
+            "top5_accuracy": 0.40040444893832156
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.19736842105263158,
+            "top5_accuracy": 0.4934210526315789
+          }
+        },
+        "cross_entropy_loss": 2.832026510635826
+      },
+      "lr": 9.566445378781162e-05
+    },
+    {
+      "epoch": 8,
+      "train_cross_entropy_loss": 1.651636779614555,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.3165652784277024,
+        "top5_accuracy": 0.6214319138979878,
+        "mean_logprob_correct": -2.9318726378917708,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.5278210853901768,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.4358669833729216,
+            "top5_accuracy": 0.7048693586698337
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.16500453309156846,
+            "top5_accuracy": 0.47053490480507704
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.20284237726098192,
+            "top5_accuracy": 0.5400516795865633
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.3868065967016492,
+            "top5_accuracy": 0.7526236881559221
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.4782608695652174,
+            "top5_accuracy": 0.6521739130434783
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.4688601645123384,
+            "top5_accuracy": 0.8730904817861339
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.3483786152497809,
+            "top5_accuracy": 0.6345311130587205
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.1435793731041456,
+            "top5_accuracy": 0.41051567239635994
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.1118421052631579,
+            "top5_accuracy": 0.3881578947368421
+          }
+        },
+        "cross_entropy_loss": 2.931872641421056
+      },
+      "lr": 9.428461717918511e-05
+    },
+    {
+      "epoch": 9,
+      "train_cross_entropy_loss": 1.4004580097073764,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.3221806270472625,
+        "top5_accuracy": 0.6289190453907346,
+        "mean_logprob_correct": -2.940019955559678,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.5196737677222694,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.4477434679334917,
+            "top5_accuracy": 0.7280285035629454
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.15684496826835903,
+            "top5_accuracy": 0.46600181323662737
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.21188630490956073,
+            "top5_accuracy": 0.541343669250646
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.4002998500749625,
+            "top5_accuracy": 0.7496251874062968
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.41304347826086957,
+            "top5_accuracy": 0.6304347826086957
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.4535840188014101,
+            "top5_accuracy": 0.8319623971797885
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.3453111305872042,
+            "top5_accuracy": 0.6375985977212971
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.17593528816986856,
+            "top5_accuracy": 0.44388270980788674
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.19078947368421054,
+            "top5_accuracy": 0.5657894736842105
+          }
+        },
+        "cross_entropy_loss": 2.94001997794623
+      },
+      "lr": 9.272737228145352e-05
+    },
+    {
+      "epoch": 10,
+      "train_cross_entropy_loss": 1.1565348434982763,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.32592419279363594,
+        "top5_accuracy": 0.6242395882077679,
+        "mean_logprob_correct": -3.0218139277126883,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.4378797955692593,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.44061757719714967,
+            "top5_accuracy": 0.7250593824228029
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.16772438803263826,
+            "top5_accuracy": 0.46328195829555757
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.2041343669250646,
+            "top5_accuracy": 0.5271317829457365
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.4332833583208396,
+            "top5_accuracy": 0.7406296851574213
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.41304347826086957,
+            "top5_accuracy": 0.7391304347826086
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.5099882491186839,
+            "top5_accuracy": 0.8707403055229143
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.34005258545135847,
+            "top5_accuracy": 0.6266432953549518
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.15874620829120323,
+            "top5_accuracy": 0.42264914054600605
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.17105263157894737,
+            "top5_accuracy": 0.5197368421052632
+          }
+        },
+        "cross_entropy_loss": 3.0218139098635555
+      },
+      "lr": 9.099895756229753e-05
+    },
+    {
+      "epoch": 11,
+      "train_cross_entropy_loss": 0.9397908343382385,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.33879270004679457,
+        "top5_accuracy": 0.6289190453907346,
+        "mean_logprob_correct": -3.023326692980364,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.4363670303015832,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.4524940617577197,
+            "top5_accuracy": 0.7309976247030879
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.1786038077969175,
+            "top5_accuracy": 0.4669084315503173
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.20801033591731266,
+            "top5_accuracy": 0.5335917312661499
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.46026986506746626,
+            "top5_accuracy": 0.7466266866566716
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.45652173913043476,
+            "top5_accuracy": 0.6739130434782609
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.5264394829612221,
+            "top5_accuracy": 0.8789659224441834
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.35451358457493426,
+            "top5_accuracy": 0.6319018404907976
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.17391304347826086,
+            "top5_accuracy": 0.43174924165824063
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.125,
+            "top5_accuracy": 0.46710526315789475
+          }
+        },
+        "cross_entropy_loss": 3.023326711337813
+      },
+      "lr": 8.910629721159892e-05
+    },
+    {
+      "epoch": 12,
+      "train_cross_entropy_loss": 0.7587932015289385,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.3366869443144595,
+        "top5_accuracy": 0.6328965839962565,
+        "mean_logprob_correct": -3.0923856510352024,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.367308072246745,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.45368171021377673,
+            "top5_accuracy": 0.7292161520190024
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.18495013599274707,
+            "top5_accuracy": 0.4696282864913871
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.2041343669250646,
+            "top5_accuracy": 0.5400516795865633
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.4407796101949025,
+            "top5_accuracy": 0.7646176911544228
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.41304347826086957,
+            "top5_accuracy": 0.6739130434782609
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.5170387779083431,
+            "top5_accuracy": 0.881316098707403
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.34574934268185803,
+            "top5_accuracy": 0.6406660823838738
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.18099089989888775,
+            "top5_accuracy": 0.4206268958543984
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.20394736842105263,
+            "top5_accuracy": 0.506578947368421
+          }
+        },
+        "cross_entropy_loss": 3.092385645051063
+      },
+      "lr": 8.705697340249275e-05
+    },
+    {
+      "epoch": 13,
+      "train_cross_entropy_loss": 0.6038346101835698,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.33200748713149275,
+        "top5_accuracy": 0.6352363125877398,
+        "mean_logprob_correct": -3.2355639626672614,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.2241297606146861,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.42933491686460806,
+            "top5_accuracy": 0.7244655581947743
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.19401631912964643,
+            "top5_accuracy": 0.48957388939256574
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.2235142118863049,
+            "top5_accuracy": 0.541343669250646
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.4332833583208396,
+            "top5_accuracy": 0.7556221889055472
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.43478260869565216,
+            "top5_accuracy": 0.6956521739130435
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.5193889541715628,
+            "top5_accuracy": 0.8754406580493537
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.3488168273444347,
+            "top5_accuracy": 0.6468010517090271
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.16076845298281092,
+            "top5_accuracy": 0.4277047522750253
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.14473684210526316,
+            "top5_accuracy": 0.46710526315789475
+          }
+        },
+        "cross_entropy_loss": 3.2355639716984235
+      },
+      "lr": 8.485919591647778e-05
+    },
+    {
+      "epoch": 14,
+      "train_cross_entropy_loss": 0.4609128407427553,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.328731867103416,
+        "top5_accuracy": 0.6071595694899392,
+        "mean_logprob_correct": -3.2176632021582714,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.242030521123676,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.44418052256532065,
+            "top5_accuracy": 0.7197149643705463
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.19038984587488667,
+            "top5_accuracy": 0.44152311876699907
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.1834625322997416,
+            "top5_accuracy": 0.4883720930232558
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.431784107946027,
+            "top5_accuracy": 0.7316341829085458
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.3695652173913043,
+            "top5_accuracy": 0.6521739130434783
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.4582843713278496,
+            "top5_accuracy": 0.8014101057579318
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.35451358457493426,
+            "top5_accuracy": 0.6301489921121823
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.18301314459049545,
+            "top5_accuracy": 0.4084934277047523
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.16447368421052633,
+            "top5_accuracy": 0.46710526315789475
+          }
+        },
+        "cross_entropy_loss": 3.2176632164904713
+      },
+      "lr": 8.252176925426922e-05
+    },
+    {
+      "epoch": 15,
+      "train_cross_entropy_loss": 0.36085809568888894,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.3451099672437997,
+        "top5_accuracy": 0.6256434253626579,
+        "mean_logprob_correct": -3.239553160937728,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.2201405623442194,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.4661520190023753,
+            "top5_accuracy": 0.7363420427553444
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.19220308250226656,
+            "top5_accuracy": 0.46237533998186764
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.2131782945736434,
+            "top5_accuracy": 0.5051679586563308
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.4407796101949025,
+            "top5_accuracy": 0.7511244377811095
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.41304347826086957,
+            "top5_accuracy": 0.6956521739130435
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.5252643948296122,
+            "top5_accuracy": 0.8730904817861339
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.3588957055214724,
+            "top5_accuracy": 0.6349693251533742
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.18099089989888775,
+            "top5_accuracy": 0.4064711830131446
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.19736842105263158,
+            "top5_accuracy": 0.5263157894736842
+          }
+        },
+        "cross_entropy_loss": 3.239553159678936
+      },
+      "lr": 8.005405736415126e-05
+    },
+    {
+      "epoch": 16,
+      "train_cross_entropy_loss": 0.2872975086745454,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.34674777725783806,
+        "top5_accuracy": 0.630556855404773,
+        "mean_logprob_correct": -3.327357276969107,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 1.1323364463128407,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.47743467933491684,
+            "top5_accuracy": 0.732185273159145
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.18495013599274707,
+            "top5_accuracy": 0.46237533998186764
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.21059431524547803,
+            "top5_accuracy": 0.5465116279069767
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.4302848575712144,
+            "top5_accuracy": 0.7466266866566716
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.5217391304347826,
+            "top5_accuracy": 0.6739130434782609
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.5017626321974148,
+            "top5_accuracy": 0.8578143360752056
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.36064855390008765,
+            "top5_accuracy": 0.6349693251533742
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.20728008088978767,
+            "top5_accuracy": 0.448938321536906
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.17763157894736842,
+            "top5_accuracy": 0.47368421052631576
+          }
+        },
+        "cross_entropy_loss": 3.3273572694156344
+      },
+      "lr": 7.746594612913061e-05
+    },
+    {
+      "epoch": 17,
+      "train_cross_entropy_loss": 0.22787397761647804,
+      "val": {
+        "num_records": 4274,
+        "top1_accuracy": 0.3160973327094057,
+        "top5_accuracy": 0.5954609265325223,
+        "mean_logprob_correct": -3.540025586484485,
+        "mean_baseline_logprob": -4.459693723281948,
+        "delta_logprob_vs_gpt2": 0.9196681367974624,
+        "per_operator": {
+          "*": {
+            "n": 1684,
+            "top1_accuracy": 0.4495249406175772,
+            "top5_accuracy": 0.7244655581947743
+          },
+          "+": {
+            "n": 1103,
+            "top1_accuracy": 0.1613780598368087,
+            "top5_accuracy": 0.43064369900271987
+          },
+          "-": {
+            "n": 774,
+            "top1_accuracy": 0.17829457364341086,
+            "top5_accuracy": 0.4573643410852713
+          },
+          "/": {
+            "n": 667,
+            "top1_accuracy": 0.3868065967016492,
+            "top5_accuracy": 0.6956521739130435
+          },
+          "unknown": {
+            "n": 46,
+            "top1_accuracy": 0.43478260869565216,
+            "top5_accuracy": 0.6956521739130435
+          }
+        },
+        "per_magnitude_bucket": {
+          "[0,10)": {
+            "n": 851,
+            "top1_accuracy": 0.4794359576968273,
+            "top5_accuracy": 0.8413631022326674
+          },
+          "[10,100)": {
+            "n": 2282,
+            "top1_accuracy": 0.3168273444347064,
+            "top5_accuracy": 0.5784399649430324
+          },
+          "[100,1000)": {
+            "n": 989,
+            "top1_accuracy": 0.2012133468149646,
+            "top5_accuracy": 0.4368048533872599
+          },
+          "[1000+)": {
+            "n": 152,
+            "top1_accuracy": 0.13815789473684212,
+            "top5_accuracy": 0.506578947368421
+          }
+        },
+        "cross_entropy_loss": 3.5400255959224745
+      },
+      "lr": 7.476780376317109e-05
+    }
+  ]
+}

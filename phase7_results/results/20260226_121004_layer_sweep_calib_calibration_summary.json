@@ -1,0 +1,40 @@
+{
+  "schema_version": "phase7_calibration_summary_v1",
+  "run_id": "20260226_121004_layer_sweep_calib",
+  "task": "calibration_mini_sweep",
+  "worker": {
+    "schema_version": "phase7_calibration_worker_summary_v1",
+    "run_id": "20260226_121004_layer_sweep_calib",
+    "worker": "gpu1",
+    "phase": "phase7",
+    "start_ts": 1772125804,
+    "end_ts": 1772136088,
+    "elapsed_sec": 10284,
+    "layer_sets": [
+      "single_l22",
+      "spread4_current",
+      "middle12_06_17",
+      "every2_even"
+    ],
+    "variants": [
+      "raw",
+      "hybrid"
+    ],
+    "num_configs": 8,
+    "checkpoints_dir": "phase7_results/sweeps/20260226_121004_layer_sweep_calib/calibration/checkpoints",
+    "results_dir": "phase7_results/sweeps/20260226_121004_layer_sweep_calib/calibration/results"
+  },
+  "num_eval_rows": 8,
+  "results_dir": "phase7_results/sweeps/20260226_121004_layer_sweep_calib/calibration/results",
+  "sweep_summary_path": "phase7_results/sweeps/20260226_121004_layer_sweep_calib/calibration/results/layer_sweep_phase7_summary.json",
+  "top_configs_overall": [
+    "state_raw_every2_even",
+    "state_hybrid_every2_even",
+    "state_raw_middle12_06_17",
+    "state_hybrid_middle12_06_17",
+    "state_raw_spread4_current"
+  ],
+  "causal_throughput_path": "phase7_results/interventions/20260226_121004_layer_sweep_calib_calibration_causal_throughput.json",
+  "causal_records_per_hour": 10588.235294117647,
+  "causal_layer_checks_per_hour": 10588.235294117647
+}

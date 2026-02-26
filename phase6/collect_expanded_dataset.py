@@ -178,12 +178,12 @@ def extract_record(
     activation_store: Dict[int, torch.Tensor],
     saes: Dict[int, SparseAutoencoder],
     norm_stats: Dict[int, Tuple[torch.Tensor, torch.Tensor]],
-    model,
+    logits: torch.Tensor,
     device: str,
     example_idx: int,
     ann_idx: int,
     gsm8k_split: str,
-) -> Optional[dict]:
+) -> Tuple[Optional[dict], Optional[str]]:
     """Extract one annotation record with raw hidden states, SAE features, and baseline logprob."""
 
     # Map char positions → token indices
@@ -192,11 +192,11 @@ def extract_record(
     result_toks = find_tokens_for_span(offset_mapping, ann["result_chars"][0], ann["result_chars"][1])
 
     if not eq_toks or not pre_eq_toks or not result_toks:
-        return None
+        return None, "token_alignment"
 
     # Filter: only single-token results (decoder predicts one token)
     if len(result_toks) != 1:
-        return None
+        return None, "multi_token_result"
 
     eq_tok_idx = eq_toks[0]
     result_tok_idx = result_toks[0]
@@ -218,10 +218,10 @@ def extract_record(
 
     # Baseline log-prob: model's own prediction of the result token
     # at position eq_tok_idx (autoregressive: logits[eq_tok] predict token at eq_tok+1)
-    with torch.no_grad():
-        logits = model(input_ids).logits  # (1, seq_len, vocab)
     # Predict result token from the position just before it
     pred_pos = result_tok_idx - 1
+    if pred_pos < 0 or pred_pos >= logits.shape[1]:
+        return None, "token_alignment"
     log_probs = F.log_softmax(logits[0, pred_pos, :], dim=-1)
     baseline_logprob = log_probs[result_token_id].item()
 
@@ -230,6 +230,7 @@ def extract_record(
 
     C = ann["C"]
     return {
+        "schema_version": "phase6_v1",
         "example_idx":     example_idx,
         "ann_idx":         ann_idx,
         "ann_text":        ann["ann_text"],
@@ -247,7 +248,7 @@ def extract_record(
         "baseline_logprob": baseline_logprob,
         "baseline_top5":   list(zip(top5_ids.tolist(), top5_vals.tolist())),
         "gsm8k_split":    gsm8k_split,
-    }
+    }, None
 
 
 # ── Main collection ──────────────────────────────────────────────────────────
@@ -290,8 +291,13 @@ def collect(args):
     else:
         global_offset = 0
 
+    if args.max_examples is not None:
+        raw_examples = raw_examples[: args.max_examples]
+        print(f"  Limiting to first {len(raw_examples)} examples via --max-examples")
+
     records: List[dict] = []
-    n_skipped = 0
+    n_skipped_no_annotations = 0
+    n_skipped_alignment = 0
     n_multitoken = 0
 
     for local_idx, ex in enumerate(raw_examples):
@@ -299,7 +305,7 @@ def collect(args):
         text = ex["question"] + "\n" + ex["answer"]
         annotations = parse_annotations(text)
         if not annotations:
-            n_skipped += 1
+            n_skipped_no_annotations += 1
             continue
 
         enc = tokenizer(
@@ -312,16 +318,21 @@ def collect(args):
 
         # Forward pass — populates activation_store
         with torch.no_grad():
-            model(input_ids)
+            logits = model(input_ids).logits
 
         for ann_idx, ann in enumerate(annotations):
-            rec = extract_record(
+            rec, skip_reason = extract_record(
                 ann, input_ids, offset_mapping, tokens_str,
-                activation_store, saes, norm_stats, model, device,
+                activation_store, saes, norm_stats, logits, device,
                 ex_idx, ann_idx, gsm8k_split,
             )
             if rec is None:
-                n_multitoken += 1
+                if skip_reason == "multi_token_result":
+                    n_multitoken += 1
+                elif skip_reason == "token_alignment":
+                    n_skipped_alignment += 1
+                else:
+                    n_skipped_alignment += 1
                 continue
             records.append(rec)
 
@@ -338,7 +349,8 @@ def collect(args):
 
     print(f"\n=== Collection Summary ({gsm8k_split}{shard_suffix}) ===")
     print(f"  Records:          {len(records)}")
-    print(f"  Skipped (no ann): {n_skipped}")
+    print(f"  Skipped (no ann): {n_skipped_no_annotations}")
+    print(f"  Skipped (token alignment): {n_skipped_alignment}")
     print(f"  Skipped (multi-token result): {n_multitoken}")
     if records:
         C_vals = [r["C"] for r in records]
@@ -375,6 +387,8 @@ def parse_args():
     p.add_argument("--activations-dir", default="phase2_results/activations")
     p.add_argument("--output-dir", default="phase6_results/dataset")
     p.add_argument("--device", default="cuda:0")
+    p.add_argument("--max-examples", type=int, default=None,
+                   help="Process only the first N examples (after sharding), for smoke tests")
     p.add_argument("--shard", type=int, nargs=2, metavar=("IDX", "N"),
                    help="Shard index and total shards (e.g., --shard 0 3)")
     p.add_argument("--merge", action="store_true", help="Merge shards and exit")

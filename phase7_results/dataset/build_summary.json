@@ -1,0 +1,66 @@
+{
+  "schema_version": "phase7_trace_v1",
+  "source_phase6": {
+    "train": "phase6_results/dataset/gsm8k_expanded_train.pt",
+    "test": "phase6_results/dataset/gsm8k_expanded_test.pt"
+  },
+  "outputs": {
+    "train": "phase7_results/dataset/gsm8k_step_traces_train.pt",
+    "test": "phase7_results/dataset/gsm8k_step_traces_test.pt",
+    "all": "phase7_results/dataset/gsm8k_step_traces_all.pt"
+  },
+  "splits": {
+    "train": {
+      "split": "train",
+      "num_step_records": 21402,
+      "num_traces": 7112,
+      "step_type_counts": {
+        "operate": 14290,
+        "emit_result": 7112
+      },
+      "operator_counts": {
+        "/": 3639,
+        "+": 5280,
+        "*": 8141,
+        "-": 3836,
+        "unknown": 506
+      },
+      "magnitude_bucket_counts": {
+        "[10,100)": 11354,
+        "[0,10)": 4371,
+        "[100,1000)": 4957,
+        "[1000+)": 720
+      },
+      "parse_error_counts": {
+        "has_error": 181,
+        "no_error": 21221
+      }
+    },
+    "test": {
+      "split": "test",
+      "num_step_records": 3799,
+      "num_traces": 1248,
+      "step_type_counts": {
+        "operate": 2551,
+        "emit_result": 1248
+      },
+      "operator_counts": {
+        "-": 679,
+        "*": 1492,
+        "/": 607,
+        "+": 921,
+        "unknown": 100
+      },
+      "magnitude_bucket_counts": {
+        "[0,10)": 851,
+        "[10,100)": 2008,
+        "[1000+)": 120,
+        "[100,1000)": 820
+      },
+      "parse_error_counts": {
+        "has_error": 24,
+        "no_error": 3775
+      }
+    }
+  }
+}

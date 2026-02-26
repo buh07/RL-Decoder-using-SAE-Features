@@ -1,11 +1,20 @@
 # Phase 6: RL Decoder with SAE Features — Implementation Plan
 
+## Implementation Status Note (February 26, 2026)
+
+- `phase6/collect_expanded_dataset.py` has been implemented as a **fused collector** that
+  performs both annotation extraction and feature computation in one pass.
+- `phase6_results/` directory scaffolding exists, but no Phase 6 datasets/checkpoints/results have
+  been generated yet.
+- The `compute_features.py` split described below is currently a **planned refactor**, not the
+  active implementation path.
+
 ## 1. Motivation (Summary)
 
 Phases 1–5 established:
 
 - **SAE features encode arithmetic reasoning.** Ridge probes on TopK SAE features at the `=` token predict log(|result|) with R²=0.977 at layer 7 (Phase 4r, Experiment A).
-- **The encoding is causal.** Projecting the residual-stream difference Δh between two examples onto the SAE decoder column subspace and patching at the `=` token shifts log-prob by +0.107 toward the target result at layer 22 (Phase 4r, Experiment C, method="subspace"). 17/24 layers show positive causal effect.
+- **The encoding is causal.** Projecting the residual-stream difference Δh between two examples onto the SAE decoder column subspace and patching at the `=` token shifts log-prob by +0.107 toward the target result at layer 22 (Phase 4r, Experiment C, method="subspace"). 21/24 layers show positive causal effect.
 - **Direct SAE-space steering does not work.** Three variants — full-space mean-diff (−2.854), probe-subspace mean-diff (−2.385), nearest-neighbour feature transfer (−2.589) — all yield negative Δlog_prob. Root causes: (1) the SAE encode→decode roundtrip introduces reconstruction error larger than the steering signal; (2) the high-C/low-C split is conceptually misaligned with self-improvement.
 - **Reasoning is not localised to one layer.** Phase 3 showed single-layer probes cannot decode reasoning connectives (0% per-class accuracy). Arithmetic information flows across layers 7–22, with different layers serving different roles.
 
@@ -62,7 +71,7 @@ Per annotation, store:
 
 #### 3.1.2 Compute Features for Expanded Dataset
 
-**Script:** `phase6/compute_features.py`
+**Script:** `phase6/compute_features.py` (planned refactor; current implementation is fused into `collect_expanded_dataset.py`)
 
 For each annotation, run GPT-2 medium forward pass with capture hooks and compute:
 
@@ -350,8 +359,8 @@ For the SAE-input decoder:
 
 ```
 phase6/
-├── collect_expanded_dataset.py     # Step 1: extract annotations from full GSM8K
-├── compute_features.py             # Step 2: run GPT-2 + SAEs, store features
+├── collect_expanded_dataset.py     # Current path: fused extraction + feature computation
+├── compute_features.py             # Planned refactor (split pipeline, not yet implemented)
 ├── decoder_model.py                # ArithmeticDecoder architecture
 ├── decoder_config.py               # Hyperparameter configs for 6 variants
 ├── train_supervised.py             # Stage 1: cross-entropy training
@@ -388,13 +397,12 @@ phase6_results/
 
 | Step | Script | GPU | Est. Time | Depends On |
 |------|--------|-----|-----------|------------|
-| 1. Extract annotations | `collect_expanded_dataset.py` | CPU | 5 min | — |
-| 2. Compute features (3 shards) | `compute_features.py` | GPU 0,1,2 | ~2 hr | Step 1 |
-| 3. Train 6 supervised configs | `train_supervised.py` | GPU 0 (sequential) | ~90 min | Step 2 |
-| 4. Evaluate supervised | `evaluate_decoder.py` | GPU 0 | ~10 min | Step 3 |
-| 5. RL fine-tune best 1–2 configs | `train_rl.py` | GPU 0 | ~30 min | Step 4 |
-| 6. Full evaluation + ablations | `evaluate_decoder.py` | GPU 0 | ~20 min | Step 5 |
-| 7. Interpretability analysis | `interpret_decoder.py` | GPU 0 | ~10 min | Step 6 |
+| 1. Generate expanded dataset + features (current fused path, 3 shards) | `collect_expanded_dataset.py` | GPU 0,1,2 | ~2–3 hr | — |
+| 2. Train 6 supervised configs | `train_supervised.py` | GPU 0 (sequential) | ~90 min | Step 1 |
+| 3. Evaluate supervised | `evaluate_decoder.py` | GPU 0 | ~10 min | Step 2 |
+| 4. RL fine-tune best 1–2 configs | `train_rl.py` | GPU 0 | ~30 min | Step 3 |
+| 5. Full evaluation + ablations | `evaluate_decoder.py` | GPU 0 | ~20 min | Step 4 |
+| 6. Interpretability analysis | `interpret_decoder.py` | GPU 0 | ~10 min | Step 5 |
 | **Total** | | | **~5 hours** | |
 
 All steps are automatable. Steps 1–2 can run in background (tmux). Steps 3–7 can be a single pipeline script.

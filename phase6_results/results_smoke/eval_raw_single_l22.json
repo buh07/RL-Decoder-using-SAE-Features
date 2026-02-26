@@ -1,0 +1,109 @@
+{
+  "checkpoint": "phase6_results/checkpoints_smoke/raw_single_l22_supervised.pt",
+  "stage": "supervised",
+  "config_name": "raw_single_l22",
+  "experiment_config": {
+    "name": "raw_single_l22",
+    "input_variant": "raw",
+    "layers": [
+      22
+    ],
+    "d_model": 256,
+    "n_heads": 4,
+    "n_decoder_layers": 2,
+    "dropout": 0.1,
+    "vocab_size": 50257,
+    "aggregator": "transformer",
+    "hybrid_topk_values": 50,
+    "batch_size": 64,
+    "epochs": 50,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_steps": 100,
+    "seed": 17,
+    "val_fraction": 0.2,
+    "early_stop_patience": 10,
+    "input_dim": 1024
+  },
+  "model_config": {
+    "input_dim": 1024,
+    "n_layers_input": 1,
+    "d_model": 256,
+    "n_heads": 4,
+    "n_decoder_layers": 2,
+    "vocab_size": 50257,
+    "dropout": 0.1,
+    "aggregator": "transformer",
+    "use_sparse_input": false
+  },
+  "evaluations": {
+    "val": {
+      "num_records": 2,
+      "top1_accuracy": 0.0,
+      "top5_accuracy": 0.0,
+      "mean_logprob_correct": -10.493184089660645,
+      "mean_baseline_logprob": -4.851496458053589,
+      "delta_logprob_vs_gpt2": -5.641687631607056,
+      "per_operator": {
+        "*": {
+          "n": 1,
+          "top1_accuracy": 0.0,
+          "top5_accuracy": 0.0
+        },
+        "-": {
+          "n": 1,
+          "top1_accuracy": 0.0,
+          "top5_accuracy": 0.0
+        }
+      },
+      "per_magnitude_bucket": {
+        "[0,10)": {
+          "n": 1,
+          "top1_accuracy": 0.0,
+          "top5_accuracy": 0.0
+        },
+        "[10,100)": {
+          "n": 1,
+          "top1_accuracy": 0.0,
+          "top5_accuracy": 0.0
+        }
+      },
+      "num_examples": 1,
+      "dataset_path": "phase6_results/dataset_smoke/gsm8k_expanded_train_synth.pt"
+    },
+    "test": {
+      "num_records": 2,
+      "top1_accuracy": 0.0,
+      "top5_accuracy": 0.0,
+      "mean_logprob_correct": -10.493184089660645,
+      "mean_baseline_logprob": -4.851496458053589,
+      "delta_logprob_vs_gpt2": -5.641687631607056,
+      "per_operator": {
+        "*": {
+          "n": 1,
+          "top1_accuracy": 0.0,
+          "top5_accuracy": 0.0
+        },
+        "-": {
+          "n": 1,
+          "top1_accuracy": 0.0,
+          "top5_accuracy": 0.0
+        }
+      },
+      "per_magnitude_bucket": {
+        "[0,10)": {
+          "n": 1,
+          "top1_accuracy": 0.0,
+          "top5_accuracy": 0.0
+        },
+        "[10,100)": {
+          "n": 1,
+          "top1_accuracy": 0.0,
+          "top5_accuracy": 0.0
+        }
+      },
+      "num_examples": 1,
+      "dataset_path": "phase6_results/dataset_smoke/gsm8k_expanded_test.pt"
+    }
+  }
+}

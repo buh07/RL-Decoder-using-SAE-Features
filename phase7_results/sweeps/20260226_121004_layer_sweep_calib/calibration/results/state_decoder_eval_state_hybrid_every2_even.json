@@ -1,0 +1,202 @@
+{
+  "schema_version": "layer_sweep_result_v1",
+  "checkpoint": "phase7_results/sweeps/20260226_121004_layer_sweep_calib/calibration/checkpoints/state_hybrid_every2_even.pt",
+  "stage": "phase7_state_decoder_supervised",
+  "config_name": "state_hybrid_every2_even",
+  "experiment_config": {
+    "name": "state_hybrid_every2_even",
+    "input_variant": "hybrid",
+    "layers": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22
+    ],
+    "d_model": 256,
+    "n_heads": 4,
+    "n_decoder_layers": 2,
+    "dropout": 0.1,
+    "aggregator": "transformer",
+    "hybrid_topk_values": 50,
+    "batch_size": 64,
+    "epochs": 40,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_steps": 100,
+    "seed": 17,
+    "val_fraction": 0.2,
+    "early_stop_patience": 10,
+    "loss_w_result_token": 1.0,
+    "loss_w_operator": 0.5,
+    "loss_w_step_type": 0.25,
+    "loss_w_magnitude": 0.25,
+    "loss_w_sign": 0.25,
+    "loss_w_subresult": 0.15,
+    "loss_w_lhs": 0.05,
+    "loss_w_rhs": 0.05,
+    "input_dim": 1074
+  },
+  "evaluations": {
+    "val": {
+      "num_records": 4274,
+      "loss_total": 7.383428699790622,
+      "loss_result_token": 2.1183549970123443,
+      "loss_operator": 0.010755492693748522,
+      "loss_step_type": 0.4220871143548579,
+      "loss_magnitude": 0.26143119130309744,
+      "loss_sign": 0.006070322045760258,
+      "loss_subresult": 1.8593527468973419,
+      "loss_lhs": 0.03693948164721711,
+      "loss_rhs": 96.13097773302324,
+      "result_token_top1": 0.5128685072810504,
+      "result_token_top5": 0.764389330502922,
+      "operator_acc": 0.9981282171268133,
+      "step_type_acc": 0.8135236308961814,
+      "magnitude_acc": 0.9145999063829646,
+      "sign_acc": 0.9992980814225549,
+      "subresult_mae_z": 0.12378620688581668,
+      "lhs_mae_z": 0.10114302092787798,
+      "rhs_mae_z": 0.28736866921509163,
+      "mean_correct_logprob": -2.118354979440549,
+      "mean_baseline_logprob": -4.459693755175278,
+      "delta_logprob_vs_gpt2": 2.3413387757347297,
+      "per_operator_result_top1": {
+        "*": {
+          "n": 1593,
+          "top1_accuracy": 0.6666666666666666
+        },
+        "+": {
+          "n": 1077,
+          "top1_accuracy": 0.3491179201485608
+        },
+        "-": {
+          "n": 788,
+          "top1_accuracy": 0.35913705583756345
+        },
+        "/": {
+          "n": 728,
+          "top1_accuracy": 0.6043956043956044
+        },
+        "unknown": {
+          "n": 88,
+          "top1_accuracy": 0.3522727272727273
+        }
+      },
+      "subresult_mae": 385.34137355464946,
+      "lhs_mae": 7896.610596360344,
+      "rhs_mae": 443.9448060642198,
+      "num_examples": 1422,
+      "dataset_path": "phase7_results/dataset/gsm8k_step_traces_train.pt"
+    },
+    "test": {
+      "num_records": 3799,
+      "loss_total": 2.9329470111433222,
+      "loss_result_token": 2.0757532959142524,
+      "loss_operator": 0.008752998773368464,
+      "loss_step_type": 0.43729519714616294,
+      "loss_magnitude": 0.24835461178447862,
+      "loss_sign": 0.003960132453104991,
+      "loss_subresult": 1.9302451787501766,
+      "loss_lhs": 4.750676049902853,
+      "loss_rhs": 3.0668820284883593,
+      "result_token_top1": 0.5175046066793526,
+      "result_token_top5": 0.7720452749154919,
+      "operator_acc": 0.9992103185048697,
+      "step_type_acc": 0.8038957624819505,
+      "magnitude_acc": 0.9241905768126618,
+      "sign_acc": 0.9997367728349565,
+      "subresult_mae_z": 0.12358084463012567,
+      "lhs_mae_z": 0.13973938821194487,
+      "rhs_mae_z": 0.18652370624749515,
+      "mean_correct_logprob": -2.075753320672381,
+      "mean_baseline_logprob": -4.445945922498108,
+      "delta_logprob_vs_gpt2": 2.3701926018257273,
+      "per_operator_result_top1": {
+        "*": {
+          "n": 1492,
+          "top1_accuracy": 0.6802949061662198
+        },
+        "+": {
+          "n": 921,
+          "top1_accuracy": 0.31704668838219324
+        },
+        "-": {
+          "n": 679,
+          "top1_accuracy": 0.3475699558173785
+        },
+        "/": {
+          "n": 607,
+          "top1_accuracy": 0.6046128500823723
+        },
+        "unknown": {
+          "n": 100,
+          "top1_accuracy": 0.56
+        }
+      },
+      "subresult_mae": 384.7020892945118,
+      "lhs_mae": 10909.97207281563,
+      "rhs_mae": 288.1533008542569,
+      "num_examples": 1248,
+      "dataset_path": "phase7_results/dataset/gsm8k_step_traces_test.pt"
+    }
+  },
+  "sweep_metadata": {
+    "schema_version": "layer_sweep_result_v1",
+    "phase": "phase7",
+    "input_variant": "hybrid",
+    "layers": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22
+    ],
+    "num_layers": 12,
+    "layer_set_id": "every2_even",
+    "layer_set_family": "strided",
+    "layer_set_sweep_group": "broad",
+    "sweep_run_id": "20260226_121004_layer_sweep_calib",
+    "seed": 17,
+    "parent_baseline": "spread4_current",
+    "manifest_path": "experiments/layer_sweep_manifest_v1.json"
+  },
+  "phase": "phase7",
+  "input_variant": "hybrid",
+  "layers": [
+    0,
+    2,
+    4,
+    6,
+    8,
+    10,
+    12,
+    14,
+    16,
+    18,
+    20,
+    22
+  ],
+  "num_layers": 12,
+  "layer_set_id": "every2_even",
+  "layer_set_family": "strided",
+  "layer_set_sweep_group": "broad",
+  "sweep_run_id": "20260226_121004_layer_sweep_calib",
+  "seed": 17,
+  "parent_baseline": "spread4_current",
+  "manifest_path": "experiments/layer_sweep_manifest_v1.json"
+}

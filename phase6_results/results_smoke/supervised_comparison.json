@@ -1,0 +1,74 @@
+{
+  "results_dir": "phase6_results/results_smoke",
+  "supervised": [
+    {
+      "config_name": null,
+      "checkpoint_path": null,
+      "num_train_records": null,
+      "num_val_records": null,
+      "best_epoch": null,
+      "val_top1_accuracy": null,
+      "val_top5_accuracy": null,
+      "val_mean_logprob_correct": null,
+      "val_delta_logprob_vs_gpt2": null,
+      "val_cross_entropy_loss": null,
+      "source_file": "phase6_results/results_smoke/supervised_comparison.json"
+    },
+    {
+      "config_name": "hybrid_single_l22",
+      "checkpoint_path": "phase6_results/checkpoints_smoke/hybrid_single_l22_supervised.pt",
+      "num_train_records": 2,
+      "num_val_records": 2,
+      "best_epoch": 1,
+      "val_top1_accuracy": 0.0,
+      "val_top5_accuracy": 0.0,
+      "val_mean_logprob_correct": -10.291470527648926,
+      "val_delta_logprob_vs_gpt2": -5.439974069595337,
+      "val_cross_entropy_loss": 10.291470527648926,
+      "source_file": "phase6_results/results_smoke/supervised_hybrid_single_l22.json"
+    },
+    {
+      "config_name": "raw_single_l22",
+      "checkpoint_path": "phase6_results/checkpoints_smoke/raw_single_l22_supervised.pt",
+      "num_train_records": 2,
+      "num_val_records": 2,
+      "best_epoch": 1,
+      "val_top1_accuracy": 0.0,
+      "val_top5_accuracy": 0.0,
+      "val_mean_logprob_correct": -10.493184089660645,
+      "val_delta_logprob_vs_gpt2": -5.641687631607056,
+      "val_cross_entropy_loss": 10.493184089660645,
+      "source_file": "phase6_results/results_smoke/supervised_raw_single_l22.json"
+    },
+    {
+      "config_name": "sae_single_l22",
+      "checkpoint_path": "phase6_results/checkpoints_smoke/sae_single_l22_supervised.pt",
+      "num_train_records": 2,
+      "num_val_records": 2,
+      "best_epoch": 1,
+      "val_top1_accuracy": 0.0,
+      "val_top5_accuracy": 0.0,
+      "val_mean_logprob_correct": -10.54805040359497,
+      "val_delta_logprob_vs_gpt2": -5.696553945541382,
+      "val_cross_entropy_loss": 10.54805040359497,
+      "source_file": "phase6_results/results_smoke/supervised_sae_single_l22.json"
+    }
+  ],
+  "evaluations": [
+    {
+      "config_name": "raw_single_l22",
+      "checkpoint": "phase6_results/checkpoints_smoke/raw_single_l22_supervised.pt",
+      "source_file": "phase6_results/results_smoke/eval_raw_single_l22.json",
+      "val_top1_accuracy": 0.0,
+      "val_top5_accuracy": 0.0,
+      "val_mean_logprob_correct": -10.493184089660645,
+      "val_delta_logprob_vs_gpt2": -5.641687631607056,
+      "test_top1_accuracy": 0.0,
+      "test_top5_accuracy": 0.0,
+      "test_mean_logprob_correct": -10.493184089660645,
+      "test_delta_logprob_vs_gpt2": -5.641687631607056
+    }
+  ],
+  "num_supervised_files": 4,
+  "num_eval_files": 1
+}

@@ -1,0 +1,99 @@
+{
+  "thresholds_version": "phase7_thresholds_v1",
+  "source_audit": "phase7_results/audits_smoke/text_causal_audit_controls_papercore.json",
+  "target_fpr": 0.05,
+  "score_track": "causal_auditor",
+  "selected_point": {
+    "threshold": 0.270001,
+    "tpr": 0.0,
+    "fpr": 0.0,
+    "tp": 0,
+    "fp": 0,
+    "tn": 21,
+    "fn": 3
+  },
+  "thresholds": {
+    "text_latent_match_min": 0.75,
+    "text_latent_hard_fail": 0.5,
+    "necessity_max_delta_logprob": -0.02,
+    "sufficiency_min_delta_logprob": 0.02,
+    "specificity_min_margin": 0.01,
+    "off_manifold_max_ratio": 0.75,
+    "overall_score_faithful_min": 0.270001
+  },
+  "roc_points": [
+    {
+      "threshold": 0.270001,
+      "tpr": 0.0,
+      "fpr": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 21,
+      "fn": 3
+    },
+    {
+      "threshold": 0.27,
+      "tpr": 0.0,
+      "fpr": 0.09523809523809523,
+      "tp": 0,
+      "fp": 2,
+      "tn": 19,
+      "fn": 3
+    },
+    {
+      "threshold": 0.245,
+      "tpr": 0.3333333333333333,
+      "fpr": 0.23809523809523808,
+      "tp": 1,
+      "fp": 5,
+      "tn": 16,
+      "fn": 2
+    },
+    {
+      "threshold": 0.21999999999999997,
+      "tpr": 0.3333333333333333,
+      "fpr": 0.2857142857142857,
+      "tp": 1,
+      "fp": 6,
+      "tn": 15,
+      "fn": 2
+    },
+    {
+      "threshold": 0.2,
+      "tpr": 0.3333333333333333,
+      "fpr": 0.5238095238095238,
+      "tp": 1,
+      "fp": 11,
+      "tn": 10,
+      "fn": 2
+    },
+    {
+      "threshold": 0.13999999999999999,
+      "tpr": 0.6666666666666666,
+      "fpr": 0.7142857142857143,
+      "tp": 2,
+      "fp": 15,
+      "tn": 6,
+      "fn": 1
+    },
+    {
+      "threshold": 0.08499999999999999,
+      "tpr": 1.0,
+      "fpr": 1.0,
+      "tp": 3,
+      "fp": 21,
+      "tn": 0,
+      "fn": 0
+    },
+    {
+      "threshold": 0.08499899999999999,
+      "tpr": 1.0,
+      "fpr": 1.0,
+      "tp": 3,
+      "fp": 21,
+      "tn": 0,
+      "fn": 0
+    }
+  ],
+  "num_labeled_audits": 24
+}

@@ -1,4 +1,12 @@
 # Phase 1 Ground-Truth Validation Results
+
+> **Status note (February 26, 2026):** This file documents an **early BFS-only exploratory run**
+> and is kept for historical reference. It is **not** the canonical Phase 1 summary used by the
+> current project write-up. For current Phase 1 results, see `PROJECT_STATUS.md` and the canonical
+> artifact paths:
+> `phase1_results/v2/gpu1_bfs/phase1_results.json`,
+> `phase1_results/v2/gpu2_stack/phase1_results.json`,
+> `phase1_results/v3/gpu3_logic/phase1_results.json`.
 **Date**: February 17, 2026  
 **Status**: ✅ COMPLETED - Methodology validated, moved to Phase 4
 

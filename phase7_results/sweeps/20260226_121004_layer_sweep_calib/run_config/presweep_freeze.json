@@ -1,0 +1,17 @@
+{
+  "schema_version": "layer_sweep_presweep_freeze_v1",
+  "sweep_run_id": "20260226_121004_layer_sweep_calib",
+  "created_at": "2026-02-26T12:10:04-05:00",
+  "claim_boundary": "causally supported under measured variables/subspaces and tested interventions; not a complete explanation.",
+  "benchmark_tracks": ["text_only", "latent_only", "causal_auditor"],
+  "paper_core_failure_families": [
+    "prompt_bias_rationalization",
+    "silent_error_correction",
+    "answer_first_order_flip",
+    "shortcut_rationalization"
+  ],
+  "manifest_path": "experiments/layer_sweep_manifest_v1.json",
+  "manifest_sha256": "db08fc74bcf5cc71495090b90a251acd6cfed2f16f3b7c6beadbd81b8b35eeb2",
+  "calibration_layer_sets": ["single_l22", "spread4_current", "middle12_06_17", "every2_even"],
+  "task_scope": ["task0_pre_sweep_freeze", "task1_calibration_mini_sweep", "task2_phase7_trace_dataset_build"]
+}
