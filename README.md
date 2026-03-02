@@ -5,9 +5,10 @@
 *Benjamin Huh, February 2026*
 
 This repository implements a phased framework for extracting, validating, and analyzing
-reasoning features from LLM activations using sparse autoencoders (SAEs). Phases 1–5 are
-complete, with the primary target being GPT-2 medium (24-layer, 1024D). Phase 6 (RL decoder)
-has scaffolding in place but has not been executed yet.
+reasoning features from LLM activations using sparse autoencoders (SAEs). Phases 1-6 are
+complete, with the primary target being GPT-2 medium (24-layer, 1024D). The Phase 6 full
+layer sweep is complete. Phase 7 is implemented with calibration complete; the full broad sweep
+and causal shortlist runs are pending.
 
 ## Quick Navigation
 
@@ -33,11 +34,57 @@ source setup_env.sh          # activates .venv and sets PYTHONPATH
 | **3** | Reasoning Flow Tracing | ✅ | Layer×token feature heatmaps; ~50% active (~50% sparse) |
 | **4** | Arithmetic Feature Probing | ✅ | R²=0.977; +0.107 Δlog_prob at L22 (subspace) |
 | **5** | Feature Interpretation + Steering | ✅ | Mean-diff steering uniformly negative → distributed encoding |
+| **6** | Decoder Benchmark + Layer Sweep | ✅ | Full sweep complete (102 configs); best test top1=0.5628 (`raw_block8_00_07`) |
+| **7** | Causal CoT Verification Auditor | 🟡 | Implemented + calibrated; full broad sweep and causal shortlist pending |
 
 See [PROJECT_STATUS.md](PROJECT_STATUS.md) for full details and key findings.
 
 Phase 1 note: `phase1_results/` contains multiple generations (including early runs); use the
 canonical paths listed in `PROJECT_STATUS.md`.
+
+## Latest Phase 6 Results (Full Sweep)
+
+- Sweep coverage: `43 raw + 43 hybrid + 16 sae = 102` configs
+- Best test top-1: `raw_block8_00_07` = `0.5628`
+- Best test top-5: `hybrid_block4_04_07` = `0.7860`
+- Best `delta_logprob_vs_gpt2`: `raw_block4_04_07` = `+2.5717`
+- Improvement vs `spread4_current` baseline:
+  - raw: `+5.53 pp`
+  - hybrid: `+5.00 pp`
+  - sae: `+5.98 pp`
+
+For active execution planning and future work, see `TODO.md` and
+`experiments/PHASE7_LAYER_SWEEP_REVIEW.md`.
+
+## Phase 7 Pivot: Causal-Faithfulness Verifier (Primary Direction)
+
+The project direction is now to treat Phase 6 as instrumentation baseline and Phase 7 as the core
+faithfulness contribution. The target claim is:
+
+`good readout != causal faithfulness` unless necessity + sufficiency + specificity checks pass.
+
+Phase 7 success gates (must all pass before CoT-improvement workflows):
+- Control-set AUROC on `causal_auditor` track `>= 0.85`
+- Unfaithful-control false positive rate `<= 0.05`
+- At least one documented `high latent_only / low causal_auditor` failure case
+- Explicit claim-boundary language preserved in benchmark outputs
+
+Actionable run sequence:
+```bash
+# 1) Generate + parse paper-core controls
+.venv/bin/python3 phase7/generate_cot_controls.py --output phase7_results/controls/cot_controls_test_papercore.json
+.venv/bin/python3 phase7/parse_cot_to_states.py \
+  --controls phase7_results/controls/cot_controls_test_papercore.json \
+  --trace-dataset phase7_results/dataset/gsm8k_step_traces_test.pt \
+  --output phase7_results/controls/cot_controls_test_papercore_parsed.json
+
+# 2) Run shortlist causal checks, then audit + calibration + benchmark
+.venv/bin/python3 phase7/causal_audit.py <args>
+.venv/bin/python3 phase7/calibrate_audit_thresholds.py <args>
+.venv/bin/python3 phase7/benchmark_faithfulness.py <args>
+```
+
+Do not move to reranking/filtering/reward-shaping until these gates pass on controls.
 
 ## Project Structure
 

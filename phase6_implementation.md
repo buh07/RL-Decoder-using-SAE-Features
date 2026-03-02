@@ -1,13 +1,16 @@
 # Phase 6: RL Decoder with SAE Features — Implementation Plan
 
-## Implementation Status Note (February 26, 2026)
+## Implementation Status Note (Historical Spec Context)
 
-- `phase6/collect_expanded_dataset.py` has been implemented as a **fused collector** that
-  performs both annotation extraction and feature computation in one pass.
-- `phase6_results/` directory scaffolding exists, but no Phase 6 datasets/checkpoints/results have
-  been generated yet.
-- The `compute_features.py` split described below is currently a **planned refactor**, not the
-  active implementation path.
+This document is the design/spec history for Phase 6. For live execution status and latest
+empirical results, use `PROJECT_STATUS.md`.
+
+- `phase6/collect_expanded_dataset.py` is implemented as a **fused collector** that performs both
+  annotation extraction and feature computation in one pass.
+- Phase 6 execution has been completed in this repo (dataset, supervised, RL follow-up, and full
+  layer sweep). This file is retained as design context, not the canonical run-status tracker.
+- The `compute_features.py` split described below remains a **planned refactor**, not the active
+  implementation path.
 
 ## 1. Motivation (Summary)
 

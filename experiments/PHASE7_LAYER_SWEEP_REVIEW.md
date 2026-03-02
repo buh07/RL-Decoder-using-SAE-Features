@@ -45,37 +45,70 @@ Summaries / shortlist tooling:
 - `experiments/summarize_phase7_layer_sweep.py`
 - `experiments/select_phase7_causal_shortlist.py`
 
-## Runtime Estimate (2 GPUs: 0 and 1)
+## Observed Phase 6 Sweep Outcomes (Completed)
+
+Completed run:
+- `phase6_results/sweeps/20260226_164900_phase6_full_sweep/phase6_full/`
+- completion: `102/102` configs, `0` failures
+
+Best test metrics:
+- Best top-1: `raw_block8_00_07` = `0.5628`
+- Best top-5: `hybrid_block4_04_07` = `0.7860`
+- Best `delta_logprob_vs_gpt2`: `raw_block4_04_07` = `+2.5717`
+
+Improvement vs `spread4_current` baseline:
+- raw: `+5.53 pp`
+- hybrid: `+5.00 pp`
+- sae: `+5.98 pp`
+
+Implication for Phase 7 shortlist priors:
+- prioritize `raw_block8_00_07`
+- prioritize `raw_block4_04_07`
+- prioritize `hybrid_block4_04_07`
+- prioritize `hybrid_block8_00_07`
+- keep `sae_block8_00_07` as interpretability comparator
+
+## Remaining Runtime Estimate (Phase 7 Only, 2 GPUs: 0 and 1)
 
 Grounding observations from this repo:
 
-- Phase 6 supervised benchmark (dataset + 6 configs + eval): ~54 min
-- Phase 6 RL follow-up (2 configs + eval + interpret): ~11 min
+- Phase 7 calibration sweep completed:
+  - `phase7_results/results/20260226_121004_layer_sweep_calib_calibration_summary.json`
+  - `phase7_results/interventions/20260226_121004_layer_sweep_calib_calibration_causal_throughput.json`
 
-Planned full layer-sweep experiment (Phase 6 + Phase 7, causal shortlist only):
+Remaining full layer-sweep work:
 
-- Sweep infra + manifest + aggregation implementation: `4–8h` engineering time (CPU)
-- Phase 7 trace dataset build (one-time): `20–45m`
-- Phase 6 broad sweep: `10–16h`
 - Phase 7 state-decoder sweep: `12–20h`
 - Phase 7 causal shortlist runs (`subresult_value` first): `8–20h`
 - Audit + calibration + paper-aligned benchmark: `2–6h`
 
-### Total wall-time estimate (2 GPUs)
+### Total remaining wall-time estimate (2 GPUs)
 
-- Fast path: `~32h`
-- Typical path: `~40–52h`
-- Conservative path: `~60h`
+- Fast path: `~22h`
+- Typical path: `~28–38h`
+- Conservative path: `~46h`
 
-## Required Calibration Step Before Full Sweep
+## Calibration Note
 
-Run a mini calibration first:
+The calibration step is already complete; use the two calibration artifacts above as the runtime baseline for scheduling the remaining Phase 7 work.
 
-- 4 layer subsets
-- raw + hybrid only
-- 1 Phase 7 causal shortlist dry run (50 records)
+## Pivot Acceptance Criteria (Decision Gate)
 
-Use it to update:
+Before any downstream "improve CoT" use (reranking/filtering/reward shaping), require:
 
-- average minutes/config for Phase 6 + Phase 7 training/eval
-- causal patching throughput (records x layers / hour)
+- `causal_auditor` AUROC on controls `>= 0.85`
+- unfaithful-control FPR `<= 0.05`
+- at least one explicit high-readout / low-causal-support case
+- benchmark output includes A/B/C track metrics and claim-boundary disclaimer
+
+Actionable evaluation steps:
+1. Generate controls with paper-core variants (`phase7/generate_cot_controls.py`).
+2. Parse and align controls with order/revision metadata (`phase7/parse_cot_to_states.py`).
+3. Run causal checks on shortlist (necessity/sufficiency/specificity, off-manifold checks enabled).
+4. Run `phase7/causal_audit.py`.
+5. Run `phase7/calibrate_audit_thresholds.py`.
+6. Run `phase7/benchmark_faithfulness.py`.
+
+Interpretation rule:
+- If readout is strong but causal gates fail, do not claim faithful CoT.
+- If gates pass, claims remain bounded to measured variables/subspaces and tested interventions.

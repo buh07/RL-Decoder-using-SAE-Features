@@ -1,6 +1,6 @@
 # Active Tasks
 
-**Last Updated:** February 26, 2026
+**Last Updated:** March 1, 2026
 
 For full status and key results, see [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
@@ -24,6 +24,41 @@ For full status and key results, see [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## Outstanding / Next Steps
 
+### Priority (Immediate)
+- [ ] Backfill canonical summary/report for Phase 6 full sweep run
+      `20260226_164900_phase6_full_sweep`:
+      expected canonical outputs in `phase6_results/results/`
+      (`<RUN_ID>_phase6_full_sweep_summary.json`, `<RUN_ID>_phase6_full_sweep_run_report.json`).
+- [ ] Use completed Phase 6 full-sweep outcomes to seed deterministic Phase 7 shortlist priors
+      (`raw_block8_00_07`, `raw_block4_04_07`, `hybrid_block4_04_07`,
+      `hybrid_block8_00_07`, `sae_block8_00_07` as initial candidates).
+
+### Phase 7 Pivot Gates (must pass before CoT-improvement workflows)
+- [ ] Gate A: `causal_auditor` AUROC on controls `>= 0.85`
+- [ ] Gate B: unfaithful-control FPR `<= 0.05`
+- [ ] Gate C: `readout_high_causal_fail_cases_n >= 1`
+- [ ] Gate D: benchmark output includes claim-boundary disclaimer and A/B/C track metrics
+
+Actionable test sequence:
+- [ ] Generate controls:
+      `.venv/bin/python3 phase7/generate_cot_controls.py --output phase7_results/controls/cot_controls_test_papercore.json`
+- [ ] Parse controls:
+      `.venv/bin/python3 phase7/parse_cot_to_states.py --controls phase7_results/controls/cot_controls_test_papercore.json --trace-dataset phase7_results/dataset/gsm8k_step_traces_test.pt --output phase7_results/controls/cot_controls_test_papercore_parsed.json`
+- [ ] Run shortlist causal checks (necessity/sufficiency/specificity + off-manifold enabled)
+- [ ] Run audit:
+      `.venv/bin/python3 phase7/causal_audit.py ... --output phase7_results/audits/text_causal_audit_controls_papercore.json`
+- [ ] Calibrate thresholds:
+      `.venv/bin/python3 phase7/calibrate_audit_thresholds.py ... --output phase7_results/calibration/phase7_thresholds_v1_papercore.json`
+- [ ] Benchmark:
+      `.venv/bin/python3 phase7/benchmark_faithfulness.py --audit phase7_results/audits/text_causal_audit_controls_papercore.json --thresholds phase7_results/calibration/phase7_thresholds_v1_papercore.json --output phase7_results/results/faithfulness_benchmark_controls_papercore.json`
+
+Pass/fail checks on benchmark output (`phase7_results/results/faithfulness_benchmark_controls_papercore.json`):
+- [ ] `auroc >= 0.85`
+- [ ] `false_positive_rate <= 0.05`
+- [ ] `readout_high_causal_fail_cases_n >= 1`
+- [ ] `by_benchmark_track` contains `text_only`, `latent_only`, `causal_auditor`
+- [ ] `claim_boundary_disclaimer` present
+
 ### Infrastructure
 - [ ] Clean up `sae_logs/` — many logs are from superseded runs; keep only
       the phase4b and phase5 task4 logs that correspond to current checkpoints.
@@ -41,6 +76,13 @@ For full status and key results, see [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ### Phase 6 + Phase 7 Full Layer Sweep (Primary active experiment)
 
+Remaining runtime guidance (from completed Phase 6 execution):
+- `Phase 7 broad sweep` + `causal shortlist` + `audit/benchmark` is now the dominant path.
+- Estimated remaining wall time on 2 GPUs:
+  - fast path: `~22h`
+  - typical path: `~28-38h`
+  - conservative path: `~46h`
+
 #### 0. Pre-sweep freeze (do before launching anything)
 - [ ] Freeze claim-boundary wording for all Phase 7 outputs:
       "causally supported under measured variables/subspaces and tested interventions; not a complete explanation."
@@ -55,28 +97,28 @@ For full status and key results, see [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 #### 1. Calibration mini-sweep (required before the 2-3 day run)
 Goal: estimate actual per-config runtime and causal throughput on this machine.
-- [ ] Select 4 calibration layer sets from the manifest (recommended):
+- [x] Select 4 calibration layer sets from the manifest (recommended):
       `single_l22`, `spread4_current`, `middle12_06_17`, `every2_even`.
-- [ ] Run Phase 6 supervised train+eval for `raw` and `hybrid` on the 4 layer sets (8 configs total).
-- [ ] Run Phase 7 state-decoder train+eval for `raw` and `hybrid` on the same 4 layer sets (8 configs total).
-- [ ] Run one Phase 7 causal dry run (`subresult_value`) on 1 shortlisted subset with `50` records.
-- [ ] Measure and record:
+- [x] Run Phase 6 supervised train+eval for `raw` and `hybrid` on the 4 layer sets (8 configs total).
+- [x] Run Phase 7 state-decoder train+eval for `raw` and `hybrid` on the same 4 layer sets (8 configs total).
+- [x] Run one Phase 7 causal dry run (`subresult_value`) on 1 shortlisted subset with `50` records.
+- [x] Measure and record:
       minutes/config for Phase 6, minutes/config for Phase 7, causal throughput (records x layers / hour).
-- [ ] Update the full-run runtime estimate (fast / typical / conservative) from observed calibration numbers.
+- [x] Update the full-run runtime estimate (fast / typical / conservative) from observed calibration numbers.
 Artifacts to produce:
-- [ ] `phase6_results/results/<SWEEP_RUN_ID>_calibration_summary.json`
-- [ ] `phase7_results/results/<SWEEP_RUN_ID>_calibration_summary.json`
-- [ ] `phase7_results/interventions/<SWEEP_RUN_ID>_calibration_causal_throughput.json`
+- [x] `phase6_results/results/<SWEEP_RUN_ID>_calibration_summary.json`
+- [x] `phase7_results/results/<SWEEP_RUN_ID>_calibration_summary.json`
+- [x] `phase7_results/interventions/<SWEEP_RUN_ID>_calibration_causal_throughput.json`
 
 #### 2. Phase 7 trace dataset build (one-time prerequisite for Phase 7 sweep)
-- [ ] Build full trace datasets from Phase 6 merged datasets:
+- [x] Build full trace datasets from Phase 6 merged datasets:
       `phase7/build_step_trace_dataset.py`
-- [ ] Validate outputs exist and are non-empty:
+- [x] Validate outputs exist and are non-empty:
       `phase7_results/dataset/gsm8k_step_traces_train.pt`
       `phase7_results/dataset/gsm8k_step_traces_test.pt`
-- [ ] Validate schema/version and summary:
+- [x] Validate schema/version and summary:
       `schema_version=phase7_trace_v1`, record counts, split counts, per-step-type counts.
-- [ ] Save/inspect `phase7_results/dataset/build_summary.json`.
+- [x] Save/inspect `phase7_results/dataset/build_summary.json`.
 
 #### 3. Phase 6 broad sweep (final-token decoder readout mapping)
 Scope:
@@ -85,19 +127,19 @@ Scope:
 - `sae` on the `16`-subset SAE panel
 
 Run requirements:
-- [ ] Use manifest-driven CLI (`--manifest ... --layer-set-id ... --input-variant ...`) for every sweep run.
-- [ ] Route outputs to run-scoped directories (avoid mixing with baseline files), e.g.:
+- [x] Use manifest-driven CLI (`--manifest ... --layer-set-id ... --input-variant ...`) for every sweep run.
+- [x] Route outputs to run-scoped directories (avoid mixing with baseline files), e.g.:
       `phase6_results/sweeps/<SWEEP_RUN_ID>/{checkpoints,results,logs,interpret}`.
-- [ ] Ensure each train run produces:
+- [x] Ensure each train run produces:
       checkpoint + `supervised_*.json` with sweep metadata.
-- [ ] Ensure each eval run produces:
+- [x] Ensure each eval run produces:
       `eval_*.json` with val/test metrics + sweep metadata.
 
 Phase 6 metrics to collect per config:
-- [ ] `val_top1`, `val_top5`, `val_delta_logprob_vs_gpt2`
-- [ ] `test_top1`, `test_top5`, `test_delta_logprob_vs_gpt2`
-- [ ] `best_epoch`
-- [ ] layer metadata (`layer_set_id`, family, num_layers)
+- [x] `val_top1`, `val_top5`, `val_delta_logprob_vs_gpt2`
+- [x] `test_top1`, `test_top5`, `test_delta_logprob_vs_gpt2`
+- [x] `best_epoch`
+- [x] layer metadata (`layer_set_id`, family, num_layers)
 
 Interpretability follow-up (after sweep ranking):
 - [ ] Run `phase6/interpret_decoder.py` for top `5` `raw` configs by test top-1.
@@ -107,6 +149,8 @@ Interpretability follow-up (after sweep ranking):
 Phase 6 sweep aggregation:
 - [ ] Run `experiments/summarize_phase6_layer_sweep.py` on the sweep result dir.
 - [ ] Verify summary includes family-level and num-layer aggregates.
+- [ ] Backfill canonical copied summary/report for run `20260226_164900_phase6_full_sweep`
+      (coordinator bookkeeping gap: `pipeline.done` and canonical copies are missing).
 Artifacts to produce:
 - [ ] `phase6_results/sweeps/<SWEEP_RUN_ID>/results/layer_sweep_phase6_summary.json`
 
@@ -239,7 +283,7 @@ If extending beyond the layer sweep, the next step is **using the auditor to imp
 - [ ] Write up Phase 4r + Phase 5 findings as a coherent narrative
       (subspace steering positive result is the publishable claim).
 - [ ] Add description of TopK vs ReLU tradeoffs to `overview.tex`.
-- [ ] Add a Phase 6 summary section to `PROJECT_STATUS.md` / `README.md`
+- [x] Add a Phase 6 summary section to `PROJECT_STATUS.md` / `README.md`
       (supervised + RL follow-up results, and what they imply for Phase 7).
 - [ ] Add a Phase 7 paper-aligned benchmark methodology section to docs
       (tracks A/B/C, core 4 failure families, and claim-boundary language).

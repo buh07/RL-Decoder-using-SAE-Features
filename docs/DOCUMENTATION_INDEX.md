@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** February 23, 2026
+**Last Updated:** March 1, 2026
 
 ## Essential Documents
 
@@ -17,6 +17,24 @@
 |------|---------|
 | [src/SECTION3_README.md](../src/SECTION3_README.md) | Activation capture infrastructure (`activation_capture.py`, `model_registry.py`) |
 | [src/SECTION4_README.md](../src/SECTION4_README.md) | SAE architecture and training (`sae_architecture.py`, `sae_config.py`, `sae_training.py`) |
+
+## Future Work Planning Docs
+
+| File | Purpose |
+|------|---------|
+| [TODO.md](../TODO.md) | Execution tracker and source of truth for pending work |
+| [experiments/PHASE7_LAYER_SWEEP_REVIEW.md](../experiments/PHASE7_LAYER_SWEEP_REVIEW.md) | Objective alignment, layer-sweep rationale, and runtime framing |
+| [phase6_implementation.md](../phase6_implementation.md) | Historical Phase 6 design baseline (not the live execution-status source) |
+
+## Key Recent Artifacts
+
+| Path | What it contains |
+|------|------------------|
+| `phase6_results/sweeps/20260226_164900_phase6_full_sweep/phase6_full/` | Completed Phase 6 full sweep run (102 train+eval configs) |
+| `phase6_results/rl_runs/20260226_104147_p6rl/` | Phase 6 RL top-2 follow-up run outputs |
+| `phase7_results/results/20260226_121004_layer_sweep_calib_calibration_summary.json` | Phase 7 calibration mini-sweep summary |
+| `phase7_results/interventions/20260226_121004_layer_sweep_calib_calibration_causal_throughput.json` | Phase 7 causal dry-run throughput summary |
+| `phase7_results/dataset/build_summary.json` | Phase 7 step-trace dataset build summary |
 
 ## Archived Reports
 

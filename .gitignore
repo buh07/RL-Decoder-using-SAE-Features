@@ -18,6 +18,14 @@ datasets/tokenized/
 **/*.log
 **/*.jsonl
 
+# Run-scoped experiment noise (keep curated summaries/results, ignore process artifacts)
+phase6_results/results_smoke/
+phase7_results/*_smoke/
+phase6_results/run_state/
+phase6_results/**/state/
+phase7_results/**/state/
+phase6_results/sweeps/*/phase6_full/
+
 # Python virtual environments
 ENV/
 env.bak/

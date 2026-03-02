@@ -1,6 +1,6 @@
 # RL-Decoder with SAE Features — Project Status
 
-**Last Updated:** February 26, 2026 (Phase 5 complete; Phase 6 scaffolding started)
+**Last Updated:** March 1, 2026 (Phase 6 complete; Phase 7 implemented/calibrated)
 
 ---
 
@@ -15,6 +15,8 @@
 | **4** | Arithmetic Feature Probing | ✅ Complete (v1) | R²=0.985 at layer 8; features predictive but not causally sufficient |
 | **4r** | Arithmetic Probing — TopK + Subspace | ✅ Complete | R²=0.977 (L7); causal Δlog_prob=+0.107 at L22 (21/24 layers positive) |
 | **5** | Feature Interpretation + Causal Steering | ✅ Complete | Feature contexts (L22 F11823 active 97%); mean-diff steering uniformly negative → confirms distributed encoding |
+| **6** | Decoder Benchmark + Full Layer Sweep | ✅ Complete | Full sweep done (102/102, 0 failed); best test top1=0.5628 (`raw_block8_00_07`) |
+| **7** | Causal CoT Verification Auditor | 🟡 Implemented + calibrated | Full broad sweep + causal shortlist + benchmark runs pending |
 
 ---
 
@@ -194,32 +196,77 @@ independently-editable causal knob.
 
 ---
 
-## Phase 6 — RL Decoder with SAE Features (Scaffolding Started, Not Yet Run) 🚧
+## Phase 6 — Decoder Benchmark + Layer Sweep ✅
 
 **Scripts:** `phase6/`
-**Results target:** `phase6_results/`
+**Primary results:** `phase6_results/`
 
-Current repo state:
-- `phase6_implementation.md` contains the design/specification
-- `phase6/collect_expanded_dataset.py` is implemented (fused annotation + feature collector)
-- `phase6_results/{dataset,checkpoints,results,plots}/` directories exist but are currently scaffold-only (no generated artifacts yet)
+Phase 6 execution summary:
+- Expanded dataset generated (`phase6_results/dataset/gsm8k_expanded_{train,test}.pt`)
+- Supervised benchmark completed for 6 base configs
+- RL top-2 follow-up completed (`phase6_results/rl_runs/20260226_104147_p6rl/`)
+- Full Phase 6 layer sweep completed (`phase6_results/sweeps/20260226_164900_phase6_full_sweep/phase6_full/`)
 
-**Run order:**
-```bash
-# 1. Feature interpretation (CPU, ~2 min)
-.venv/bin/python3 phase5/feature_interpreter.py \
-  --dataset  phase4_results/topk/collection/gsm8k_arithmetic_dataset.pt \
-  --probe    phase4_results/topk/probe/top_features_per_layer.json \
-  --output   phase5_results/feature_interpretations
+### Base supervised benchmark (6 configs)
 
-# 2. Arithmetic steering (GPU, ~10 min)
-CUDA_VISIBLE_DEVICES=0 .venv/bin/python3 phase5/arithmetic_steerer.py \
-  --dataset      phase4_results/topk/collection/gsm8k_arithmetic_dataset.pt \
-  --saes-dir     phase2_results/saes_gpt2_12x_topk/saes \
-  --activations-dir phase2_results/activations \
-  --output       phase5_results/steering \
-  --device       cuda:0
-```
+| Config | Test top-1 | Test top-5 | Test Δlogprob vs GPT-2 |
+|---|---:|---:|---:|
+| `raw_multi_l7_l12_l17_l22` | 0.5075 | 0.7605 | +2.2919 |
+| `hybrid_multi_l7_l12_l17_l22` | 0.5086 | 0.7584 | +2.2798 |
+| `sae_multi_l7_l12_l17_l22` | 0.3356 | 0.6362 | +1.6297 |
+
+### RL top-2 follow-up (vs supervised baselines)
+
+| Config | Δtop-1 | Δtop-5 | Δ(Δlogprob vs GPT-2) |
+|---|---:|---:|---:|
+| `raw_multi_l7_l12_l17_l22` | +0.0100 | -0.0024 | -0.0801 |
+| `hybrid_multi_l7_l12_l17_l22` | +0.0003 | -0.0008 | -0.0484 |
+
+Interpretation: RL was mixed and mostly not beneficial on top-5 and `delta_logprob_vs_gpt2`.
+
+### Full Phase 6 sweep (run: `20260226_164900_phase6_full_sweep`)
+
+- Scope: `43 raw + 43 hybrid + 16 sae = 102` configs
+- Completion: `102/102` done, `0` failed
+- Artifacts present: `102` eval JSONs, `102` supervised JSONs, `102` checkpoints
+
+Best test metrics across the sweep:
+- Best top-1: `raw_block8_00_07` = `0.5628`
+- Best top-5: `hybrid_block4_04_07` = `0.7860`
+- Best `delta_logprob_vs_gpt2`: `raw_block4_04_07` = `+2.5717`
+
+Practical finding: strongest readout appears in early-mid blocks (`block4_04_07`, `block8_00_07`), not only in the prior `spread4_current` layer set.
+
+**Known bookkeeping gap:** `pipeline.done` and canonical copied summary/report are missing for this sweep run because the coordinator was not resumed after completion. The run artifacts themselves are complete and valid.
+
+---
+
+## Phase 7 — Causal CoT Verification Auditor 🟡
+
+**Scripts:** `phase7/`
+**Current state:** implemented and smoke/calibration validated; full broad sweep and causal shortlist runs pending.
+
+Completed prerequisites:
+- Trace dataset built (`phase7_results/dataset/gsm8k_step_traces_{train,test,all}.pt`)
+- Calibration mini-sweep summary (`phase7_results/results/20260226_121004_layer_sweep_calib_calibration_summary.json`)
+- Causal dry-run throughput artifact (`phase7_results/interventions/20260226_121004_layer_sweep_calib_calibration_causal_throughput.json`)
+
+### Phase 7 pivot criteria (gates before CoT-improvement use)
+
+Phase 7 is now the primary contribution track for CoT faithfulness verification.
+Required gates before using auditor scores for reranking/filtering/reward shaping:
+- `causal_auditor` AUROC on controls: `>= 0.85`
+- Unfaithful-control false positive rate: `<= 0.05`
+- At least one explicit `high latent_only / low causal_auditor` case
+- Claim-boundary disclaimer preserved in benchmark output JSON
+
+Minimal validation sequence:
+1. Generate controls: `phase7/generate_cot_controls.py`
+2. Parse/align controls: `phase7/parse_cot_to_states.py`
+3. Run shortlist causal interventions: `phase7/causal_intervention_engine.py` workflow
+4. Audit traces: `phase7/causal_audit.py`
+5. Calibrate thresholds: `phase7/calibrate_audit_thresholds.py`
+6. Benchmark tracks A/B/C: `phase7/benchmark_faithfulness.py`
 
 ---
 
@@ -255,6 +302,19 @@ RL-Decoder with SAE Features/
 ├── phase5_results/
 │   ├── feature_interpretations/ — Per-feature JSON cards (layers 14–23) + L22 summary
 │   └── steering/            — Steering heatmap + line plot + steering_results.json
+│
+├── phase6/                  — Decoder benchmark pipeline scripts
+├── phase6_results/
+│   ├── dataset/             — Expanded GSM8K arithmetic dataset (train/test)
+│   ├── results/             — Base supervised benchmark outputs
+│   ├── rl_runs/             — RL follow-up run-scoped artifacts
+│   └── sweeps/              — Full layer-sweep run outputs
+│
+├── phase7/                  — Causal CoT verification auditor scripts
+├── phase7_results/
+│   ├── dataset/             — Step-trace datasets
+│   ├── sweeps/              — Calibration and future broad-sweep outputs
+│   └── interventions/       — Causal check artifacts
 │
 ├── archived/                — Superseded / broken work (kept for reference)
 │   ├── old_phase3_single_layer_probe/   (GPT-2 small single-layer probes)
