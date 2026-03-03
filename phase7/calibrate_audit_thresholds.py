@@ -5,7 +5,18 @@ import argparse
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from common import load_json, save_json
+try:  # pragma: no cover
+    from .common import load_json, save_json
+except Exception:  # pragma: no cover
+    from common import load_json, save_json
+
+
+def _default_thresholds() -> Dict[str, float]:
+    try:  # pragma: no cover
+        from .causal_audit import default_thresholds as _impl
+    except Exception:  # pragma: no cover
+        from causal_audit import default_thresholds as _impl
+    return _impl()
 
 
 def _roc_points(scores_labels: List[Tuple[float, int]]):
@@ -75,14 +86,14 @@ def main() -> None:
 
     base_thresholds = aud.get("summary", {}).get("thresholds", {}).get("thresholds", {})
     if not base_thresholds:
-        from causal_audit import default_thresholds
-        base_thresholds = default_thresholds()
+        base_thresholds = _default_thresholds()
     base_thresholds = dict(base_thresholds)
     base_thresholds["overall_score_faithful_min"] = float(best["threshold"])
 
     out = {
         "thresholds_version": "phase7_thresholds_v1",
         "source_audit": args.audit,
+        "model_metadata": aud.get("model_metadata"),
         "target_fpr": float(args.target_fpr),
         "score_track": args.score_track,
         "selected_point": best,

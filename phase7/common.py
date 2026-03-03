@@ -319,12 +319,30 @@ def perturb_number(x: Optional[float], mode: str = "small") -> Optional[float]:
 
 
 def compare_states(text_state: Optional[dict], latent_state: Optional[dict], tol: float = 1e-5) -> Dict[str, Any]:
-    fields = ["step_type", "operator", "magnitude_bucket", "sign", "lhs_value", "rhs_value", "subresult_value"]
+    categorical_fields = ["step_type", "operator", "magnitude_bucket", "sign"]
+    numeric_fields = ["lhs_value", "rhs_value", "subresult_value"]
+    fields = categorical_fields + numeric_fields
     matches: Dict[str, Optional[bool]] = {}
+    numeric_abs_error: Dict[str, Optional[float]] = {k: None for k in numeric_fields}
     n_comp = 0
     n_match = 0
+    n_cat_comp = 0
+    n_cat_match = 0
+    n_num_comp = 0
+    n_num_match = 0
     if text_state is None or latent_state is None:
-        return {"field_matches": {k: None for k in fields}, "match_fraction": 0.0, "n_compared": 0}
+        return {
+            "field_matches": {k: None for k in fields},
+            "categorical_field_matches": {k: None for k in categorical_fields},
+            "numeric_field_matches": {k: None for k in numeric_fields},
+            "numeric_abs_error": numeric_abs_error,
+            "match_fraction": 0.0,
+            "categorical_match_fraction": 0.0,
+            "numeric_match_fraction": 0.0,
+            "n_compared": 0,
+            "n_categorical_compared": 0,
+            "n_numeric_compared": 0,
+        }
     for f in fields:
         a = text_state.get(f)
         b = latent_state.get(f)
@@ -332,16 +350,33 @@ def compare_states(text_state: Optional[dict], latent_state: Optional[dict], tol
             matches[f] = None
             continue
         if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-            ok = math.isclose(float(a), float(b), rel_tol=1e-6, abs_tol=tol)
+            af = float(a)
+            bf = float(b)
+            ok = math.isclose(af, bf, rel_tol=1e-6, abs_tol=tol)
+            if f in numeric_abs_error:
+                numeric_abs_error[f] = abs(af - bf)
         else:
             ok = str(a) == str(b)
         matches[f] = ok
         n_comp += 1
         n_match += int(ok)
+        if f in categorical_fields:
+            n_cat_comp += 1
+            n_cat_match += int(ok)
+        elif f in numeric_fields:
+            n_num_comp += 1
+            n_num_match += int(ok)
     return {
         "field_matches": matches,
+        "categorical_field_matches": {k: matches.get(k) for k in categorical_fields},
+        "numeric_field_matches": {k: matches.get(k) for k in numeric_fields},
+        "numeric_abs_error": numeric_abs_error,
         "match_fraction": float(n_match / max(1, n_comp)),
+        "categorical_match_fraction": float(n_cat_match / max(1, n_cat_comp)),
+        "numeric_match_fraction": float(n_num_match / max(1, n_num_comp)),
         "n_compared": n_comp,
+        "n_categorical_compared": n_cat_comp,
+        "n_numeric_compared": n_num_comp,
     }
 
 

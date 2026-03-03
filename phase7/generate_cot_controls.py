@@ -6,18 +6,32 @@ import random
 from pathlib import Path
 from typing import Dict, List
 
-from common import (
-    build_trace_text_with_spans,
-    clone_jsonable,
-    control_variant_metadata,
-    faithful_step_text,
-    final_answer_text,
-    group_step_records_to_traces,
-    load_pt,
-    perturb_number,
-    save_json,
-    set_seed,
-)
+try:  # pragma: no cover
+    from .common import (
+        build_trace_text_with_spans,
+        clone_jsonable,
+        control_variant_metadata,
+        faithful_step_text,
+        final_answer_text,
+        group_step_records_to_traces,
+        load_pt,
+        perturb_number,
+        save_json,
+        set_seed,
+    )
+except Exception:  # pragma: no cover
+    from common import (
+        build_trace_text_with_spans,
+        clone_jsonable,
+        control_variant_metadata,
+        faithful_step_text,
+        final_answer_text,
+        group_step_records_to_traces,
+        load_pt,
+        perturb_number,
+        save_json,
+        set_seed,
+    )
 
 
 def _state_to_text(state: Dict) -> str:
@@ -69,8 +83,6 @@ def _build_variant(trace_steps: List[dict], variant: str, rng: random.Random) ->
                 i, j = rng.sample(perm, 2)
             perm[i], perm[j] = perm[j], perm[i]
             step_text_states = [step_text_states[k] for k in perm]
-            for i2, s in enumerate(step_text_states):
-                s["step_idx"] = i2
             failure_mode = "reordered_steps"
     elif variant == "irrelevant_rationale":
         failure_mode = "irrelevant_rationale"
@@ -87,19 +99,20 @@ def _build_variant(trace_steps: List[dict], variant: str, rng: random.Random) ->
         operate_idxs = [i for i, s in enumerate(step_text_states) if s.get("step_type") == "operate"]
         if operate_idxs:
             idx = rng.choice(operate_idxs)
+            step_idx_value = int(step_text_states[idx].get("step_idx", idx))
             wrong = clone_jsonable(step_text_states[idx])
             wrong["subresult_value"] = perturb_number(wrong.get("subresult_value"), "small")
             if wrong.get("lhs_value") is not None:
                 wrong["lhs_value"] = perturb_number(wrong.get("lhs_value"), "small")
             correction_events.append(
                 {
-                    "step_idx": int(idx),
+                    "step_idx": int(step_idx_value),
                     "wrong_state": wrong,
                     "corrected_state": clone_jsonable(step_states[idx]),
                 }
             )
             step_text_states[idx] = wrong
-            failure_mode = f"silent_error_correction_step_{idx}"
+            failure_mode = f"silent_error_correction_step_{step_idx_value}"
     elif variant == "answer_first_order_flip":
         failure_mode = "answer_first_order_flip"
         final_answer_first = True
@@ -120,12 +133,13 @@ def _build_variant(trace_steps: List[dict], variant: str, rng: random.Random) ->
         line_objs.extend({"role": "step", "text": t} for t in step_lines)
     elif variant == "silent_error_correction":
         step_lines = []
-        for i, s in enumerate(step_text_states):
+        for s in step_text_states:
             t = _state_to_text(s)
             step_lines.append(t)
             line_objs.append({"role": "step", "text": t})
+            sidx = int(s.get("step_idx", -1))
             for ev in correction_events:
-                if int(ev["step_idx"]) == i:
+                if int(ev["step_idx"]) == sidx:
                     corr = "CORRECTION " + _state_to_text(ev["corrected_state"])
                     line_objs.append({"role": "correction", "text": corr})
     elif variant == "answer_first_order_flip":
@@ -142,6 +156,10 @@ def _build_variant(trace_steps: List[dict], variant: str, rng: random.Random) ->
     if variant == "false_rationale_correct_answer":
         final_line = final_answer_text(trace_steps)
     elif variant == "wrong_intermediate" and step_states:
+        final_line = final_answer_text(trace_steps)
+    elif variant == "reordered_steps":
+        final_line = final_answer_text(trace_steps)
+    elif variant == "answer_first_order_flip":
         final_line = final_answer_text(trace_steps)
     elif variant == "irrelevant_rationale":
         final_line = final_answer_text(trace_steps)
@@ -217,6 +235,11 @@ def main() -> None:
                     "example_idx": tb.example_idx,
                     "gsm8k_split": tb.split,
                     "num_steps": len(tb.steps),
+                    "model_key": str(tb.steps[0].get("model_key", "gpt2-medium")) if tb.steps else "gpt2-medium",
+                    "model_family": str(tb.steps[0].get("model_family", "gpt2")) if tb.steps else "gpt2",
+                    "num_layers": int(tb.steps[0].get("num_layers", 24)) if tb.steps else 24,
+                    "hidden_dim": int(tb.steps[0].get("hidden_dim", 1024)) if tb.steps else 1024,
+                    "tokenizer_id": str(tb.steps[0].get("tokenizer_id", "gpt2-medium")) if tb.steps else "gpt2-medium",
                     **v,
                 }
             )

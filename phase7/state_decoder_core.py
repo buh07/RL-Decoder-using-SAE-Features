@@ -22,9 +22,12 @@ sys.path.insert(0, str(REPO_ROOT / "phase6"))
 from decoder_model import ArithmeticDecoder, ArithmeticDecoderConfig  # type: ignore  # noqa: E402
 from pipeline_utils import build_input_tensor_from_record  # type: ignore  # noqa: E402
 
-from common import MAG_BUCKETS, OPERATORS, SIGNS, STEP_TYPES, magnitude_bucket, set_seed, sign_label
+try:  # pragma: no cover
+    from .common import MAG_BUCKETS, OPERATORS, SIGNS, STEP_TYPES, magnitude_bucket, set_seed, sign_label
+except Exception:  # pragma: no cover
+    from common import MAG_BUCKETS, OPERATORS, SIGNS, STEP_TYPES, magnitude_bucket, set_seed, sign_label
 
-VOCAB_SIZE_GPT2 = 50257
+DEFAULT_VOCAB_SIZE = 50257
 VALID_INPUT_VARIANTS = ("raw", "sae", "hybrid")
 
 OP_TO_ID = {v: i for i, v in enumerate(OPERATORS)}
@@ -38,6 +41,12 @@ class StateDecoderExperimentConfig:
     name: str
     input_variant: str  # raw|sae|hybrid
     layers: Tuple[int, ...]
+    vocab_size: int = DEFAULT_VOCAB_SIZE
+    model_key: str = "gpt2-medium"
+    model_family: str = "gpt2"
+    tokenizer_id: str = "gpt2-medium"
+    model_num_layers: int = 24
+    model_hidden_dim: int = 1024
     d_model: int = 256
     n_heads: int = 4
     n_decoder_layers: int = 2
@@ -132,6 +141,24 @@ def make_custom_state_decoder_config(
     base = asdict(cfg)
     base.update({"name": final_name, "input_variant": input_variant, "layers": layer_tuple})
     return StateDecoderExperimentConfig(**base)
+
+
+def apply_model_metadata_to_config(
+    cfg: StateDecoderExperimentConfig,
+    model_meta: Dict[str, Any],
+    vocab_size_override: Optional[int] = None,
+) -> StateDecoderExperimentConfig:
+    d = cfg.to_dict()
+    d["model_key"] = str(model_meta.get("model_key", d.get("model_key", "gpt2-medium")))
+    d["model_family"] = str(model_meta.get("model_family", d.get("model_family", "unknown")))
+    d["tokenizer_id"] = str(model_meta.get("tokenizer_id", d.get("tokenizer_id", "")))
+    d["model_num_layers"] = int(model_meta.get("num_layers", d.get("model_num_layers", 24)))
+    d["model_hidden_dim"] = int(model_meta.get("hidden_dim", d.get("model_hidden_dim", 1024)))
+    if vocab_size_override is not None:
+        d["vocab_size"] = int(vocab_size_override)
+    elif model_meta.get("vocab_size") is not None:
+        d["vocab_size"] = int(model_meta["vocab_size"])
+    return StateDecoderExperimentConfig.from_dict(d)
 
 
 def split_by_example(records: Sequence[dict], val_fraction: float, seed: int) -> Tuple[List[dict], List[dict]]:
@@ -255,14 +282,14 @@ class MultiHeadStateDecoder(nn.Module):
             d_model=cfg.d_model,
             n_heads=cfg.n_heads,
             n_decoder_layers=cfg.n_decoder_layers,
-            vocab_size=VOCAB_SIZE_GPT2,
+            vocab_size=cfg.vocab_size,
             dropout=cfg.dropout,
             aggregator=cfg.aggregator,
             use_sparse_input=(cfg.input_variant == "sae"),
         )
         self.backbone = ArithmeticDecoder(self.backbone_cfg)
         d = cfg.d_model
-        self.result_token_head = nn.Linear(d, VOCAB_SIZE_GPT2)
+        self.result_token_head = nn.Linear(d, cfg.vocab_size)
         self.operator_head = nn.Linear(d, len(OPERATORS))
         self.step_type_head = nn.Linear(d, len(STEP_TYPES))
         self.magnitude_head = nn.Linear(d, len(MAG_BUCKETS))

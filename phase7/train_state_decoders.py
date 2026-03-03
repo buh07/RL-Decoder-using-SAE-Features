@@ -17,21 +17,42 @@ REPO_ROOT = THIS_DIR.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from common import load_pt, save_json, set_seed
-from state_decoder_core import (
-    Phase7StateDataset,
-    StateDecoderExperimentConfig,
-    MultiHeadStateDecoder,
-    collate_state_batch,
-    compute_multitask_loss,
-    default_state_decoder_configs,
-    evaluate_state_model,
-    make_custom_state_decoder_config,
-    make_scheduler,
-    numeric_stats_from_records,
-    save_checkpoint,
-    split_by_example,
-)
+try:  # pragma: no cover
+    from .common import load_pt, save_json, set_seed
+    from .model_registry import resolve_model_spec
+    from .state_decoder_core import (
+        Phase7StateDataset,
+        StateDecoderExperimentConfig,
+        MultiHeadStateDecoder,
+        apply_model_metadata_to_config,
+        collate_state_batch,
+        compute_multitask_loss,
+        default_state_decoder_configs,
+        evaluate_state_model,
+        make_custom_state_decoder_config,
+        make_scheduler,
+        numeric_stats_from_records,
+        save_checkpoint,
+        split_by_example,
+    )
+except Exception:  # pragma: no cover
+    from common import load_pt, save_json, set_seed
+    from model_registry import resolve_model_spec
+    from state_decoder_core import (
+        Phase7StateDataset,
+        StateDecoderExperimentConfig,
+        MultiHeadStateDecoder,
+        apply_model_metadata_to_config,
+        collate_state_batch,
+        compute_multitask_loss,
+        default_state_decoder_configs,
+        evaluate_state_model,
+        make_custom_state_decoder_config,
+        make_scheduler,
+        numeric_stats_from_records,
+        save_checkpoint,
+        split_by_example,
+    )
 
 try:
     from experiments.layer_sweep_manifest import get_layer_set, infer_layer_set_id_from_layers, load_manifest
@@ -54,6 +75,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--sweep-run-id", default=None, help="Optional sweep run ID metadata")
     p.add_argument("--parent-baseline", default=None, help="Optional baseline layer_set_id for comparisons")
     p.add_argument("--seed", type=int, default=None, help="Override config seed")
+    p.add_argument("--model-key", default="gpt2-medium")
+    p.add_argument("--adapter-config", default=None, help="Optional JSON overrides for model registry entry")
+    p.add_argument("--vocab-size", type=int, default=None, help="Optional vocab size override for decoder token head")
     p.add_argument("--checkpoints-dir", default="phase7_results/checkpoints")
     p.add_argument("--results-dir", default="phase7_results/results")
     p.add_argument("--device", default="cuda:0")
@@ -93,6 +117,11 @@ def _build_sweep_metadata(*, args: argparse.Namespace, cfg: StateDecoderExperime
         "schema_version": "layer_sweep_result_v1",
         "phase": "phase7",
         "input_variant": cfg.input_variant,
+        "model_key": cfg.model_key,
+        "model_family": cfg.model_family,
+        "num_layers_total": int(cfg.model_num_layers),
+        "hidden_dim": int(cfg.model_hidden_dim),
+        "tokenizer_id": cfg.tokenizer_id,
         "layers": list(cfg.layers),
         "num_layers": len(cfg.layers),
         "layer_set_id": row.get("layer_set_id", args.layer_set_id),
@@ -240,6 +269,14 @@ def train_one(
         ckpt_path,
         {
             "stage": "phase7_state_decoder_supervised",
+            "model_metadata": {
+                "model_key": cfg.model_key,
+                "model_family": cfg.model_family,
+                "num_layers": int(cfg.model_num_layers),
+                "hidden_dim": int(cfg.model_hidden_dim),
+                "tokenizer_id": cfg.tokenizer_id,
+                "vocab_size": int(cfg.vocab_size),
+            },
             "experiment_config": cfg.to_dict(),
             "model_state_dict": model.state_dict(),
             "backbone_model_config": model.backbone_cfg.to_dict(),
@@ -253,6 +290,12 @@ def train_one(
     result = {
         "config_name": cfg.name,
         "stage": "phase7_state_decoder_supervised",
+        "model_key": cfg.model_key,
+        "model_family": cfg.model_family,
+        "model_num_layers": int(cfg.model_num_layers),
+        "model_hidden_dim": int(cfg.model_hidden_dim),
+        "tokenizer_id": cfg.tokenizer_id,
+        "vocab_size": int(cfg.vocab_size),
         "dataset_train_path": str(args.dataset_train),
         "num_train_records": len(train_records),
         "num_val_records": len(val_records),
@@ -282,6 +325,9 @@ def main() -> None:
     if args.config_name and args.all_configs:
         raise ValueError("Use either --config-name or --all-configs (or neither), not both")
     selected, manifest_payload = _resolve_selected_configs(args)
+    spec = resolve_model_spec(args.model_key, args.adapter_config)
+    model_meta = spec.to_dict()
+    selected = [apply_model_metadata_to_config(cfg, model_meta, vocab_size_override=args.vocab_size) for cfg in selected]
 
     records = load_pt(args.dataset_train)
     if args.max_records is not None:

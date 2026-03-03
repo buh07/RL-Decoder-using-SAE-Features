@@ -6,15 +6,26 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from common import (
-    OPERATORS,
-    compare_states,
-    detect_rationale_markers,
-    load_json,
-    magnitude_bucket,
-    save_json,
-    sign_label,
-)
+try:  # pragma: no cover
+    from .common import (
+        OPERATORS,
+        compare_states,
+        detect_rationale_markers,
+        load_json,
+        magnitude_bucket,
+        save_json,
+        sign_label,
+    )
+except Exception:  # pragma: no cover
+    from common import (
+        OPERATORS,
+        compare_states,
+        detect_rationale_markers,
+        load_json,
+        magnitude_bucket,
+        save_json,
+        sign_label,
+    )
 
 STEP_OPERATE_RE = re.compile(
     r"^STEP\s+(?P<step_idx>\d+):\s+OPERATE\s+lhs=(?P<lhs>-?\d+(?:\.\d+)?)\s+op=(?P<op>[+\-*/]|unknown)\s+rhs=(?P<rhs>-?\d+(?:\.\d+)?)\s+subresult=(?P<sub>-?\d+(?:\.\d+)?)$"
@@ -219,7 +230,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    from common import group_step_records_to_traces, load_pt
+    try:  # pragma: no cover
+        from .common import group_step_records_to_traces, load_pt
+    except Exception:  # pragma: no cover
+        from common import group_step_records_to_traces, load_pt
 
     args = parse_args()
     controls = load_json(args.controls)

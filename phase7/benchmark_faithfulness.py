@@ -2,10 +2,14 @@
 from __future__ import annotations
 
 import argparse
+import math
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from common import load_json, save_json
+try:  # pragma: no cover
+    from .common import load_json, save_json
+except Exception:  # pragma: no cover
+    from common import load_json, save_json
 
 
 def _roc(scores_labels: List[Tuple[float, int]]):
@@ -46,6 +50,15 @@ def _score_for_track(audit: dict, track: str) -> float:
     return float((audit.get("benchmark_track_scores") or {}).get(track, 0.0))
 
 
+def _quantile(values: List[float], q: float) -> float:
+    vals = sorted(float(v) for v in values if isinstance(v, (int, float)) and math.isfinite(float(v)))
+    if not vals:
+        return 0.0
+    q = min(1.0, max(0.0, float(q)))
+    idx = int(round((len(vals) - 1) * q))
+    return float(vals[idx])
+
+
 def _collect_scored(audits: List[dict], track: str) -> List[Tuple[float, int, dict]]:
     out = []
     for a in audits:
@@ -72,15 +85,28 @@ def _confusion_at_threshold(scored: List[Tuple[float, int, dict]], thr: float) -
 
 
 def _metrics_bundle(scored: List[Tuple[float, int, dict]], thr: float) -> Dict:
-    roc_rows, auc = _roc([(s, y) for s, y, _ in scored])
+    P = sum(y for _, y, _ in scored)
+    N = len(scored) - P
+    auroc_defined = bool(P > 0 and N > 0)
+    roc_rows, auc = _roc([(s, y) for s, y, _ in scored]) if auroc_defined else ([], None)
     conf = _confusion_at_threshold(scored, thr)
     tp, fp, tn, fn = conf["tp"], conf["fp"], conf["tn"], conf["fn"]
-    precision = tp / (tp + fp) if (tp + fp) else 0.0
-    recall = tp / (tp + fn) if (tp + fn) else 0.0
-    fpr = fp / (fp + tn) if (fp + tn) else 0.0
+    precision_defined = bool((tp + fp) > 0)
+    recall_defined = bool(P > 0)
+    fpr_defined = bool(N > 0)
+    precision = (tp / (tp + fp)) if precision_defined else None
+    recall = (tp / (tp + fn)) if recall_defined else None
+    fpr = (fp / (fp + tn)) if fpr_defined else None
     return {
         "num_labeled_audits": len(scored),
+        "class_counts": {"faithful": int(P), "unfaithful": int(N)},
         "auroc": auc,
+        "metric_defined": {
+            "auroc": auroc_defined,
+            "precision": precision_defined,
+            "recall": recall_defined,
+            "false_positive_rate": fpr_defined,
+        },
         "confusion": conf,
         "precision": precision,
         "recall": recall,
@@ -96,6 +122,12 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--audit", default="phase7_results/audits/text_causal_audit_controls.json")
     p.add_argument("--thresholds", default=None)
+    p.add_argument(
+        "--latent-high-quantile",
+        type=float,
+        default=0.80,
+        help="Quantile of latent_only scores to define 'high readout' for separation cases.",
+    )
     p.add_argument("--output", default="phase7_results/results/faithfulness_benchmark_controls.json")
     return p.parse_args()
 
@@ -114,23 +146,26 @@ def main() -> None:
     scored = _collect_scored(audits, "causal_auditor")
     overall_metrics = _metrics_bundle(scored, thr)
 
+    by_variant_rows: Dict[str, List[Tuple[float, int, dict]]] = {}
     by_variant = {}
-    for _, _, a in scored:
-        var = a.get("control_variant", "unknown")
-        d = by_variant.setdefault(var, {"n": 0, "sum_score": 0.0, "faithful_n": 0, "pred_faithful_n": 0})
-        d["n"] += 1
-        d["sum_score"] += float(a.get("overall_score", 0.0))
-        d["faithful_n"] += 1 if a.get("gold_label") == "faithful" else 0
-        d["pred_faithful_n"] += 1 if float(a.get("overall_score", 0.0)) >= thr else 0
-    by_variant = {
-        k: {
-            "n": v["n"],
-            "mean_score": float(v["sum_score"] / max(1, v["n"])),
-            "faithful_n": v["faithful_n"],
-            "pred_faithful_n": v["pred_faithful_n"],
+    for row in scored:
+        var = row[2].get("control_variant", "unknown")
+        by_variant_rows.setdefault(var, []).append(row)
+    for var, var_rows in sorted(by_variant_rows.items()):
+        m = _metrics_bundle(var_rows, thr)
+        mean_score = float(sum(float(r[2].get("overall_score", 0.0)) for r in var_rows) / max(1, len(var_rows)))
+        by_variant[var] = {
+            "n": m["num_labeled_audits"],
+            "mean_score": mean_score,
+            "faithful_n": m["class_counts"]["faithful"],
+            "pred_faithful_n": int(sum(1 for s, _, _ in var_rows if float(s) >= thr)),
+            "class_counts": m["class_counts"],
+            "metric_defined": m["metric_defined"],
+            "auroc": m["auroc"],
+            "false_positive_rate": m["false_positive_rate"],
+            "precision": m["precision"],
+            "recall": m["recall"],
         }
-        for k, v in sorted(by_variant.items())
-    }
 
     by_family_rows: Dict[str, List[Tuple[float, int, dict]]] = {}
     for row in scored:
@@ -141,6 +176,8 @@ def main() -> None:
         m = _metrics_bundle(fam_rows, thr)
         by_paper_failure_family[fam] = {
             "n": m["num_labeled_audits"],
+            "class_counts": m["class_counts"],
+            "metric_defined": m["metric_defined"],
             "auroc": m["auroc"],
             "false_positive_rate": m["false_positive_rate"],
             "precision": m["precision"],
@@ -155,6 +192,8 @@ def main() -> None:
             "threshold": thr,
             "threshold_source": "overall_score_faithful_min_reused",
             "num_labeled_audits": tm["num_labeled_audits"],
+            "class_counts": tm["class_counts"],
+            "metric_defined": tm["metric_defined"],
             "auroc": tm["auroc"],
             "false_positive_rate": tm["false_positive_rate"],
             "precision": tm["precision"],
@@ -162,6 +201,28 @@ def main() -> None:
             "confusion": tm["confusion"],
         }
 
+    variant_vs_faithful = {}
+    faithful_rows = by_variant_rows.get("faithful", [])
+    for variant, var_rows in sorted(by_variant_rows.items()):
+        if variant == "faithful":
+            continue
+        subset = list(faithful_rows) + list(var_rows)
+        vm = _metrics_bundle(subset, thr)
+        variant_vs_faithful[variant] = {
+            "n_total": vm["num_labeled_audits"],
+            "n_faithful": vm["class_counts"]["faithful"],
+            "n_variant_unfaithful": vm["class_counts"]["unfaithful"],
+            "class_counts": vm["class_counts"],
+            "metric_defined": vm["metric_defined"],
+            "auroc": vm["auroc"],
+            "false_positive_rate": vm["false_positive_rate"],
+            "precision": vm["precision"],
+            "recall": vm["recall"],
+            "confusion": vm["confusion"],
+        }
+
+    latent_labeled_scores = [float((a.get("benchmark_track_scores") or {}).get("latent_only", 0.0)) for a in audits if a.get("gold_label") in {"faithful", "unfaithful"}]
+    latent_high_threshold = _quantile(latent_labeled_scores, args.latent_high_quantile)
     readout_high_causal_fail_cases = []
     for a in audits:
         lbl = a.get("gold_label")
@@ -171,7 +232,7 @@ def main() -> None:
         causal_score = float(a.get("overall_score", 0.0))
         verdict = str(a.get("verdict"))
         causal_fail = (causal_score < thr) or verdict in {"unsupported", "contradicted", "off_manifold", "unverifiable_text"}
-        if latent_score >= thr and causal_fail:
+        if latent_score >= latent_high_threshold and causal_fail:
             readout_high_causal_fail_cases.append(
                 {
                     "trace_id": a.get("trace_id"),
@@ -188,6 +249,7 @@ def main() -> None:
     out = {
         "schema_version": "phase7_faithfulness_benchmark_v1",
         "source_audit": args.audit,
+        "model_metadata": aud.get("model_metadata"),
         "threshold": thr,
         "num_labeled_audits": overall_metrics["num_labeled_audits"],
         "auroc": overall_metrics["auroc"],
@@ -198,7 +260,14 @@ def main() -> None:
         "by_control_variant": by_variant,
         "by_paper_failure_family": by_paper_failure_family,
         "by_benchmark_track": by_track,
+        "variant_vs_faithful": variant_vs_faithful,
         "readout_high_causal_fail_cases_n": len(readout_high_causal_fail_cases),
+        "readout_high_definition": {
+            "method": "latent_only_quantile",
+            "latent_high_quantile": float(args.latent_high_quantile),
+            "latent_high_threshold": float(latent_high_threshold),
+            "causal_fail_threshold": float(thr),
+        },
         "examples_readout_high_but_causal_unsupported": readout_high_causal_fail_cases[:20],
         "claim_boundary_disclaimer": (
             "Causal support scores reflect measured variables/subspaces and tested interventions only; "
@@ -210,11 +279,15 @@ def main() -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     save_json(out_path, out)
     print(f"Saved benchmark -> {out_path}")
+    auroc_disp = overall_metrics["auroc"] if isinstance(overall_metrics["auroc"], (int, float)) else float("nan")
+    precision_disp = overall_metrics["precision"] if isinstance(overall_metrics["precision"], (int, float)) else float("nan")
+    recall_disp = overall_metrics["recall"] if isinstance(overall_metrics["recall"], (int, float)) else float("nan")
+    fpr_disp = overall_metrics["false_positive_rate"] if isinstance(overall_metrics["false_positive_rate"], (int, float)) else float("nan")
     print(
-        f"AUROC={overall_metrics['auroc']:.4f} threshold={thr:.4f} "
-        f"precision={overall_metrics['precision']:.3f} "
-        f"recall={overall_metrics['recall']:.3f} "
-        f"FPR={overall_metrics['false_positive_rate']:.3f}"
+        f"AUROC={auroc_disp:.4f} threshold={thr:.4f} "
+        f"precision={precision_disp:.3f} "
+        f"recall={recall_disp:.3f} "
+        f"FPR={fpr_disp:.3f}"
     )
 
 

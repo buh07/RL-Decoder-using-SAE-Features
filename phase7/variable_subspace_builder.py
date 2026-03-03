@@ -5,7 +5,10 @@ import argparse
 from pathlib import Path
 from typing import Dict, List, Sequence
 
-from common import CAUSAL_PATCH_SPEC_SCHEMA, load_json, save_json
+try:  # pragma: no cover
+    from .common import CAUSAL_PATCH_SPEC_SCHEMA, load_json, save_json
+except Exception:  # pragma: no cover
+    from common import CAUSAL_PATCH_SPEC_SCHEMA, load_json, save_json
 
 DEFAULT_VARIABLES = [
     "subresult_value",
@@ -73,6 +76,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--probe-top-features", default="phase4_results/topk/probe/top_features_per_layer.json")
     p.add_argument("--probe-position", default="result", choices=["eq", "pre_eq", "result"])
     p.add_argument("--decoder-saliency", default=None, help="Optional phase7 grad saliency JSON (SAE-only decoder recommended)")
+    p.add_argument("--model-key", default="gpt2-medium")
     p.add_argument("--layers", type=int, nargs="*", default=[7, 12, 17, 22])
     p.add_argument("--variables", nargs="*", default=DEFAULT_VARIABLES)
     p.add_argument("--top-k", type=int, default=64)
@@ -112,6 +116,7 @@ def main() -> None:
 
     out = {
         "schema_version": CAUSAL_PATCH_SPEC_SCHEMA,
+        "model_key": args.model_key,
         "probe_top_features": args.probe_top_features,
         "decoder_saliency": args.decoder_saliency,
         "combine_policy": args.combine_policy,
