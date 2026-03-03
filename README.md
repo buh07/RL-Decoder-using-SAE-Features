@@ -15,6 +15,7 @@ and causal shortlist runs are pending.
 - **[PROJECT_STATUS.md](PROJECT_STATUS.md)** — Current status, all key results, run commands
 - **[overview.tex](overview.tex)** — Formal design document
 - **[TODO.md](TODO.md)** — Outstanding tasks
+- **[`docs/PHASE7_AUDITOR_PROTOCOL_SCOPE.md`](docs/PHASE7_AUDITOR_PROTOCOL_SCOPE.md)** — Phase 7 scope, claims boundary, and literature baseline
 
 ## Setup
 
@@ -35,7 +36,7 @@ source setup_env.sh          # activates .venv and sets PYTHONPATH
 | **4** | Arithmetic Feature Probing | ✅ | R²=0.977; +0.107 Δlog_prob at L22 (subspace) |
 | **5** | Feature Interpretation + Steering | ✅ | Mean-diff steering uniformly negative → distributed encoding |
 | **6** | Decoder Benchmark + Layer Sweep | ✅ | Full sweep complete (102 configs); best test top1=0.5628 (`raw_block8_00_07`) |
-| **7** | Causal CoT Verification Auditor | 🟡 | Implemented + calibrated; full broad sweep and causal shortlist pending |
+| **7** | Causal CoT Verification Auditor | 🟡 | Two-track active: GPT-2 protocol gates + Qwen2.5-7B portability pilot |
 
 See [PROJECT_STATUS.md](PROJECT_STATUS.md) for full details and key findings.
 
@@ -85,6 +86,60 @@ Actionable run sequence:
 ```
 
 Do not move to reranking/filtering/reward-shaping until these gates pass on controls.
+
+## Phase 8 Preview: CoT Improvement (Reranking-First)
+
+Once Phase 7 gates pass, the first optimization track is **offline reranking**:
+
+1. Generate multiple CoT candidates per prompt.
+2. Score each trace with the Phase 7 auditor.
+3. Select the best candidate by a gated score rule.
+4. Compare against baseline decoding on answer accuracy + faithfulness metrics.
+
+Phase 8 is intentionally gated on Phase 7 verification quality; details are in
+`docs/PHASE8_RERANKING_PLAN.md`.
+
+## Phase 7 Two-Track Strategy (Protocol First, Portability Ready)
+
+Phase 7 now runs as two coordinated tracks:
+
+1. **Track A (GPT-2 medium): protocol validity**
+   - Objective: verify auditor mechanics (text/latent/causal disagreement detection).
+   - Success criteria: pass AUROC/FPR/separation gates above.
+
+2. **Track B (Qwen2.5-7B): portability and external relevance**
+   - Objective: ensure the same protocol can run on a modern CoT-capable model.
+   - Initial scope: adapter smoke tests + small text/latent/causal pilot before full parity.
+
+Implementation changes already in-repo:
+- `phase7/model_adapters/base.py` (shared adapter contract)
+- `phase7/model_registry.py` (model specs + defaults)
+- `phase7/model_adapters/gpt2_medium_adapter.py` (contract-conformant GPT-2 adapter)
+- `phase7/model_adapters/qwen25_7b_adapter.py` (pilot adapter)
+
+Model-select CLI pattern (backward-compatible defaults):
+```bash
+# GPT-2 default (explicit)
+.venv/bin/python3 phase7/causal_intervention_engine.py --model-key gpt2-medium ...
+
+# Qwen portability pilot
+.venv/bin/python3 phase7/causal_intervention_engine.py --model-key qwen2.5-7b ...
+```
+
+Dual invocation is supported for Phase 7 CLIs:
+```bash
+# script style
+.venv/bin/python3 phase7/train_state_decoders.py --help
+
+# module style
+.venv/bin/python3 -m phase7.train_state_decoders --help
+```
+
+Current limitation: subspace causal checks require per-model SAE assets; the Qwen track is
+adapter/benchmark-ready, while full causal patching requires Qwen-compatible SAE checkpoints.
+
+For protocol scope, novelty, and claims boundary against prior literature, see:
+`docs/PHASE7_AUDITOR_PROTOCOL_SCOPE.md`.
 
 ## Project Structure
 

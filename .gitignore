@@ -3,6 +3,11 @@ venv/
 .env
 assets/tokenizers/
 
+# Python caches / bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Large artifacts
 checkpoints/
 phase3_results/
@@ -25,6 +30,20 @@ phase6_results/run_state/
 phase6_results/**/state/
 phase7_results/**/state/
 phase6_results/sweeps/*/phase6_full/
+phase7_results/audits/
+phase7_results/calibration/
+phase7_results/controls/
+phase7_results/interventions/
+phase7_results/run_config/
+phase7_results/sweeps/*/phase7_broad/
+phase7_results/tmp_verify_strict_*/
+phase7_results/tmp_verify_strict_slices*/
+phase_validation_results/
+phase6_results/results/*_phase6_full_sweep_summary.json
+phase6_results/results/*_phase6_full_sweep_run_report.json
+phase7_results/results/faithfulness_benchmark_controls_papercore_*.json
+phase7_results/results/trackA_gate_decision_*.json
+phase7_results/results/trackA_gate_matrix_fixv3*.json
 
 # Python virtual environments
 ENV/

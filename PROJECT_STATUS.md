@@ -1,6 +1,6 @@
 # RL-Decoder with SAE Features — Project Status
 
-**Last Updated:** March 1, 2026 (Phase 6 complete; Phase 7 implemented/calibrated)
+**Last Updated:** March 2, 2026 (Phase 6 complete; Phase 7 two-track protocol + portability work in progress)
 
 ---
 
@@ -16,7 +16,7 @@
 | **4r** | Arithmetic Probing — TopK + Subspace | ✅ Complete | R²=0.977 (L7); causal Δlog_prob=+0.107 at L22 (21/24 layers positive) |
 | **5** | Feature Interpretation + Causal Steering | ✅ Complete | Feature contexts (L22 F11823 active 97%); mean-diff steering uniformly negative → confirms distributed encoding |
 | **6** | Decoder Benchmark + Full Layer Sweep | ✅ Complete | Full sweep done (102/102, 0 failed); best test top1=0.5628 (`raw_block8_00_07`) |
-| **7** | Causal CoT Verification Auditor | 🟡 Implemented + calibrated | Full broad sweep + causal shortlist + benchmark runs pending |
+| **7** | Causal CoT Verification Auditor | 🟡 Two-track in progress | GPT-2 protocol gates pending; Qwen2.5-7B portability pilot scaffolded |
 
 ---
 
@@ -244,12 +244,22 @@ Practical finding: strongest readout appears in early-mid blocks (`block4_04_07`
 ## Phase 7 — Causal CoT Verification Auditor 🟡
 
 **Scripts:** `phase7/`
-**Current state:** implemented and smoke/calibration validated; full broad sweep and causal shortlist runs pending.
+**Current state:** implemented and smoke/calibration validated; now running a two-track plan:
+- Track A: GPT-2 protocol-gate validation
+- Track B: Qwen2.5-7B portability pilot
 
 Completed prerequisites:
 - Trace dataset built (`phase7_results/dataset/gsm8k_step_traces_{train,test,all}.pt`)
 - Calibration mini-sweep summary (`phase7_results/results/20260226_121004_layer_sweep_calib_calibration_summary.json`)
 - Causal dry-run throughput artifact (`phase7_results/interventions/20260226_121004_layer_sweep_calib_calibration_causal_throughput.json`)
+- Phase 7 CLIs hardened for both script and module invocation (`python phase7/<script>.py` and `python -m phase7.<script>`)
+- Phase 7 smoke unittest suite added under `phase7/tests/` for invocation, registry contract, and metadata contract
+- Model portability scaffolding added:
+  - `phase7/model_adapters/base.py`
+  - `phase7/model_registry.py`
+  - `phase7/model_adapters/qwen25_7b_adapter.py`
+  - `phase7/causal_intervention_engine.py` now supports `--dry-run` with structured unsupported status for non-GPT causal subspace runs
+  - Note: non-GPT causal patching still requires model-specific SAE assets/loaders; currently implemented full patching path is GPT-2.
 
 ### Phase 7 pivot criteria (gates before CoT-improvement use)
 
@@ -260,6 +270,15 @@ Required gates before using auditor scores for reranking/filtering/reward shapin
 - At least one explicit `high latent_only / low causal_auditor` case
 - Claim-boundary disclaimer preserved in benchmark output JSON
 
+Latest gate matrix snapshot (`phase7_results/results/trackA_gate_matrix_fixv3_v2.json`):
+- Checkpoints evaluated: `raw_every2_even`, `hybrid_every2_even`, `raw_middle12_06_17`
+- AUROC gate: **pass** (`0.9676` on all three)
+- FPR gate: pass (`0.018` on all three)
+- Separation gate: pass (`readout_high_causal_fail_cases_n` in `1648–1726`)
+- Reporting gate: pass (A/B/C tracks + claim-boundary disclaimer present)
+
+Interpretation: Track-A gate criteria are now satisfied for the fixv3 matrix run; next work should focus on broader robustness/portability and Phase 8 reranking design validation.
+
 Minimal validation sequence:
 1. Generate controls: `phase7/generate_cot_controls.py`
 2. Parse/align controls: `phase7/parse_cot_to_states.py`
@@ -267,6 +286,29 @@ Minimal validation sequence:
 4. Audit traces: `phase7/causal_audit.py`
 5. Calibrate thresholds: `phase7/calibrate_audit_thresholds.py`
 6. Benchmark tracks A/B/C: `phase7/benchmark_faithfulness.py`
+
+### Protocol validity vs model capability (locked interpretation)
+
+- GPT-2 is the **protocol-validation model** for fast white-box iteration.
+- Qwen2.5-7B is the **external-relevance model** for CoT-capable behavior checks.
+- A failed GPT-2 natural-language CoT trace is not by itself a protocol failure.
+- A protocol pass requires intervention-backed separation (not decoder accuracy alone).
+
+Reference scope and literature baseline:
+- `docs/PHASE7_AUDITOR_PROTOCOL_SCOPE.md`
+
+### Phase 8 launch policy (reranking-first)
+
+Phase 8 starts only after Phase 7 gates pass. The first optimization method is
+offline **CoT reranking** (not reward shaping first):
+
+1. Sample multiple CoT candidates per prompt.
+2. Score with the Phase 7 causal-faithfulness auditor.
+3. Select highest gated score candidate.
+4. Evaluate answer quality + faithfulness against baseline decoding.
+
+Phase 8 execution details:
+- `docs/PHASE8_RERANKING_PLAN.md`
 
 ---
 

@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** March 1, 2026
+**Last Updated:** March 2, 2026
 
 ## Essential Documents
 
@@ -24,6 +24,8 @@
 |------|---------|
 | [TODO.md](../TODO.md) | Execution tracker and source of truth for pending work |
 | [experiments/PHASE7_LAYER_SWEEP_REVIEW.md](../experiments/PHASE7_LAYER_SWEEP_REVIEW.md) | Objective alignment, layer-sweep rationale, and runtime framing |
+| [docs/PHASE7_AUDITOR_PROTOCOL_SCOPE.md](PHASE7_AUDITOR_PROTOCOL_SCOPE.md) | Scope, novelty, claim boundary, and literature baseline for Phase 7 |
+| [docs/PHASE8_RERANKING_PLAN.md](PHASE8_RERANKING_PLAN.md) | Post-gate CoT-improvement execution plan (reranking-first) |
 | [phase6_implementation.md](../phase6_implementation.md) | Historical Phase 6 design baseline (not the live execution-status source) |
 
 ## Key Recent Artifacts
@@ -52,4 +54,4 @@ Execution reports and design documents from earlier runs are in
 | `PHASE5_TASK4_TRAINING_STATUS.md` | Multi-layer SAE training status (old numbering) |
 | `PHASE5_TASK4_ANALYSIS_REPORT.md` | Multi-layer SAE transfer analysis (old numbering, now Phase 3) |
 | `PHASE5_TASK4_SPECIFICATION.md` | Multi-layer SAE specification (old numbering, now Phase 2/3) |
-| `PHASE6_DESIGN_SPECIFICATION.md` | Step-level CoT extension design (proposed, not started) |
+| `PHASE6_DESIGN_SPECIFICATION.md` | Step-level CoT extension design (historical reference) |

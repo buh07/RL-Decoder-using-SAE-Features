@@ -1,6 +1,6 @@
 # Active Tasks
 
-**Last Updated:** March 1, 2026
+**Last Updated:** March 2, 2026
 
 For full status and key results, see [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
@@ -33,31 +33,83 @@ For full status and key results, see [PROJECT_STATUS.md](PROJECT_STATUS.md).
       (`raw_block8_00_07`, `raw_block4_04_07`, `hybrid_block4_04_07`,
       `hybrid_block8_00_07`, `sae_block8_00_07` as initial candidates).
 
-### Phase 7 Pivot Gates (must pass before CoT-improvement workflows)
-- [ ] Gate A: `causal_auditor` AUROC on controls `>= 0.85`
-- [ ] Gate B: unfaithful-control FPR `<= 0.05`
-- [ ] Gate C: `readout_high_causal_fail_cases_n >= 1`
-- [ ] Gate D: benchmark output includes claim-boundary disclaimer and A/B/C track metrics
+### Phase 7 Protocol Gates (Track A: GPT-2)
+- [x] Gate A: `causal_auditor` AUROC on controls `>= 0.85`
+- [x] Gate B: unfaithful-control FPR `<= 0.05`
+- [x] Gate C: `readout_high_causal_fail_cases_n >= 1`
+- [x] Gate D: benchmark output includes claim-boundary disclaimer and A/B/C track metrics
 
-Actionable test sequence:
+Latest snapshot (`trackA_gate_matrix_fixv3_v2.json`):
+- Gate A: pass (`auroc=0.9676`)
+- Gate B: pass (`fpr=0.018`)
+- Gate C: pass (`readout_high_causal_fail_cases_n` between `1648` and `1726` across checkpoints)
+- Gate D: pass
+
+Go/No-Go decision table for Phase 8 start:
+
+| Gate | Condition | Required for Go? | If Fail |
+|---|---|---|---|
+| A | `causal_auditor.auroc >= 0.85` | Yes | Run diagnostic ablations (agreement thresholds, temporal/revision weighting, subspace quality) |
+| B | `false_positive_rate <= 0.05` | Yes | Recalibrate thresholding and inspect family-specific false positives |
+| C | `readout_high_causal_fail_cases_n >= 1` | Yes | Re-check causal-vs-latent separation logic and controls |
+| D | `by_benchmark_track` + claim-boundary disclaimer present | Yes | Fix benchmark output contract before any optimization use |
+| E | Per-family metrics include definedness (`metric_defined`) and handle single-class slices | Yes | Regenerate benchmark with class-aware reporting |
+
+Actionable protocol test sequence:
 - [ ] Generate controls:
       `.venv/bin/python3 phase7/generate_cot_controls.py --output phase7_results/controls/cot_controls_test_papercore.json`
 - [ ] Parse controls:
       `.venv/bin/python3 phase7/parse_cot_to_states.py --controls phase7_results/controls/cot_controls_test_papercore.json --trace-dataset phase7_results/dataset/gsm8k_step_traces_test.pt --output phase7_results/controls/cot_controls_test_papercore_parsed.json`
-- [ ] Run shortlist causal checks (necessity/sufficiency/specificity + off-manifold enabled)
+- [ ] Run shortlist causal checks (necessity/sufficiency/specificity + off-manifold enabled):
+      `.venv/bin/python3 phase7/causal_intervention_engine.py --model-key gpt2-medium ...`
 - [ ] Run audit:
-      `.venv/bin/python3 phase7/causal_audit.py ... --output phase7_results/audits/text_causal_audit_controls_papercore.json`
+      `.venv/bin/python3 phase7/causal_audit.py --model-key gpt2-medium ... --output phase7_results/audits/text_causal_audit_controls_papercore.json`
 - [ ] Calibrate thresholds:
       `.venv/bin/python3 phase7/calibrate_audit_thresholds.py ... --output phase7_results/calibration/phase7_thresholds_v1_papercore.json`
 - [ ] Benchmark:
       `.venv/bin/python3 phase7/benchmark_faithfulness.py --audit phase7_results/audits/text_causal_audit_controls_papercore.json --thresholds phase7_results/calibration/phase7_thresholds_v1_papercore.json --output phase7_results/results/faithfulness_benchmark_controls_papercore.json`
 
-Pass/fail checks on benchmark output (`phase7_results/results/faithfulness_benchmark_controls_papercore.json`):
+Protocol pass/fail checks on `phase7_results/results/faithfulness_benchmark_controls_papercore.json`:
 - [ ] `auroc >= 0.85`
 - [ ] `false_positive_rate <= 0.05`
 - [ ] `readout_high_causal_fail_cases_n >= 1`
 - [ ] `by_benchmark_track` contains `text_only`, `latent_only`, `causal_auditor`
 - [ ] `claim_boundary_disclaimer` present
+- [ ] `by_paper_failure_family[*].metric_defined` exists and AUROC undefined cases are explicit (`auroc: null`)
+
+### Phase 8 (post-gate only) — CoT Improvement via Reranking
+- [ ] Confirm all Phase 7 Go gates pass (table above).
+- [ ] Implement candidate generation for multi-sample CoT decoding.
+- [ ] Score candidates with the Phase 7 auditor.
+- [ ] Select best candidate by gated auditor score policy.
+- [ ] Compare reranked vs baseline decoding on:
+      answer accuracy, faithfulness metrics, and failure-family breakdown.
+- [ ] Add rollback rule: disable reranking if answer quality regresses beyond tolerance.
+- [ ] Document runbook and metrics in `docs/PHASE8_RERANKING_PLAN.md`.
+
+### Phase 7 Portability Gates (Track B: model-agnostic pipeline)
+- [x] Adapter contract tests pass for `gpt2-medium` and `qwen2.5-7b` (construction-level contract checks):
+      `model_key`, `num_layers`, `hidden_dim`, `load`, `tokenize`, `forward`, `logprob_at`, `patch_forward`
+- [x] `phase7/model_registry.py` lists both models with correct defaults and optional override via `--adapter-config`
+- [x] Backward compatibility check: existing GPT-2 artifacts load with default args and no schema errors
+- [x] Schema extension check: new artifacts include
+      `model_key`, `model_family`, `num_layers`, `hidden_dim`, `tokenizer_id`
+- [x] Causal engine compatibility:
+      `phase7/causal_intervention_engine.py --model-key gpt2-medium` reproduces existing behavior
+- [x] Dual invocation compatibility check for core CLIs:
+      script mode (`python phase7/<script>.py --help`) and module mode (`python -m phase7.<script> --help`)
+- [x] Minimal Phase 7 smoke tests added:
+      `phase7/tests/test_model_registry.py`, `phase7/tests/test_invocation_modes.py`, `phase7/tests/test_phase7_metadata_contract.py`
+
+### Qwen2.5-7B Pilot Gates (Track B execution)
+- [ ] Adapter load + forward smoke:
+      `.venv/bin/python3 -c "from phase7.model_registry import create_adapter; create_adapter('qwen2.5-7b', device='cuda:0').load()"`
+- [ ] Phase 7 dataset compatibility smoke on small sample:
+      `phase7/build_step_trace_dataset.py --model-key qwen2.5-7b --max-train 32 --max-test 16`
+- [ ] State-decoder small run (1 config, small max-records) with `--model-key qwen2.5-7b`
+- [ ] Add model-specific SAE/subspace loader path for `qwen2.5-7b` in `phase7/causal_intervention_engine.py`
+- [ ] One causal pilot run (25–50 records, 1–2 layers) once compatible SAE/subspace assets exist
+- [ ] One benchmark run emits all three tracks (`text_only`, `latent_only`, `causal_auditor`)
 
 ### Infrastructure
 - [ ] Clean up `sae_logs/` — many logs are from superseded runs; keep only
