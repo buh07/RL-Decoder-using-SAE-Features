@@ -93,6 +93,10 @@ Known failure modes:
 2. Off-manifold interventions that produce destructive side effects.
 3. Donor matching scarcity for strict sufficiency controls.
 4. High decodability but weak causal support (expected and informative).
+5. Marker cue dependence risk (prompt-bias/shortcut lexical cues).
+   - Marker penalties are heuristic diagnostics only by default.
+   - They are not used as causal evidence unless explicitly enabled.
+   - Penalty defaults are intentionally conservative and should be calibration-backed before gate use.
 
 Non-claims:
 1. This does not prove complete internal reasoning decomposition.

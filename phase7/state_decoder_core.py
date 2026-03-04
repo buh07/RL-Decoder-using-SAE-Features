@@ -24,11 +24,11 @@ from pipeline_utils import build_input_tensor_from_record  # type: ignore  # noq
 
 try:  # pragma: no cover
     from .common import MAG_BUCKETS, OPERATORS, SIGNS, STEP_TYPES, magnitude_bucket, set_seed, sign_label
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     from common import MAG_BUCKETS, OPERATORS, SIGNS, STEP_TYPES, magnitude_bucket, set_seed, sign_label
 
 DEFAULT_VOCAB_SIZE = 50257
-VALID_INPUT_VARIANTS = ("raw", "sae", "hybrid")
+VALID_INPUT_VARIANTS = ("raw", "sae", "hybrid", "hybrid_indexed")
 
 OP_TO_ID = {v: i for i, v in enumerate(OPERATORS)}
 STEP_TO_ID = {v: i for i, v in enumerate(STEP_TYPES)}
@@ -47,6 +47,7 @@ class StateDecoderExperimentConfig:
     tokenizer_id: str = "gpt2-medium"
     model_num_layers: int = 24
     model_hidden_dim: int = 1024
+    model_sae_dim: int = 12288
     d_model: int = 256
     n_heads: int = 4
     n_decoder_layers: int = 2
@@ -72,11 +73,13 @@ class StateDecoderExperimentConfig:
 
     def input_dim(self) -> int:
         if self.input_variant == "raw":
-            return 1024
+            return int(self.model_hidden_dim)
         if self.input_variant == "sae":
-            return 12288
+            return int(self.model_sae_dim)
         if self.input_variant == "hybrid":
-            return 1024 + self.hybrid_topk_values
+            return int(self.model_hidden_dim) + int(self.hybrid_topk_values)
+        if self.input_variant == "hybrid_indexed":
+            return int(self.model_hidden_dim) + int(2 * self.hybrid_topk_values)
         raise ValueError(f"Unsupported input_variant={self.input_variant}")
 
     def to_dict(self) -> Dict[str, Any]:
@@ -90,7 +93,9 @@ class StateDecoderExperimentConfig:
         d = dict(d)
         d["layers"] = tuple(d["layers"])
         d.pop("input_dim", None)
-        return cls(**d)
+        allowed = set(cls.__dataclass_fields__.keys())
+        filtered = {k: v for k, v in d.items() if k in allowed}
+        return cls(**filtered)
 
 
 MULTI_LAYERS = (7, 12, 17, 22)
@@ -154,6 +159,7 @@ def apply_model_metadata_to_config(
     d["tokenizer_id"] = str(model_meta.get("tokenizer_id", d.get("tokenizer_id", "")))
     d["model_num_layers"] = int(model_meta.get("num_layers", d.get("model_num_layers", 24)))
     d["model_hidden_dim"] = int(model_meta.get("hidden_dim", d.get("model_hidden_dim", 1024)))
+    d["model_sae_dim"] = int(model_meta.get("sae_dim", d.get("model_sae_dim", 12288)))
     if vocab_size_override is not None:
         d["vocab_size"] = int(vocab_size_override)
     elif model_meta.get("vocab_size") is not None:
@@ -191,7 +197,7 @@ class NumericNormStats:
         if arr.size == 0:
             return cls(0.0, 1.0)
         mean = float(arr.mean())
-        std = float(arr.std())
+        std = float(arr.std(ddof=1)) if arr.size > 1 else 0.0
         return cls(mean, max(std, 1e-6))
 
     @classmethod
@@ -200,10 +206,33 @@ class NumericNormStats:
 
 
 class Phase7StateDataset(Dataset):
-    def __init__(self, records: Sequence[dict], cfg: StateDecoderExperimentConfig, numeric_stats: Dict[str, NumericNormStats]):
+    def __init__(
+        self,
+        records: Sequence[dict],
+        cfg: StateDecoderExperimentConfig,
+        numeric_stats: Dict[str, NumericNormStats],
+        *,
+        cache_inputs: str = "off",
+        cache_max_gb: float = 2.0,
+    ):
         self.records = list(records)
         self.cfg = cfg
         self.numeric_stats = numeric_stats
+        self.cache_inputs = str(cache_inputs).lower()
+        if self.cache_inputs not in {"off", "auto", "on"}:
+            raise ValueError(f"cache_inputs must be one of off|auto|on, got {cache_inputs!r}")
+        self.cache_max_gb = float(cache_max_gb)
+        self._cached_x: Optional[List[torch.Tensor]] = None
+        if self.records and self.cache_inputs != "off":
+            first_x = build_input_tensor_from_record(self.records[0], self.cfg)
+            est_bytes = int(len(self.records) * first_x.numel() * first_x.element_size())
+            allow_bytes = int(max(0.0, self.cache_max_gb) * (1024 ** 3))
+            should_cache = self.cache_inputs == "on" or (self.cache_inputs == "auto" and est_bytes <= allow_bytes)
+            if should_cache:
+                cached = [first_x]
+                for r in self.records[1:]:
+                    cached.append(build_input_tensor_from_record(r, self.cfg))
+                self._cached_x = cached
 
     def __len__(self) -> int:
         return len(self.records)
@@ -217,7 +246,7 @@ class Phase7StateDataset(Dataset):
     def __getitem__(self, idx: int) -> Dict[str, Any]:
         r = self.records[idx]
         s = r["structured_state"]
-        x = build_input_tensor_from_record(r, self.cfg)
+        x = self._cached_x[idx] if self._cached_x is not None else build_input_tensor_from_record(r, self.cfg)
         op = str(s.get("operator", "unknown"))
         mag = str(s.get("magnitude_bucket", magnitude_bucket(float(r.get("C", 0.0)))))
         sign = str(s.get("sign", sign_label(float(r.get("C", 0.0)))))
@@ -272,6 +301,33 @@ def collate_state_batch(items: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     return batch
 
 
+def dataloader_perf_kwargs(
+    *,
+    num_workers: int,
+    pin_memory: bool = False,
+    persistent_workers: bool = False,
+    prefetch_factor: int = 2,
+) -> Dict[str, Any]:
+    kwargs: Dict[str, Any] = {
+        "num_workers": int(max(0, num_workers)),
+        "pin_memory": bool(pin_memory),
+    }
+    if kwargs["num_workers"] > 0:
+        kwargs["persistent_workers"] = bool(persistent_workers)
+        kwargs["prefetch_factor"] = int(max(1, prefetch_factor))
+    return kwargs
+
+
+def move_batch_to_device(batch: Dict[str, Any], device: str, *, non_blocking: bool = False) -> Dict[str, Any]:
+    out: Dict[str, Any] = {}
+    for k, v in batch.items():
+        if torch.is_tensor(v):
+            out[k] = v.to(device, non_blocking=non_blocking)
+        else:
+            out[k] = v
+    return out
+
+
 class MultiHeadStateDecoder(nn.Module):
     def __init__(self, cfg: StateDecoderExperimentConfig):
         super().__init__()
@@ -286,6 +342,7 @@ class MultiHeadStateDecoder(nn.Module):
             dropout=cfg.dropout,
             aggregator=cfg.aggregator,
             use_sparse_input=(cfg.input_variant == "sae"),
+            use_output_head=False,
         )
         self.backbone = ArithmeticDecoder(self.backbone_cfg)
         d = cfg.d_model
@@ -353,11 +410,12 @@ def _topk_acc(logits: torch.Tensor, target: torch.Tensor, k: int = 5) -> float:
     return float(logits.topk(k, dim=-1).indices.eq(target[:, None]).any(dim=-1).float().mean().item())
 
 
-def _masked_mae(pred: torch.Tensor, target: torch.Tensor, mask: torch.Tensor) -> float:
-    denom = float(mask.sum().item())
-    if denom <= 0:
-        return float("nan")
-    return float(((pred - target).abs() * mask).sum().item() / denom)
+def _masked_mae(pred: torch.Tensor, target: torch.Tensor, mask: torch.Tensor) -> tuple:
+    """Returns (sum_of_abs_errors, valid_count) to allow correct aggregation."""
+    valid = float(mask.sum().item())
+    if valid <= 0:
+        return 0.0, 0
+    return float(((pred - target).abs() * mask).sum().item()), int(valid)
 
 
 def evaluate_state_model(
@@ -365,6 +423,8 @@ def evaluate_state_model(
     loader: DataLoader,
     device: str,
     numeric_stats: Dict[str, NumericNormStats],
+    *,
+    non_blocking_transfer: bool = False,
 ) -> Dict[str, Any]:
     model.eval()
     n = 0
@@ -384,9 +444,12 @@ def evaluate_state_model(
         "step_type_acc": 0.0,
         "magnitude_acc": 0.0,
         "sign_acc": 0.0,
-        "subresult_mae_z": 0.0,
-        "lhs_mae_z": 0.0,
-        "rhs_mae_z": 0.0,
+        "subresult_mae_z_sum": 0.0,
+        "subresult_mae_z_n": 0,
+        "lhs_mae_z_sum": 0.0,
+        "lhs_mae_z_n": 0,
+        "rhs_mae_z_sum": 0.0,
+        "rhs_mae_z_n": 0,
         "correct_logprob": 0.0,
         "baseline_logprob": 0.0,
     }
@@ -394,12 +457,8 @@ def evaluate_state_model(
 
     with torch.no_grad():
         for batch in loader:
-            x = batch["x"].to(device)
-            dev_batch = {}
-            for k, v in batch.items():
-                dev_batch[k] = v.to(device) if torch.is_tensor(v) and k != "baseline_logprob" else v
-            # baseline_logprob kept on CPU tensor is fine; move for math convenience
-            dev_batch["baseline_logprob"] = batch["baseline_logprob"].to(device)
+            dev_batch = move_batch_to_device(batch, device, non_blocking=non_blocking_transfer)
+            x = dev_batch["x"]
             out = model(x)
             losses = compute_multitask_loss(out, dev_batch, model.exp_cfg)
             bsz = x.shape[0]
@@ -412,18 +471,23 @@ def evaluate_state_model(
             agg["step_type_acc"] += _acc(out["step_type_logits"], dev_batch["step_type_id"]) * bsz
             agg["magnitude_acc"] += _acc(out["magnitude_logits"], dev_batch["magnitude_id"]) * bsz
             agg["sign_acc"] += _acc(out["sign_logits"], dev_batch["sign_id"]) * bsz
-            agg["subresult_mae_z"] += _masked_mae(out["subresult_pred"], dev_batch["subresult_z"], dev_batch["mask_subresult"]) * bsz
-            agg["lhs_mae_z"] += _masked_mae(out["lhs_pred"], dev_batch["lhs_z"], dev_batch["mask_lhs"]) * bsz
-            agg["rhs_mae_z"] += _masked_mae(out["rhs_pred"], dev_batch["rhs_z"], dev_batch["mask_rhs"]) * bsz
+            for _key, _pred_k, _tgt_k, _mask_k in [
+                ("subresult", "subresult_pred", "subresult_z", "mask_subresult"),
+                ("lhs", "lhs_pred", "lhs_z", "mask_lhs"),
+                ("rhs", "rhs_pred", "rhs_z", "mask_rhs"),
+            ]:
+                _s, _v = _masked_mae(out[_pred_k], dev_batch[_tgt_k], dev_batch[_mask_k])
+                agg[f"{_key}_mae_z_sum"] += _s
+                agg[f"{_key}_mae_z_n"] += _v
 
             log_probs = F.log_softmax(out["result_token_logits"], dim=-1)
             corr_lp = log_probs.gather(1, dev_batch["result_token_id"][:, None]).squeeze(1)
             agg["correct_logprob"] += float(corr_lp.sum().item())
             agg["baseline_logprob"] += float(dev_batch["baseline_logprob"].sum().item())
 
-            pred = out["result_token_logits"].argmax(dim=-1).detach().cpu()
-            y = batch["result_token_id"]
-            for op, pp, yy in zip(batch["operator"], pred.tolist(), y.tolist()):
+            pred = out["result_token_logits"].argmax(dim=-1).detach().cpu().tolist()
+            y = dev_batch["result_token_id"].detach().cpu().tolist()
+            for op, pp, yy in zip(batch["operator"], pred, y):
                 d = by_op.setdefault(op, {"n": 0.0, "top1": 0.0})
                 d["n"] += 1.0
                 d["top1"] += 1.0 if pp == yy else 0.0
@@ -432,10 +496,17 @@ def evaluate_state_model(
         return {"num_records": 0}
     outm = {"num_records": n}
     for k, v in agg.items():
+        if k.endswith("_mae_z_sum") or k.endswith("_mae_z_n"):
+            continue  # handled below
         if k in {"correct_logprob", "baseline_logprob"}:
             outm[f"mean_{k}"] = float(v / n)
         else:
             outm[k] = float(v / n)
+    # Compute masked MAE metrics from sum/count
+    for key in ("subresult", "lhs", "rhs"):
+        s = agg[f"{key}_mae_z_sum"]
+        cnt = agg[f"{key}_mae_z_n"]
+        outm[f"{key}_mae_z"] = float(s / cnt) if cnt > 0 else float("nan")
     outm["delta_logprob_vs_gpt2"] = float((agg["correct_logprob"] - agg["baseline_logprob"]) / n)
     outm["per_operator_result_top1"] = {
         op: {"n": int(d["n"]), "top1_accuracy": float(d["top1"] / max(1.0, d["n"]))} for op, d in sorted(by_op.items())
@@ -486,15 +557,55 @@ def load_model_from_checkpoint(path: str | Path, device: str):
     ckpt = load_checkpoint(path, map_location="cpu")
     cfg = StateDecoderExperimentConfig.from_dict(ckpt["experiment_config"])
     model = MultiHeadStateDecoder(cfg)
-    model.load_state_dict(ckpt["model_state_dict"])
+    incompat = model.load_state_dict(ckpt["model_state_dict"], strict=False)
+    allowed_unexpected = {"backbone.output_head.weight", "backbone.output_head.bias"}
+    unexpected = [k for k in incompat.unexpected_keys if k not in allowed_unexpected]
+    missing = list(incompat.missing_keys)
+    if unexpected or missing:
+        raise RuntimeError(
+            "Checkpoint/state-dict incompatibility detected while loading phase7 model. "
+            f"unexpected_keys={unexpected} missing_keys={missing}"
+        )
     model = model.to(device).eval()
     numeric_stats = {k: NumericNormStats.from_dict(v) for k, v in ckpt["numeric_stats"].items()}
     return ckpt, cfg, numeric_stats, model
 
 
-def decode_latent_pred_states(model: MultiHeadStateDecoder, records: Sequence[dict], cfg: StateDecoderExperimentConfig, numeric_stats: Dict[str, NumericNormStats], device: str, batch_size: int = 64) -> List[dict]:
-    ds = Phase7StateDataset(records, cfg, numeric_stats)
-    dl = DataLoader(ds, batch_size=batch_size, shuffle=False, collate_fn=collate_state_batch)
+def decode_latent_pred_states(
+    model: MultiHeadStateDecoder,
+    records: Sequence[dict],
+    cfg: StateDecoderExperimentConfig,
+    numeric_stats: Dict[str, NumericNormStats],
+    device: str,
+    batch_size: int = 64,
+    *,
+    num_workers: int = 0,
+    pin_memory: bool = False,
+    persistent_workers: bool = False,
+    prefetch_factor: int = 2,
+    cache_inputs: str = "off",
+    cache_max_gb: float = 2.0,
+    non_blocking_transfer: bool = False,
+) -> List[dict]:
+    ds = Phase7StateDataset(
+        records,
+        cfg,
+        numeric_stats,
+        cache_inputs=cache_inputs,
+        cache_max_gb=cache_max_gb,
+    )
+    dl = DataLoader(
+        ds,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_state_batch,
+        **dataloader_perf_kwargs(
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+            persistent_workers=persistent_workers,
+            prefetch_factor=prefetch_factor,
+        ),
+    )
     preds: List[dict] = []
     inv_op = {v: k for k, v in OP_TO_ID.items()}
     inv_step = {v: k for k, v in STEP_TO_ID.items()}
@@ -503,7 +614,8 @@ def decode_latent_pred_states(model: MultiHeadStateDecoder, records: Sequence[di
     model.eval()
     with torch.no_grad():
         for batch in dl:
-            x = batch["x"].to(device)
+            dev_batch = move_batch_to_device(batch, device, non_blocking=non_blocking_transfer)
+            x = dev_batch["x"]
             out = model(x)
             log_probs = F.log_softmax(out["result_token_logits"], dim=-1)
             top1_tok = out["result_token_logits"].argmax(dim=-1).cpu().tolist()

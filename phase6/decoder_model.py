@@ -31,6 +31,7 @@ class ArithmeticDecoderConfig:
     dropout: float = 0.1
     aggregator: str = "transformer"
     use_sparse_input: bool = False
+    use_output_head: bool = True
 
     @classmethod
     def from_dict(cls, data: dict) -> "ArithmeticDecoderConfig":
@@ -47,6 +48,7 @@ class ArithmeticDecoderConfig:
             dropout=self.dropout,
             aggregator=self.aggregator,
             use_sparse_input=self.use_sparse_input,
+            use_output_head=self.use_output_head,
         )
 
 
@@ -101,7 +103,7 @@ class ArithmeticDecoder(nn.Module):
             raise ValueError(f"Unsupported aggregator={config.aggregator}")
 
         self.out_norm = nn.LayerNorm(config.d_model)
-        self.output_head = nn.Linear(config.d_model, config.vocab_size)
+        self.output_head = nn.Linear(config.d_model, config.vocab_size) if config.use_output_head else None
 
     def _project_layers(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, L, D)
@@ -128,4 +130,9 @@ class ArithmeticDecoder(nn.Module):
         return self.out_norm(pooled)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.output_head is None:
+            raise RuntimeError(
+                "ArithmeticDecoder forward() requested but output_head is disabled (use_output_head=False). "
+                "Call encode() instead."
+            )
         return self.output_head(self.encode(x))

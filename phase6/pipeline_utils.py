@@ -72,6 +72,14 @@ def topk_values_signed(x: torch.Tensor, k: int) -> torch.Tensor:
     return x.gather(-1, idx)
 
 
+def topk_indices_values_signed(x: torch.Tensor, k: int) -> Tuple[torch.Tensor, torch.Tensor]:
+    # x: (..., D), returns (indices, values) of top-|x| entries, shape (..., k) each
+    k = min(k, x.shape[-1])
+    idx = x.abs().topk(k, dim=-1).indices
+    vals = x.gather(-1, idx)
+    return idx, vals
+
+
 def build_input_tensor_from_record(record: dict, cfg) -> torch.Tensor:
     """
     Returns tensor of shape (n_layers_input, input_dim) in float32 on CPU.
@@ -83,19 +91,24 @@ def build_input_tensor_from_record(record: dict, cfg) -> torch.Tensor:
         cfg.hybrid_topk_values if hasattr(cfg, "hybrid_topk_values") else int(cfg.get("hybrid_topk_values", 50))
     )
 
-    raw = record["raw_hidden"].float()   # (24, 1024)
-    sae = record["sae_features"].float() # (24, 12288)
-
-    raw_sel = raw[list(layers), :]
-    sae_sel = sae[list(layers), :]
+    layer_idx = list(layers)
 
     if input_variant == "raw":
-        return raw_sel
+        return record["raw_hidden"][layer_idx, :].float()
     if input_variant == "sae":
-        return sae_sel
+        return record["sae_features"][layer_idx, :].float()
     if input_variant == "hybrid":
+        raw_sel = record["raw_hidden"][layer_idx, :].float()
+        sae_sel = record["sae_features"][layer_idx, :].float()
         topvals = topk_values_signed(sae_sel, hybrid_topk_values)
         return torch.cat([raw_sel, topvals], dim=-1)
+    if input_variant == "hybrid_indexed":
+        raw_sel = record["raw_hidden"][layer_idx, :].float()
+        sae_sel = record["sae_features"][layer_idx, :].float()
+        topidx, topvals = topk_indices_values_signed(sae_sel, hybrid_topk_values)
+        denom = max(1, int(sae_sel.shape[-1]) - 1)
+        topidx_norm = (topidx.float() / float(denom)) * 2.0 - 1.0
+        return torch.cat([raw_sel, topvals, topidx_norm], dim=-1)
 
     raise ValueError(f"Unsupported input_variant={input_variant}")
 

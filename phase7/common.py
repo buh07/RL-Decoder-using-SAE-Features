@@ -14,6 +14,7 @@ import numpy as np
 import torch
 
 PHASE7_TRACE_SCHEMA = "phase7_trace_v1"
+PHASE7_TRACE_SCHEMA_V2 = "phase7_trace_v2"
 CAUSAL_PATCH_SPEC_SCHEMA = "causal_patch_spec_v1"
 CAUSAL_AUDIT_SCHEMA = "causal_audit_v1"
 
@@ -25,6 +26,8 @@ PAPER_CORE4_VARIANTS = [
     "prompt_bias_rationalization",
     "silent_error_correction",
     "answer_first_order_flip",
+    "answer_first_only",
+    "order_flip_only",
     "shortcut_rationalization",
 ]
 
@@ -193,11 +196,15 @@ def parse_expression_summary(expr: str, c_fallback: Optional[float] = None) -> D
     last_lhs = nums[0]
     last_rhs = nums[1]
     last_op = ops[0]
-    for op, rhs in zip(ops, nums[1:]):
+    for op_idx, (op, rhs) in enumerate(zip(ops, nums[1:])):
         last_lhs = cur
         last_rhs = rhs
         last_op = op
-        cur = _apply_op(cur, rhs, op)
+        try:
+            cur = _apply_op(cur, rhs, op)
+        except Exception as exc:
+            out["parse_error"] = f"eval_error:{type(exc).__name__}@{op_idx}"
+            return out
     out["lhs_value"] = last_lhs
     out["rhs_value"] = last_rhs
     out["subresult_value"] = cur if c_fallback is None else c_fallback
@@ -206,6 +213,75 @@ def parse_expression_summary(expr: str, c_fallback: Optional[float] = None) -> D
         # Note disagreement but do not overwrite; dataset label is source of truth.
         out["eval_result"] = float(cur)
         out["eval_matches_C"] = math.isclose(float(cur), float(c_fallback), rel_tol=1e-6, abs_tol=1e-6)
+    return out
+
+
+def parse_expression_steps(expr: str, c_fallback: Optional[float] = None) -> Dict[str, Any]:
+    """Return ordered arithmetic operation steps for expr.
+
+    Output:
+    {
+      "parse_error": str|None,
+      "steps": [{"operator","lhs_value","rhs_value","subresult_value","operation_idx","operation_count"}, ...],
+      "operation_count": int,
+      "eval_result": float|None,
+      "eval_matches_C": bool|None,
+    }
+    """
+    nums, ops, err = tokenize_expression(expr)
+    out: Dict[str, Any] = {
+        "parse_error": err,
+        "steps": [],
+        "operation_count": int(len(ops)),
+        "eval_result": None,
+        "eval_matches_C": None,
+    }
+    if err is not None:
+        return out
+    if len(nums) == 0:
+        out["parse_error"] = "empty"
+        return out
+    if len(ops) == 0:
+        # No operate step; caller should still emit result step.
+        val = float(nums[0])
+        out["eval_result"] = val
+        if c_fallback is not None and math.isfinite(float(c_fallback)):
+            out["eval_matches_C"] = bool(
+                math.isclose(val, float(c_fallback), rel_tol=1e-6, abs_tol=1e-6)
+            )
+        return out
+    if len(nums) != len(ops) + 1:
+        out["parse_error"] = "arity_mismatch"
+        return out
+
+    cur = float(nums[0])
+    steps: List[Dict[str, Any]] = []
+    op_count = len(ops)
+    for op_idx, (op, rhs) in enumerate(zip(ops, nums[1:])):
+        lhs = float(cur)
+        rhs_f = float(rhs)
+        try:
+            cur = float(_apply_op(lhs, rhs_f, op))
+        except Exception as exc:
+            out["parse_error"] = f"eval_error:{type(exc).__name__}@{op_idx}"
+            out["steps"] = steps
+            return out
+        steps.append(
+            {
+                "operator": op if op in OPERATORS else "unknown",
+                "lhs_value": lhs,
+                "rhs_value": rhs_f,
+                "subresult_value": cur,
+                "operation_idx": int(op_idx),
+                "operation_count": int(op_count),
+            }
+        )
+    out["steps"] = steps
+    out["eval_result"] = float(cur)
+    if c_fallback is not None and math.isfinite(float(c_fallback)):
+        out["eval_matches_C"] = bool(
+            math.isclose(float(cur), float(c_fallback), rel_tol=1e-6, abs_tol=1e-6)
+        )
     return out
 
 
@@ -231,7 +307,7 @@ def build_structured_state(record: dict, step_idx: int, trace_len: int) -> Dict[
         "operator": parsed.get("operator", "unknown") if parsed.get("operator") in OPERATORS else "unknown",
         "lhs_value": _safe_num(parsed.get("lhs_value")),
         "rhs_value": _safe_num(parsed.get("rhs_value")),
-        "subresult_value": _safe_num(parsed.get("subresult_value")) or c_val,
+        "subresult_value": _sv if (_sv := _safe_num(parsed.get("subresult_value"))) is not None else c_val,
         "result_token_id": int(record["result_token_id"]),
         "magnitude_bucket": magnitude_bucket(c_val),
         "sign": sign_label(c_val),
@@ -308,14 +384,40 @@ def clone_jsonable(obj: Any) -> Any:
     return json.loads(json.dumps(obj))
 
 
-def perturb_number(x: Optional[float], mode: str = "small") -> Optional[float]:
+def perturb_number(
+    x: Optional[float],
+    mode: str = "small",
+    rng: Optional[random.Random] = None,
+) -> Optional[float]:
     if x is None:
         return None
+    rv = rng if rng is not None else random
+    x_f = float(x)
     if mode == "small":
-        if abs(x) < 1:
-            return x + 1.0
-        return x + (1.0 if x >= 0 else -1.0)
-    return x * 2.0
+        mag_pool = [0.5, 1.0, 2.0] if abs(x_f) < 1.0 else [1.0, 2.0]
+    elif mode == "medium":
+        mag_pool = [2.0, 3.0, 5.0]
+    else:
+        mag_pool = [1.0, 2.0, 5.0, 10.0]
+    delta_mag = float(rv.choice(mag_pool))
+    delta_sign = float(rv.choice([-1.0, 1.0]))
+    return x_f + (delta_sign * delta_mag)
+
+
+def _coerce_numeric_like(v: Any) -> Optional[float]:
+    if isinstance(v, (int, float)):
+        vf = float(v)
+        return vf if math.isfinite(vf) else None
+    if isinstance(v, str):
+        s = v.strip()
+        if not s:
+            return None
+        try:
+            vf = float(s)
+        except Exception:
+            return None
+        return vf if math.isfinite(vf) else None
+    return None
 
 
 def compare_states(text_state: Optional[dict], latent_state: Optional[dict], tol: float = 1e-5) -> Dict[str, Any]:
@@ -349,9 +451,9 @@ def compare_states(text_state: Optional[dict], latent_state: Optional[dict], tol
         if a is None or b is None:
             matches[f] = None
             continue
-        if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-            af = float(a)
-            bf = float(b)
+        af = _coerce_numeric_like(a) if f in numeric_fields else None
+        bf = _coerce_numeric_like(b) if f in numeric_fields else None
+        if af is not None and bf is not None:
             ok = math.isclose(af, bf, rel_tol=1e-6, abs_tol=tol)
             if f in numeric_abs_error:
                 numeric_abs_error[f] = abs(af - bf)
@@ -400,6 +502,14 @@ def control_variant_metadata(variant: str) -> Dict[str, Any]:
         family = "answer_first_order_flip"
         subtype = "final_answer_before_steps"
         order_pattern = "answer_first"
+    elif variant == "answer_first_only":
+        family = "answer_first_order_flip"
+        subtype = "answer_first_only"
+        order_pattern = "answer_first"
+    elif variant == "order_flip_only":
+        family = "answer_first_order_flip"
+        subtype = "order_flip_only"
+        order_pattern = "step_first"
     elif variant == "shortcut_rationalization":
         family = "shortcut_rationalization"
         subtype = "heuristic_or_bias_justification"
@@ -414,17 +524,37 @@ def control_variant_metadata(variant: str) -> Dict[str, Any]:
 
 def detect_rationale_markers(line: str) -> List[str]:
     """Lightweight tags for non-step rationale cues used in paper-core controls."""
-    u = line.strip().upper()
+    raw = line.strip()
+    u = raw.upper()
+    lo = raw.lower()
     markers: List[str] = []
-    if "PROMPT_BIAS" in u or "OPTION_ORDER" in u or "HINT=" in u:
+    prompt_bias_patterns = [
+        r"\bprompt\b.*\border(?:ing)?\b",
+        r"\boption\b.*\border\b",
+        r"\bhint\b.*\bpriorit",
+        r"\bselected\b.*\bfirst\b",
+    ]
+    if any(re.search(pat, lo) for pat in prompt_bias_patterns):
         markers.append("prompt_bias_cue")
-    if "SHORTCUT" in u or "HEURISTIC" in u:
+    shortcut_patterns = [
+        r"\bshortcut\b",
+        r"\bheuristic\b",
+        r"\bquick(?:ly)?\b.*\bpattern\b",
+        r"\bskip(?:ped)?\b.*\bexplicit\b.*\bcomput",
+        r"\bsign\b.*\bmagnitude\b",
+    ]
+    if any(re.search(pat, lo) for pat in shortcut_patterns):
         markers.append("shortcut_cue")
     if u.startswith("CORRECTION STEP "):
         markers.append("correction_line")
     if u.startswith("FINAL_ANSWER"):
         markers.append("final_answer_line")
-    if u.startswith("STEP ") and "THINK ABOUT THE PROBLEM CAREFULLY" in u:
+    generic_patterns = [
+        r"\bthink\b.*\b(problem|context|generally|carefully)\b",
+        r"\breflect\b.*\b(setup|context|generally)\b",
+        r"\breason(?:ed|ing)?\b.*\b(generally|context)\b",
+    ]
+    if any(re.search(pat, lo) for pat in generic_patterns):
         markers.append("generic_rationale")
     return markers
 

@@ -7,7 +7,7 @@ from typing import Dict, List, Sequence
 
 try:  # pragma: no cover
     from .common import CAUSAL_PATCH_SPEC_SCHEMA, load_json, save_json
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     from common import CAUSAL_PATCH_SPEC_SCHEMA, load_json, save_json
 
 DEFAULT_VARIABLES = [

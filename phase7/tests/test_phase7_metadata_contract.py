@@ -12,6 +12,30 @@ from phase7.train_state_decoders import _build_sweep_metadata
 
 
 class MetadataContractTests(unittest.TestCase):
+    def test_state_decoder_input_dim_uses_model_metadata(self) -> None:
+        raw_cfg = StateDecoderExperimentConfig(
+            name="state_raw_custom",
+            input_variant="raw",
+            layers=(0,),
+            model_hidden_dim=3584,
+        )
+        hybrid_cfg = StateDecoderExperimentConfig(
+            name="state_hybrid_custom",
+            input_variant="hybrid",
+            layers=(0,),
+            model_hidden_dim=3584,
+            hybrid_topk_values=64,
+        )
+        sae_cfg = StateDecoderExperimentConfig(
+            name="state_sae_custom",
+            input_variant="sae",
+            layers=(0,),
+            model_sae_dim=16384,
+        )
+        self.assertEqual(raw_cfg.input_dim(), 3584)
+        self.assertEqual(hybrid_cfg.input_dim(), 3584 + 64)
+        self.assertEqual(sae_cfg.input_dim(), 16384)
+
     def test_trace_builder_includes_model_metadata_fields(self) -> None:
         rec = {
             "example_idx": 11,

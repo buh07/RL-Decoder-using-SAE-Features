@@ -1,8 +1,41 @@
 {
-  "schema_version": "phase7_trace_v1",
+  "schema_version": "phase7_trace_v2",
+  "state_ontology": "v2_expanded",
+  "model_metadata": {
+    "model_key": "gpt2-medium",
+    "model_family": "gpt2",
+    "num_layers": 24,
+    "hidden_dim": 1024,
+    "tokenizer_id": "gpt2-medium"
+  },
   "source_phase6": {
     "train": "phase6_results/dataset/gsm8k_expanded_train.pt",
     "test": "phase6_results/dataset/gsm8k_expanded_test.pt"
+  },
+  "strict_validation": {
+    "allow_legacy_metadata_mismatch": false,
+    "train": {
+      "split": "train",
+      "num_records_checked": 21402,
+      "raw_hidden_shape_mismatch_records": 0,
+      "record_model_key_mismatch": 0,
+      "record_model_family_mismatch": 0,
+      "record_num_layers_mismatch": 0,
+      "record_hidden_dim_mismatch": 0,
+      "record_tokenizer_id_mismatch": 0,
+      "mismatch_errors_detected": 0
+    },
+    "test": {
+      "split": "test",
+      "num_records_checked": 3799,
+      "raw_hidden_shape_mismatch_records": 0,
+      "record_model_key_mismatch": 0,
+      "record_model_family_mismatch": 0,
+      "record_num_layers_mismatch": 0,
+      "record_hidden_dim_mismatch": 0,
+      "record_tokenizer_id_mismatch": 0,
+      "mismatch_errors_detected": 0
+    }
   },
   "outputs": {
     "train": "phase7_results/dataset/gsm8k_step_traces_train.pt",
@@ -12,54 +45,75 @@
   "splits": {
     "train": {
       "split": "train",
-      "num_step_records": 21402,
+      "num_step_records": 45729,
       "num_traces": 7112,
       "step_type_counts": {
-        "operate": 14290,
-        "emit_result": 7112
+        "operate": 24327,
+        "emit_result": 21402
       },
       "operator_counts": {
-        "/": 3639,
-        "+": 5280,
-        "*": 8141,
-        "-": 3836,
-        "unknown": 506
+        "/": 4213,
+        "unknown": 21583,
+        "+": 7031,
+        "*": 8813,
+        "-": 4089
       },
       "magnitude_bucket_counts": {
-        "[10,100)": 11354,
-        "[0,10)": 4371,
-        "[100,1000)": 4957,
-        "[1000+)": 720
+        "[10,100)": 24324,
+        "[0,10)": 9125,
+        "[100,1000)": 10777,
+        "[1000+)": 1503
       },
       "parse_error_counts": {
-        "has_error": 181,
-        "no_error": 21221
+        "has_error": 362,
+        "no_error": 45367
+      },
+      "operation_count_distribution": {
+        "0": 325,
+        "1": 36722,
+        "2": 6973,
+        "3": 1172,
+        "4": 355,
+        "5": 114,
+        "6": 28,
+        "8": 18,
+        "9": 10,
+        "11": 12
       }
     },
     "test": {
       "split": "test",
-      "num_step_records": 3799,
+      "num_step_records": 8059,
       "num_traces": 1248,
       "step_type_counts": {
-        "operate": 2551,
-        "emit_result": 1248
+        "operate": 4260,
+        "emit_result": 3799
       },
       "operator_counts": {
-        "-": 679,
-        "*": 1492,
-        "/": 607,
-        "+": 921,
-        "unknown": 100
+        "-": 727,
+        "unknown": 3823,
+        "*": 1608,
+        "/": 707,
+        "+": 1194
       },
       "magnitude_bucket_counts": {
-        "[0,10)": 851,
-        "[10,100)": 2008,
-        "[1000+)": 120,
-        "[100,1000)": 820
+        "[0,10)": 1772,
+        "[10,100)": 4266,
+        "[1000+)": 253,
+        "[100,1000)": 1768
       },
       "parse_error_counts": {
-        "has_error": 24,
-        "no_error": 3775
+        "has_error": 48,
+        "no_error": 8011
+      },
+      "operation_count_distribution": {
+        "0": 76,
+        "1": 6512,
+        "2": 1232,
+        "3": 184,
+        "4": 40,
+        "5": 6,
+        "8": 9
       }
     }
   }

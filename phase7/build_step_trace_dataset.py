@@ -11,7 +11,9 @@ import torch
 try:  # pragma: no cover
     from .common import (
         PHASE7_TRACE_SCHEMA,
+        PHASE7_TRACE_SCHEMA_V2,
         build_structured_state,
+        parse_expression_steps,
         faithful_step_text,
         group_records_by_example,
         load_pt,
@@ -20,10 +22,12 @@ try:  # pragma: no cover
         save_pt,
     )
     from .model_registry import resolve_model_spec
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     from common import (
         PHASE7_TRACE_SCHEMA,
+        PHASE7_TRACE_SCHEMA_V2,
         build_structured_state,
+        parse_expression_steps,
         faithful_step_text,
         group_records_by_example,
         load_pt,
@@ -157,12 +161,167 @@ def _build_from_phase6_records(records: List[dict], split_name: str, model_meta:
     return out
 
 
+def _expanded_step_state(
+    *,
+    rec: dict,
+    step_type: str,
+    operator: str,
+    lhs_value: Optional[float],
+    rhs_value: Optional[float],
+    subresult_value: float,
+    operation_idx: int,
+    operation_count: int,
+    parse_error: Optional[str],
+    source_expr_str: str,
+    example_idx: int,
+    step_idx: int,
+) -> Dict[str, object]:
+    c_val = float(rec.get("C", subresult_value))
+    return {
+        "step_type": str(step_type),
+        "operator": str(operator),
+        "lhs_value": lhs_value,
+        "rhs_value": rhs_value,
+        "subresult_value": float(subresult_value),
+        "result_token_id": int(rec["result_token_id"]),
+        "num_operands": int(operation_count + 1) if operation_count > 0 else int(1),
+        "num_operators": int(operation_count),
+        "is_multi_op_expr": bool(operation_count > 1),
+        "parse_error": parse_error,
+        "source_expr_str": str(source_expr_str),
+        "example_idx": int(example_idx),
+        "step_idx": int(step_idx),
+        "operation_idx": int(operation_idx),
+        "operation_count": int(operation_count),
+        "magnitude_bucket": rec.get("magnitude_bucket")
+        or rec.get("structured_state", {}).get("magnitude_bucket")
+        or ("[0,10)" if abs(c_val) < 10 else "[10,100)" if abs(c_val) < 100 else "[100,1000)" if abs(c_val) < 1000 else "[1000+)"),
+        "sign": rec.get("sign")
+        or rec.get("structured_state", {}).get("sign")
+        or ("neg" if c_val < 0 else "pos" if c_val > 0 else "zero"),
+    }
+
+
+def _build_from_phase6_records_v2(records: List[dict], split_name: str, model_meta: Dict[str, object]) -> List[dict]:
+    by_example = group_records_by_example(records)
+    out: List[dict] = []
+    for ex_id, group in sorted(by_example.items()):
+        trace_id = make_trace_id(split_name, ex_id)
+        trace_rows: List[dict] = []
+        for rec_idx, rec in enumerate(group):
+            c_val = float(rec.get("C", 0.0))
+            expr = str(rec.get("expr_str", ""))
+            ann_idx = int(rec.get("ann_idx", rec_idx))
+            parsed_steps = parse_expression_steps(expr, c_fallback=c_val)
+            op_steps = list(parsed_steps.get("steps") or [])
+            op_count = int(parsed_steps.get("operation_count", len(op_steps)))
+            parse_error = parsed_steps.get("parse_error")
+
+            if parse_error and not op_steps:
+                op_steps = [
+                    {
+                        "operator": "unknown",
+                        "lhs_value": None,
+                        "rhs_value": None,
+                        "subresult_value": c_val,
+                        "operation_idx": 0,
+                        "operation_count": max(1, op_count),
+                    }
+                ]
+                op_count = max(1, op_count)
+
+            for op in op_steps:
+                step_idx = len(trace_rows)
+                state = _expanded_step_state(
+                    rec=rec,
+                    step_type="operate",
+                    operator=str(op.get("operator", "unknown")),
+                    lhs_value=(float(op["lhs_value"]) if op.get("lhs_value") is not None else None),
+                    rhs_value=(float(op["rhs_value"]) if op.get("rhs_value") is not None else None),
+                    subresult_value=float(op.get("subresult_value", c_val)),
+                    operation_idx=int(op.get("operation_idx", 0)),
+                    operation_count=int(op_count),
+                    parse_error=str(parse_error) if parse_error is not None else None,
+                    source_expr_str=expr,
+                    example_idx=int(ex_id),
+                    step_idx=step_idx,
+                )
+                row = dict(rec)
+                row.update(
+                    {
+                        "schema_version": PHASE7_TRACE_SCHEMA_V2,
+                        "trace_id": trace_id,
+                        "step_idx": int(step_idx),
+                        "operation_idx": int(state["operation_idx"]),
+                        "operation_count": int(state["operation_count"]),
+                        "ann_idx": ann_idx,
+                        "source_expr_str": expr,
+                        "state_ontology_version": "v2_expanded",
+                        "model_key": str(row.get("model_key", model_meta["model_key"])),
+                        "model_family": str(row.get("model_family", model_meta["model_family"])),
+                        "num_layers": int(row.get("num_layers", model_meta["num_layers"])),
+                        "hidden_dim": int(row.get("hidden_dim", model_meta["hidden_dim"])),
+                        "tokenizer_id": str(row.get("tokenizer_id", model_meta["tokenizer_id"])),
+                        "structured_state": state,
+                        "cot_text_step": faithful_step_text(state),
+                        "cot_alignment_span": None,
+                    }
+                )
+                trace_rows.append(row)
+
+            emit_step_idx = len(trace_rows)
+            emit_state = _expanded_step_state(
+                rec=rec,
+                step_type="emit_result",
+                operator="unknown",
+                lhs_value=None,
+                rhs_value=None,
+                subresult_value=c_val,
+                operation_idx=max(0, op_count),
+                operation_count=max(0, op_count),
+                parse_error=str(parse_error) if parse_error is not None else None,
+                source_expr_str=expr,
+                example_idx=int(ex_id),
+                step_idx=emit_step_idx,
+            )
+            emit_row = dict(rec)
+            emit_row.update(
+                {
+                    "schema_version": PHASE7_TRACE_SCHEMA_V2,
+                    "trace_id": trace_id,
+                    "step_idx": int(emit_step_idx),
+                    "operation_idx": int(emit_state["operation_idx"]),
+                    "operation_count": int(emit_state["operation_count"]),
+                    "ann_idx": ann_idx,
+                    "source_expr_str": expr,
+                    "state_ontology_version": "v2_expanded",
+                    "model_key": str(emit_row.get("model_key", model_meta["model_key"])),
+                    "model_family": str(emit_row.get("model_family", model_meta["model_family"])),
+                    "num_layers": int(emit_row.get("num_layers", model_meta["num_layers"])),
+                    "hidden_dim": int(emit_row.get("hidden_dim", model_meta["hidden_dim"])),
+                    "tokenizer_id": str(emit_row.get("tokenizer_id", model_meta["tokenizer_id"])),
+                    "structured_state": emit_state,
+                    "cot_text_step": faithful_step_text(emit_state),
+                    "cot_alignment_span": None,
+                }
+            )
+            trace_rows.append(emit_row)
+
+        trace_len = len(trace_rows)
+        for row in trace_rows:
+            row["trace_len"] = int(trace_len)
+            row["structured_state"]["step_idx"] = int(row["step_idx"])
+        out.extend(trace_rows)
+    return out
+
+
 def _summarize(step_records: List[dict], split_name: str) -> Dict:
     step_types = Counter(r["structured_state"]["step_type"] for r in step_records)
     ops = Counter(r["structured_state"]["operator"] for r in step_records)
     mags = Counter(r["structured_state"]["magnitude_bucket"] for r in step_records)
     parse_err = Counter(bool(r["structured_state"].get("parse_error")) for r in step_records)
     trace_ids = {r["trace_id"] for r in step_records}
+    op_counts = Counter(int(r.get("operation_count", 0)) for r in step_records)
     return {
         "split": split_name,
         "num_step_records": len(step_records),
@@ -171,6 +330,7 @@ def _summarize(step_records: List[dict], split_name: str) -> Dict:
         "operator_counts": dict(ops),
         "magnitude_bucket_counts": dict(mags),
         "parse_error_counts": {"has_error": int(parse_err.get(True, 0)), "no_error": int(parse_err.get(False, 0))},
+        "operation_count_distribution": {str(k): int(v) for k, v in sorted(op_counts.items())},
     }
 
 
@@ -183,6 +343,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--adapter-config", default=None, help="Optional JSON overrides for model registry entry")
     p.add_argument("--max-train", type=int, default=None)
     p.add_argument("--max-test", type=int, default=None)
+    p.add_argument(
+        "--state-ontology",
+        choices=["v1_summary", "v2_expanded"],
+        default="v2_expanded",
+        help="Trace ontology mode for generated dataset rows.",
+    )
     p.add_argument(
         "--allow-legacy-metadata-mismatch",
         action="store_true",
@@ -234,9 +400,15 @@ def main() -> None:
     )
 
     print(f"Loaded Phase6 train records: {len(train)}")
-    train_steps = _build_from_phase6_records(train, "train", model_meta)
+    if args.state_ontology == "v2_expanded":
+        train_steps = _build_from_phase6_records_v2(train, "train", model_meta)
+    else:
+        train_steps = _build_from_phase6_records(train, "train", model_meta)
     print(f"Built Phase7 train step records: {len(train_steps)}")
-    test_steps = _build_from_phase6_records(test, "test", model_meta)
+    if args.state_ontology == "v2_expanded":
+        test_steps = _build_from_phase6_records_v2(test, "test", model_meta)
+    else:
+        test_steps = _build_from_phase6_records(test, "test", model_meta)
     print(f"Built Phase7 test step records: {len(test_steps)}")
 
     train_path = out_dir / "gsm8k_step_traces_train.pt"
@@ -246,8 +418,10 @@ def main() -> None:
     save_pt(test_path, test_steps)
     save_pt(all_path, train_steps + test_steps)
 
+    schema_version = PHASE7_TRACE_SCHEMA_V2 if args.state_ontology == "v2_expanded" else PHASE7_TRACE_SCHEMA
     summary = {
-        "schema_version": PHASE7_TRACE_SCHEMA,
+        "schema_version": schema_version,
+        "state_ontology": args.state_ontology,
         "model_metadata": model_meta,
         "source_phase6": {"train": args.phase6_train, "test": args.phase6_test},
         "strict_validation": {

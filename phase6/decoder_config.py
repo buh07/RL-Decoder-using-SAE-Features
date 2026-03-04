@@ -8,7 +8,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 VOCAB_SIZE_GPT2 = 50257
 SINGLE_LAYER = (22,)
 MULTI_LAYERS = (7, 12, 17, 22)
-VALID_INPUT_VARIANTS = ("raw", "sae", "hybrid")
+VALID_INPUT_VARIANTS = ("raw", "sae", "hybrid", "hybrid_indexed")
 
 
 @dataclass
@@ -39,6 +39,8 @@ class DecoderExperimentConfig:
             return 12288
         if self.input_variant == "hybrid":
             return 1024 + self.hybrid_topk_values
+        if self.input_variant == "hybrid_indexed":
+            return 1024 + (2 * self.hybrid_topk_values)
         raise ValueError(f"Unsupported input_variant: {self.input_variant}")
 
     def to_dict(self) -> Dict:

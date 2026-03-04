@@ -8,7 +8,7 @@ from typing import Dict, Optional
 
 try:  # pragma: no cover
     from .model_adapters import GPT2MediumAdapter, Qwen25_7BAdapter
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     from model_adapters import GPT2MediumAdapter, Qwen25_7BAdapter
 
 

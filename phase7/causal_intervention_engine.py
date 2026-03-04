@@ -17,16 +17,39 @@ REPO_ROOT = THIS_DIR.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 try:  # pragma: no cover
-    from .common import CAUSAL_PATCH_SPEC_SCHEMA, load_json, load_pt, save_json, set_seed
+    from .common import (
+        CAUSAL_PATCH_SPEC_SCHEMA,
+        MAG_BUCKETS,
+        OPERATORS,
+        SIGNS,
+        STEP_TYPES,
+        load_json,
+        load_pt,
+        save_json,
+        set_seed,
+    )
     from .model_adapters import BaseCausalLMAdapter
     from .model_registry import create_adapter, resolve_model_spec
-except Exception:  # pragma: no cover
-    from common import CAUSAL_PATCH_SPEC_SCHEMA, load_json, load_pt, save_json, set_seed
+    from .state_decoder_core import load_model_from_checkpoint
+except ImportError:  # pragma: no cover
+    from common import (
+        CAUSAL_PATCH_SPEC_SCHEMA,
+        MAG_BUCKETS,
+        OPERATORS,
+        SIGNS,
+        STEP_TYPES,
+        load_json,
+        load_pt,
+        save_json,
+        set_seed,
+    )
     from model_adapters import BaseCausalLMAdapter
     from model_registry import create_adapter, resolve_model_spec
+    from state_decoder_core import load_model_from_checkpoint
 
 # Phase4 helper module (SAE loaders + normalization stats for GPT-2 assets)
 import phase4.causal_patch_test as p4  # type: ignore  # noqa: E402
+from phase6.pipeline_utils import build_input_tensor_from_record  # type: ignore  # noqa: E402
 
 
 def _record_result_token_id(rec: dict) -> int:
@@ -34,11 +57,33 @@ def _record_result_token_id(rec: dict) -> int:
 
 
 def _record_result_pos(rec: dict) -> int:
-    return int(rec.get("result_tok_idx", 0)) - 1
+    if "result_tok_idx" not in rec:
+        raise KeyError("missing result_tok_idx")
+    pos_1based = int(rec["result_tok_idx"])
+    if pos_1based <= 0:
+        raise ValueError(f"invalid result_tok_idx={pos_1based}; expected 1-based positive token index")
+    token_ids = rec.get("token_ids")
+    if isinstance(token_ids, (list, tuple)) and token_ids:
+        if pos_1based > len(token_ids):
+            raise ValueError(
+                f"result_tok_idx={pos_1based} exceeds token_ids length={len(token_ids)}"
+            )
+    return pos_1based - 1
 
 
 def _record_eq_pos(rec: dict) -> int:
-    return int(rec.get("eq_tok_idx", 0))
+    if "eq_tok_idx" not in rec:
+        raise KeyError("missing eq_tok_idx")
+    pos_1based = int(rec["eq_tok_idx"])
+    if pos_1based <= 0:
+        raise ValueError(f"invalid eq_tok_idx={pos_1based}; expected 1-based positive token index")
+    token_ids = rec.get("token_ids")
+    if isinstance(token_ids, (list, tuple)) and token_ids:
+        if pos_1based > len(token_ids):
+            raise ValueError(
+                f"eq_tok_idx={pos_1based} exceeds token_ids length={len(token_ids)}"
+            )
+    return pos_1based - 1
 
 
 def _source_input_ids(rec: dict, device: str) -> torch.Tensor:
@@ -117,6 +162,28 @@ def _validate_records_model_compatibility(
     return checks
 
 
+def _validate_result_token_positions(records: Sequence[dict]) -> List[str]:
+    errors: List[str] = []
+    for idx, r in enumerate(records):
+        try:
+            _ = _record_result_pos(r)
+        except Exception as exc:
+            errors.append(f"record[{idx}] {exc}")
+        try:
+            _ = _record_eq_pos(r)
+        except Exception as exc:
+            errors.append(f"record[{idx}] {exc}")
+    return errors
+
+
+def _record_identity_key(rec: dict) -> Tuple[str, int, int]:
+    return (
+        str(rec.get("trace_id", "")),
+        int(rec.get("step_idx", -1)),
+        int(rec.get("example_idx", -1)),
+    )
+
+
 def _feature_indices_for(specs_payload: dict, variable: str, layer: int) -> List[int]:
     if "specs" in specs_payload:
         for s in specs_payload["specs"]:
@@ -145,7 +212,9 @@ def _build_subspace_decoder_cols(sae, feat_idx: Sequence[int], device: str) -> t
 
 
 def _logprob_at_token(logits: torch.Tensor, pos: int, token_id: int) -> float:
-    pos = max(0, min(int(pos), logits.shape[1] - 1))
+    pos = int(pos)
+    if pos < 0 or pos >= int(logits.shape[1]):
+        raise ValueError(f"token position out of bounds: pos={pos}, seq_len={int(logits.shape[1])}")
     lp = F.log_softmax(logits[0, pos, :], dim=-1)
     return float(lp[int(token_id)].item())
 
@@ -242,9 +311,10 @@ def sufficiency_patch(
 def select_matched_donor(records: Sequence[dict], source: dict, variable: str, seed: int = 17) -> Optional[dict]:
     rng = random.Random(seed + int(source.get("example_idx", 0)) + int(source.get("step_idx", 0)))
     src_state = source["structured_state"]
+    src_key = _record_identity_key(source)
     candidates = []
     for r in records:
-        if r is source:
+        if _record_identity_key(r) == src_key:
             continue
         s = r["structured_state"]
         if s.get("step_type") != src_state.get("step_type"):
@@ -269,7 +339,7 @@ def select_matched_donor(records: Sequence[dict], source: dict, variable: str, s
         candidates.append(r)
     if not candidates:
         for r in records:
-            if r is source:
+            if _record_identity_key(r) == src_key:
                 continue
             s = r["structured_state"]
             if s.get("step_type") != src_state.get("step_type") or s.get("operator") != src_state.get("operator"):
@@ -368,6 +438,250 @@ class CausalPatchContext:
         }
 
 
+@dataclass
+class MediationContext:
+    enabled: bool
+    variable: str
+    device: str
+    model: Optional[torch.nn.Module] = None
+    cfg: Optional[Any] = None
+    numeric_stats: Optional[Dict[str, Any]] = None
+    checkpoint_path: Optional[str] = None
+    reason: Optional[str] = None
+
+    @classmethod
+    def from_checkpoint(
+        cls,
+        checkpoint_path: Optional[str],
+        *,
+        variable: str,
+        device: str,
+        expected_model_key: str,
+        force_enable: bool,
+    ) -> "MediationContext":
+        if not force_enable:
+            return cls(enabled=False, variable=variable, device=device, reason="disabled_by_flag")
+        if checkpoint_path is None:
+            return cls(enabled=False, variable=variable, device=device, reason="missing_state_decoder_checkpoint")
+        ckpt, cfg, numeric_stats, model = load_model_from_checkpoint(checkpoint_path, device)
+        cfg_model_key = str(getattr(cfg, "model_key", "gpt2-medium"))
+        if cfg_model_key != str(expected_model_key):
+            raise RuntimeError(
+                "Mediation checkpoint model mismatch: "
+                f"checkpoint model_key={cfg_model_key!r} vs run model_key={expected_model_key!r}"
+            )
+        return cls(
+            enabled=True,
+            variable=variable,
+            device=device,
+            model=model,
+            cfg=cfg,
+            numeric_stats=numeric_stats,
+            checkpoint_path=str(checkpoint_path),
+            reason=None,
+        )
+
+    def metadata(self) -> Dict[str, Any]:
+        return {
+            "enabled": bool(self.enabled),
+            "variable": self.variable,
+            "checkpoint_path": self.checkpoint_path,
+            "reason": self.reason,
+        }
+
+
+def _rec_with_raw_layer_patch(source_rec: dict, layer: int, patch_vec: torch.Tensor) -> dict:
+    row = dict(source_rec)
+    raw = source_rec["raw_hidden"].clone()
+    raw[int(layer)] = patch_vec.detach().cpu().float()
+    row["raw_hidden"] = raw
+    return row
+
+
+def _decode_decoder_variable(row: dict, mctx: MediationContext) -> Any:
+    if not mctx.enabled or mctx.model is None or mctx.cfg is None:
+        return None
+    x = build_input_tensor_from_record(row, mctx.cfg).unsqueeze(0).to(mctx.device)
+    with torch.no_grad():
+        out = mctx.model(x)
+    var = str(mctx.variable)
+    if var == "result_token_id":
+        return int(out["result_token_logits"].argmax(dim=-1)[0].item())
+    if var == "operator":
+        idx = int(out["operator_logits"].argmax(dim=-1)[0].item())
+        return OPERATORS[idx] if 0 <= idx < len(OPERATORS) else "unknown"
+    if var == "magnitude_bucket":
+        idx = int(out["magnitude_logits"].argmax(dim=-1)[0].item())
+        return MAG_BUCKETS[idx] if 0 <= idx < len(MAG_BUCKETS) else "[1000+)"
+    if var == "sign":
+        idx = int(out["sign_logits"].argmax(dim=-1)[0].item())
+        return SIGNS[idx] if 0 <= idx < len(SIGNS) else "zero"
+    if var == "step_type":
+        idx = int(out["step_type_logits"].argmax(dim=-1)[0].item())
+        return STEP_TYPES[idx] if 0 <= idx < len(STEP_TYPES) else "operate"
+    if mctx.numeric_stats is None:
+        return None
+    if var == "subresult_value":
+        z = float(out["subresult_pred"][0].item())
+        st = mctx.numeric_stats["subresult_value"]
+        return float(z * st.std + st.mean)
+    if var == "lhs_value":
+        z = float(out["lhs_pred"][0].item())
+        st = mctx.numeric_stats["lhs_value"]
+        return float(z * st.std + st.mean)
+    if var == "rhs_value":
+        z = float(out["rhs_pred"][0].item())
+        st = mctx.numeric_stats["rhs_value"]
+        return float(z * st.std + st.mean)
+    return None
+
+
+def _is_numeric_variable(variable: str) -> bool:
+    return variable in {"subresult_value", "lhs_value", "rhs_value"}
+
+
+def _latent_shift_score(pre_value: Any, post_value: Any, variable: str) -> Optional[float]:
+    if pre_value is None or post_value is None:
+        return None
+    if _is_numeric_variable(variable):
+        try:
+            return float(abs(float(post_value) - float(pre_value)))
+        except Exception:
+            return None
+    return 0.0 if str(post_value) == str(pre_value) else 1.0
+
+
+def _latent_direction_match(pre_value: Any, post_value: Any, target_value: Any, variable: str) -> Optional[bool]:
+    if pre_value is None or post_value is None or target_value is None:
+        return None
+    if _is_numeric_variable(variable):
+        try:
+            pre_d = abs(float(pre_value) - float(target_value))
+            post_d = abs(float(post_value) - float(target_value))
+        except Exception:
+            return None
+        return bool(post_d + 1e-8 < pre_d)
+    return bool(str(post_value) == str(target_value))
+
+
+def _target_value_for_variable(rec: dict, variable: str) -> Any:
+    st = rec.get("structured_state", {})
+    if variable == "result_token_id":
+        return int(st.get("result_token_id", rec.get("result_token_id", -1)))
+    return st.get(variable)
+
+
+def _compute_need_suff_patch_vectors(
+    source_rec: dict,
+    donor_rec: Optional[dict],
+    layer: int,
+    feature_indices: Sequence[int],
+    ctx: CausalPatchContext,
+) -> Tuple[Optional[torch.Tensor], Optional[torch.Tensor]]:
+    if not feature_indices or layer not in ctx.saes:
+        return None, None
+    h_src = source_rec["raw_hidden"][layer].to(ctx.device).float()
+    D_norm = _build_subspace_decoder_cols(ctx.saes[layer], feature_indices, ctx.device)
+    coords = D_norm.T @ h_src
+    comp = D_norm @ coords
+    need_patch_vec = h_src - comp
+    suff_patch_vec = None
+    if donor_rec is not None:
+        h_don = donor_rec["raw_hidden"][layer].to(ctx.device).float()
+        delta_h = h_don - h_src
+        projected = D_norm @ (D_norm.T @ delta_h)
+        suff_patch_vec = h_src + projected
+    return need_patch_vec, suff_patch_vec
+
+
+def _compute_layer_mediation(
+    *,
+    source_rec: dict,
+    donor_rec: Optional[dict],
+    layer: int,
+    feature_indices: Sequence[int],
+    ctx: CausalPatchContext,
+    mctx: Optional[MediationContext],
+) -> Dict[str, Any]:
+    if mctx is None or not mctx.enabled:
+        return {
+            "supported": False,
+            "reason": (mctx.reason if mctx is not None else "no_mediation_context"),
+            "latent_shift_score": None,
+            "direction_match": None,
+            "pass": None,
+        }
+    if int(layer) >= source_rec["raw_hidden"].shape[0]:
+        return {
+            "supported": False,
+            "reason": f"layer_out_of_range_for_record:{layer}",
+            "latent_shift_score": None,
+            "direction_match": None,
+            "pass": None,
+        }
+    need_patch, suff_patch = _compute_need_suff_patch_vectors(
+        source_rec=source_rec,
+        donor_rec=donor_rec,
+        layer=layer,
+        feature_indices=feature_indices,
+        ctx=ctx,
+    )
+    if need_patch is None:
+        return {
+            "supported": False,
+            "reason": "missing_patch_vectors_for_mediation",
+            "latent_shift_score": None,
+            "direction_match": None,
+            "pass": None,
+        }
+
+    pre_val = _decode_decoder_variable(source_rec, mctx)
+    need_row = _rec_with_raw_layer_patch(source_rec, layer, need_patch)
+    post_need_val = _decode_decoder_variable(need_row, mctx)
+    need_shift = _latent_shift_score(pre_val, post_need_val, mctx.variable)
+    need_pass = None if need_shift is None else bool(float(need_shift) > 1e-6)
+
+    post_suff_val = None
+    suff_shift = None
+    direction_match = None
+    suff_pass = None
+    if suff_patch is not None and donor_rec is not None:
+        suff_row = _rec_with_raw_layer_patch(source_rec, layer, suff_patch)
+        post_suff_val = _decode_decoder_variable(suff_row, mctx)
+        suff_shift = _latent_shift_score(pre_val, post_suff_val, mctx.variable)
+        target_val = _target_value_for_variable(donor_rec, mctx.variable)
+        direction_match = _latent_direction_match(pre_val, post_suff_val, target_val, mctx.variable)
+        suff_pass = direction_match
+
+    if need_pass is None and suff_pass is None:
+        mediation_pass = None
+    elif need_pass is None:
+        mediation_pass = bool(suff_pass)
+    elif suff_pass is None:
+        mediation_pass = bool(need_pass)
+    else:
+        mediation_pass = bool(need_pass and suff_pass)
+
+    combined_shift = None
+    shifts = [x for x in [need_shift, suff_shift] if isinstance(x, (int, float))]
+    if shifts:
+        combined_shift = float(max(shifts))
+    return {
+        "supported": True,
+        "variable": mctx.variable,
+        "pre_value": pre_val,
+        "post_necessity_value": post_need_val,
+        "post_sufficiency_value": post_suff_val,
+        "latent_shift_score": combined_shift,
+        "latent_shift_score_necessity": need_shift,
+        "latent_shift_score_sufficiency": suff_shift,
+        "direction_match": direction_match,
+        "necessity_mediation_pass": need_pass,
+        "sufficiency_mediation_pass": suff_pass,
+        "pass": mediation_pass,
+    }
+
+
 def run_causal_checks_on_record(
     source_rec: dict,
     all_records: Sequence[dict],
@@ -375,6 +689,7 @@ def run_causal_checks_on_record(
     variable: str,
     layers: Sequence[int],
     ctx: CausalPatchContext,
+    mediation_ctx: Optional[MediationContext] = None,
     off_manifold_max_ratio: float = 0.75,
     seed: int = 17,
 ) -> Dict[str, Any]:
@@ -419,6 +734,14 @@ def run_causal_checks_on_record(
                 ),
             },
         }
+        layer_row["mediation"] = _compute_layer_mediation(
+            source_rec=source_rec,
+            donor_rec=donor,
+            layer=int(layer),
+            feature_indices=feats,
+            ctx=ctx,
+            mctx=mediation_ctx,
+        )
         off_vals = [v for v in [need.get("off_manifold_ratio"), suff.get("off_manifold_ratio")] if isinstance(v, (int, float))]
         layer_row["off_manifold_intervention"] = any(float(v) > off_manifold_max_ratio for v in off_vals)
         out["layers"][str(layer)] = layer_row
@@ -432,6 +755,23 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--model-key", default="gpt2-medium")
     p.add_argument("--adapter-config", default=None, help="Optional JSON overrides for model registry entry")
     p.add_argument("--variable", default="subresult_value")
+    p.add_argument(
+        "--state-decoder-checkpoint",
+        default=None,
+        help="Optional state decoder checkpoint used for latent mediation readout.",
+    )
+    p.add_argument(
+        "--mediation-variable",
+        choices=["subresult_value", "lhs_value", "rhs_value", "operator", "magnitude_bucket", "sign", "result_token_id", "step_type"],
+        default="subresult_value",
+        help="Target variable for mediation readout checks.",
+    )
+    p.add_argument(
+        "--enable-latent-mediation",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Enable latent mediation checks. Defaults to enabled when --state-decoder-checkpoint is set.",
+    )
     p.add_argument("--layers", type=int, nargs="*", default=[22])
     p.add_argument("--device", default="cuda:0")
     p.add_argument("--saes-dir", default=None, help="Optional SAE directory override (per-model default comes from registry)")
@@ -446,6 +786,11 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     set_seed(args.seed)
+    mediation_enabled = (
+        bool(args.enable_latent_mediation)
+        if args.enable_latent_mediation is not None
+        else bool(args.state_decoder_checkpoint)
+    )
     spec = resolve_model_spec(args.model_key, args.adapter_config)
     records_all = load_pt(args.trace_dataset)
     records_all = [r for r in records_all if r.get("gsm8k_split") == "test"] or records_all
@@ -461,7 +806,7 @@ def main() -> None:
 
     if not records:
         payload = {
-            "schema_version": "phase7_causal_checks_v1",
+            "schema_version": "phase7_causal_checks_v2",
             "status": "error_no_records_for_model_key",
             "dry_run": bool(args.dry_run),
             "model_spec": spec.to_dict(),
@@ -480,6 +825,11 @@ def main() -> None:
             "records_considered": 0,
             "layers_requested": list(args.layers),
             "variable": args.variable,
+            "mediation": {
+                "enabled": mediation_enabled,
+                "variable": args.mediation_variable,
+                "checkpoint": args.state_decoder_checkpoint,
+            },
             "subspace_specs_schema": CAUSAL_PATCH_SPEC_SCHEMA,
             "rows": [],
         }
@@ -500,7 +850,7 @@ def main() -> None:
         )
     except RuntimeError as exc:
         payload = {
-            "schema_version": "phase7_causal_checks_v1",
+            "schema_version": "phase7_causal_checks_v2",
             "status": "error_model_data_mismatch",
             "dry_run": bool(args.dry_run),
             "model_spec": spec.to_dict(),
@@ -519,6 +869,11 @@ def main() -> None:
             "records_considered": len(records),
             "layers_requested": list(args.layers),
             "variable": args.variable,
+            "mediation": {
+                "enabled": mediation_enabled,
+                "variable": args.mediation_variable,
+                "checkpoint": args.state_decoder_checkpoint,
+            },
             "subspace_specs_schema": CAUSAL_PATCH_SPEC_SCHEMA,
             "rows": [],
             "compatibility_checks": {"num_records_checked": int(len(records)), "validation_failed": True},
@@ -529,7 +884,7 @@ def main() -> None:
     records = records[: args.max_records]
     if not records:
         payload = {
-            "schema_version": "phase7_causal_checks_v1",
+            "schema_version": "phase7_causal_checks_v2",
             "status": "error_no_records_after_max_records",
             "dry_run": bool(args.dry_run),
             "model_spec": spec.to_dict(),
@@ -548,6 +903,11 @@ def main() -> None:
             "records_considered": 0,
             "layers_requested": list(args.layers),
             "variable": args.variable,
+            "mediation": {
+                "enabled": mediation_enabled,
+                "variable": args.mediation_variable,
+                "checkpoint": args.state_decoder_checkpoint,
+            },
             "subspace_specs_schema": CAUSAL_PATCH_SPEC_SCHEMA,
             "rows": [],
             "compatibility_checks": compatibility_checks,
@@ -555,6 +915,47 @@ def main() -> None:
         save_json(args.output, payload)
         raise SystemExit(
             f"No records remain after applying --max-records={args.max_records}; wrote {args.output}"
+        )
+    position_errors = _validate_result_token_positions(records)
+    if position_errors:
+        payload = {
+            "schema_version": "phase7_causal_checks_v2",
+            "status": "error_invalid_result_token_positions",
+            "dry_run": bool(args.dry_run),
+            "model_spec": spec.to_dict(),
+            "model_metadata": {
+                "model_key": spec.model_key,
+                "model_family": spec.model_family,
+                "num_layers": int(spec.num_layers),
+                "hidden_dim": int(spec.hidden_dim),
+                "tokenizer_id": spec.tokenizer_id,
+                "latent_dim": 0,
+                "supports_subspace_patching": False,
+                "resolved_saes_dir": args.saes_dir if args.saes_dir is not None else spec.sae_dir,
+                "resolved_activations_dir": args.activations_dir,
+                "unsupported_reason": "invalid_result_token_positions",
+            },
+            "records_considered": len(records),
+            "layers_requested": list(args.layers),
+            "variable": args.variable,
+            "mediation": {
+                "enabled": mediation_enabled,
+                "variable": args.mediation_variable,
+                "checkpoint": args.state_decoder_checkpoint,
+            },
+            "subspace_specs_schema": CAUSAL_PATCH_SPEC_SCHEMA,
+            "rows": [],
+            "compatibility_checks": compatibility_checks,
+            "invalid_result_positions": {
+                "num_errors": len(position_errors),
+                "examples": position_errors[:20],
+            },
+        }
+        save_json(args.output, payload)
+        raise RuntimeError(
+            "Causal intervention strict record check failed: invalid/missing result token positions.\n"
+            + "\n".join(position_errors[:20])
+            + ("" if len(position_errors) <= 20 else f"\n... and {len(position_errors) - 20} more")
         )
     specs = load_json(args.subspace_specs) if Path(args.subspace_specs).exists() else {"schema_version": CAUSAL_PATCH_SPEC_SCHEMA}
 
@@ -578,7 +979,7 @@ def main() -> None:
 
         status = "ready" if supports_subspace else "unsupported_model_causal_subspace"
         payload = {
-            "schema_version": "phase7_causal_checks_v1",
+            "schema_version": "phase7_causal_checks_v2",
             "status": status,
             "dry_run": True,
             "model_spec": spec.to_dict(),
@@ -597,6 +998,15 @@ def main() -> None:
             "records_considered": len(records),
             "layers_requested": list(args.layers),
             "variable": args.variable,
+            "mediation": {
+                "enabled": mediation_enabled,
+                "variable": args.mediation_variable,
+                "checkpoint": args.state_decoder_checkpoint,
+                "status": (
+                    "ready" if (mediation_enabled and args.state_decoder_checkpoint) else
+                    "disabled" if not mediation_enabled else "missing_state_decoder_checkpoint"
+                ),
+            },
             "subspace_specs_schema": specs.get("schema_version", CAUSAL_PATCH_SPEC_SCHEMA),
             "rows": [],
             "compatibility_checks": compatibility_checks,
@@ -614,17 +1024,38 @@ def main() -> None:
         saes_dir=args.saes_dir,
         activations_dir=args.activations_dir,
     )
+    mctx = MediationContext.from_checkpoint(
+        args.state_decoder_checkpoint,
+        variable=args.mediation_variable,
+        device=args.device,
+        expected_model_key=spec.model_key,
+        force_enable=mediation_enabled,
+    )
     rows = []
     for rec in records:
-        rows.append(run_causal_checks_on_record(rec, records, specs, args.variable, args.layers, ctx, seed=args.seed))
+        rows.append(
+            run_causal_checks_on_record(
+                rec,
+                records,
+                specs,
+                args.variable,
+                args.layers,
+                ctx,
+                mediation_ctx=mctx,
+                seed=args.seed,
+            )
+        )
         print(f"checked trace={rec.get('trace_id')} step={rec.get('step_idx')} example={rec.get('example_idx')}")
 
     payload = {
-        "schema_version": "phase7_causal_checks_v1",
+        "schema_version": "phase7_causal_checks_v2",
         "status": "ok" if ctx.supports_subspace_patching else "unsupported_model_causal_subspace",
         "dry_run": False,
         "model_metadata": ctx.metadata(),
+        "mediation": mctx.metadata(),
         "rows": rows,
+        "mediation_variable": args.mediation_variable,
+        "enable_latent_mediation": mediation_enabled,
         "subspace_specs_schema": specs.get("schema_version", CAUSAL_PATCH_SPEC_SCHEMA),
         "compatibility_checks": compatibility_checks,
     }

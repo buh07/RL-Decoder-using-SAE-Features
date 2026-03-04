@@ -335,7 +335,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--manifest", default=None, help="Layer sweep manifest JSON (for --layer-set-id / metadata)")
     p.add_argument("--layer-set-id", default=None, help="Layer-set ID from manifest for a custom single run")
     p.add_argument("--layers", type=int, nargs="+", default=None, help="Custom selected layers (alternative to --layer-set-id)")
-    p.add_argument("--input-variant", choices=["raw", "sae", "hybrid"], default=None, help="Required with --layer-set-id/--layers")
+    p.add_argument("--input-variant", choices=["raw", "sae", "hybrid", "hybrid_indexed"], default=None, help="Required with --layer-set-id/--layers")
     p.add_argument("--custom-config-name", default=None, help="Override auto-generated config name for custom runs")
     p.add_argument("--sweep-run-id", default=None, help="Optional run ID propagated into sweep metadata")
     p.add_argument("--parent-baseline", default=None, help="Optional baseline layer_set_id for sweep comparisons")

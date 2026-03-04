@@ -36,6 +36,10 @@ class InvocationModeTests(unittest.TestCase):
             "phase7/benchmark_faithfulness.py",
             "phase7/generate_cot_controls.py",
             "phase7/parse_cot_to_states.py",
+            "phase7/diagnose_latent_separation.py",
+            "phase7/split_audit_dataset.py",
+            "phase7/prepare_real_cot_eval.py",
+            "phase7/build_control_latent_cache.py",
         ]
         for script in scripts:
             with self.subTest(script=script):
@@ -52,6 +56,10 @@ class InvocationModeTests(unittest.TestCase):
             "phase7.benchmark_faithfulness",
             "phase7.generate_cot_controls",
             "phase7.parse_cot_to_states",
+            "phase7.diagnose_latent_separation",
+            "phase7.split_audit_dataset",
+            "phase7.prepare_real_cot_eval",
+            "phase7.build_control_latent_cache",
         ]
         for module in modules:
             with self.subTest(module=module):

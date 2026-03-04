@@ -20,17 +20,19 @@ try:  # pragma: no cover
     from .state_decoder_core import (
         Phase7StateDataset,
         collate_state_batch,
+        dataloader_perf_kwargs,
         decode_latent_pred_states,
         evaluate_state_model,
         load_model_from_checkpoint,
         split_by_example,
     )
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     from common import load_pt, save_json
     from model_registry import resolve_model_spec
     from state_decoder_core import (
         Phase7StateDataset,
         collate_state_batch,
+        dataloader_perf_kwargs,
         decode_latent_pred_states,
         evaluate_state_model,
         load_model_from_checkpoint,
@@ -39,7 +41,7 @@ except Exception:  # pragma: no cover
 
 try:
     from experiments.layer_sweep_manifest import get_layer_set, infer_layer_set_id_from_layers, load_manifest
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     get_layer_set = None
     infer_layer_set_id_from_layers = None
     load_manifest = None
@@ -53,6 +55,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--eval-split", choices=["val", "test", "both"], default="both")
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--num-workers", type=int, default=0)
+    p.add_argument("--pin-memory", action="store_true")
+    p.add_argument("--persistent-workers", action="store_true")
+    p.add_argument("--prefetch-factor", type=int, default=2)
+    p.add_argument("--non-blocking-transfer", action="store_true")
+    p.add_argument("--torch-num-threads", type=int, default=None)
+    p.add_argument("--cache-inputs", choices=["off", "auto", "on"], default="off")
+    p.add_argument("--cache-max-gb", type=float, default=2.0)
     p.add_argument("--model-key", default="gpt2-medium")
     p.add_argument("--adapter-config", default=None, help="Optional JSON overrides for model registry entry")
     p.add_argument("--device", default="cuda:0")
@@ -67,12 +76,34 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--grad-topn", type=int, default=0, help="If >0 and SAE input, compute gradient saliency top-N per selected layer")
     p.add_argument("--grad-saliency-output", default=None)
     p.add_argument(
+        "--saliency-split",
+        choices=["val", "test", "train"],
+        default="test",
+        help="Dataset split used for saliency computation (default: test for out-of-sample analysis).",
+    )
+    p.add_argument(
+        "--grad-saliency-max-records",
+        type=int,
+        default=256,
+        help="Max records sampled for gradient saliency.",
+    )
+    p.add_argument(
         "--allow-legacy-metadata-mismatch",
         action="store_true",
         help=(
             "Unsafe compatibility mode: allow evaluation even when dataset record metadata/tensor shapes "
             "do not match the checkpoint model metadata."
         ),
+    )
+    p.add_argument(
+        "--allow-missing-split-field",
+        action="store_true",
+        help="Unsafe legacy mode: allow datasets without gsm8k_split and use all records.",
+    )
+    p.add_argument(
+        "--allow-mixed-schema",
+        action="store_true",
+        help="Unsafe compatibility mode: allow mixed phase7 trace schema versions in one evaluation run.",
     )
     return p.parse_args()
 
@@ -212,12 +243,90 @@ def _merge_sweep_metadata(args, ckpt: Dict, cfg, manifest_row: Optional[Dict]) -
     return md
 
 
-def _make_loader(records: List[dict], cfg, numeric_stats, batch_size: int, num_workers: int):
-    ds = Phase7StateDataset(records, cfg, numeric_stats)
-    return DataLoader(ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=collate_state_batch)
+def _make_loader(
+    records: List[dict],
+    cfg,
+    numeric_stats,
+    batch_size: int,
+    num_workers: int,
+    *,
+    pin_memory: bool,
+    persistent_workers: bool,
+    prefetch_factor: int,
+    cache_inputs: str,
+    cache_max_gb: float,
+):
+    ds = Phase7StateDataset(
+        records,
+        cfg,
+        numeric_stats,
+        cache_inputs=cache_inputs,
+        cache_max_gb=cache_max_gb,
+    )
+    return DataLoader(
+        ds,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_state_batch,
+        **dataloader_perf_kwargs(
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+            persistent_workers=persistent_workers,
+            prefetch_factor=prefetch_factor,
+        ),
+    )
 
 
-def _compute_grad_sae_saliency(model, records: List[dict], cfg, numeric_stats, device: str, topn: int) -> Dict:
+def _filter_records_by_split(records: List[dict], split: str, allow_missing_split_field: bool) -> List[dict]:
+    has_split_field = any("gsm8k_split" in r for r in records)
+    if not has_split_field:
+        if allow_missing_split_field:
+            return list(records)
+        raise RuntimeError(
+            f"Dataset is missing gsm8k_split field; refusing to continue for split={split!r}. "
+            "Use --allow-missing-split-field only for legacy compatibility."
+        )
+    filtered = [r for r in records if r.get("gsm8k_split") == split]
+    if not filtered:
+        raise RuntimeError(
+            f"No records found for split={split!r}. "
+            "Refusing silent fallback to all records to avoid leakage."
+        )
+    return filtered
+
+
+def _normalize_schema_version(rec: dict) -> str:
+    v = rec.get("schema_version")
+    if v is None:
+        return "phase7_trace_v1"
+    return str(v)
+
+
+def _validate_schema_versions(records: List[dict], allow_mixed_schema: bool) -> List[str]:
+    versions = sorted({_normalize_schema_version(r) for r in records})
+    if not versions:
+        raise RuntimeError("No records available after split filtering")
+    allowed = {"phase7_trace_v1", "phase7_trace_v2"}
+    bad = [v for v in versions if v not in allowed]
+    if bad:
+        raise RuntimeError(f"Unsupported schema versions in dataset: {bad}; supported={sorted(allowed)}")
+    if len(versions) > 1 and not allow_mixed_schema:
+        raise RuntimeError(
+            f"Mixed schema versions detected: {versions}. "
+            "Use --allow-mixed-schema only if you intentionally accept mixed ontology semantics."
+        )
+    return versions
+
+
+def _compute_grad_sae_saliency(
+    model,
+    records: List[dict],
+    cfg,
+    numeric_stats,
+    device: str,
+    topn: int,
+    max_records: int,
+) -> Dict:
     # Only meaningful for SAE-only input where input dims map directly to SAE feature indices.
     if cfg.input_variant != "sae":
         return {"supported": False, "reason": f"input_variant={cfg.input_variant} does not map gradient dims to SAE features"}
@@ -227,7 +336,8 @@ def _compute_grad_sae_saliency(model, records: List[dict], cfg, numeric_stats, d
     # Accumulate mean absolute gradient wrt input features per selected layer for result-token CE.
     accum = torch.zeros(len(cfg.layers), cfg.input_dim(), dtype=torch.float64)
     n = 0
-    for i in range(min(len(ds), 256)):
+    n_limit = min(len(ds), max(1, int(max_records)))
+    for i in range(n_limit):
         item = ds[i]
         x = item["x"].unsqueeze(0).to(device).requires_grad_(True)
         y = torch.tensor([item["result_token_id"]], dtype=torch.long, device=device)
@@ -262,6 +372,10 @@ def _compute_grad_sae_saliency(model, records: List[dict], cfg, numeric_stats, d
 
 def main() -> None:
     args = parse_args()
+    if args.torch_num_threads is not None:
+        if args.torch_num_threads <= 0:
+            raise ValueError("--torch-num-threads must be > 0 when set")
+        torch.set_num_threads(int(args.torch_num_threads))
     ckpt, cfg, numeric_stats, model = load_model_from_checkpoint(args.checkpoint, args.device)
     spec = resolve_model_spec(getattr(cfg, "model_key", args.model_key), args.adapter_config)
     manifest_payload = _load_manifest_payload(args.manifest)
@@ -299,14 +413,17 @@ def main() -> None:
     )
     if sweep_metadata is not None:
         result["sweep_metadata"] = sweep_metadata
-        result.update(sweep_metadata)
+        for k, v in sweep_metadata.items():
+            result.setdefault(k, v)
 
     train_records = None
     if args.eval_split in {"val", "both"} or args.emit_latent_preds or args.grad_topn > 0:
         train_records = load_pt(args.dataset_train)
         if args.max_records_train is not None:
             train_records = train_records[: args.max_records_train]
-        train_records = [r for r in train_records if r.get("gsm8k_split") == "train"] or train_records
+        train_records = _filter_records_by_split(train_records, "train", bool(args.allow_missing_split_field))
+        train_schema_versions = _validate_schema_versions(train_records, bool(args.allow_mixed_schema))
+        result.setdefault("dataset_schema_versions", {})["train"] = train_schema_versions
         train_checks = _validate_records_compatibility(
             train_records,
             split_name="train",
@@ -321,8 +438,25 @@ def main() -> None:
 
     if args.eval_split in {"val", "both"}:
         _, val_records = split_by_example(train_records, cfg.val_fraction, cfg.seed)  # type: ignore[arg-type]
-        val_loader = _make_loader(val_records, cfg, numeric_stats, args.batch_size, args.num_workers)
-        m = evaluate_state_model(model, val_loader, args.device, numeric_stats)
+        val_loader = _make_loader(
+            val_records,
+            cfg,
+            numeric_stats,
+            args.batch_size,
+            args.num_workers,
+            pin_memory=args.pin_memory,
+            persistent_workers=args.persistent_workers,
+            prefetch_factor=args.prefetch_factor,
+            cache_inputs=args.cache_inputs,
+            cache_max_gb=args.cache_max_gb,
+        )
+        m = evaluate_state_model(
+            model,
+            val_loader,
+            args.device,
+            numeric_stats,
+            non_blocking_transfer=args.non_blocking_transfer,
+        )
         m["num_examples"] = len({int(r["example_idx"]) for r in val_records})
         m["dataset_path"] = str(args.dataset_train)
         result["evaluations"]["val"] = m
@@ -331,7 +465,9 @@ def main() -> None:
         test_records = load_pt(args.dataset_test)
         if args.max_records_test is not None:
             test_records = test_records[: args.max_records_test]
-        test_records = [r for r in test_records if r.get("gsm8k_split") == "test"] or test_records
+        test_records = _filter_records_by_split(test_records, "test", bool(args.allow_missing_split_field))
+        test_schema_versions = _validate_schema_versions(test_records, bool(args.allow_mixed_schema))
+        result.setdefault("dataset_schema_versions", {})["test"] = test_schema_versions
         test_checks = _validate_records_compatibility(
             test_records,
             split_name="test",
@@ -343,8 +479,25 @@ def main() -> None:
             allow_legacy_metadata_mismatch=bool(args.allow_legacy_metadata_mismatch),
         )
         result.setdefault("dataset_compatibility_checks", {})["test"] = test_checks
-        test_loader = _make_loader(test_records, cfg, numeric_stats, args.batch_size, args.num_workers)
-        m = evaluate_state_model(model, test_loader, args.device, numeric_stats)
+        test_loader = _make_loader(
+            test_records,
+            cfg,
+            numeric_stats,
+            args.batch_size,
+            args.num_workers,
+            pin_memory=args.pin_memory,
+            persistent_workers=args.persistent_workers,
+            prefetch_factor=args.prefetch_factor,
+            cache_inputs=args.cache_inputs,
+            cache_max_gb=args.cache_max_gb,
+        )
+        m = evaluate_state_model(
+            model,
+            test_loader,
+            args.device,
+            numeric_stats,
+            non_blocking_transfer=args.non_blocking_transfer,
+        )
         m["num_examples"] = len({int(r["example_idx"]) for r in test_records})
         m["dataset_path"] = str(args.dataset_test)
         result["evaluations"]["test"] = m
@@ -358,7 +511,9 @@ def main() -> None:
         test_records = load_pt(args.dataset_test)
         if args.max_records_test is not None:
             test_records = test_records[: args.max_records_test]
-        test_records = [r for r in test_records if r.get("gsm8k_split") == "test"] or test_records
+        test_records = _filter_records_by_split(test_records, "test", bool(args.allow_missing_split_field))
+        pred_schema_versions = _validate_schema_versions(test_records, bool(args.allow_mixed_schema))
+        result.setdefault("dataset_schema_versions", {})["test_emit_latent_preds"] = pred_schema_versions
         pred_checks = _validate_records_compatibility(
             test_records,
             split_name="test_emit_latent_preds",
@@ -370,7 +525,21 @@ def main() -> None:
             allow_legacy_metadata_mismatch=bool(args.allow_legacy_metadata_mismatch),
         )
         result.setdefault("dataset_compatibility_checks", {})["test_emit_latent_preds"] = pred_checks
-        preds = decode_latent_pred_states(model, test_records, cfg, numeric_stats, args.device, batch_size=args.batch_size)
+        preds = decode_latent_pred_states(
+            model,
+            test_records,
+            cfg,
+            numeric_stats,
+            args.device,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            pin_memory=args.pin_memory,
+            persistent_workers=args.persistent_workers,
+            prefetch_factor=args.prefetch_factor,
+            cache_inputs=args.cache_inputs,
+            cache_max_gb=args.cache_max_gb,
+            non_blocking_transfer=args.non_blocking_transfer,
+        )
         pred_out = Path(args.latent_preds_output) if args.latent_preds_output else Path("phase7_results/interp") / f"latent_preds_{cfg.name}.json"
         pred_out.parent.mkdir(parents=True, exist_ok=True)
         payload = {"schema_version": "phase7_latent_preds_v1", "config_name": cfg.name, "predictions": preds}
@@ -383,7 +552,27 @@ def main() -> None:
     if args.grad_topn > 0:
         if train_records is None:
             raise RuntimeError("Internal error: train_records not loaded")
-        sal = _compute_grad_sae_saliency(model, train_records, cfg, numeric_stats, args.device, args.grad_topn)
+        if args.saliency_split == "train":
+            sal_records = list(train_records)
+        elif args.saliency_split == "val":
+            _, sal_records = split_by_example(train_records, cfg.val_fraction, cfg.seed)
+        else:
+            sal_records = load_pt(args.dataset_test)
+            if args.max_records_test is not None:
+                sal_records = sal_records[: args.max_records_test]
+            sal_records = _filter_records_by_split(sal_records, "test", bool(args.allow_missing_split_field))
+        sal_schema_versions = _validate_schema_versions(sal_records, bool(args.allow_mixed_schema))
+        sal = _compute_grad_sae_saliency(
+            model,
+            sal_records,
+            cfg,
+            numeric_stats,
+            args.device,
+            args.grad_topn,
+            args.grad_saliency_max_records,
+        )
+        sal["saliency_split"] = args.saliency_split
+        sal["dataset_schema_versions"] = sal_schema_versions
         sal_out = Path(args.grad_saliency_output) if args.grad_saliency_output else Path("phase7_results/interp") / f"grad_sae_saliency_{cfg.name}.json"
         sal_out.parent.mkdir(parents=True, exist_ok=True)
         sal_payload = {"schema_version": "phase7_grad_saliency_v1", "config_name": cfg.name, **sal}
