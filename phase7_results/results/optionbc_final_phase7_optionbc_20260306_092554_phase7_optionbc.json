@@ -1,0 +1,26 @@
+{
+  "schema_version": "phase7_optionbc_final_v1",
+  "run_tag": "phase7_optionbc_20260306_092554_phase7_optionbc",
+  "optionb_canary_decision_ref": "phase7_results/results/optionb_canary_decision_phase7_optionbc_20260306_092554_phase7_optionbc.json",
+  "optionc_probe_ref": "phase7_results/results/optionc_probe_phase7_optionbc_20260306_092554_phase7_optionbc.json",
+  "optionb_canary_pass": false,
+  "matrix_promoted": false,
+  "matrix_profile_summary": {
+    "P1": {
+      "mean_composite_auroc": null,
+      "n": 0
+    },
+    "P2": {
+      "mean_composite_auroc": null,
+      "n": 0
+    },
+    "P3": {
+      "mean_composite_auroc": null,
+      "n": 0
+    }
+  },
+  "matrix_num_benchmarks": 0,
+  "optionc_control_conditioned_test_auroc": 0.5375214691504823,
+  "optionc_source_trace_test_auroc": 0.5074866781168803,
+  "optionc_cross_variant_generalization_pass": false
+}

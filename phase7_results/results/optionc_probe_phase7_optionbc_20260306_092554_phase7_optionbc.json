@@ -1,0 +1,133 @@
+{
+  "schema_version": "phase7_contrastive_probe_v1",
+  "source_control_records": "phase7_results/interventions/control_records_20260305_234011_phase7v3_closure.json",
+  "source_control_records_stats": {
+    "controls_total": 4500,
+    "controls_used": 747,
+    "controls_missing_text": 0,
+    "controls_no_step_positions": 113,
+    "controls_no_matching_trace_steps": 0,
+    "records_built": 2200,
+    "records_skipped_missing_trace_step": 0,
+    "anchor_coverage_eq_like_rows": 2201,
+    "anchor_coverage_line_end_rows": 0,
+    "anchor_coverage_fallback_rows": 0,
+    "anchor_coverage_total_rows": 2201,
+    "position_convention_version": "phase7_pos_contract_v1",
+    "position_contract_validated": true,
+    "offset_alignment_degraded_rows": 0,
+    "control_sampling_policy": "stratified_trace_variant",
+    "controls_used_fraction": 0.166,
+    "unique_traces_used": 430,
+    "unique_variants_used": 7,
+    "faithful_rows": 1266,
+    "unfaithful_rows": 934
+  },
+  "feature_source": "both",
+  "primary_feature_source": "control_conditioned",
+  "layers": [
+    7,
+    12,
+    17,
+    22
+  ],
+  "train_variants": [
+    "faithful",
+    "prompt_bias_rationalization",
+    "reordered_steps",
+    "wrong_intermediate"
+  ],
+  "test_variants": [
+    "answer_first_order_flip",
+    "faithful",
+    "false_rationale_correct_answer",
+    "silent_error_correction"
+  ],
+  "trace_test_fraction": 0.2,
+  "trace_split_seed": 20260306,
+  "split_policy": "trace_stratified_random",
+  "min_class_per_split": 10,
+  "trace_group_leakage_guard": true,
+  "num_train_samples": 1765,
+  "num_test_samples": 435,
+  "train_auroc_unfaithful_positive": 0.5258588635768526,
+  "test_auroc_unfaithful_positive": 0.5375214691504823,
+  "loss_start": 1.2113292217254639,
+  "loss_end": 0.6880730986595154,
+  "loss_mean": 1.0565736643970012,
+  "cross_variant_generalization_pass": false,
+  "by_feature_source": {
+    "control_conditioned": {
+      "status": "ok",
+      "input_dim": 4096,
+      "num_train_samples": 1765,
+      "num_test_samples": 435,
+      "train_auroc_unfaithful_positive": 0.5258588635768526,
+      "test_auroc_unfaithful_positive": 0.5375214691504823,
+      "loss_start": 1.2113292217254639,
+      "loss_end": 0.6880730986595154,
+      "loss_mean": 1.0565736643970012,
+      "cross_variant_generalization_pass": false,
+      "split_diagnostics": {
+        "split_policy": "trace_stratified_random",
+        "trace_split_seed": 20260306,
+        "trace_test_fraction": 0.2,
+        "num_unique_traces_total": 430,
+        "num_unique_train_traces": 344,
+        "num_unique_test_traces": 86,
+        "trace_overlap_count": 0,
+        "trace_overlap_check_pass": true,
+        "variant_filter_applied": false,
+        "variant_overlap_non_faithful": [],
+        "class_counts_train": {
+          "faithful": 1005,
+          "unfaithful": 760
+        },
+        "class_counts_test": {
+          "faithful": 261,
+          "unfaithful": 174
+        },
+        "min_class_per_split": 10
+      }
+    },
+    "source_trace": {
+      "status": "ok",
+      "input_dim": 4096,
+      "num_train_samples": 1765,
+      "num_test_samples": 435,
+      "train_auroc_unfaithful_positive": 0.5050759361089291,
+      "test_auroc_unfaithful_positive": 0.5074866781168803,
+      "loss_start": 1.3337868452072144,
+      "loss_end": 0.6928149461746216,
+      "loss_mean": 1.1102873668074609,
+      "cross_variant_generalization_pass": false,
+      "split_diagnostics": {
+        "split_policy": "trace_stratified_random",
+        "trace_split_seed": 20260306,
+        "trace_test_fraction": 0.2,
+        "num_unique_traces_total": 430,
+        "num_unique_train_traces": 344,
+        "num_unique_test_traces": 86,
+        "trace_overlap_count": 0,
+        "trace_overlap_check_pass": true,
+        "variant_filter_applied": false,
+        "variant_overlap_non_faithful": [],
+        "class_counts_train": {
+          "faithful": 1005,
+          "unfaithful": 760
+        },
+        "class_counts_test": {
+          "faithful": 261,
+          "unfaithful": 174
+        },
+        "min_class_per_split": 10
+      }
+    }
+  },
+  "source_comparability": {
+    "control_conditioned_test_auroc": 0.5375214691504823,
+    "source_trace_test_auroc": 0.5074866781168803,
+    "control_minus_source_test_auroc_delta": 0.03003479103360196,
+    "interpretation_flag": "inconclusive"
+  }
+}

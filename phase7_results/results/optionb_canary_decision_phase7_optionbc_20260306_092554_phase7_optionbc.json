@@ -1,0 +1,29 @@
+{
+  "schema_version": "phase7_optionb_canary_decision_v1",
+  "run_tag": "phase7_optionbc_20260306_092554_phase7_optionbc",
+  "profiles": [
+    {
+      "profile": "P1",
+      "mean_composite_auroc": 0.8361147959183673,
+      "all_leakage_pass": true,
+      "confidence_guard_all_pass": true
+    },
+    {
+      "profile": "P2",
+      "mean_composite_auroc": 0.8370841836734694,
+      "all_leakage_pass": true,
+      "confidence_guard_all_pass": true
+    },
+    {
+      "profile": "P3",
+      "mean_composite_auroc": 0.8382653061224492,
+      "all_leakage_pass": true,
+      "confidence_guard_all_pass": true
+    }
+  ],
+  "ordering_margin": 0.005,
+  "ordering_pass": false,
+  "leakage_pass": true,
+  "confidence_guard_pass": true,
+  "canary_pass": false
+}

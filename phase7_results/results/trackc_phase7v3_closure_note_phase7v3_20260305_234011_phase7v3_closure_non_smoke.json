@@ -1,0 +1,36 @@
+{
+  "schema_version": "phase7_trackc_closure_note_v1",
+  "run_tag": "phase7v3_20260305_234011_phase7v3_closure_non_smoke",
+  "artifacts": {
+    "r1_benchmark": "phase7_results/results/trackc_r1_benchmark_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json",
+    "r2_benchmark": "phase7_results/results/trackc_r2_benchmark_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json",
+    "r3_probe": "phase7_results/results/trackc_r3_probe_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json",
+    "r4_geometry": "phase7_results/results/trackc_r4_geometry_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json",
+    "decision": "phase7_results/results/trackc_phase7v3_decision_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json"
+  },
+  "stage_status": {
+    "r0_done": true,
+    "r1_done": true,
+    "r2_done": true,
+    "r3_done": true,
+    "r4_done": true
+  },
+  "selected_track_c": "confidence_margin",
+  "claim_boundary": "If selected_track_c=two_track_negative_result, Track C remains unresolved for GPT-2 arithmetic and deployment defaults to text+latent composite.",
+  "summary": {
+    "r1_confidence_margin_auroc": 0.6008729181628539,
+    "r1_confidence_margin_ci95": [
+      0.5554075538177289,
+      0.6455852333928398
+    ],
+    "r1_confidence_vs_text_corr": 0.6187108297657831,
+    "r1_power_sufficient": true,
+    "r1_leakage_check_pass": true,
+    "r2_trajectory_coherence_auroc": 0.4497088847850621,
+    "r3_status_by_source": {
+      "control_conditioned": "train_empty_after_trace_leakage_guard",
+      "source_trace": "train_empty_after_trace_leakage_guard"
+    },
+    "r4_best_geometry_auroc": 0.5444354779546622
+  }
+}
