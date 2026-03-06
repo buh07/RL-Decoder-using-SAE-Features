@@ -82,6 +82,8 @@ class Phase7GateQualityTests(unittest.TestCase):
     def test_score_ordering_faithful_above_wrong_intermediate(self) -> None:
         faithful = self._run_variant("faithful")
         wrong = self._run_variant("wrong_intermediate")
+        self.assertIn("composite", faithful.get("benchmark_track_scores", {}))
+        self.assertIn("causal_auditor", faithful.get("benchmark_track_scores", {}))
         self.assertGreater(
             float(faithful["overall_score"]),
             float(wrong["overall_score"]),

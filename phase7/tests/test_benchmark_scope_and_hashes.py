@@ -105,6 +105,9 @@ class BenchmarkScopeAndHashesTests(unittest.TestCase):
             self.assertIn("evaluation_trace_hash", out)
             self.assertIn("calibration_source_ref", out)
             self.assertIn("composite", out["by_benchmark_track"])
+            self.assertIn("text_only", out["by_benchmark_track"])
+            self.assertIn("latent_only", out["by_benchmark_track"])
+            self.assertIn("causal_auditor", out["by_benchmark_track"])
 
             gate = json.loads(gate_path.read_text())
             self.assertFalse(bool(gate["externally_supported_claims"]))

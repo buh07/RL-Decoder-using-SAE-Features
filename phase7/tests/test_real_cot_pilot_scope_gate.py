@@ -107,6 +107,7 @@ class RealCotPilotScopeGateTests(unittest.TestCase):
                     "overall_score": 0.9,
                     "benchmark_track_scores": {"text_only": 0.8, "latent_only": 0.7, "causal_auditor": 0.75},
                     "verdict": "causally_faithful",
+                    "parse_summary": {"parseable": 1, "total_steps": 1},
                 },
                 {
                     "trace_id": "trace_eval_1",
@@ -116,6 +117,7 @@ class RealCotPilotScopeGateTests(unittest.TestCase):
                     "overall_score": 0.1,
                     "benchmark_track_scores": {"text_only": 0.2, "latent_only": 0.3, "causal_auditor": 0.25},
                     "verdict": "unsupported",
+                    "parse_summary": {"parseable": 1, "total_steps": 1},
                 },
             ]
             eval_payload = {
@@ -195,4 +197,3 @@ class RealCotPilotScopeGateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
