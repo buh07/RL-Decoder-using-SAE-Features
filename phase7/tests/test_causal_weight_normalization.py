@@ -62,7 +62,28 @@ class CausalWeightNormalizationTests(unittest.TestCase):
             )
             self.assertAlmostEqual(s, 1.0, places=8)
 
+    def test_zero_causal_weight_valid(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "thr.json"
+            p.write_text(
+                json.dumps(
+                    {
+                        "thresholds": {
+                            "text_score_weight": 0.4,
+                            "latent_score_weight": 0.4,
+                            "confidence_score_weight": 0.2,
+                            "causal_score_weight": 0.0,
+                        }
+                    }
+                )
+            )
+            out = _load_thresholds(str(p), allow_auto_normalize_weights=False)
+            thr = out["thresholds"]
+            self.assertAlmostEqual(float(thr["text_score_weight"]), 0.4, places=8)
+            self.assertAlmostEqual(float(thr["latent_score_weight"]), 0.4, places=8)
+            self.assertAlmostEqual(float(thr["confidence_score_weight"]), 0.2, places=8)
+            self.assertAlmostEqual(float(thr["causal_score_weight"]), 0.0, places=8)
+
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -1,57 +1,36 @@
 # Documentation Index
 
-**Last Updated:** March 2, 2026
+**Last Updated:** March 6, 2026
 
-## Essential Documents
-
+## Core Project Docs
 | File | Purpose |
-|------|---------|
-| [README.md](../README.md) | Project overview, structure, run commands |
-| [PROJECT_STATUS.md](../PROJECT_STATUS.md) | Phase-by-phase results, key findings, environment notes |
-| [TODO.md](../TODO.md) | Outstanding tasks and next steps |
-| [overview.tex](../overview.tex) | Formal research design document |
+|---|---|
+| `README.md` | High-level project summary and current status |
+| `PROJECT_STATUS.md` | Phase-by-phase status and canonical results |
+| `TODO.md` | Active work queue and next-step execution plan |
+| `overview.tex` | Research design and framing |
 
-## Source Documentation
-
+## Phase 7 GPT-2 Closure Docs
 | File | Purpose |
-|------|---------|
-| [src/SECTION3_README.md](../src/SECTION3_README.md) | Activation capture infrastructure (`activation_capture.py`, `model_registry.py`) |
-| [src/SECTION4_README.md](../src/SECTION4_README.md) | SAE architecture and training (`sae_architecture.py`, `sae_config.py`, `sae_training.py`) |
+|---|---|
+| `docs/PHASE7V3_TRACKC_FINDINGS.md` | Final GPT-2 Track C closure and decision matrix outcome |
+| `docs/TRACKC_NEGATIVE_FINDING.md` | Final negative-result claim boundary for GPT-2 Track C |
+| `experiments/PHASE7_LAYER_SWEEP_REVIEW.md` | Closure-oriented review summary and open inquiry boundary |
 
-## Future Work Planning Docs
+## Phase 7 Key Result Artifacts
+| Path | Purpose |
+|---|---|
+| `phase7_results/results/trackc_phase7v3_closure_note_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json` | Closure-grade non-smoke summary |
+| `phase7_results/results/trackc_phase7v3_decision_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json` | v3 decision artifact |
+| `phase7_results/results/optionb_canary_decision_phase7_optionbc_20260306_092554_phase7_optionbc.json` | Option B fair profile comparison decision |
+| `phase7_results/results/optionc_probe_phase7_optionbc_20260306_092554_phase7_optionbc.json` | Option C contrastive probe outcome |
+| `phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json` | Combined Option B/C closure summary |
+| `phase7_results/results/trackc_intervention_archive_manifest.json` | Archive index for Track C intervention-era artifacts |
 
+## Active Inquiry Docs
 | File | Purpose |
-|------|---------|
-| [TODO.md](../TODO.md) | Execution tracker and source of truth for pending work |
-| [experiments/PHASE7_LAYER_SWEEP_REVIEW.md](../experiments/PHASE7_LAYER_SWEEP_REVIEW.md) | Objective alignment, layer-sweep rationale, and runtime framing |
-| [docs/PHASE7_AUDITOR_PROTOCOL_SCOPE.md](PHASE7_AUDITOR_PROTOCOL_SCOPE.md) | Scope, novelty, claim boundary, and literature baseline for Phase 7 |
-| [docs/PHASE8_RERANKING_PLAN.md](PHASE8_RERANKING_PLAN.md) | Post-gate CoT-improvement execution plan (reranking-first) |
-| [phase6_implementation.md](../phase6_implementation.md) | Historical Phase 6 design baseline (not the live execution-status source) |
+|---|---|
+| `TODO.md` | Qwen diagnostic-first inquiry (`Q0`) go/no-go plan |
 
-## Key Recent Artifacts
-
-| Path | What it contains |
-|------|------------------|
-| `phase6_results/sweeps/20260226_164900_phase6_full_sweep/phase6_full/` | Completed Phase 6 full sweep run (102 train+eval configs) |
-| `phase6_results/rl_runs/20260226_104147_p6rl/` | Phase 6 RL top-2 follow-up run outputs |
-| `phase7_results/results/20260226_121004_layer_sweep_calib_calibration_summary.json` | Phase 7 calibration mini-sweep summary |
-| `phase7_results/interventions/20260226_121004_layer_sweep_calib_calibration_causal_throughput.json` | Phase 7 causal dry-run throughput summary |
-| `phase7_results/dataset/build_summary.json` | Phase 7 step-trace dataset build summary |
-
-## Archived Reports
-
-Execution reports and design documents from earlier runs are in
-[docs/archived_reports/](archived_reports/):
-
-| File | What it covers |
-|------|---------------|
-| `PHASE3_FULLSCALE_EXECUTION_GUIDE.md` | GPT-2 small single-layer probe execution (superseded) |
-| `PHASE4_EXECUTION_REPORT.md` | Phase 4 frontier SAE training run log (broken SAEs, superseded) |
-| `PHASE4_FINAL_SUMMARY.md` | Phase 4 summary (broken SAEs, superseded) |
-| `PHASE4_IMPLEMENTATION_SUMMARY.md` | Phase 4 implementation notes (superseded) |
-| `PHASE5_COMPLETION_REPORT.md` | Phase 5 Tasks 1–3 completion report (broken SAEs, superseded) |
-| `PHASE5_TASK4_REFACTOR_STATUS.md` | Multi-layer SAE refactor status (old numbering) |
-| `PHASE5_TASK4_TRAINING_STATUS.md` | Multi-layer SAE training status (old numbering) |
-| `PHASE5_TASK4_ANALYSIS_REPORT.md` | Multi-layer SAE transfer analysis (old numbering, now Phase 3) |
-| `PHASE5_TASK4_SPECIFICATION.md` | Multi-layer SAE specification (old numbering, now Phase 2/3) |
-| `PHASE6_DESIGN_SPECIFICATION.md` | Step-level CoT extension design (historical reference) |
+## Archived Material
+Historical execution reports and superseded plans are under `docs/archived_reports/`.

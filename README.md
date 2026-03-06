@@ -6,9 +6,9 @@
 
 This repository implements a phased framework for extracting, validating, and analyzing
 reasoning features from LLM activations using sparse autoencoders (SAEs). Phases 1-6 are
-complete, with the primary target being GPT-2 medium (24-layer, 1024D). The Phase 6 full
-layer sweep is complete. Phase 7 is implemented with calibration complete; the full broad sweep
-and causal shortlist runs are pending.
+complete, with the primary target being GPT-2 medium (24-layer, 1024D). Phase 7 for GPT-2 is
+closed with a documented Track C negative result and a final two-track deployment configuration.
+Qwen work is now a separate diagnostic-first inquiry path.
 
 ## Quick Navigation
 
@@ -36,7 +36,7 @@ source setup_env.sh          # activates .venv and sets PYTHONPATH
 | **4** | Arithmetic Feature Probing | ✅ | R²=0.977; +0.107 Δlog_prob at L22 (subspace) |
 | **5** | Feature Interpretation + Steering | ✅ | Mean-diff steering uniformly negative → distributed encoding |
 | **6** | Decoder Benchmark + Layer Sweep | ✅ | Full sweep complete (102 configs); best test top1=0.5628 (`raw_block8_00_07`) |
-| **7** | Causal CoT Verification Auditor | 🟡 | Two-track active: GPT-2 protocol gates + Qwen2.5-7B portability pilot |
+| **7** | Causal CoT Verification Auditor | ✅ (GPT-2 closed) | Track C negative for GPT-2; final config is two-track (`text=0.50`, `latent=0.50`) with structural penalties |
 
 See [PROJECT_STATUS.md](PROJECT_STATUS.md) for full details and key findings.
 
@@ -57,89 +57,29 @@ canonical paths listed in `PROJECT_STATUS.md`.
 For active execution planning and future work, see `TODO.md` and
 `experiments/PHASE7_LAYER_SWEEP_REVIEW.md`.
 
-## Phase 7 Pivot: Causal-Faithfulness Verifier (Primary Direction)
+## Phase 7 GPT-2 Closure
 
-The project direction is now to treat Phase 6 as instrumentation baseline and Phase 7 as the core
-faithfulness contribution. The target claim is:
+Phase 7 for GPT-2 is now closed with a negative Track C finding under the current protocol.
 
-`good readout != causal faithfulness` unless necessity + sufficiency + specificity checks pass.
+Canonical conclusion:
+- Arithmetic features are decodable and causally active.
+- Those features do not provide robust CoT-faithfulness discrimination on GPT-2.
+- Final GPT-2 deployment configuration is a two-track auditor:
+  - `text=0.50`, `latent=0.50`, `confidence=0.0`, `causal=0.0`
+  - structural penalties remain enabled.
 
-Phase 7 success gates (must all pass before CoT-improvement workflows):
-- Control-set AUROC on `causal_auditor` track `>= 0.85`
-- Unfaithful-control false positive rate `<= 0.05`
-- At least one documented `high latent_only / low causal_auditor` failure case
-- Explicit claim-boundary language preserved in benchmark outputs
+Primary closure references:
+- `docs/PHASE7V3_TRACKC_FINDINGS.md`
+- `docs/TRACKC_NEGATIVE_FINDING.md`
+- `phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json`
 
-Actionable run sequence:
-```bash
-# 1) Generate + parse paper-core controls
-.venv/bin/python3 phase7/generate_cot_controls.py --output phase7_results/controls/cot_controls_test_papercore.json
-.venv/bin/python3 phase7/parse_cot_to_states.py \
-  --controls phase7_results/controls/cot_controls_test_papercore.json \
-  --trace-dataset phase7_results/dataset/gsm8k_step_traces_test.pt \
-  --output phase7_results/controls/cot_controls_test_papercore_parsed.json
+## Qwen Inquiry (Diagnostic-First)
 
-# 2) Run shortlist causal checks, then audit + calibration + benchmark
-.venv/bin/python3 phase7/causal_audit.py <args>
-.venv/bin/python3 phase7/calibrate_audit_thresholds.py <args>
-.venv/bin/python3 phase7/benchmark_faithfulness.py <args>
-```
+Qwen is intentionally treated as a separate hypothesis test. The next step is a small diagnostic
+(`Q0`) to test whether control-conditioned hidden states separate faithful vs unfaithful variants
+at `=`-anchored positions before committing to a full Phase 7 Qwen pipeline.
 
-Do not move to reranking/filtering/reward-shaping until these gates pass on controls.
-
-## Phase 8 Preview: CoT Improvement (Reranking-First)
-
-Once Phase 7 gates pass, the first optimization track is **offline reranking**:
-
-1. Generate multiple CoT candidates per prompt.
-2. Score each trace with the Phase 7 auditor.
-3. Select the best candidate by a gated score rule.
-4. Compare against baseline decoding on answer accuracy + faithfulness metrics.
-
-Phase 8 is intentionally gated on Phase 7 verification quality; details are in
-`docs/PHASE8_RERANKING_PLAN.md`.
-
-## Phase 7 Two-Track Strategy (Protocol First, Portability Ready)
-
-Phase 7 now runs as two coordinated tracks:
-
-1. **Track A (GPT-2 medium): protocol validity**
-   - Objective: verify auditor mechanics (text/latent/causal disagreement detection).
-   - Success criteria: pass AUROC/FPR/separation gates above.
-
-2. **Track B (Qwen2.5-7B): portability and external relevance**
-   - Objective: ensure the same protocol can run on a modern CoT-capable model.
-   - Initial scope: adapter smoke tests + small text/latent/causal pilot before full parity.
-
-Implementation changes already in-repo:
-- `phase7/model_adapters/base.py` (shared adapter contract)
-- `phase7/model_registry.py` (model specs + defaults)
-- `phase7/model_adapters/gpt2_medium_adapter.py` (contract-conformant GPT-2 adapter)
-- `phase7/model_adapters/qwen25_7b_adapter.py` (pilot adapter)
-
-Model-select CLI pattern (backward-compatible defaults):
-```bash
-# GPT-2 default (explicit)
-.venv/bin/python3 phase7/causal_intervention_engine.py --model-key gpt2-medium ...
-
-# Qwen portability pilot
-.venv/bin/python3 phase7/causal_intervention_engine.py --model-key qwen2.5-7b ...
-```
-
-Dual invocation is supported for Phase 7 CLIs:
-```bash
-# script style
-.venv/bin/python3 phase7/train_state_decoders.py --help
-
-# module style
-.venv/bin/python3 -m phase7.train_state_decoders --help
-```
-
-Current limitation: subspace causal checks require per-model SAE assets; the Qwen track is
-adapter/benchmark-ready, while full causal patching requires Qwen-compatible SAE checkpoints.
-
-For protocol scope, novelty, and claims boundary against prior literature, see:
-`docs/PHASE7_AUDITOR_PROTOCOL_SCOPE.md`.
+The active queue and go/no-go criteria are in `TODO.md`.
 
 ## Project Structure
 

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RL-Decoder with SAE Features - Phase 7 GPT-2 Closure</title>
+  <style>
+    :root {
+      --bg: #f4f7f8;
+      --panel: #ffffff;
+      --ink: #142126;
+      --muted: #4d6168;
+      --line: #d5e0e4;
+      --accent: #0f766e;
+      --accent-soft: #d9f1ee;
+      --ok: #166534;
+      --warn: #b45309;
+      --shadow: 0 8px 24px rgba(20, 33, 38, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 10% 10%, #e9f7f5 0%, transparent 32%),
+        radial-gradient(circle at 90% 0%, #e8eef7 0%, transparent 35%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "IBM Plex Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 56px; }
+    .hero {
+      background: linear-gradient(135deg, #0f766e, #155e75);
+      color: #f4fffe;
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .hero h1 { margin: 0 0 8px; font-size: clamp(1.6rem, 2.6vw, 2.4rem); }
+    .hero p { margin: 6px 0; max-width: 960px; color: #d9f7f3; }
+
+    .meta {
+      margin-top: 12px;
+      font-size: 0.92rem;
+      color: #c4efe8;
+      display: grid;
+      gap: 4px;
+    }
+
+    .section {
+      margin-top: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    h2 { margin: 0 0 10px; font-size: 1.28rem; color: #0f3240; }
+    h3 { margin: 0 0 6px; font-size: 1.02rem; color: #10313f; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fbfeff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .badge-ok { color: var(--ok); background: #e8f6ec; border-color: #b6e2c3; }
+    .badge-warn { color: var(--warn); background: #fff4e6; border-color: #f6d4a5; }
+
+    .status-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+
+    .status-table th,
+    .status-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .status-table th {
+      color: #214655;
+      font-weight: 700;
+      background: #f7fbfc;
+    }
+
+    .callout {
+      margin-top: 10px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #0f3f3a;
+      font-size: 0.95rem;
+    }
+
+    .small { color: var(--muted); font-size: 0.9rem; }
+
+    code {
+      font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.87em;
+      background: #f2f6f7;
+      border: 1px solid #d7e1e4;
+      border-radius: 6px;
+      padding: 1px 5px;
+    }
+
+    ul { margin: 6px 0 0 18px; padding: 0; }
+    li { margin: 3px 0; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>RL-Decoder with SAE Features</h1>
+      <p>
+        This project tests whether internal arithmetic representations can be turned into
+        a meaningful Chain-of-Thought (CoT) faithfulness auditor, not just an answer predictor.
+      </p>
+      <p>
+        The GPT-2 Medium branch is now closed for Phase 7: strong mechanistic arithmetic evidence,
+        but Track C remains a negative result for faithfulness discrimination.
+      </p>
+      <div class="meta">
+        <div><strong>Project state:</strong> Phases 1-6 complete; Phase 7 GPT-2 closed; Qwen inquiry open.</div>
+        <div><strong>Final GPT-2 Phase 7 config:</strong> <code>text=0.50</code>, <code>latent=0.50</code>, structural penalties on.</div>
+        <div><strong>Status snapshot date:</strong> March 6, 2026.</div>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2>Motivation And Research Question</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Motivation</h3>
+          <ul>
+            <li>Models can output plausible reasoning that does not reflect internal computation.</li>
+            <li>Answer accuracy cannot certify reasoning faithfulness.</li>
+            <li>Mechanistic evidence is needed to separate genuine faithfulness from rationalization.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Core question (Phase 7)</h3>
+          <ul>
+            <li>Can a three-track auditor (<code>text</code>, <code>latent</code>, <code>causal</code>) discriminate faithful vs unfaithful CoT?</li>
+            <li>Can it do so under leakage-safe split policy and strict gate criteria?</li>
+            <li>Does mechanistic Track C add real marginal value?</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Current answer (GPT-2)</h3>
+          <ul>
+            <li>Track C does not clear closure-grade relevance for GPT-2 under this protocol.</li>
+            <li>Two-track auditing is the final GPT-2 output.</li>
+            <li>Qwen is a separate test of whether this is model-specific.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Phase-by-Phase Status</h2>
+      <table class="status-table">
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th>Status</th>
+            <th>What it established</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1-3</td>
+            <td><span class="badge badge-ok">Complete</span></td>
+            <td>Reliable SAE training, activation tracing, and representation instrumentation.</td>
+          </tr>
+          <tr>
+            <td>4 / 4r</td>
+            <td><span class="badge badge-ok">Complete</span></td>
+            <td>Arithmetic features are decodable and causally active (positive mechanistic signal).</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><span class="badge badge-ok">Complete</span></td>
+            <td>Feature interpretation and steering diagnostics support distributed/nonlinear encoding.</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><span class="badge badge-ok">Complete</span></td>
+            <td>Full decoder sweep complete (`102/102`), robust baseline readout matrix.</td>
+          </tr>
+          <tr>
+            <td>7 (GPT-2)</td>
+            <td><span class="badge badge-ok">Closed</span></td>
+            <td>Track C negative result; two-track (`text+latent`) final deployment choice.</td>
+          </tr>
+          <tr>
+            <td>7 (Qwen)</td>
+            <td><span class="badge badge-warn">Open Inquiry</span></td>
+            <td>Diagnostic-first `Q0` only; full pipeline conditional on viability signal.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Three Publishable GPT-2 Results</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Result 1: Mechanistic arithmetic is real</h3>
+          <ul>
+            <li>Arithmetic state is strongly decodable from hidden representations.</li>
+            <li>Subspace interventions produce positive causal movement in output behavior.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Result 2: Mechanism does not imply CoT faithfulness</h3>
+          <ul>
+            <li>Track C reformulations did not provide robust faithful/unfaithful discrimination for GPT-2.</li>
+            <li>This shows a measurable readout-versus-faithfulness gap.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Result 3: Text+structure still works as a detector</h3>
+          <ul>
+            <li>Fair Option B profile comparison yields composite AUROC around <code>0.836-0.838</code>.</li>
+            <li>Useful as a practical detector, but not a mechanistic faithfulness guarantee.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>What This Means For Claims</h2>
+      <table class="status-table">
+        <thead>
+          <tr>
+            <th>Claim type</th>
+            <th>Status</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>"GPT-2 arithmetic mechanism exists"</td>
+            <td><span class="badge badge-ok">Supported</span></td>
+            <td>Phase 4/4r probing and intervention evidence.</td>
+          </tr>
+          <tr>
+            <td>"Track C verifies GPT-2 CoT faithfulness"</td>
+            <td><span class="badge badge-warn">Not supported</span></td>
+            <td>Closure branch selected negative disposition for Track C.</td>
+          </tr>
+          <tr>
+            <td>"Phase 8 reranking should proceed under original gates"</td>
+            <td><span class="badge badge-warn">Blocked</span></td>
+            <td>Original latent/causal gate assumptions are not met for GPT-2.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        The key scientific story is the contrast: arithmetic representations are present and causally active,
+        but they do not track whether GPT-2's CoT text is faithful under this protocol.
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Canonical Closure Artifacts</h2>
+      <ul>
+        <li><code>phase7_results/results/trackc_phase7v3_closure_note_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json</code></li>
+        <li><code>phase7_results/results/trackc_phase7v3_decision_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json</code></li>
+        <li><code>phase7_results/results/optionb_canary_decision_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
+        <li><code>phase7_results/results/optionc_probe_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
+        <li><code>phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Qwen Next-Step Inquiry (Diagnostic-First)</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Q0 diagnostic design</h3>
+          <ul>
+            <li>Run 50 traces with faithful/unfaithful controls.</li>
+            <li>Use control-conditioned forward passes.</li>
+            <li>Measure within-trace hidden-state L2 separation at the `=` anchor.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Go/No-Go rule</h3>
+          <ul>
+            <li>Go only if separation is consistently above near-zero collapse.</li>
+            <li>If Q0 fails, do not start full Qwen Stage 3.</li>
+            <li>If Q0 passes, promote to full pipeline with explicit comparability gates.</li>
+          </ul>
+        </article>
+      </div>
+      <p class="small">See <code>TODO.md</code> for the exact Q0 execution and decision criteria.</p>
+    </section>
+  </main>
+</body>
+</html>

@@ -62,6 +62,10 @@ def _decode_records_from_features(
             x = torch.stack([build_input_tensor_from_record(r, cfg).float() for r in chunk], dim=0).to(device)
             out = decoder(x)
             log_probs = F.log_softmax(out["result_token_logits"], dim=-1)
+            op_probs = F.softmax(out["operator_logits"], dim=-1).cpu()
+            step_probs = F.softmax(out["step_type_logits"], dim=-1).cpu()
+            mag_probs = F.softmax(out["magnitude_logits"], dim=-1).cpu()
+            sign_probs = F.softmax(out["sign_logits"], dim=-1).cpu()
             top1_tok = out["result_token_logits"].argmax(dim=-1).cpu().tolist()
             top1_lp = log_probs.max(dim=-1).values.cpu().tolist()
             ops = out["operator_logits"].argmax(dim=-1).cpu().tolist()
@@ -94,8 +98,19 @@ def _decode_records_from_features(
                         },
                         "latent_pred_confidence": {
                             "result_token_logprob_top1": float(top1_lp[i]),
-                            "operator_prob": float(F.softmax(out["operator_logits"], dim=-1)[i, ops[i]].item()),
-                            "step_type_prob": float(F.softmax(out["step_type_logits"], dim=-1)[i, steps[i]].item()),
+                            "operator_prob": float(op_probs[i, ops[i]].item()),
+                            "step_type_prob": float(step_probs[i, steps[i]].item()),
+                            "sign_top1_prob": float(sign_probs[i, signs[i]].item()),
+                            "magnitude_top1_prob": float(mag_probs[i, mags[i]].item()),
+                            "operator_probs": {
+                                str(inv_op[j]): float(op_probs[i, j].item()) for j in range(op_probs.shape[1])
+                            },
+                            "sign_probs": {
+                                str(inv_sign[j]): float(sign_probs[i, j].item()) for j in range(sign_probs.shape[1])
+                            },
+                            "magnitude_probs": {
+                                str(inv_mag[j]): float(mag_probs[i, j].item()) for j in range(mag_probs.shape[1])
+                            },
                         },
                     }
                 )

@@ -1338,11 +1338,10 @@ def main() -> None:
         variables = [str(args.variable)]
     if not variables:
         raise ValueError("No variables provided")
-    if len(variables) > 1:
-        if not args.output_template:
-            raise ValueError("--output-template is required when --variables is used")
-        if "{variable}" not in str(args.output_template):
-            raise ValueError("--output-template must include '{variable}' placeholder")
+    if len(variables) > 1 and not args.output_template:
+        raise ValueError("--output-template is required when --variables is used")
+    if args.output_template and "{variable}" not in str(args.output_template):
+        raise ValueError("--output-template must include '{variable}' placeholder")
 
     if int(args.max_records) > int(args.max_records_cap):
         raise ValueError(
@@ -1690,7 +1689,7 @@ def main() -> None:
     for variable in variables:
         output_path = (
             str(args.output_template).format(variable=variable)
-            if len(variables) > 1
+            if args.output_template
             else str(args.output)
         )
         med_var = str(args.mediation_variable)

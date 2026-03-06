@@ -21,6 +21,7 @@ try:  # pragma: no cover
     from .parse_cot_to_states import align_parsed_to_trace
     from .step_claims import canonical_step_claims, parse_cot_text
     from .state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
+    from .trajectory_coherence import score_trajectory_coherence
 except ImportError:  # pragma: no cover
     from common import (
         CAUSAL_AUDIT_SCHEMA,
@@ -35,6 +36,7 @@ except ImportError:  # pragma: no cover
     from parse_cot_to_states import align_parsed_to_trace
     from step_claims import canonical_step_claims, parse_cot_text
     from state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
+    from trajectory_coherence import score_trajectory_coherence
 
 
 def default_thresholds() -> Dict[str, float]:
@@ -56,9 +58,13 @@ def default_thresholds() -> Dict[str, float]:
         "apply_marker_penalties_to_gate": False,
         "apply_marker_penalties_to_soundness": False,
         # Balanced score composition.
-        "text_score_weight": 0.35,
-        "latent_score_weight": 0.35,
-        "causal_score_weight": 0.30,
+        "text_score_weight": 0.50,
+        "latent_score_weight": 0.50,
+        "confidence_score_weight": 0.00,
+        "causal_score_weight": 0.00,
+        "confidence_field_operator_weight": 0.40,
+        "confidence_field_sign_weight": 0.30,
+        "confidence_field_magnitude_weight": 0.30,
         "text_component_text_match_weight": 0.40,
         "text_component_categorical_weight": 0.30,
         "text_component_numeric_weight": 0.30,
@@ -91,7 +97,7 @@ def _validate_threshold_weights(
             return weights
         return {k: float(v / total) for k, v in weights.items()}
 
-    top_keys = ["text_score_weight", "latent_score_weight", "causal_score_weight"]
+    top_keys = ["text_score_weight", "latent_score_weight", "confidence_score_weight", "causal_score_weight"]
     causal_keys = [
         "causal_component_necessity_weight",
         "causal_component_sufficiency_weight",
@@ -113,7 +119,7 @@ def _validate_threshold_weights(
             top_sum = float(sum(n.values()))
         else:
             raise ValueError(
-                f"Invalid thresholds: text/latent/causal weights must sum to 1.0, got {top_sum:.6f}"
+                f"Invalid thresholds: text/latent/confidence/causal weights must sum to 1.0, got {top_sum:.6f}"
             )
     if causal and abs(causal_sum - 1.0) > eps:
         if allow_auto_normalize:
@@ -127,7 +133,7 @@ def _validate_threshold_weights(
             )
 
     thr["_weight_validation"] = {
-        "text_latent_causal_sum": float(top_sum),
+        "text_latent_confidence_causal_sum": float(top_sum),
         "causal_component_sum": float(causal_sum),
         "auto_normalized": bool(allow_auto_normalize),
     }
@@ -212,6 +218,45 @@ def _resolve_causal_lookup_mode(
     return mode
 
 
+def _evaluate_confidence_defined_guard(
+    audits: List[Dict[str, Any]],
+    thresholds_payload: Dict[str, Any],
+    required_fraction: Optional[float],
+) -> Dict[str, Any]:
+    confidence_defined_n = sum(
+        1
+        for a in audits
+        if bool((a.get("benchmark_track_definedness") or {}).get("confidence_margin", False))
+    )
+    confidence_defined_fraction = (
+        float(confidence_defined_n / len(audits))
+        if audits
+        else None
+    )
+    confidence_weight = float((thresholds_payload.get("thresholds") or {}).get("confidence_score_weight", 0.0))
+    guard_required = (
+        isinstance(required_fraction, (int, float))
+        and float(required_fraction) > 0.0
+        and confidence_weight > 0.0
+    )
+    guard_pass = (
+        bool(
+            isinstance(confidence_defined_fraction, (int, float))
+            and confidence_defined_fraction >= float(required_fraction)
+        )
+        if guard_required
+        else None
+    )
+    return {
+        "confidence_defined_n": int(confidence_defined_n),
+        "confidence_defined_fraction": confidence_defined_fraction,
+        "confidence_weight": float(confidence_weight),
+        "guard_required": bool(guard_required),
+        "guard_threshold": (float(required_fraction) if isinstance(required_fraction, (int, float)) else None),
+        "guard_pass": guard_pass,
+    }
+
+
 def _step_status_from_components(step: Dict[str, Any], thr: Dict[str, float]) -> str:
     if step.get("unverifiable_text"):
         return "unverifiable_text"
@@ -247,19 +292,26 @@ def _pass_to_soft_score(v: Optional[bool]) -> float:
     return 0.5
 
 
-def _score_step(step: Dict[str, Any], thr: Dict[str, float]) -> Tuple[float, Dict[str, Any]]:
+def _score_step(
+    step: Dict[str, Any],
+    thr: Dict[str, float],
+    *,
+    confidence_score: Optional[float] = None,
+) -> Tuple[float, Dict[str, Any]]:
     if step.get("unverifiable_text"):
         score = float(thr.get("unverifiable_step_score", 0.05))
         return score, {
             "text_score": 0.0,
             "latent_score": 0.0,
+            "confidence_score": 0.0,
             "causal_score": 0.0,
             "base_score": score,
             "penalties": {},
             "weights": {
-                "text_score_weight": float(thr.get("text_score_weight", 0.35)),
-                "latent_score_weight": float(thr.get("latent_score_weight", 0.35)),
-                "causal_score_weight": float(thr.get("causal_score_weight", 0.30)),
+                "text_score_weight": float(thr.get("text_score_weight", 0.50)),
+                "latent_score_weight": float(thr.get("latent_score_weight", 0.50)),
+                "confidence_score_weight": float(thr.get("confidence_score_weight", 0.00)),
+                "causal_score_weight": float(thr.get("causal_score_weight", 0.00)),
             },
         }
     text_match = float(step.get("text_reference_agreement", step.get("text_latent_agreement", 0.0)))
@@ -283,10 +335,19 @@ def _score_step(step: Dict[str, Any], thr: Dict[str, float]) -> Tuple[float, Dic
         + float(thr.get("causal_component_mediation_weight", 0.20)) * mediation_score
     )
 
-    text_weight = float(thr.get("text_score_weight", 0.35))
-    latent_weight = float(thr.get("latent_score_weight", 0.35))
-    causal_weight = float(thr.get("causal_score_weight", 0.30))
-    base_score = text_weight * text_score + latent_weight * latent_match + causal_weight * causal_score
+    text_weight = float(thr.get("text_score_weight", 0.50))
+    latent_weight = float(thr.get("latent_score_weight", 0.50))
+    conf_weight = float(thr.get("confidence_score_weight", 0.00))
+    causal_weight = float(thr.get("causal_score_weight", 0.00))
+    if not isinstance(confidence_score, (int, float)) or not math.isfinite(float(confidence_score)):
+        confidence_score = float(step.get("step_confidence_score", 0.5))
+    conf_score = float(max(0.0, min(1.0, float(confidence_score))))
+    base_score = (
+        text_weight * text_score
+        + latent_weight * latent_match
+        + conf_weight * conf_score
+        + causal_weight * causal_score
+    )
 
     penalties: Dict[str, float] = {}
     diagnostic_penalties: Dict[str, float] = {}
@@ -316,6 +377,7 @@ def _score_step(step: Dict[str, Any], thr: Dict[str, float]) -> Tuple[float, Dic
     return score, {
         "text_score": float(text_score),
         "latent_score": float(latent_match),
+        "confidence_score": float(conf_score),
         "causal_score": float(causal_score),
         "base_score": float(base_score),
         "penalties": penalties,
@@ -324,6 +386,7 @@ def _score_step(step: Dict[str, Any], thr: Dict[str, float]) -> Tuple[float, Dic
         "weights": {
             "text_score_weight": text_weight,
             "latent_score_weight": latent_weight,
+            "confidence_score_weight": conf_weight,
             "causal_score_weight": causal_weight,
             "text_component_text_match_weight": float(thr.get("text_component_text_match_weight", 0.40)),
             "text_component_categorical_weight": float(thr.get("text_component_categorical_weight", 0.30)),
@@ -365,6 +428,114 @@ def _score_step_causal(step: Dict[str, Any], thr: Dict[str, float]) -> Tuple[flo
             "causal_component_specificity_weight": float(thr.get("causal_component_specificity_weight", 0.20)),
             "causal_component_mediation_weight": float(thr.get("causal_component_mediation_weight", 0.20)),
         },
+    }
+
+
+def _confidence_margin_score(
+    text_claim: Optional[Dict[str, Any]],
+    latent_confidence: Optional[Dict[str, Any]],
+    *,
+    fields: Tuple[str, ...] = ("operator", "sign", "magnitude_bucket"),
+    field_weights: Optional[Dict[str, float]] = None,
+) -> Tuple[float, Dict[str, Any]]:
+    if not isinstance(text_claim, dict) or not isinstance(latent_confidence, dict):
+        return 0.5, {
+            "defined": False,
+            "reason": "missing_text_or_latent_confidence",
+            "per_field": {},
+            "mean_margin": None,
+            "used_fields": [],
+            "weights": {},
+        }
+
+    default_weights = {"operator": 0.40, "sign": 0.30, "magnitude_bucket": 0.30}
+    weights_src = dict(default_weights)
+    if isinstance(field_weights, dict):
+        for k, v in field_weights.items():
+            if k in weights_src and isinstance(v, (int, float)):
+                weights_src[k] = float(v)
+
+    score_vals: List[Tuple[float, float]] = []
+    margins: List[float] = []
+    per_field: Dict[str, Any] = {}
+    used_fields: List[str] = []
+    weight_total = 0.0
+    for field in fields:
+        claimed_val = text_claim.get(field)
+        if claimed_val is None:
+            continue
+        probs_key = (
+            "magnitude_probs" if field == "magnitude_bucket" else f"{field}_probs"
+        )
+        top1_key = (
+            "operator_prob"
+            if field == "operator"
+            else ("sign_top1_prob" if field == "sign" else "magnitude_top1_prob")
+        )
+        probs = latent_confidence.get(probs_key)
+        if not isinstance(probs, dict) or not probs:
+            continue
+        p_claimed = float(probs.get(str(claimed_val), 0.0))
+        top1_prob = latent_confidence.get(top1_key)
+        if not isinstance(top1_prob, (int, float)):
+            top1_prob = max((float(v) for v in probs.values() if isinstance(v, (int, float))), default=0.0)
+        p_top1 = float(top1_prob)
+        margin = float(p_claimed - p_top1)
+        w = float(weights_src.get(field, 0.0))
+        if w <= 0.0:
+            continue
+        used_fields.append(field)
+        score_vals.append((w, p_claimed))
+        margins.append(margin)
+        weight_total += w
+        per_field[field] = {
+            "claimed_value": claimed_val,
+            "p_claimed": p_claimed,
+            "p_top1": p_top1,
+            "margin_claimed_minus_top1": margin,
+        }
+
+    if weight_total <= 0.0:
+        return 0.5, {
+            "defined": False,
+            "reason": "no_usable_confidence_fields",
+            "per_field": per_field,
+            "mean_margin": None,
+            "used_fields": used_fields,
+            "weights": weights_src,
+        }
+
+    score = float(sum(w * s for w, s in score_vals) / weight_total)
+    return score, {
+        "defined": True,
+        "per_field": per_field,
+        "mean_margin": (_mean(margins) if margins else None),
+        "used_fields": used_fields,
+        "weights": weights_src,
+    }
+
+
+def _score_step_confidence(step: Dict[str, Any], thr: Dict[str, float]) -> Tuple[float, Dict[str, Any]]:
+    score, detail = _confidence_margin_score(
+        step.get("text_claim_state"),
+        step.get("latent_pred_confidence"),
+        field_weights={
+            "operator": float(thr.get("confidence_field_operator_weight", 0.40)),
+            "sign": float(thr.get("confidence_field_sign_weight", 0.30)),
+            "magnitude_bucket": float(thr.get("confidence_field_magnitude_weight", 0.30)),
+        },
+    )
+    penalties: Dict[str, float] = {}
+    if step.get("off_manifold_intervention"):
+        penalties["off_manifold_intervention"] = 0.25
+    if step.get("critical_numeric_contradiction"):
+        penalties["critical_numeric_contradiction"] = 0.10
+    final = max(0.0, min(1.0, float(score) - sum(float(v) for v in penalties.values())))
+    return final, {
+        "base_score": float(score),
+        "penalties": penalties,
+        "defined": bool(detail.get("defined", False)),
+        "detail": detail,
     }
 
 
@@ -420,10 +591,19 @@ def _paper_metrics_for_trace(
     latent_scores = [float(s.get("text_latent_agreement", 0.0)) for s in latent_available_critical]
     latent_cat_scores = [float(s.get("text_latent_categorical_agreement", 0.0)) for s in latent_available_critical]
     latent_num_scores = [float(s.get("text_latent_numeric_agreement", 0.0)) for s in latent_available_critical]
+    confidence_available_critical = [s for s in parseable_critical if bool(s.get("confidence_score_defined", False))]
+    confidence_scores = [float(s.get("step_confidence_score", 0.5)) for s in confidence_available_critical]
+    confidence_margins = []
+    for s in confidence_available_critical:
+        cm = (s.get("confidence_score_components", {}).get("detail", {}) or {}).get("mean_margin")
+        if isinstance(cm, (int, float)):
+            confidence_margins.append(float(cm))
     text_track_defined = len(parseable_critical) > 0
     latent_track_defined = len(latent_available_critical) > 0
+    confidence_track_defined = len(confidence_available_critical) > 0
     text_only = _mean(text_scores) if text_track_defined else 0.5
     latent_only = _mean(latent_scores) if latent_track_defined else 0.5
+    confidence_margin = _mean(confidence_scores) if confidence_track_defined else 0.5
 
     temporal_pass = bool(temporal.get("pass", False)) if temporal else True
     contrad_corr = int(rev.get("contradicted_corrections", 0) or 0)
@@ -501,24 +681,31 @@ def _paper_metrics_for_trace(
     composite_track = _mean([float(s.get("step_score", 0.0)) for s in crit])
     # Pure causal track uses intervention-only per-step score.
     causal_track = _mean([float(s.get("step_causal_score", 0.0)) for s in crit])
+    trajectory_score, trajectory_components = score_trajectory_coherence(crit, crit)
 
     benchmark_track_scores = {
         # Keep this track text-only by construction (raw text-vs-gold alignment),
         # without temporal/revision/marker penalties that belong to soundness_proxy.
         "text_only": text_only,
         "latent_only": latent_only,
+        "confidence_margin": confidence_margin,
+        "trajectory_coherence": trajectory_score,
         "causal_auditor": causal_track,
         "composite": composite_track,
     }
     track_definedness = {
         "text_only": bool(text_track_defined),
         "latent_only": bool(latent_track_defined),
+        "confidence_margin": bool(confidence_track_defined),
+        "trajectory_coherence": bool(trajectory_components.get("defined", False)),
         "causal_auditor": bool(len(crit) > 0),
         "composite": bool(len(crit) > 0),
     }
     undefined_track_policy = {
         "text_only": "fallback_0p5_when_no_parseable_critical_steps",
         "latent_only": "fallback_0p5_when_no_parseable_steps_with_latent_predictions",
+        "confidence_margin": "fallback_0p5_when_no_parseable_steps_with_confidence_distribution",
+        "trajectory_coherence": "fallback_0p5_when_insufficient_cross_step_chain_information",
         "causal_auditor": "defined_if_any_critical_step_exists",
         "composite": "defined_if_any_critical_step_exists",
     }
@@ -585,6 +772,13 @@ def _paper_metrics_for_trace(
             "mean_text_vs_latent_numeric_match": (_mean(latent_num_scores) if latent_track_defined else 0.5),
             "num_critical_steps": len(crit),
         },
+        "confidence_track_score_components": {
+            "aggregation": "mean_critical_step_decoder_claimed_class_probability",
+            "mean_confidence_margin_score": confidence_margin,
+            "mean_claimed_minus_top1_margin": (_mean(confidence_margins) if confidence_margins else None),
+            "num_critical_steps_with_confidence": int(len(confidence_available_critical)),
+        },
+        "trajectory_coherence_score_components": trajectory_components,
     }
 
 
@@ -647,6 +841,7 @@ def _audit_one_control(
             latent_key = (trace_key_prefix, step_idx)
             latent_pred = latent_pred_idx.get(latent_key)
         latent_state = latent_pred["latent_pred_state"] if latent_pred else None
+        latent_confidence = latent_pred.get("latent_pred_confidence") if isinstance(latent_pred, dict) else None
         text_state = parsed_by_step.get(step_idx)
         tcmp = compare_states(text_state, latent_state)
         gcmp = compare_states(text_state, row["structured_state"])
@@ -715,6 +910,7 @@ def _audit_one_control(
             "step_type": row["structured_state"].get("step_type"),
             "text_claim_state": text_state,
             "latent_pred_state": latent_state,
+            "latent_pred_confidence": latent_confidence,
             "gold_structured_state": row["structured_state"],
             "text_latent_agreement": text_match,
             "text_latent_categorical_agreement": text_cat_match,
@@ -757,7 +953,11 @@ def _audit_one_control(
             },
         }
         step_out["status"] = _step_status_from_components(step_out, thr)
-        step_score, score_components = _score_step(step_out, thr)
+        step_confidence_score, confidence_score_components = _score_step_confidence(step_out, thr)
+        step_out["step_confidence_score"] = step_confidence_score
+        step_out["confidence_score_defined"] = bool(confidence_score_components.get("defined", False))
+        step_out["confidence_score_components"] = confidence_score_components
+        step_score, score_components = _score_step(step_out, thr, confidence_score=step_confidence_score)
         step_causal_score, causal_score_components = _score_step_causal(step_out, thr)
         step_out["step_score"] = step_score
         step_out["step_causal_score"] = step_causal_score
@@ -859,6 +1059,7 @@ def _audit_one_control(
         "undefined_track_policy": paper_metrics.get("undefined_track_policy", {}),
         "score_components": paper_metrics.get("score_components", {}),
         "latent_track_score_components": paper_metrics["latent_track_score_components"],
+        "confidence_track_score_components": paper_metrics.get("confidence_track_score_components", {}),
         "temporal_consistency_pass": temporal_pass,
         "revision_consistency_pass": revision_consistency_pass,
         "steps": step_rows,
@@ -972,6 +1173,15 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     p.add_argument("--max-controls", type=int, default=None)
+    p.add_argument(
+        "--require-confidence-defined-fraction",
+        type=float,
+        default=None,
+        help=(
+            "Optional hard guard for confidence-enabled runs: if confidence_score_weight > 0, "
+            "require at least this fraction of audits to have confidence_margin defined."
+        ),
+    )
     p.add_argument("--output", default="phase7_results/audits/text_causal_audit_controls.json")
     return p.parse_args()
 
@@ -1100,6 +1310,18 @@ def main() -> None:
         if causal_lookup_mode == "control_conditioned"
         else None
     )
+    confidence_guard = _evaluate_confidence_defined_guard(
+        audits,
+        thresholds_payload,
+        required_fraction=args.require_confidence_defined_fraction,
+    )
+    if bool(confidence_guard.get("guard_required")) and not bool(confidence_guard.get("guard_pass")):
+        raise ValueError(
+            "Confidence definedness guard failed: "
+            f"defined_fraction={confidence_guard.get('confidence_defined_fraction')!r} "
+            f"< required={float(confidence_guard.get('guard_threshold')):.6f} "
+            f"with confidence_score_weight={float(confidence_guard.get('confidence_weight')):.6f}."
+        )
 
     summary = {
         "schema_version": CAUSAL_AUDIT_SCHEMA,
@@ -1122,6 +1344,11 @@ def main() -> None:
         "causal_variant_lookup_hits": int(lookup_hits),
         "causal_variant_lookup_misses": int(lookup_misses),
         "causal_variant_lookup_hit_fraction": lookup_hit_fraction,
+        "confidence_defined_n": int(confidence_guard.get("confidence_defined_n", 0)),
+        "confidence_defined_fraction": confidence_guard.get("confidence_defined_fraction"),
+        "confidence_defined_guard_required": bool(confidence_guard.get("guard_required")),
+        "confidence_defined_guard_threshold": confidence_guard.get("guard_threshold"),
+        "confidence_defined_guard_pass": confidence_guard.get("guard_pass"),
     }
 
     out_path = Path(args.output)

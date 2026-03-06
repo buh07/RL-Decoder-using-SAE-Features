@@ -57,7 +57,16 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--target-fpr", type=float, default=0.05)
     p.add_argument(
         "--score-track",
-        choices=["causal_auditor", "text_only", "latent_only", "composite"],
+        choices=[
+            "causal_auditor",
+            "text_only",
+            "latent_only",
+            "composite",
+            "confidence_margin",
+            "trajectory_coherence",
+            "contrastive_probe",
+            "representation_geometry",
+        ],
         default="causal_auditor",
         help="Which score to calibrate threshold for (default keeps v1 behavior on overall_score)",
     )
@@ -220,8 +229,25 @@ def main() -> None:
 
     track_thresholds = None
     if args.all_tracks:
+        available_tracks = set()
+        for a in audits:
+            tracks = a.get("benchmark_track_scores") or {}
+            if isinstance(tracks, dict):
+                available_tracks.update(str(k) for k in tracks.keys())
+        track_order = [
+            "text_only",
+            "latent_only",
+            "confidence_margin",
+            "trajectory_coherence",
+            "contrastive_probe",
+            "representation_geometry",
+            "causal_auditor",
+            "composite",
+        ]
+        required_tracks = {"text_only", "latent_only", "causal_auditor", "composite"}
+        tracks_to_calibrate = [t for t in track_order if t in available_tracks or t in required_tracks]
         track_thresholds = {}
-        for track in ["text_only", "latent_only", "causal_auditor", "composite"]:
+        for track in tracks_to_calibrate:
             calibrated = _calibrate_track(
                 audits,
                 track,

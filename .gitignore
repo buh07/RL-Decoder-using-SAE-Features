@@ -81,6 +81,21 @@ phase7_results/results/trackA_gate_matrix_phase7v2_*.json
 phase7_results/results/trackA_gate_matrix_phase7v3*.json
 phase7_results/results/v1_vs_v2_scoring_comparison.json
 
+# Phase 7 results: ignore-by-default, allowlist curated closure summaries.
+phase7_results/results/*.json
+phase7_results/results/*.md
+phase7_results/results/*.jsonl
+phase7_results/results/*.jsonl.gz
+phase7_results/results/_tmp*
+phase7_results/results/*smoke*
+
+!phase7_results/results/optionb_canary_decision_phase7_optionbc_20260306_092554_phase7_optionbc.json
+!phase7_results/results/optionc_probe_phase7_optionbc_20260306_092554_phase7_optionbc.json
+!phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json
+!phase7_results/results/trackc_phase7v3_closure_note_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json
+!phase7_results/results/trackc_phase7v3_decision_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json
+!phase7_results/results/trackc_intervention_archive_manifest.json
+
 # Python virtual environments
 ENV/
 env.bak/
