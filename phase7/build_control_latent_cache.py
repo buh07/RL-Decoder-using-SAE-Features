@@ -14,9 +14,9 @@ REPO_ROOT = THIS_DIR.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 try:  # pragma: no cover
-    from .common import load_json, save_json
+    from .common import load_json, save_json, sha256_file, write_rows_sidecar
+    from .control_token_anchor import collect_control_step_token_positions
     from .model_registry import create_adapter, resolve_model_spec
-    from .parse_cot_to_states import canonical_step_claims, parse_cot_text
     from .state_decoder_core import (
         MAG_TO_ID,
         OP_TO_ID,
@@ -25,9 +25,9 @@ try:  # pragma: no cover
         load_model_from_checkpoint,
     )
 except ImportError:  # pragma: no cover
-    from common import load_json, save_json
+    from common import load_json, save_json, sha256_file, write_rows_sidecar
+    from control_token_anchor import collect_control_step_token_positions
     from model_registry import create_adapter, resolve_model_spec
-    from parse_cot_to_states import canonical_step_claims, parse_cot_text
     from state_decoder_core import (
         MAG_TO_ID,
         OP_TO_ID,
@@ -37,44 +37,6 @@ except ImportError:  # pragma: no cover
     )
 
 from phase6.pipeline_utils import build_input_tensor_from_record  # type: ignore  # noqa: E402
-
-
-def _line_end_token_pos(tokenizer, text: str, char_end: int) -> int:
-    end = max(0, min(int(char_end), len(text)))
-    prefix = text[:end]
-    toks = tokenizer(prefix, return_tensors="pt")
-    ids = toks.input_ids[0]
-    if ids.numel() <= 0:
-        return 0
-    return int(ids.shape[0] - 1)
-
-
-def _collect_canonical_step_positions(control: dict, parse_mode: str, tokenizer) -> List[Dict[str, int]]:
-    cot_text = str(control.get("cot_text", ""))
-    parsed = parse_cot_text(cot_text, parse_mode=parse_mode)
-    claims = canonical_step_claims(parsed)
-    line_spans = list(control.get("cot_line_spans", []) or [])
-    rows: List[Dict[str, int]] = []
-    for step_idx in sorted(claims):
-        state = claims[step_idx]
-        if state is None:
-            continue
-        line_idx = int(state.get("observed_line_index", -1))
-        if line_idx < 0 or line_idx >= len(line_spans):
-            continue
-        span = line_spans[line_idx]
-        if not isinstance(span, dict):
-            continue
-        char_end = int(span.get("char_end", 0))
-        tok_pos = _line_end_token_pos(tokenizer, cot_text, char_end)
-        rows.append(
-            {
-                "step_idx": int(step_idx),
-                "line_index": int(line_idx),
-                "token_pos": int(tok_pos),
-            }
-        )
-    return rows
 
 
 def _decode_records_from_features(
@@ -167,9 +129,36 @@ def parse_args() -> argparse.Namespace:
         help="Activation stats directory used to normalize hidden states before SAE encoding.",
     )
     p.add_argument("--parse-mode", choices=["template_only", "hybrid"], default="hybrid")
+    p.add_argument(
+        "--token-anchor",
+        choices=["eq_like", "line_end"],
+        default="eq_like",
+        help=(
+            "Token anchor for per-step hidden extraction. eq_like anchors to equation-style '=' "
+            "positions when available; line_end keeps legacy behavior."
+        ),
+    )
+    p.add_argument(
+        "--anchor-priority",
+        choices=["template_first", "equation_first", "leftmost_eq"],
+        default="template_first",
+        help="Anchor rule priority when multiple equation-like candidates appear on the same line.",
+    )
     p.add_argument("--device", default="cuda:0")
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--max-controls", type=int, default=None)
+    p.add_argument(
+        "--rows-format",
+        choices=["json", "jsonl.gz"],
+        default="jsonl.gz",
+        help="Storage format for row-heavy payload section.",
+    )
+    p.add_argument(
+        "--rows-inline",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Inline rows in output JSON instead of sidecar rows artifact.",
+    )
     p.add_argument(
         "--allow-model-key-mismatch",
         action=argparse.BooleanOptionalAction,
@@ -238,6 +227,17 @@ def main() -> None:
     out_rows: List[dict] = []
     skipped_controls = 0
     controls_with_rows = 0
+    position_contract_validated = True
+    anchor_cov_totals = {
+        "eq_like_rows": 0,
+        "line_end_rows": 0,
+        "fallback_rows": 0,
+        "total_rows": 0,
+    }
+    tokenization_summary = {
+        "offset_alignment_degraded_rows": 0,
+        "special_tokens_policy_counts": {},
+    }
 
     for i, ctrl in enumerate(controls):
         trace_id = str(ctrl.get("trace_id"))
@@ -248,7 +248,24 @@ def main() -> None:
             skipped_controls += 1
             continue
 
-        step_pos_rows = _collect_canonical_step_positions(ctrl, args.parse_mode, adapter.tokenizer)
+        pos_payload = collect_control_step_token_positions(
+            ctrl,
+            adapter,
+            parse_mode=args.parse_mode,
+            token_anchor=args.token_anchor,
+            anchor_priority=args.anchor_priority,
+        )
+        step_pos_rows = list(pos_payload.get("rows", []))
+        cov = dict(pos_payload.get("anchor_coverage", {}) or {})
+        for k in anchor_cov_totals:
+            anchor_cov_totals[k] += int(cov.get(k, 0))
+        tok_meta = dict(pos_payload.get("tokenization_metadata", {}) or {})
+        policy = str(tok_meta.get("special_tokens_policy", "unknown"))
+        tokenization_summary["special_tokens_policy_counts"][policy] = int(
+            tokenization_summary["special_tokens_policy_counts"].get(policy, 0) + 1
+        )
+        if bool(tok_meta.get("offset_alignment_degraded", False)):
+            tokenization_summary["offset_alignment_degraded_rows"] += int(len(step_pos_rows))
         if not step_pos_rows:
             skipped_controls += 1
             continue
@@ -268,7 +285,28 @@ def main() -> None:
 
         records: List[dict] = []
         for sp in step_pos_rows:
-            pos = max(0, min(int(sp["token_pos"]), seq_len - 1))
+            hidden_pos = int(sp.get("hidden_token_pos_0b", sp["token_pos"]))
+            eq_pos = int(sp.get("eq_token_pos_0b", sp["eq_token_pos"]))
+            result_pos = int(sp.get("result_token_pos_0b", sp["result_token_pos"]))
+            eq_idx_1b = int(sp.get("eq_tok_idx_1b", eq_pos + 1))
+            result_idx_1b = int(sp.get("result_tok_idx_1b", result_pos + 1))
+            if eq_idx_1b != eq_pos + 1:
+                raise RuntimeError(
+                    f"position contract violation: eq_tok_idx_1b={eq_idx_1b} != eq_token_pos_0b+1={eq_pos + 1}"
+                )
+            if result_idx_1b != result_pos + 1:
+                raise RuntimeError(
+                    "position contract violation: "
+                    f"result_tok_idx_1b={result_idx_1b} != result_token_pos_0b+1={result_pos + 1}"
+                )
+            if args.token_anchor == "eq_like" and hidden_pos != eq_pos:
+                raise RuntimeError(
+                    "position contract violation for eq_like: "
+                    f"hidden_token_pos_0b={hidden_pos} != eq_token_pos_0b={eq_pos}"
+                )
+            pos = max(0, min(int(hidden_pos), seq_len - 1))
+            eq_pos = max(0, min(int(eq_pos), seq_len - 1))
+            result_pos = max(0, min(int(result_pos), seq_len - 1))
             raw_hidden = torch.stack(
                 [hidden_states[layer_i][0, pos, :].detach().float().cpu() for layer_i in range(num_layers)],
                 dim=0,
@@ -304,6 +342,10 @@ def main() -> None:
         for p in preds:
             step_idx = int(p["step_idx"])
             line_meta = next((x for x in step_pos_rows if int(x["step_idx"]) == step_idx), None)
+            if line_meta is not None and not bool(line_meta.get("anchor_span_contains_anchor_char", False)):
+                raise RuntimeError(
+                    f"anchor span contract violated for trace_id={trace_id}, variant={variant}, step_idx={step_idx}"
+                )
             out_rows.append(
                 {
                     "trace_id": trace_id,
@@ -314,19 +356,86 @@ def main() -> None:
                     "latent_pred_confidence": p.get("latent_pred_confidence"),
                     "line_index": (int(line_meta["line_index"]) if line_meta is not None else None),
                     "token_pos": (int(line_meta["token_pos"]) if line_meta is not None else None),
+                    "eq_token_pos": (int(line_meta["eq_token_pos"]) if line_meta is not None else None),
+                    "result_token_pos": (int(line_meta["result_token_pos"]) if line_meta is not None else None),
+                    "hidden_token_pos_0b": (
+                        int(line_meta["hidden_token_pos_0b"]) if line_meta is not None else None
+                    ),
+                    "eq_token_pos_0b": (
+                        int(line_meta["eq_token_pos_0b"]) if line_meta is not None else None
+                    ),
+                    "result_token_pos_0b": (
+                        int(line_meta["result_token_pos_0b"]) if line_meta is not None else None
+                    ),
+                    "eq_tok_idx_1b": (int(line_meta["eq_tok_idx_1b"]) if line_meta is not None else None),
+                    "result_tok_idx_1b": (
+                        int(line_meta["result_tok_idx_1b"]) if line_meta is not None else None
+                    ),
+                    "position_convention_version": (
+                        str(line_meta["position_convention_version"]) if line_meta is not None else "phase7_pos_contract_v1"
+                    ),
+                    "token_anchor_mode": (
+                        str(line_meta["token_anchor_mode"]) if line_meta is not None else str(args.token_anchor)
+                    ),
+                    "token_anchor_reason": (
+                        str(line_meta["token_anchor_reason"]) if line_meta is not None else "unknown"
+                    ),
+                    "selected_anchor_rule": (
+                        str(line_meta.get("selected_anchor_rule", "unknown")) if line_meta is not None else "unknown"
+                    ),
+                    "anchor_candidate_matches": (
+                        list(line_meta.get("anchor_candidate_matches", [])) if line_meta is not None else []
+                    ),
+                    "anchor_char_index": (int(line_meta["anchor_char_index"]) if line_meta is not None else None),
+                    "anchor_token_span_start": (
+                        int(line_meta["anchor_token_span_start"]) if line_meta is not None else None
+                    ),
+                    "anchor_token_span_end": (
+                        int(line_meta["anchor_token_span_end"]) if line_meta is not None else None
+                    ),
+                    "anchor_span_contains_anchor_char": (
+                        bool(line_meta["anchor_span_contains_anchor_char"]) if line_meta is not None else None
+                    ),
+                    "special_tokens_policy": (
+                        str(line_meta.get("special_tokens_policy", tok_meta.get("special_tokens_policy", "unknown")))
+                        if line_meta is not None
+                        else str(tok_meta.get("special_tokens_policy", "unknown"))
+                    ),
+                    "num_special_tokens_prefix": (
+                        int(line_meta.get("num_special_tokens_prefix", tok_meta.get("num_special_tokens_prefix", 0)))
+                        if line_meta is not None
+                        else int(tok_meta.get("num_special_tokens_prefix", 0))
+                    ),
+                    "offset_alignment_degraded": (
+                        bool(line_meta.get("offset_alignment_degraded", tok_meta.get("offset_alignment_degraded", False)))
+                        if line_meta is not None
+                        else bool(tok_meta.get("offset_alignment_degraded", False))
+                    ),
                 }
             )
         controls_with_rows += 1
         if (i + 1) % 25 == 0:
             print(f"[build_control_latent_cache] processed {i + 1}/{len(controls)} controls")
 
+    rows_payload = write_rows_sidecar(
+        args.output,
+        out_rows,
+        rows_format=str(args.rows_format),
+        rows_inline=bool(args.rows_inline),
+    )
     payload = {
         "schema_version": "phase7_control_latent_cache_v1",
         "controls_source": str(args.controls),
+        "controls_source_sha256": sha256_file(args.controls),
         "state_decoder_checkpoint": str(args.state_decoder_checkpoint),
+        "state_decoder_checkpoint_sha256": sha256_file(args.state_decoder_checkpoint),
         "latent_source": "variant_conditioned",
         "index_key": ["trace_id", "control_variant", "step_idx"],
         "parse_mode_used": str(args.parse_mode),
+        "token_anchor_mode": str(args.token_anchor),
+        "anchor_priority": str(args.anchor_priority),
+        "position_convention_version": "phase7_pos_contract_v1",
+        "position_contract_validated": bool(position_contract_validated),
         "model_metadata": {
             "model_key": str(spec.model_key),
             "model_family": str(spec.model_family),
@@ -349,7 +458,18 @@ def main() -> None:
         "num_controls_with_rows": int(controls_with_rows),
         "num_controls_skipped": int(skipped_controls),
         "num_rows": int(len(out_rows)),
-        "rows": out_rows,
+        "anchor_coverage_summary": {
+            **anchor_cov_totals,
+            "eq_like_fraction": float(anchor_cov_totals["eq_like_rows"] / max(1, anchor_cov_totals["total_rows"])),
+        },
+        "tokenization_summary": {
+            "offset_alignment_degraded_rows": int(tokenization_summary["offset_alignment_degraded_rows"]),
+            "special_tokens_policy_counts": {
+                str(k): int(v)
+                for k, v in sorted(tokenization_summary["special_tokens_policy_counts"].items())
+            },
+        },
+        **rows_payload,
     }
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)

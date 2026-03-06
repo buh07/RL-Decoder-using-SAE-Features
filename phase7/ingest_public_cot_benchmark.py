@@ -53,6 +53,15 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional controls-compatible payload for phase7/causal_audit.py",
     )
+    p.add_argument(
+        "--strict-external-labels",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Reject proxy/derived labels for labeled benchmark mode. "
+            "Forbidden sources: answer_match_proxy, derived_from_model_score, heuristic_proxy."
+        ),
+    )
     return p.parse_args()
 
 
@@ -115,9 +124,23 @@ def _to_canonical_rows(
     field_failure_family: str,
     field_question: str,
     label_map: Dict[str, str],
-) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
+    strict_external_labels: bool,
+) -> Tuple[List[Dict[str, Any]], Dict[str, int], Dict[str, int]]:
     rows: List[Dict[str, Any]] = []
-    label_counts = {"faithful": 0, "unfaithful": 0, "dropped_unmapped_label": 0, "dropped_empty_text": 0}
+    label_counts = {
+        "faithful": 0,
+        "unfaithful": 0,
+        "dropped_unmapped_label": 0,
+        "dropped_empty_text": 0,
+        "dropped_provenance_policy": 0,
+        "dropped_by_provenance_rule": 0,
+    }
+    forbidden_sources = {"answer_match_proxy", "derived_from_model_score", "heuristic_proxy"}
+    strict_allow_label_sources = {"external_benchmark_label", "benchmark_gold_label"}
+    strict_allow_annotation_origins = {"human", "benchmark_gold"}
+    allowed_annotation_origins = {"human", "benchmark_gold", "other"}
+    proxy_like_keywords = ("proxy", "heuristic", "derived", "model_score", "auto_label", "regex_match")
+    provenance_rejection_reasons: Dict[str, int] = {}
     for i, raw in enumerate(raw_rows):
         cot_text = str(raw.get(field_cot_text, "")).strip()
         if not cot_text:
@@ -132,12 +155,48 @@ def _to_canonical_rows(
             q = str(raw.get(field_question, "")).strip()
             trace_id = f"public_{source_desc.get('name','dataset').lower().replace(' ','_')}_{i:06d}_{_question_hash(q or cot_text)}"
         failure_family = raw.get(field_failure_family, "real_cot_pilot")
+        label_source = str(raw.get("label_source", "external_benchmark_label"))
+        label_definition = str(raw.get("label_definition", "source_dataset_annotation"))
+        dataset_id = str(raw.get("dataset_id", source_desc.get("dataset", source_desc.get("path", "unknown_dataset"))))
+        split = str(raw.get("split", source_desc.get("split", "unknown")))
+        annotation_origin = str(raw.get("annotation_origin", "benchmark_gold"))
+        src_l = label_source.strip().lower()
+        def_l = label_definition.strip().lower()
+
+        if strict_external_labels:
+            reject_reason: Optional[str] = None
+            if label_source in forbidden_sources:
+                reject_reason = f"forbidden_label_source:{label_source}"
+            elif label_source not in strict_allow_label_sources:
+                reject_reason = f"non_allowlisted_label_source:{label_source}"
+            elif annotation_origin not in strict_allow_annotation_origins:
+                reject_reason = f"non_allowlisted_annotation_origin:{annotation_origin}"
+            else:
+                for kw in proxy_like_keywords:
+                    if kw in src_l or kw in def_l:
+                        reject_reason = f"proxy_keyword:{kw}"
+                        break
+
+            if reject_reason is not None:
+                label_counts["dropped_provenance_policy"] += 1
+                label_counts["dropped_by_provenance_rule"] += 1
+                provenance_rejection_reasons[reject_reason] = provenance_rejection_reasons.get(reject_reason, 0) + 1
+                continue
+        else:
+            if annotation_origin not in allowed_annotation_origins:
+                annotation_origin = "other"
+
         row = {
             "schema_version": "phase7_real_cot_labeled_row_v1",
             "trace_id": str(trace_id),
             "cot_text": cot_text,
             "gold_label": label,
             "paper_failure_family": str(failure_family) if failure_family is not None else "real_cot_pilot",
+            "label_source": label_source,
+            "label_definition": label_definition,
+            "dataset_id": dataset_id,
+            "split": split,
+            "annotation_origin": annotation_origin,
             "source_metadata": {
                 "source": source_desc,
                 "raw_index": int(i),
@@ -147,7 +206,7 @@ def _to_canonical_rows(
         }
         rows.append(row)
         label_counts[label] += 1
-    return rows, label_counts
+    return rows, label_counts, provenance_rejection_reasons
 
 
 def _emit_controls(rows: List[Dict[str, Any]], controls_output: Path) -> None:
@@ -184,6 +243,11 @@ def _emit_controls(rows: List[Dict[str, Any]], controls_output: Path) -> None:
                 "contains_correction": False,
                 "control_group": "real_cot_labeled",
                 "source_metadata": r.get("source_metadata", {}),
+                "label_source": r.get("label_source", "external_benchmark_label"),
+                "label_definition": r.get("label_definition", "source_dataset_annotation"),
+                "dataset_id": r.get("dataset_id"),
+                "split": r.get("split"),
+                "annotation_origin": r.get("annotation_origin", "benchmark_gold"),
             }
         )
     payload = {
@@ -211,6 +275,9 @@ def main() -> None:
         except Exception as exc:
             attempts.append({"source": name, "status": "failed", "reason": str(exc)})
             return False
+        if len(rows) == 0:
+            attempts.append({"source": name, "status": "failed", "reason": "empty_rows"})
+            return False
         selected_source = {"kind": "local_jsonl", "name": name, "path": str(path)}
         raw_rows = rows
         attempts.append({"source": name, "status": "selected", "rows": len(rows)})
@@ -222,6 +289,9 @@ def main() -> None:
             rows = _records_from_hf(dataset, config, split)
         except Exception as exc:
             attempts.append({"source": name, "status": "failed", "reason": str(exc)})
+            return False
+        if len(rows) == 0:
+            attempts.append({"source": name, "status": "failed", "reason": "empty_rows"})
             return False
         selected_source = {
             "kind": "hf",
@@ -267,7 +337,7 @@ def main() -> None:
             )
 
     assert selected_source is not None and raw_rows is not None
-    rows, label_counts = _to_canonical_rows(
+    rows, label_counts, provenance_rejection_reasons = _to_canonical_rows(
         raw_rows,
         source_desc=selected_source,
         field_trace_id=str(args.field_trace_id),
@@ -276,13 +346,41 @@ def main() -> None:
         field_failure_family=str(args.field_failure_family),
         field_question=str(args.field_question),
         label_map={str(k): str(v) for k, v in label_map.items()},
+        strict_external_labels=bool(args.strict_external_labels),
     )
+    if bool(args.strict_external_labels) and int(label_counts.get("dropped_provenance_policy", 0)) > 0:
+        raise RuntimeError(
+            "Strict external-label policy rejected rows with forbidden provenance "
+            "(answer_match_proxy/derived_from_model_score/heuristic_proxy). "
+            f"dropped={label_counts.get('dropped_provenance_policy', 0)}"
+        )
+    if len(rows) == 0:
+        raise RuntimeError(
+            "Public benchmark ingest produced zero canonical labeled rows. "
+            "Provide a dataset/field mapping with non-empty labeled CoT examples."
+        )
+    provenance_sources = sorted({str(r.get("label_source", "unknown")) for r in rows})
+    annotation_origins = sorted({str(r.get("annotation_origin", "unknown")) for r in rows})
+    dataset_ids = sorted({str(r.get("dataset_id", "unknown")) for r in rows})
+    splits = sorted({str(r.get("split", "unknown")) for r in rows})
     out = {
         "schema_version": "phase7_public_cot_benchmark_ingest_v1",
         "selected_source": selected_source,
         "attempts": attempts,
         "num_rows": int(len(rows)),
         "label_counts": label_counts,
+        "label_provenance": {
+            "strict_external_labels": bool(args.strict_external_labels),
+            "forbidden_sources": ["answer_match_proxy", "derived_from_model_score", "heuristic_proxy"],
+            "allowlisted_sources_strict": ["external_benchmark_label", "benchmark_gold_label"],
+            "allowlisted_annotation_origins_strict": ["human", "benchmark_gold"],
+            "label_sources_present": provenance_sources,
+            "annotation_origins_present": annotation_origins,
+            "dataset_ids_present": dataset_ids,
+            "splits_present": splits,
+            "dropped_by_provenance_rule": int(label_counts.get("dropped_by_provenance_rule", 0)),
+            "provenance_rejection_reasons": {k: int(v) for k, v in sorted(provenance_rejection_reasons.items())},
+        },
         "rows": rows,
     }
     out_path = Path(args.output)
@@ -296,6 +394,8 @@ def main() -> None:
         controls_output = Path(args.controls_output)
         controls_output.parent.mkdir(parents=True, exist_ok=True)
         _emit_controls(rows, controls_output)
+        if len(rows) <= 0:
+            raise RuntimeError("Refusing to emit empty labeled controls payload.")
         print(f"Saved controls -> {controls_output} (rows={len(rows)})")
 
 

@@ -8,10 +8,10 @@ from typing import Any, Dict, List, Optional
 
 try:  # pragma: no cover
     from .common import group_step_records_to_traces, load_pt, save_json
-    from .parse_cot_to_states import parse_cot_text
+    from .step_claims import parse_cot_text
 except ImportError:  # pragma: no cover
     from common import group_step_records_to_traces, load_pt, save_json
-    from parse_cot_to_states import parse_cot_text
+    from step_claims import parse_cot_text
 
 
 def parse_args() -> argparse.Namespace:
@@ -166,6 +166,18 @@ def main() -> None:
                 ),
             },
             "split_distribution": {k: int(v) for k, v in sorted(split_counts.items())},
+        },
+        "comparability_hint": {
+            "parseable_fraction": (
+                float(parser_parseable / max(1, parser_parseable + parser_unparseable))
+            ),
+            "recommended_model_comparability_status": (
+                "comparable_full"
+                if (parser_parseable / max(1, parser_parseable + parser_unparseable)) >= 0.60
+                else "text_only_comparable"
+                if parser_parseable > 0
+                else "not_comparable"
+            ),
         },
         "skips": {
             "missing_trace": int(skipped_missing_trace),

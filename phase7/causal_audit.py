@@ -8,14 +8,32 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 try:  # pragma: no cover
-    from .common import CAUSAL_AUDIT_SCHEMA, compare_states, group_step_records_to_traces, load_json, load_pt, save_json
+    from .common import (
+        CAUSAL_AUDIT_SCHEMA,
+        compare_states,
+        group_step_records_to_traces,
+        load_json,
+        load_pt,
+        load_rows_payload,
+        save_json,
+    )
     from .model_registry import resolve_model_spec
-    from .parse_cot_to_states import align_parsed_to_trace, canonical_step_claims, parse_cot_text
+    from .parse_cot_to_states import align_parsed_to_trace
+    from .step_claims import canonical_step_claims, parse_cot_text
     from .state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
 except ImportError:  # pragma: no cover
-    from common import CAUSAL_AUDIT_SCHEMA, compare_states, group_step_records_to_traces, load_json, load_pt, save_json
+    from common import (
+        CAUSAL_AUDIT_SCHEMA,
+        compare_states,
+        group_step_records_to_traces,
+        load_json,
+        load_pt,
+        load_rows_payload,
+        save_json,
+    )
     from model_registry import resolve_model_spec
-    from parse_cot_to_states import align_parsed_to_trace, canonical_step_claims, parse_cot_text
+    from parse_cot_to_states import align_parsed_to_trace
+    from step_claims import canonical_step_claims, parse_cot_text
     from state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
 
 
@@ -44,27 +62,94 @@ def default_thresholds() -> Dict[str, float]:
         "text_component_text_match_weight": 0.40,
         "text_component_categorical_weight": 0.30,
         "text_component_numeric_weight": 0.30,
-        "causal_component_necessity_weight": 0.35,
-        "causal_component_sufficiency_weight": 0.40,
-        "causal_component_specificity_weight": 0.25,
+        "causal_component_necessity_weight": 0.30,
+        "causal_component_sufficiency_weight": 0.30,
+        "causal_component_specificity_weight": 0.20,
         "causal_component_mediation_weight": 0.20,
         "require_mediation_for_causal_pass": True,
     }
 
 
-def _load_thresholds(path: Optional[str]) -> Dict[str, Any]:
+def _validate_threshold_weights(
+    thresholds: Dict[str, Any],
+    *,
+    allow_auto_normalize: bool = False,
+) -> Dict[str, Any]:
+    thr = dict(thresholds)
+
+    def _collect(keys: List[str]) -> Dict[str, float]:
+        out: Dict[str, float] = {}
+        for k in keys:
+            v = thr.get(k)
+            if isinstance(v, (int, float)):
+                out[k] = float(v)
+        return out
+
+    def _normalize(weights: Dict[str, float]) -> Dict[str, float]:
+        total = float(sum(weights.values()))
+        if total <= 0.0:
+            return weights
+        return {k: float(v / total) for k, v in weights.items()}
+
+    top_keys = ["text_score_weight", "latent_score_weight", "causal_score_weight"]
+    causal_keys = [
+        "causal_component_necessity_weight",
+        "causal_component_sufficiency_weight",
+        "causal_component_specificity_weight",
+        "causal_component_mediation_weight",
+    ]
+
+    top = _collect(top_keys)
+    causal = _collect(causal_keys)
+
+    top_sum = float(sum(top.values())) if top else 0.0
+    causal_sum = float(sum(causal.values())) if causal else 0.0
+    eps = 1e-8
+
+    if top and abs(top_sum - 1.0) > eps:
+        if allow_auto_normalize:
+            n = _normalize(top)
+            thr.update(n)
+            top_sum = float(sum(n.values()))
+        else:
+            raise ValueError(
+                f"Invalid thresholds: text/latent/causal weights must sum to 1.0, got {top_sum:.6f}"
+            )
+    if causal and abs(causal_sum - 1.0) > eps:
+        if allow_auto_normalize:
+            n = _normalize(causal)
+            thr.update(n)
+            causal_sum = float(sum(n.values()))
+        else:
+            raise ValueError(
+                "Invalid thresholds: causal component weights must sum to 1.0, "
+                f"got {causal_sum:.6f}"
+            )
+
+    thr["_weight_validation"] = {
+        "text_latent_causal_sum": float(top_sum),
+        "causal_component_sum": float(causal_sum),
+        "auto_normalized": bool(allow_auto_normalize),
+    }
+    return thr
+
+
+def _load_thresholds(path: Optional[str], *, allow_auto_normalize_weights: bool = False) -> Dict[str, Any]:
     if not path:
-        return {"thresholds_version": "phase7_thresholds_default", "thresholds": default_thresholds()}
+        base = _validate_threshold_weights(default_thresholds(), allow_auto_normalize=allow_auto_normalize_weights)
+        return {"thresholds_version": "phase7_thresholds_default", "thresholds": base}
     payload = load_json(path)
     base = default_thresholds()
     if "thresholds" in payload:
         merged = dict(base)
         merged.update(payload.get("thresholds") or {})
+        merged = _validate_threshold_weights(merged, allow_auto_normalize=allow_auto_normalize_weights)
         out = dict(payload)
         out["thresholds"] = merged
         return out
     merged = dict(base)
     merged.update(payload or {})
+    merged = _validate_threshold_weights(merged, allow_auto_normalize=allow_auto_normalize_weights)
     return {"thresholds_version": "phase7_thresholds_custom", "thresholds": merged}
 
 
@@ -82,11 +167,49 @@ def _index_variant_latent_preds(pred_rows: List[dict]) -> Dict[Tuple[str, str, i
     return idx
 
 
-def _index_causal_checks(causal_payload: Dict[str, Any]) -> Dict[Tuple[str, int], dict]:
-    idx = {}
-    for r in causal_payload.get("rows", []):
-        idx[(str(r.get("source_trace_id")), int(r.get("source_step_idx", -1)))] = r
+def _extract_causal_mode(causal_payload: Dict[str, Any]) -> str:
+    mode = str((causal_payload or {}).get("causal_mode", "source_trace"))
+    if mode not in {"source_trace", "control_conditioned"}:
+        mode = "source_trace"
+    return mode
+
+
+def _index_causal_checks(causal_payload: Dict[str, Any], *, source_path: Optional[str] = None) -> Dict[Tuple[Any, ...], dict]:
+    mode = _extract_causal_mode(causal_payload)
+    idx: Dict[Tuple[Any, ...], dict] = {}
+    for r in load_rows_payload(causal_payload, base_path=source_path):
+        trace_id = str(r.get("source_trace_id"))
+        step_idx = int(r.get("source_step_idx", -1))
+        variant = r.get("source_control_variant")
+        if mode == "control_conditioned":
+            if variant is None:
+                raise ValueError(
+                    "control_conditioned causal payload row missing source_control_variant; "
+                    "cannot safely index by variant."
+                )
+            idx[(trace_id, str(variant), step_idx)] = r
+            continue
+        if variant is not None:
+            raise ValueError(
+                "source_trace causal payload contains source_control_variant; "
+                "this violates source_trace indexing invariants."
+            )
+        idx[(trace_id, step_idx)] = r
     return idx
+
+
+def _resolve_causal_lookup_mode(
+    causal_payload: Dict[str, Any],
+    required_mode: Optional[str] = None,
+    source_path: Optional[str] = None,
+) -> str:
+    mode = _extract_causal_mode(causal_payload)
+    if required_mode and str(required_mode) != mode:
+        raise ValueError(
+            f"Causal mode mismatch: required={required_mode!r}, loaded={mode!r}"
+            + (f" from {source_path}" if source_path else "")
+        )
+    return mode
 
 
 def _step_status_from_components(step: Dict[str, Any], thr: Dict[str, float]) -> str:
@@ -205,9 +328,9 @@ def _score_step(step: Dict[str, Any], thr: Dict[str, float]) -> Tuple[float, Dic
             "text_component_text_match_weight": float(thr.get("text_component_text_match_weight", 0.40)),
             "text_component_categorical_weight": float(thr.get("text_component_categorical_weight", 0.30)),
             "text_component_numeric_weight": float(thr.get("text_component_numeric_weight", 0.30)),
-            "causal_component_necessity_weight": float(thr.get("causal_component_necessity_weight", 0.35)),
-            "causal_component_sufficiency_weight": float(thr.get("causal_component_sufficiency_weight", 0.40)),
-            "causal_component_specificity_weight": float(thr.get("causal_component_specificity_weight", 0.25)),
+            "causal_component_necessity_weight": float(thr.get("causal_component_necessity_weight", 0.30)),
+            "causal_component_sufficiency_weight": float(thr.get("causal_component_sufficiency_weight", 0.30)),
+            "causal_component_specificity_weight": float(thr.get("causal_component_specificity_weight", 0.20)),
             "causal_component_mediation_weight": float(thr.get("causal_component_mediation_weight", 0.20)),
         },
     }
@@ -479,6 +602,9 @@ def _audit_one_control(
     latent_source: str = "shared",
     variant_latent_pred_idx: Optional[Dict[Tuple[str, str, int], dict]] = None,
     control_latent_cache: Optional[str] = None,
+    causal_lookup_mode: str = "source_trace",
+    causal_index_policy: str = "index_by_(trace_id,step_idx)_only",
+    causal_index_invariant_pass: bool = True,
 ) -> dict:
     if variant_latent_pred_idx is None:
         variant_latent_pred_idx = {}
@@ -507,10 +633,13 @@ def _audit_one_control(
     failure_modes = []
     trace_key_prefix = str(ctrl["trace_id"])
     ctrl_variant = str(ctrl.get("variant", ctrl.get("control_variant", "unknown")))
+    causal_variant_lookup_hits = 0
+    causal_variant_lookup_misses = 0
+    causal_variant_lookup_attempts = 0
 
     for row in sorted(trace_steps, key=lambda r: int(r["step_idx"])):
         step_idx = int(row["step_idx"])
-        causal_key = (trace_key_prefix, step_idx)
+        causal_key = (trace_key_prefix, ctrl_variant, step_idx)
         if latent_source == "variant_conditioned":
             latent_key = (trace_key_prefix, ctrl_variant, step_idx)
             latent_pred = variant_latent_pred_idx.get(latent_key)
@@ -523,7 +652,17 @@ def _audit_one_control(
         gcmp = compare_states(text_state, row["structured_state"])
         lcmp = compare_states(latent_state, row["structured_state"])
 
-        c = causal_idx.get(causal_key)
+        if causal_lookup_mode == "control_conditioned":
+            causal_variant_lookup_attempts += 1
+            c = causal_idx.get(causal_key)
+            if c is None:
+                causal_variant_lookup_misses += 1
+            else:
+                causal_variant_lookup_hits += 1
+        else:
+            c = causal_idx.get(causal_key)
+            if c is None:
+                c = causal_idx.get((trace_key_prefix, step_idx))
         layer_info = None
         need = suff = spec = None
         med = None
@@ -688,6 +827,10 @@ def _audit_one_control(
     else:
         verdict = "unsupported"
 
+    causal_lookup_hit_fraction = None
+    if causal_variant_lookup_attempts > 0:
+        causal_lookup_hit_fraction = float(causal_variant_lookup_hits / max(1, causal_variant_lookup_attempts))
+
     return {
         "schema_version": CAUSAL_AUDIT_SCHEMA,
         "trace_id": str(ctrl["trace_id"]),
@@ -737,6 +880,14 @@ def _audit_one_control(
             "claim_boundary": "causally supported under measured variables/subspaces and tested interventions",
             "completeness_scope": "partial; not a complete explanation of all internal reasoning",
             "control_latent_cache": control_latent_cache,
+            "causal_mode": str(causal_lookup_mode),
+            "causal_lookup_mode": str(causal_lookup_mode),
+            "causal_index_policy": str(causal_index_policy),
+            "causal_index_invariant_pass": bool(causal_index_invariant_pass),
+            "causal_variant_lookup_attempts": int(causal_variant_lookup_attempts),
+            "causal_variant_lookup_hits": int(causal_variant_lookup_hits),
+            "causal_variant_lookup_misses": int(causal_variant_lookup_misses),
+            "causal_variant_lookup_hit_fraction": causal_lookup_hit_fraction,
             "marker_penalty_rationale": {
                 "prompt_bias": "heuristic penalty used only when enabled; intended as auxiliary diagnostic cue, not causal proof",
                 "shortcut": "heuristic penalty used only when enabled; intended as auxiliary diagnostic cue, not causal proof",
@@ -755,6 +906,14 @@ def _audit_one_control(
         },
         "gold_alignment_to_text": gold_align,
         "unsupported_rationale_markers": unsupported_markers,
+        "causal_lookup_mode": str(causal_lookup_mode),
+        "causal_mode": str(causal_lookup_mode),
+        "causal_index_policy": str(causal_index_policy),
+        "causal_index_invariant_pass": bool(causal_index_invariant_pass),
+        "causal_variant_lookup_attempts": int(causal_variant_lookup_attempts),
+        "causal_variant_lookup_hits": int(causal_variant_lookup_hits),
+        "causal_variant_lookup_misses": int(causal_variant_lookup_misses),
+        "causal_variant_lookup_hit_fraction": causal_lookup_hit_fraction,
     }
 
 
@@ -764,7 +923,24 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--trace-dataset", default="phase7_results/dataset/gsm8k_step_traces_test.pt")
     p.add_argument("--state-decoder-checkpoint", required=True)
     p.add_argument("--causal-checks", default=None, help="Path to cached causal checks JSON from causal_intervention_engine.py")
+    p.add_argument(
+        "--require-causal-mode",
+        choices=["source_trace", "control_conditioned"],
+        default=None,
+        help=(
+            "Optional strict contract: fail if loaded causal checks do not declare the required causal_mode. "
+            "Useful for preventing accidental source-trace fallback in control-conditioned experiments."
+        ),
+    )
     p.add_argument("--thresholds", default=None)
+    p.add_argument(
+        "--allow-auto-normalize-weights",
+        action="store_true",
+        help=(
+            "Unsafe fallback: if score-composition weights do not sum to 1.0, auto-normalize "
+            "instead of failing."
+        ),
+    )
     p.add_argument("--model-key", default="gpt2-medium")
     p.add_argument("--adapter-config", default=None, help="Optional JSON overrides for model registry entry")
     p.add_argument("--device", default="cuda:0")
@@ -802,7 +978,10 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    thresholds_payload = _load_thresholds(args.thresholds)
+    thresholds_payload = _load_thresholds(
+        args.thresholds,
+        allow_auto_normalize_weights=bool(args.allow_auto_normalize_weights),
+    )
     if args.require_mediation_for_causal_pass is not None:
         thresholds_payload.setdefault("thresholds", {})
         thresholds_payload["thresholds"]["require_mediation_for_causal_pass"] = bool(
@@ -844,12 +1023,33 @@ def main() -> None:
         if not args.control_latent_cache:
             raise ValueError("--control-latent-cache is required when --latent-source variant_conditioned")
         cache_payload = load_json(args.control_latent_cache)
-        cache_rows = list(cache_payload.get("rows", []))
+        cache_rows = load_rows_payload(cache_payload, base_path=args.control_latent_cache)
         variant_latent_pred_idx = _index_variant_latent_preds(cache_rows)
 
     causal_idx = {}
+    causal_lookup_mode = "source_trace"
+    causal_index_policy = "index_by_(trace_id,step_idx)_only"
+    causal_index_invariant_pass = True
+    causal_source_rows_sha256 = None
     if args.causal_checks:
-        causal_idx = _index_causal_checks(load_json(args.causal_checks))
+        causal_payload = load_json(args.causal_checks)
+        causal_source_rows_sha256 = causal_payload.get("rows_sha256")
+        causal_lookup_mode = _resolve_causal_lookup_mode(
+            causal_payload,
+            required_mode=args.require_causal_mode,
+            source_path=args.causal_checks,
+        )
+        causal_index_policy = (
+            "index_by_(trace_id,control_variant,step_idx)_only"
+            if causal_lookup_mode == "control_conditioned"
+            else "index_by_(trace_id,step_idx)_only"
+        )
+        try:
+            causal_idx = _index_causal_checks(causal_payload, source_path=args.causal_checks)
+            causal_index_invariant_pass = True
+        except Exception:
+            causal_index_invariant_pass = False
+            raise
 
     audits = []
     for ctrl in controls:
@@ -869,6 +1069,9 @@ def main() -> None:
                 latent_source=args.latent_source,
                 variant_latent_pred_idx=variant_latent_pred_idx,
                 control_latent_cache=args.control_latent_cache,
+                causal_lookup_mode=causal_lookup_mode,
+                causal_index_policy=causal_index_policy,
+                causal_index_invariant_pass=causal_index_invariant_pass,
             )
         )
 
@@ -889,6 +1092,15 @@ def main() -> None:
                 track_sums[str(track)] += float(score)
                 track_ns[str(track)] += 1
 
+    lookup_attempts = sum(int(a.get("causal_variant_lookup_attempts", 0) or 0) for a in audits)
+    lookup_hits = sum(int(a.get("causal_variant_lookup_hits", 0) or 0) for a in audits)
+    lookup_misses = sum(int(a.get("causal_variant_lookup_misses", 0) or 0) for a in audits)
+    lookup_hit_fraction = (
+        float(lookup_hits / max(1, lookup_attempts))
+        if causal_lookup_mode == "control_conditioned"
+        else None
+    )
+
     summary = {
         "schema_version": CAUSAL_AUDIT_SCHEMA,
         "model_metadata": model_metadata,
@@ -900,6 +1112,16 @@ def main() -> None:
         "thresholds": thresholds_payload,
         "latent_source": args.latent_source,
         "control_latent_cache": args.control_latent_cache,
+        "causal_checks_source": args.causal_checks,
+        "causal_source_rows_sha256": causal_source_rows_sha256,
+        "causal_mode": causal_lookup_mode,
+        "causal_lookup_mode": causal_lookup_mode,
+        "causal_index_policy": causal_index_policy,
+        "causal_index_invariant_pass": bool(causal_index_invariant_pass),
+        "causal_variant_lookup_attempts": int(lookup_attempts),
+        "causal_variant_lookup_hits": int(lookup_hits),
+        "causal_variant_lookup_misses": int(lookup_misses),
+        "causal_variant_lookup_hit_fraction": lookup_hit_fraction,
     }
 
     out_path = Path(args.output)
@@ -910,6 +1132,7 @@ def main() -> None:
             "schema_version": CAUSAL_AUDIT_SCHEMA,
             "model_metadata": model_metadata,
             "summary": summary,
+            "causal_source_rows_sha256": causal_source_rows_sha256,
             "audits": audits,
         },
     )

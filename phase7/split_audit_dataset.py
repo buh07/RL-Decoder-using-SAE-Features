@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Dict, List, Sequence, Tuple
 
 try:  # pragma: no cover
-    from .common import load_json, save_json
+    from .common import load_json, save_json, sha256_file
 except ImportError:  # pragma: no cover
-    from common import load_json, save_json
+    from common import load_json, save_json, sha256_file
 
 
 def parse_args() -> argparse.Namespace:
@@ -33,6 +33,19 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--output-calib", default=None)
     p.add_argument("--output-eval", default=None)
     p.add_argument("--output-manifest", default=None)
+    p.add_argument(
+        "--reuse-manifest-if-compatible",
+        default=None,
+        help=(
+            "Optional existing manifest path. If source_audit_rows_sha256 and split_policy_hash "
+            "match and output files exist, reuse and exit."
+        ),
+    )
+    p.add_argument(
+        "--source-audit-hash",
+        default=None,
+        help="Optional precomputed source audit SHA256. Defaults to file SHA256 of --audit.",
+    )
     return p.parse_args()
 
 
@@ -62,6 +75,12 @@ def _trace_hash(trace_ids: Sequence[str]) -> str:
     return h.hexdigest()
 
 
+def _split_policy_hash(*, seed: int, calib_fraction: float) -> str:
+    h = hashlib.sha256()
+    h.update(f"seed={int(seed)}|calib_fraction={float(calib_fraction):.12f}|group_by=trace_id".encode("utf-8"))
+    return h.hexdigest()
+
+
 def _counts(rows: Sequence[Dict]) -> Dict[str, Dict[str, int]]:
     by_label = Counter(str(r.get("gold_label", "unknown")) for r in rows)
     by_variant = Counter(str(r.get("control_variant", "unknown")) for r in rows)
@@ -75,6 +94,34 @@ def main() -> None:
     args = parse_args()
     payload = load_json(args.audit)
     audits = list(payload.get("audits", []))
+    source_audit_rows_sha = str(args.source_audit_hash) if args.source_audit_hash else sha256_file(args.audit)
+    split_policy_hash = _split_policy_hash(seed=int(args.seed), calib_fraction=float(args.calib_fraction))
+
+    if args.reuse_manifest_if_compatible:
+        mp = Path(args.reuse_manifest_if_compatible)
+        if mp.exists():
+            try:
+                prior = load_json(mp)
+                prior_sha = str(prior.get("source_audit_rows_sha256", ""))
+                prior_policy = str(prior.get("split_policy_hash", ""))
+                outs = dict(prior.get("outputs", {}) or {})
+                calib_out = Path(str(outs.get("calibration_audit", "")))
+                eval_out = Path(str(outs.get("evaluation_audit", "")))
+                mani_out = Path(str(outs.get("manifest", "")))
+                if (
+                    prior_sha == source_audit_rows_sha
+                    and prior_policy == split_policy_hash
+                    and calib_out.exists()
+                    and eval_out.exists()
+                    and mani_out.exists()
+                ):
+                    print(f"Reusing split manifest -> {mp}")
+                    print(f"Reusing calibration audit -> {calib_out}")
+                    print(f"Reusing evaluation audit  -> {eval_out}")
+                    return
+            except Exception:
+                pass
+
     trace_ids_all = sorted({str(a.get("trace_id")) for a in audits if a.get("trace_id") is not None})
     calib_ids, eval_ids = _split_trace_ids(trace_ids_all, args.calib_fraction, args.seed)
     calib_set = set(calib_ids)
@@ -129,8 +176,10 @@ def main() -> None:
     manifest = {
         "schema_version": "phase7_audit_split_manifest_v1",
         "source_audit": str(args.audit),
+        "source_audit_rows_sha256": source_audit_rows_sha,
         "split_seed": int(args.seed),
         "calib_fraction": float(args.calib_fraction),
+        "split_policy_hash": split_policy_hash,
         "single_trace_eval_mode": bool(len(trace_ids_all) == 1),
         "trace_ids_calib": calib_ids,
         "trace_ids_eval": eval_ids,

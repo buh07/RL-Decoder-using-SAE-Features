@@ -17,3 +17,5 @@ class Qwen25_7BAdapter(BaseCausalLMAdapter):
     default_dtype: str = "bfloat16"
     device: str = "cuda:0"
     load_kwargs: dict = field(default_factory=lambda: {"low_cpu_mem_usage": True})
+    # Qwen chat/instruct tokenization normally includes BOS/special-prefix handling.
+    add_special_tokens_policy: bool = True

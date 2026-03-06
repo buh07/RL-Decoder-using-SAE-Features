@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import gzip
+import hashlib
 import math
 import random
 import re
@@ -69,6 +71,116 @@ def save_jsonl(path: str | Path, rows: Iterable[dict]) -> None:
     with p.open("w") as f:
         for row in rows:
             f.write(json.dumps(row) + "\n")
+
+
+def load_jsonl(path: str | Path) -> List[dict]:
+    rows: List[dict] = []
+    with Path(path).open("r") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            rows.append(json.loads(line))
+    return rows
+
+
+def save_jsonl_gz(path: str | Path, rows: Iterable[dict]) -> None:
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(p, "wt", encoding="utf-8") as f:
+        for row in rows:
+            f.write(json.dumps(row) + "\n")
+
+
+def load_jsonl_gz(path: str | Path) -> List[dict]:
+    rows: List[dict] = []
+    with gzip.open(Path(path), "rt", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            rows.append(json.loads(line))
+    return rows
+
+
+def sha256_file(path: str | Path, chunk_bytes: int = 1 << 20) -> str:
+    h = hashlib.sha256()
+    with Path(path).open("rb") as f:
+        while True:
+            chunk = f.read(chunk_bytes)
+            if not chunk:
+                break
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _sha256_json_rows(rows: Sequence[dict]) -> str:
+    h = hashlib.sha256()
+    for row in rows:
+        h.update(json.dumps(row, sort_keys=True, separators=(",", ":")).encode("utf-8"))
+        h.update(b"\n")
+    return h.hexdigest()
+
+
+def write_rows_sidecar(
+    output_path: str | Path,
+    rows: Sequence[dict],
+    *,
+    rows_format: str = "jsonl.gz",
+    rows_inline: bool = False,
+) -> Dict[str, Any]:
+    out = Path(output_path)
+    fmt = str(rows_format or "json").strip().lower()
+    if rows_inline or fmt == "json":
+        return {
+            "rows": list(rows),
+            "rows_inline": True,
+            "rows_path": None,
+            "rows_format": "json",
+            "rows_count": int(len(rows)),
+            "rows_sha256": _sha256_json_rows(rows),
+        }
+    if fmt != "jsonl.gz":
+        raise ValueError(f"Unsupported rows format: {rows_format!r}")
+    rows_path = out.with_suffix(out.suffix + ".rows.jsonl.gz")
+    save_jsonl_gz(rows_path, rows)
+    return {
+        "rows": [],
+        "rows_inline": False,
+        "rows_path": str(rows_path),
+        "rows_format": "jsonl.gz",
+        "rows_count": int(len(rows)),
+        "rows_sha256": sha256_file(rows_path),
+    }
+
+
+def load_rows_payload(payload: Dict[str, Any], *, base_path: str | Path | None = None) -> List[dict]:
+    inline = payload.get("rows")
+    if isinstance(inline, list) and inline:
+        return list(inline)
+    rows_path = payload.get("rows_path")
+    if not rows_path:
+        return list(inline or [])
+    rp = Path(rows_path)
+    if not rp.is_absolute() and base_path is not None:
+        # Prefer artifact-relative resolution for short sidecar names, but
+        # preserve workspace-relative paths like "phase7_results/...".
+        rel_candidate = (Path(base_path).parent / rp).resolve()
+        if rel_candidate.exists():
+            rp = rel_candidate
+        else:
+            rp = rp.resolve()
+    fmt = str(payload.get("rows_format") or "").lower()
+    if fmt == "jsonl.gz" or str(rp).endswith(".jsonl.gz"):
+        return load_jsonl_gz(rp)
+    if str(rp).endswith(".jsonl"):
+        return load_jsonl(rp)
+    maybe_json = load_json(rp)
+    if isinstance(maybe_json, dict):
+        return list(maybe_json.get("rows", []))
+    if isinstance(maybe_json, list):
+        return list(maybe_json)
+    raise ValueError(f"Unsupported rows payload at {rp}")
 
 
 def magnitude_bucket(c_val: float) -> str:

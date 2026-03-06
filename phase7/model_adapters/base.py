@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Sequence
+from typing import Any, Dict, List, Sequence, Tuple
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -28,6 +28,12 @@ class BaseCausalLMAdapter(ABC):
     model: Any = None
     tokenizer: Any = None
     load_kwargs: dict = field(default_factory=dict)
+    add_special_tokens_policy: bool = True
+
+    def _tokenize_add_special_tokens(self) -> bool:
+        # One canonical special-token policy used by tokenize(), tokenize_with_offsets(),
+        # and forward() callsites to avoid position drift.
+        return bool(self.add_special_tokens_policy)
 
     def _resolved_dtype(self) -> torch.dtype:
         dtype = _DTYPE_MAP.get(str(self.default_dtype).lower(), torch.float32)
@@ -52,7 +58,11 @@ class BaseCausalLMAdapter(ABC):
         elif isinstance(text_or_ids, str):
             if self.tokenizer is None:
                 raise RuntimeError("Adapter tokenizer is not loaded")
-            ids = self.tokenizer(text_or_ids, return_tensors="pt").input_ids
+            ids = self.tokenizer(
+                text_or_ids,
+                return_tensors="pt",
+                add_special_tokens=self._tokenize_add_special_tokens(),
+            ).input_ids
         elif isinstance(text_or_ids, Sequence) and text_or_ids and isinstance(text_or_ids[0], int):
             ids = torch.tensor([list(text_or_ids)], dtype=torch.long)
         elif isinstance(text_or_ids, Sequence) and text_or_ids and isinstance(text_or_ids[0], Sequence):
@@ -62,6 +72,46 @@ class BaseCausalLMAdapter(ABC):
         if ids.dim() == 1:
             ids = ids.unsqueeze(0)
         return ids.to(self.device)
+
+    def tokenize_with_offsets(self, text: str) -> Tuple[List[int], List[Tuple[int, int]], Dict[str, Any]]:
+        if self.tokenizer is None:
+            raise RuntimeError("Adapter tokenizer is not loaded")
+        add_special_tokens = self._tokenize_add_special_tokens()
+        degraded = False
+        try:
+            enc = self.tokenizer(
+                text,
+                return_tensors="pt",
+                return_offsets_mapping=True,
+                add_special_tokens=add_special_tokens,
+            )
+            if "offset_mapping" not in enc:
+                raise KeyError("offset_mapping missing from tokenizer output")
+            offsets = [(int(s), int(e)) for s, e in enc["offset_mapping"][0].tolist()]
+            token_ids = [int(x) for x in enc.input_ids[0].tolist()]
+        except Exception:
+            # Fallback keeps caller running but marks degraded alignment quality.
+            degraded = True
+            enc = self.tokenizer(
+                text,
+                return_tensors="pt",
+                add_special_tokens=add_special_tokens,
+            )
+            token_ids = [int(x) for x in enc.input_ids[0].tolist()]
+            offsets = [(0, 0) for _ in token_ids]
+
+        prefix_special = 0
+        for s, e in offsets:
+            if int(e) <= int(s):
+                prefix_special += 1
+            else:
+                break
+        meta = {
+            "special_tokens_policy": ("add_special_tokens_true" if add_special_tokens else "add_special_tokens_false"),
+            "num_special_tokens_prefix": int(prefix_special),
+            "offset_alignment_degraded": bool(degraded),
+        }
+        return token_ids, offsets, meta
 
     def forward(self, input_ids: Any) -> tuple[torch.Tensor, tuple[torch.Tensor, ...]]:
         if self.model is None:

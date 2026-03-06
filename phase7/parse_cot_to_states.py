@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+# NOTE: Downstream modules should import parse helpers from `phase7.step_claims`
+# (canonical import surface) instead of importing this module directly.
+
 import argparse
 import ast
 import re

@@ -15,3 +15,5 @@ class GPT2MediumAdapter(BaseCausalLMAdapter):
     hidden_dim: int = 1024
     default_dtype: str = "float32"
     device: str = "cuda:0"
+    # GPT-2 does not require prefixed special tokens for CoT text traces.
+    add_special_tokens_policy: bool = False
