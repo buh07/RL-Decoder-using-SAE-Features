@@ -88,6 +88,7 @@ def _get_sae_config_for_layer(
         "gpt2-medium": {"input_dim": 1024, "expansion_factor": 8, "learning_rate": 1e-4},
         "phi-2": {"input_dim": 2560, "expansion_factor": 8, "learning_rate": 1e-4},
         "pythia-1.4b": {"input_dim": 2048, "expansion_factor": 8, "learning_rate": 1e-4},
+        "qwen2.5-7b": {"input_dim": 3584, "expansion_factor": 8, "learning_rate": 1e-4},
     }
 
     if model_name not in base_params:

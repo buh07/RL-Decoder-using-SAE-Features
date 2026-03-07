@@ -57,6 +57,11 @@ def _get_layer_configs() -> Dict[str, Dict[str, any]]:
             "hidden_dim": 2048,
             "layers_attr": "gpt_neox.layers",
         },
+        "qwen2.5-7b": {
+            "model_id": "Qwen/Qwen2.5-7B",
+            "hidden_dim": 3584,
+            "layers_attr": "model.layers",
+        },
     }
 
 
@@ -269,6 +274,13 @@ def main():
         default="cuda:5",
         help="Device to run on",
     )
+    parser.add_argument(
+        "--dtype",
+        type=str,
+        choices=["float32", "float16", "bfloat16", "auto"],
+        default="auto",
+        help="Model load dtype (auto picks bfloat16 for qwen2.5-7b, float32 otherwise).",
+    )
 
     args = parser.parse_args()
 
@@ -290,23 +302,25 @@ def main():
 
         # Load model
         try:
-            model_id = f"gpt2-medium" if model_name == "gpt2-medium" else model_name
-            if model_name == "gpt2-medium":
-                model_id = "gpt2-medium"
-            elif model_name == "gemma-2b":
-                model_id = "google/gemma-2b"
-            elif model_name == "phi-2":
-                model_id = "microsoft/phi-2"
-            elif model_name == "pythia-1.4b":
-                model_id = "EleutherAI/pythia-1.4b"
+            model_id = layer_configs[model_name]["model_id"]
+            if args.dtype == "auto":
+                dtype = torch.bfloat16 if model_name == "qwen2.5-7b" else torch.float32
+            elif args.dtype == "float16":
+                dtype = torch.float16
+            elif args.dtype == "bfloat16":
+                dtype = torch.bfloat16
+            else:
+                dtype = torch.float32
 
             logger.info(f"Loading model: {model_id}")
             model = AutoModelForCausalLM.from_pretrained(
                 model_id,
-                torch_dtype=torch.float32,
+                torch_dtype=dtype,
                 device_map=device,
+                low_cpu_mem_usage=True,
+                trust_remote_code=True,
             )
-            tokenizer = AutoTokenizer.from_pretrained(model_id)
+            tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
 
