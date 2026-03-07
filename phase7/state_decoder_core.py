@@ -131,10 +131,11 @@ def make_custom_state_decoder_config(
     layers: Iterable[int],
     name: Optional[str] = None,
     base_name: Optional[str] = None,
+    layers_total: int = 24,
 ) -> StateDecoderExperimentConfig:
     if input_variant not in VALID_INPUT_VARIANTS:
         raise ValueError(f"Unsupported input_variant={input_variant!r}; expected one of {VALID_INPUT_VARIANTS}")
-    layer_tuple = normalize_layers(layers)
+    layer_tuple = normalize_layers(layers, layers_total=int(layers_total))
     final_name = name or _default_custom_name(input_variant, layer_tuple)
     cfg = None
     if base_name:

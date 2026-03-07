@@ -36,6 +36,7 @@ try:  # pragma: no cover
     from .model_adapters import BaseCausalLMAdapter
     from .control_token_anchor import collect_control_step_token_positions
     from .model_registry import create_adapter, resolve_model_spec
+    from .sae_assets import can_load_sae_assets, infer_sae_dim, load_norm_stats, load_saes
     from .state_decoder_core import load_model_from_checkpoint
 except ImportError:  # pragma: no cover
     from common import (
@@ -56,10 +57,9 @@ except ImportError:  # pragma: no cover
     from model_adapters import BaseCausalLMAdapter
     from control_token_anchor import collect_control_step_token_positions
     from model_registry import create_adapter, resolve_model_spec
+    from sae_assets import can_load_sae_assets, infer_sae_dim, load_norm_stats, load_saes
     from state_decoder_core import load_model_from_checkpoint
 
-# Phase4 helper module (SAE loaders + normalization stats for GPT-2 assets)
-import phase4.causal_patch_test as p4  # type: ignore  # noqa: E402
 from phase6.pipeline_utils import build_input_tensor_from_record  # type: ignore  # noqa: E402
 
 
@@ -754,24 +754,36 @@ class CausalPatchContext:
 
         resolved_saes_dir = saes_dir if saes_dir is not None else spec.sae_dir
         resolved_activations_dir = activations_dir
-        if resolved_activations_dir is None and spec.model_key == "gpt2-medium":
+        if resolved_activations_dir is None:
             resolved_activations_dir = "phase2_results/activations"
 
         saes: Dict[int, Any] = {}
         norm_stats: Dict[int, Tuple[torch.Tensor, torch.Tensor]] = {}
         unsupported_reason: Optional[str] = None
-        if resolved_saes_dir:
-            if spec.model_key == "gpt2-medium":
-                saes = p4.load_saes(Path(resolved_saes_dir), device)
-            else:
-                unsupported_reason = f"sae_loader_unimplemented_for_model:{spec.model_key}"
+        supports_assets, reason = can_load_sae_assets(
+            saes_dir=resolved_saes_dir,
+            activations_dir=resolved_activations_dir,
+            model_key=spec.model_key,
+            num_layers=int(spec.num_layers),
+        )
+        if supports_assets:
+            saes = load_saes(
+                saes_dir=Path(str(resolved_saes_dir)),
+                model_key=spec.model_key,
+                num_layers=int(spec.num_layers),
+                device=device,
+            )
+            if resolved_activations_dir:
+                norm_stats = load_norm_stats(
+                    activations_dir=Path(str(resolved_activations_dir)),
+                    model_key=spec.model_key,
+                    num_layers=int(spec.num_layers),
+                    device=device,
+                )
         else:
-            unsupported_reason = unsupported_reason or f"missing_model_sae_dir:{spec.model_key}"
-        if resolved_activations_dir:
-            if spec.model_key == "gpt2-medium":
-                norm_stats = p4.load_norm_stats(Path(resolved_activations_dir), device)
+            unsupported_reason = reason
 
-        latent_dim = int(next(iter(saes.values())).decoder.weight.shape[1]) if saes else 0
+        latent_dim = infer_sae_dim(saes)
         return cls(
             device=device,
             model_key=spec.model_key,
@@ -897,7 +909,8 @@ def _derive_sae_features_from_raw_hidden(
             raise RuntimeError(f"missing_sae_for_layer_{layer_i} while deriving mediation features")
         h = raw_hidden[layer_i].to(ctx.device).float()
         h_norm = _normalize_hidden_for_mediation(h, ctx.norm_stats.get(int(layer_i)))
-        feat = sae.encode(h_norm.unsqueeze(0)).squeeze(0).detach().float().cpu()
+        sae_dtype = next(sae.parameters()).dtype
+        feat = sae.encode(h_norm.to(dtype=sae_dtype).unsqueeze(0)).squeeze(0).detach().float().cpu()
         sae_rows.append(feat)
     sae_features = torch.stack(sae_rows, dim=0)
     row["sae_features"] = sae_features
@@ -1604,20 +1617,15 @@ def main() -> None:
                 controls_count = int(len(list(controls_payload.get("controls", []) or [])))
         resolved_saes_dir = args.saes_dir if args.saes_dir is not None else spec.sae_dir
         resolved_activations_dir = args.activations_dir
-        if resolved_activations_dir is None and spec.model_key == "gpt2-medium":
+        if resolved_activations_dir is None:
             resolved_activations_dir = "phase2_results/activations"
 
-        unsupported_reason: Optional[str] = None
-        supports_subspace = False
-        if resolved_saes_dir:
-            if spec.model_key != "gpt2-medium":
-                unsupported_reason = f"sae_loader_unimplemented_for_model:{spec.model_key}"
-            elif not Path(resolved_saes_dir).exists():
-                unsupported_reason = f"missing_sae_dir_path:{resolved_saes_dir}"
-            else:
-                supports_subspace = True
-        else:
-            unsupported_reason = f"missing_model_sae_dir:{spec.model_key}"
+        supports_subspace, unsupported_reason = can_load_sae_assets(
+            saes_dir=resolved_saes_dir,
+            activations_dir=resolved_activations_dir,
+            model_key=spec.model_key,
+            num_layers=int(spec.num_layers),
+        )
 
         status = "ready" if supports_subspace else "unsupported_model_causal_subspace"
         payload = {

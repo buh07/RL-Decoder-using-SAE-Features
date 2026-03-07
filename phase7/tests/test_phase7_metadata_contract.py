@@ -91,7 +91,13 @@ class MetadataContractTests(unittest.TestCase):
         self.assertEqual(md["model_key"], "gpt2-medium")
 
     def test_qwen_context_dry_load_reports_unsupported_reason(self) -> None:
-        ctx = CausalPatchContext.load(device="cpu", model_key="qwen2.5-7b", load_model=False)
+        ctx = CausalPatchContext.load(
+            device="cpu",
+            model_key="qwen2.5-7b",
+            load_model=False,
+            saes_dir="phase2_results/saes_qwen25_7b_12x_topk/saes_DOES_NOT_EXIST",
+            activations_dir="phase2_results/activations_DOES_NOT_EXIST",
+        )
         self.assertFalse(ctx.supports_subspace_patching)
         self.assertTrue(ctx.unsupported_reason)
 

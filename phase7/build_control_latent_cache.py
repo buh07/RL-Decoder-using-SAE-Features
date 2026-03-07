@@ -17,6 +17,7 @@ try:  # pragma: no cover
     from .common import load_json, save_json, sha256_file, write_rows_sidecar
     from .control_token_anchor import collect_control_step_token_positions
     from .model_registry import create_adapter, resolve_model_spec
+    from .sae_assets import load_norm_stats, load_saes
     from .state_decoder_core import (
         MAG_TO_ID,
         OP_TO_ID,
@@ -28,6 +29,7 @@ except ImportError:  # pragma: no cover
     from common import load_json, save_json, sha256_file, write_rows_sidecar
     from control_token_anchor import collect_control_step_token_positions
     from model_registry import create_adapter, resolve_model_spec
+    from sae_assets import load_norm_stats, load_saes
     from state_decoder_core import (
         MAG_TO_ID,
         OP_TO_ID,
@@ -222,13 +224,6 @@ def main() -> None:
     resolved_saes_dir: Optional[str] = None
     resolved_activations_dir: Optional[str] = None
     if needs_sae_features:
-        if str(spec.model_family) != "gpt2":
-            raise ValueError(
-                f"input_variant={input_variant!r} requires SAE feature reconstruction, which is currently "
-                f"implemented only for model_family='gpt2'; got model_family={spec.model_family!r}."
-            )
-        import phase4.causal_patch_test as p4  # type: ignore
-
         resolved_saes_dir = args.saes_dir if args.saes_dir is not None else spec.sae_dir
         if not resolved_saes_dir:
             raise ValueError(
@@ -236,8 +231,18 @@ def main() -> None:
                 "Provide --saes-dir or set model spec sae_dir."
             )
         resolved_activations_dir = str(args.activations_dir)
-        saes = p4.load_saes(Path(resolved_saes_dir), args.device)
-        norm_stats = p4.load_norm_stats(Path(resolved_activations_dir), args.device)
+        saes = load_saes(
+            saes_dir=Path(resolved_saes_dir),
+            model_key=str(spec.model_key),
+            num_layers=int(spec.num_layers),
+            device=str(args.device),
+        )
+        norm_stats = load_norm_stats(
+            activations_dir=Path(resolved_activations_dir),
+            model_key=str(spec.model_key),
+            num_layers=int(spec.num_layers),
+            device=str(args.device),
+        )
 
     out_rows: List[dict] = []
     skipped_controls = 0
@@ -341,7 +346,8 @@ def main() -> None:
                         raise RuntimeError(f"Missing SAE for layer={layer_i} while building latent cache")
                     h = hidden_states[layer_i][0, pos, :].detach().float().to(args.device)
                     h_norm = _normalize_hidden(h, norm_stats.get(layer_i))
-                    feat = sae.encode(h_norm.unsqueeze(0)).squeeze(0).detach().float().cpu()
+                    sae_dtype = next(sae.parameters()).dtype
+                    feat = sae.encode(h_norm.to(dtype=sae_dtype).unsqueeze(0)).squeeze(0).detach().float().cpu()
                     sae_rows.append(feat)
                 record["sae_features"] = torch.stack(sae_rows, dim=0)
             records.append(record)

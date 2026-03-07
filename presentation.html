@@ -3,65 +3,140 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RL-Decoder with SAE Features - Phase 7 GPT-2 Closure</title>
+  <title>RL-Decoder with SAE Features - Full Research Story</title>
   <style>
     :root {
-      --bg: #f4f7f8;
+      --bg: #f3f7f8;
       --panel: #ffffff;
-      --ink: #142126;
-      --muted: #4d6168;
-      --line: #d5e0e4;
+      --ink: #0f1f26;
+      --muted: #4a606a;
+      --line: #d4dfe4;
       --accent: #0f766e;
-      --accent-soft: #d9f1ee;
+      --accent-2: #155e75;
+      --soft: #e8f5f3;
       --ok: #166534;
-      --warn: #b45309;
-      --shadow: 0 8px 24px rgba(20, 33, 38, 0.08);
+      --warn: #a16207;
+      --bad: #b91c1c;
+      --shadow: 0 10px 28px rgba(12, 27, 33, 0.10);
     }
 
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       background:
-        radial-gradient(circle at 10% 10%, #e9f7f5 0%, transparent 32%),
-        radial-gradient(circle at 90% 0%, #e8eef7 0%, transparent 35%),
+        radial-gradient(circle at 8% 10%, #e5f5f2 0%, transparent 35%),
+        radial-gradient(circle at 92% 5%, #e8edf7 0%, transparent 34%),
         var(--bg);
       color: var(--ink);
       font-family: "IBM Plex Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
-    .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 56px; }
-    .hero {
-      background: linear-gradient(135deg, #0f766e, #155e75);
-      color: #f4fffe;
-      border-radius: 18px;
-      padding: 28px;
+    .deck {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 20px 80px;
+    }
+
+    .topnav {
+      position: sticky;
+      top: 10px;
+      z-index: 5;
+      margin: 0 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(6px);
       box-shadow: var(--shadow);
-      margin-bottom: 18px;
+      padding: 8px 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .hero h1 { margin: 0 0 8px; font-size: clamp(1.6rem, 2.6vw, 2.4rem); }
-    .hero p { margin: 6px 0; max-width: 960px; color: #d9f7f3; }
+    .topnav a {
+      text-decoration: none;
+      color: #134455;
+      font-size: 0.86rem;
+      border: 1px solid #d7e3e7;
+      background: #f8fcfd;
+      border-radius: 999px;
+      padding: 5px 10px;
+      white-space: nowrap;
+    }
+
+    .topnav a:hover {
+      border-color: #9cc9cf;
+      background: #eef8f7;
+    }
+
+    .slide {
+      min-height: 86vh;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+      margin: 0 0 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hero {
+      background: linear-gradient(132deg, #0a5f59, #0b3f52);
+      color: #f2fffd;
+      border-color: transparent;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 2.4vw, 2.5rem);
+      letter-spacing: 0.01em;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.38rem;
+      color: #0f3241;
+    }
+
+    .hero h2,
+    .hero h1 {
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+    }
+
+    h3 {
+      margin: 0 0 6px;
+      font-size: 1.02rem;
+      color: #113545;
+    }
+
+    .hero p {
+      margin: 6px 0;
+      color: #f0fffc;
+      max-width: 980px;
+    }
 
     .meta {
-      margin-top: 12px;
+      margin-top: 6px;
+      color: #eafff9;
       font-size: 0.92rem;
-      color: #c4efe8;
       display: grid;
       gap: 4px;
     }
 
-    .section {
-      margin-top: 18px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: var(--shadow);
+    .hero .meta strong {
+      color: #ffffff;
     }
 
-    h2 { margin: 0 0 10px; font-size: 1.28rem; color: #0f3240; }
-    h3 { margin: 0 0 6px; font-size: 1.02rem; color: #10313f; }
+    .hero code {
+      background: rgba(6, 23, 30, 0.55);
+      border-color: rgba(216, 245, 252, 0.42);
+      color: #f2fffd;
+    }
 
     .grid {
       display: grid;
@@ -72,289 +147,805 @@
     .card {
       border: 1px solid var(--line);
       border-radius: 12px;
+      background: #fbfdff;
       padding: 12px;
-      background: #fbfeff;
     }
 
-    .badge {
+    .card strong {
+      color: #0f3241;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .pill {
       display: inline-block;
-      padding: 3px 8px;
-      border-radius: 999px;
       font-size: 0.78rem;
+      font-weight: 700;
       letter-spacing: 0.02em;
+      border-radius: 999px;
       border: 1px solid transparent;
+      padding: 3px 8px;
       margin-bottom: 6px;
-      font-weight: 600;
+      text-transform: uppercase;
     }
 
-    .badge-ok { color: var(--ok); background: #e8f6ec; border-color: #b6e2c3; }
-    .badge-warn { color: var(--warn); background: #fff4e6; border-color: #f6d4a5; }
+    .ok { color: var(--ok); background: #e7f7eb; border-color: #b7e2c0; }
+    .warn { color: var(--warn); background: #fff5e6; border-color: #f2d5a6; }
+    .bad { color: var(--bad); background: #ffeded; border-color: #f2b8b8; }
 
-    .status-table {
+    .callout {
+      border-left: 4px solid var(--accent);
+      border-radius: 10px;
+      background: var(--soft);
+      color: #0e413b;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+    }
+
+    .tbl {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.95rem;
-      margin-top: 6px;
+      font-size: 0.93rem;
     }
 
-    .status-table th,
-    .status-table td {
+    .tbl th,
+    .tbl td {
       border-bottom: 1px solid var(--line);
       padding: 8px 6px;
       text-align: left;
       vertical-align: top;
     }
 
-    .status-table th {
-      color: #214655;
-      font-weight: 700;
+    .tbl th {
       background: #f7fbfc;
+      color: #1f4a59;
+      font-weight: 700;
     }
 
-    .callout {
-      margin-top: 10px;
-      border-left: 4px solid var(--accent);
-      background: var(--accent-soft);
-      padding: 10px 12px;
-      border-radius: 8px;
-      color: #0f3f3a;
-      font-size: 0.95rem;
+    ul {
+      margin: 6px 0 0 18px;
+      padding: 0;
     }
 
-    .small { color: var(--muted); font-size: 0.9rem; }
+    li { margin: 3px 0; }
 
     code {
       font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      font-size: 0.87em;
+      font-size: 0.85em;
       background: #f2f6f7;
       border: 1px solid #d7e1e4;
       border-radius: 6px;
       padding: 1px 5px;
+      word-break: break-word;
     }
 
-    ul { margin: 6px 0 0 18px; padding: 0; }
-    li { margin: 3px 0; }
+    .small { color: var(--muted); font-size: 0.9rem; }
+
+    @media (max-width: 800px) {
+      .slide { min-height: auto; }
+      .topnav { position: static; }
+    }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <header class="hero">
+  <main class="deck">
+    <nav class="topnav" aria-label="Presentation sections">
+      <a href="#map">Map</a>
+      <a href="#decision-chain">Decision Chain</a>
+      <a href="#phase1">P1</a>
+      <a href="#phase2">P2/P2r</a>
+      <a href="#phase3">P3</a>
+      <a href="#phase4">P4/P4r</a>
+      <a href="#phase5">P5</a>
+      <a href="#phase6">P6</a>
+      <a href="#phase7">P7 GPT-2</a>
+      <a href="#phase7-program">P7 Program</a>
+      <a href="#phase7-results">P7 Results</a>
+      <a href="#phase7-sae-design">P7 SAE Design</a>
+      <a href="#phase7-sae-results">P7 SAE Results</a>
+      <a href="#phase7-relevance">P7 Relevance</a>
+      <a href="#contrib">Contributions</a>
+      <a href="#qwen">Qwen Inquiry</a>
+    </nav>
+
+    <section class="slide hero" id="intro">
       <h1>RL-Decoder with SAE Features</h1>
+      <h2>Complete Research Story: What We Tried, What Worked, and What Did Not</h2>
       <p>
-        This project tests whether internal arithmetic representations can be turned into
-        a meaningful Chain-of-Thought (CoT) faithfulness auditor, not just an answer predictor.
+        Main question: when a model writes step-by-step reasoning (CoT), is that text actually describing how the model got the answer?
       </p>
       <p>
-        The GPT-2 Medium branch is now closed for Phase 7: strong mechanistic arithmetic evidence,
-        and post-closure stress tests still leave Track C as a negative result for faithfulness discrimination.
+        We built a full test pipeline. It starts with basic checks, then measures internal arithmetic features, then tests whether those features can detect faithful vs unfaithful reasoning text.
       </p>
       <div class="meta">
-        <div><strong>Project state:</strong> Phases 1-6 complete; Phase 7 GPT-2 closed; Qwen inquiry open.</div>
-        <div><strong>Final GPT-2 Phase 7 config:</strong> <code>text=0.50</code>, <code>latent=0.50</code>, structural penalties on.</div>
-        <div><strong>Status snapshot date:</strong> March 7, 2026.</div>
-      </div>
-    </header>
-
-    <section class="section">
-      <h2>Motivation And Research Question</h2>
-      <div class="grid">
-        <article class="card">
-          <h3>Motivation</h3>
-          <ul>
-            <li>Models can output plausible reasoning that does not reflect internal computation.</li>
-            <li>Answer accuracy cannot certify reasoning faithfulness.</li>
-            <li>Mechanistic evidence is needed to separate genuine faithfulness from rationalization.</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>Core question (Phase 7)</h3>
-          <ul>
-            <li>Can a three-track auditor (<code>text</code>, <code>latent</code>, <code>causal</code>) discriminate faithful vs unfaithful CoT?</li>
-            <li>Can it do so under leakage-safe split policy and strict gate criteria?</li>
-            <li>Does mechanistic Track C add real marginal value?</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>Current answer (GPT-2)</h3>
-          <ul>
-            <li>Track C does not clear closure-grade relevance for GPT-2 under this protocol.</li>
-            <li>Two-track auditing is the final GPT-2 output.</li>
-            <li>Qwen is a separate test of whether this is model-specific.</li>
-          </ul>
-        </article>
+        <div><strong>Plain definitions:</strong> <code>CoT</code> = Chain-of-Thought text. <code>SAE</code> = sparse autoencoder used to turn hidden states into interpretable sparse features. <code>AUROC</code> = ranking quality score (0.5 random, 1.0 perfect).</div>
+        <div><strong>Snapshot:</strong> as of March 7, 2026.</div>
+        <div><strong>Project state:</strong> GPT-2 Phase 7 is closed. Track C is a negative result under this protocol. Qwen is now a separate next-model test.</div>
+        <div><strong>Final GPT-2 Phase 7 config:</strong> <code>text=0.50</code>, <code>latent=0.50</code>, <code>confidence=0.0</code>, <code>causal=0.0</code>, with structural penalties enabled.</div>
       </div>
     </section>
 
-    <section class="section">
-      <h2>Phase-by-Phase Status</h2>
-      <table class="status-table">
+    <section class="slide" id="map">
+      <h2>Story Map (End-to-End)</h2>
+      <table class="tbl">
         <thead>
           <tr>
-            <th>Phase</th>
-            <th>Status</th>
-            <th>What it established</th>
+            <th>Stage</th>
+            <th>Question</th>
+            <th>What was learned</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>1-3</td>
-            <td><span class="badge badge-ok">Complete</span></td>
-            <td>Reliable SAE training, activation tracing, and representation instrumentation.</td>
+            <td>Phases 1-3</td>
+            <td>Can we trust the basic tools?</td>
+            <td>Yes. SAE training and tracing checks worked on known tasks, so later results are not built on broken tooling.</td>
           </tr>
           <tr>
-            <td>4 / 4r</td>
-            <td><span class="badge badge-ok">Complete</span></td>
-            <td>Arithmetic features are decodable and causally active (positive mechanistic signal).</td>
+            <td>Phases 4-5</td>
+            <td>Are arithmetic features real, and can we control the model with them?</td>
+            <td>The features are real and causally active for arithmetic outputs, but simple steering with those features is not stable.</td>
           </tr>
           <tr>
-            <td>5</td>
-            <td><span class="badge badge-ok">Complete</span></td>
-            <td>Feature interpretation and steering diagnostics support distributed/nonlinear encoding.</td>
+            <td>Phase 6</td>
+            <td>Can we decode useful internal state across many layer setups?</td>
+            <td>Yes. Full sweep completed, no failed configs, and we selected reliable checkpoints for Phase 7.</td>
           </tr>
           <tr>
-            <td>6</td>
-            <td><span class="badge badge-ok">Complete</span></td>
-            <td>Full decoder sweep complete (`102/102`), robust baseline readout matrix.</td>
+            <td>Phase 7 (GPT-2)</td>
+            <td>Do internal causal signals verify CoT faithfulness?</td>
+            <td>No in GPT-2 under this protocol. Track C closed negative. Final GPT-2 system is a two-track detector.</td>
           </tr>
           <tr>
-            <td>7 (GPT-2)</td>
-            <td><span class="badge badge-ok">Closed</span></td>
-            <td>Track C negative result; two-track (`text+latent`) final deployment choice.</td>
-          </tr>
-          <tr>
-            <td>7 (Qwen)</td>
-            <td><span class="badge badge-warn">Open Inquiry</span></td>
-            <td>Diagnostic-first `Q0` only; full pipeline conditional on viability signal.</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section class="section">
-      <h2>Three Publishable GPT-2 Results</h2>
-      <div class="grid">
-        <article class="card">
-          <h3>Result 1: Mechanistic arithmetic is real</h3>
-          <ul>
-            <li>Arithmetic state is strongly decodable from hidden representations.</li>
-            <li>Subspace interventions produce positive causal movement in output behavior.</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>Result 2: Mechanism does not imply CoT faithfulness</h3>
-          <ul>
-            <li>Track C reformulations did not provide robust faithful/unfaithful discrimination for GPT-2.</li>
-            <li>This shows a measurable readout-versus-faithfulness gap.</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>Result 3: Text+structure still works as a detector</h3>
-          <ul>
-            <li>Fair Option B profile comparison yields composite AUROC around <code>0.836-0.838</code>.</li>
-            <li>Useful as a practical detector, but not a mechanistic faithfulness guarantee.</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-
-    <section class="section">
-      <h2>Latest GPT-2 Stress Tests (March 7)</h2>
-      <table class="status-table">
-        <thead>
-          <tr>
-            <th>Validation pass</th>
-            <th>Key result</th>
-            <th>Interpretation</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Path B (feature-set swap)</td>
-            <td>Best AUROC <code>0.683</code></td>
-            <td>Changing SAE feature subsets improved some variants but did not produce robust wrong-intermediate discrimination.</td>
-          </tr>
-          <tr>
-            <td>Path C robust gate</td>
-            <td><code>wrong_intermediate=0.694</code>, CI <code>[0.586, 0.802]</code>; 5-fold pooled <code>0.658</code></td>
-            <td>Single split is borderline and high variance; pooled grouped CV remains below the publishability threshold.</td>
-          </tr>
-          <tr>
-            <td>Mixed hidden+SAE ladder</td>
-            <td>Final decision: <code>mixed_redundant_or_insufficient</code></td>
-            <td>Additional raw/projected features did not provide stable incremental gain over SAE-only under robust checks.</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section class="section">
-      <h2>What This Means For Claims</h2>
-      <table class="status-table">
-        <thead>
-          <tr>
-            <th>Claim type</th>
-            <th>Status</th>
-            <th>Reason</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>"GPT-2 arithmetic mechanism exists"</td>
-            <td><span class="badge badge-ok">Supported</span></td>
-            <td>Phase 4/4r probing and intervention evidence.</td>
-          </tr>
-          <tr>
-            <td>"Track C verifies GPT-2 CoT faithfulness"</td>
-            <td><span class="badge badge-warn">Not supported</span></td>
-            <td>Closure branch selected negative disposition for Track C.</td>
-          </tr>
-          <tr>
-            <td>"Phase 8 reranking should proceed under original gates"</td>
-            <td><span class="badge badge-warn">Blocked</span></td>
-            <td>Original latent/causal gate assumptions are not met for GPT-2.</td>
+            <td>Next</td>
+            <td>Is this only a GPT-2 issue?</td>
+            <td>Still open. Qwen is treated as a new, gated hypothesis test rather than a continuation of GPT-2 closure.</td>
           </tr>
         </tbody>
       </table>
       <div class="callout">
-        The key scientific story is the contrast: arithmetic representations are present and causally active,
-        but they do not track whether GPT-2's CoT text is faithful under this protocol.
+        Short version: we proved the model has real internal arithmetic features, but those features did not become a robust faithfulness verifier for GPT-2 reasoning text.
       </div>
     </section>
 
-    <section class="section">
-      <h2>Canonical Closure Artifacts</h2>
+    <section class="slide" id="decision-chain">
+      <h2>Decision Chain (Result -&gt; Next Step)</h2>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Phase result</th>
+            <th>Constraint / insight</th>
+            <th>Next phase design choice</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>P1 passed on tasks with known hidden state truth.</td>
+            <td>The core representation method is reliable.</td>
+            <td>Scale up to full model layer capture and SAE training (P2).</td>
+          </tr>
+          <tr>
+            <td>P2/P2r produced stable sparse features across layers.</td>
+            <td>Sparsity must be controlled explicitly to avoid unstable probes.</td>
+            <td>Use TopK SAEs for arithmetic probing and causal tests (P4/P4r).</td>
+          </tr>
+          <tr>
+            <td>P3 found broad activity (~50% active), but weak class separation.</td>
+            <td>Simple "count active features" is too coarse.</td>
+            <td>Switch to targeted arithmetic state probes and subspace tests (P4/P4r).</td>
+          </tr>
+          <tr>
+            <td>P4/P4r showed strong arithmetic decoding and positive interventions.</td>
+            <td>The model has real arithmetic internals, but signal may be distributed.</td>
+            <td>Stress test controllability (P5), then build auditor pipeline (P6/P7).</td>
+          </tr>
+          <tr>
+            <td>P5 steering failed across layers.</td>
+            <td>Features that predict behavior are not always good control levers.</td>
+            <td>Treat features as evidence channels, not direct steering controls (P6/P7).</td>
+          </tr>
+          <tr>
+            <td>P6 completed full checkpoint sweep with strong decoder baselines.</td>
+            <td>We now had enough quality to run strict faithfulness tests.</td>
+            <td>Run Phase 7 Track A/B/C with leakage guards and fixed gates.</td>
+          </tr>
+          <tr>
+            <td>P7 and follow-up stress tests failed to make Track C robust.</td>
+            <td>In GPT-2, arithmetic internals did not cleanly track CoT faithfulness labels.</td>
+            <td>Close GPT-2 with two tracks. Start Qwen as a new gated inquiry.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide" id="phase1">
+      <h2>Phase 1: Ground-Truth Validation (Tooling Sanity Check)</h2>
+      <div class="template-grid">
+        <article class="card">
+          <span class="pill ok">Intuition</span>
+          <p>Before touching LLM reasoning, first prove SAE can recover hidden variables when we already know the correct answer.</p>
+        </article>
+        <article class="card">
+          <span class="pill ok">Method</span>
+          <ul>
+            <li>Used controlled environments: BFS traversal, stack-machine, and logic puzzle traces.</li>
+            <li>Each environment has known internal state labels.</li>
+            <li>Trained SAEs and checked whether decoded features recover those labels.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Key Results</span>
+          <ul>
+            <li>R^2 range across tasks: <code>0.967-0.999</code>.</li>
+            <li>All tasks passed strong reconstruction and decoding checks.</li>
+            <li>No major instability across seeds.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Impact On Next Phase</span>
+          <p>Because this passed, we had evidence the method itself works. That justified moving to full GPT-2 layer-wide SAE training.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" id="phase2">
+      <h2>Phase 2 / 2r: Multi-Layer SAE Training and TopK Stabilization</h2>
+      <div class="template-grid">
+        <article class="card">
+          <span class="pill ok">Intuition</span>
+          <p>To understand reasoning internals, we need features from every layer, not only one or two layers.</p>
+        </article>
+        <article class="card">
+          <span class="pill ok">Method</span>
+          <ul>
+            <li>Phase 2: trained SAEs across all GPT-2 layers.</li>
+            <li>Phase 2r: retrained with TopK activation so sparsity is controlled directly.</li>
+            <li>Saved per-layer stats and checkpoints for downstream probes and interventions.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Key Results</span>
+          <ul>
+            <li><code>24</code> GPT-2 SAEs at <code>12x</code> expansion.</li>
+            <li><code>98</code> SAEs across 4 models in broader assets.</li>
+            <li>TopK setup stabilized around ~<code>30%</code> active feature rate for GPT-2.</li>
+            <li>Training quality was stable enough to standardize later experiments.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Impact On Next Phase</span>
+          <p>This gave us a stable feature space for tracing where model information appears across tokens and layers.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" id="phase3">
+      <h2>Phase 3: Reasoning Flow Tracing</h2>
+      <div class="template-grid">
+        <article class="card">
+          <span class="pill ok">Intuition</span>
+          <p>Before designing probes, we mapped where feature activity happens during reasoning text.</p>
+        </article>
+        <article class="card">
+          <span class="pill ok">Method</span>
+          <ul>
+            <li>Captured hidden states from every GPT-2 block during reasoning generation.</li>
+            <li>Encoded token states with per-layer SAEs.</li>
+            <li>Built token-layer activity maps for equation, intermediate, and non-computation tokens.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Key Results</span>
+          <ul>
+            <li>Average occupancy roughly <code>~50% active / ~50% sparse</code>.</li>
+            <li>Simple active-count differences between useful and non-useful tokens were small.</li>
+            <li>This showed we needed targeted features, not coarse counts.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Impact On Next Phase</span>
+          <p>We moved from coarse counting to targeted arithmetic probes tied to equation positions and step roles.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" id="phase4">
+      <h2>Phase 4 / 4r: Arithmetic Probing and Causal Subspace Tests</h2>
+      <div class="template-grid">
+        <article class="card">
+          <span class="pill ok">Intuition</span>
+          <p>If arithmetic is represented internally, we should be able to decode arithmetic state and causally perturb that state.</p>
+        </article>
+        <article class="card">
+          <span class="pill ok">Method</span>
+          <ul>
+            <li>Used GSM8K traces with arithmetic annotations at equation and result tokens.</li>
+            <li>Trained ridge probes to predict arithmetic targets from SAE features.</li>
+            <li>Ran causal subspace patching (Phase 4r) to test whether those features affect output probability.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Key Results</span>
+          <ul>
+            <li>Probe performance: around <code>R^2=0.977</code> at layer 7 (TopK stack).</li>
+            <li>Causal subspace result: peak <code>+0.107 delta_logprob</code> at layer 22.</li>
+            <li><code>21/24</code> layers showed positive directional effect in 4r causal profile.</li>
+            <li>Plain meaning: arithmetic features are present and can matter causally.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Impact On Next Phase</span>
+          <p>This justified building a faithfulness auditor, but first we had to test whether these features are controllable in practice.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" id="phase5">
+      <h2>Phase 5: Feature Interpretation and Steering Stress Test</h2>
+      <div class="template-grid">
+        <article class="card">
+          <span class="pill ok">Intuition</span>
+          <p>A feature can predict behavior but still fail as a stable control handle. We tested that directly.</p>
+        </article>
+        <article class="card">
+          <span class="pill ok">Method</span>
+          <ul>
+            <li>Generated top-feature context cards for interpretability.</li>
+            <li>Applied mean-difference steering vectors across layers and measured output shifts.</li>
+            <li>Compared expected direction vs observed direction.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill warn">Key Results</span>
+          <ul>
+            <li>Interpretation showed broad high-activation arithmetic-associated features.</li>
+            <li>Mean-diff steering produced uniformly negative shifts (disruptive, not useful control).</li>
+            <li>Control behavior was unstable even when probes looked strong.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill warn">Impact On Next Phase</span>
+          <p>We stopped assuming "good probe = good control." In later phases we used these channels as evidence signals, not guaranteed interventions.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" id="phase6">
+      <h2>Phase 6: Decoder Benchmark + Full Layer Sweep</h2>
+      <div class="template-grid">
+        <article class="card">
+          <span class="pill ok">Intuition</span>
+          <p>Before Phase 7 claims, we needed strong decoder baselines and robust checkpoint coverage.</p>
+        </article>
+        <article class="card">
+          <span class="pill ok">Method</span>
+          <ul>
+            <li>Ran full supervised sweep over input modes (raw/hybrid/sae) and layer windows.</li>
+            <li>Used fixed split policy and leakage guards.</li>
+            <li>Selected parity checkpoints for the final faithfulness matrix.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Key Results</span>
+          <ul>
+            <li>Sweep completion: <code>102/102</code> configs, <code>0</code> failed.</li>
+            <li>Best top-1: <code>raw_block8_00_07 = 0.5628</code>.</li>
+            <li>Best top-5: <code>hybrid_block4_04_07 = 0.7860</code>.</li>
+            <li>This gave a stable base for fair Phase 7 comparisons.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="pill ok">Impact On Next Phase</span>
+          <p>We entered Phase 7 with reliable checkpoints, standardized artifacts, and strong leakage controls.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" id="phase7">
+      <h2>Phase 7 (GPT-2): Main Question, Rules, and Final Outcome</h2>
+
+      <div class="grid">
+        <article class="card">
+          <h3>Main question</h3>
+          <p>
+            Can internal model signals tell us whether a reasoning trace is faithful, not just whether the text looks plausible?
+          </p>
+          <ul>
+            <li><strong>Track A:</strong> text pattern signal.</li>
+            <li><strong>Track B:</strong> decoded latent-state signal.</li>
+            <li><strong>Track C:</strong> causal/mechanistic signal.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Rules we enforced</h3>
+          <ul>
+            <li>Leakage-safe trace-group split with fixed seed.</li>
+            <li>Calibration and evaluation kept separate.</li>
+            <li>Variant-robust checks on hard cases.</li>
+            <li>Bootstrap CIs and grouped cross-validation before closure.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Final GPT-2 deployment</h3>
+          <ul>
+            <li><code>text=0.50</code>, <code>latent=0.50</code></li>
+            <li><code>confidence=0.0</code>, <code>causal=0.0</code></li>
+            <li>Structural penalties enabled.</li>
+            <li>Track C closed as a negative result for GPT-2.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="callout">
+        Bottom line for this phase: we ran many corrected versions of Track C, but none passed robust closure criteria on GPT-2.
+      </div>
+    </section>
+
+    <section class="slide" id="phase7-program">
+      <h2>Phase 7 Progression: Step-by-Step With Rationale</h2>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Step</th>
+            <th>Why we ran it</th>
+            <th>Result</th>
+            <th>Decision after result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1) Core matrix (<code>4 checkpoints x 4 variables</code>)</td>
+            <td>Start with the full baseline test under one fixed protocol.</td>
+            <td>Track C did not show robust pass behavior.</td>
+            <td>Do not conclude yet. First fix known engineering risks.</td>
+          </tr>
+          <tr>
+            <td>2) Causal bug-fix reruns</td>
+            <td>Make sure failures are not caused by indexing, lookup, or token-anchor bugs.</td>
+            <td>Code path improved and diagnostics became cleaner, but core Track C weakness stayed.</td>
+            <td>Treat this as scientific signal, then run targeted reformulations.</td>
+          </tr>
+          <tr>
+            <td>3) R1 confidence-margin track</td>
+            <td>Test whether decoder confidence gives a better faithfulness signal than hard matches.</td>
+            <td>Some signal, but not strong enough for closure.</td>
+            <td>Keep as diagnostic channel, continue to stronger tests.</td>
+          </tr>
+          <tr>
+            <td>4) R2 trajectory-coherence track</td>
+            <td>Test whether step-to-step consistency can separate faithful vs unfaithful traces.</td>
+            <td>Direction was wrong (anti-predictive).</td>
+            <td>Reject this formulation for GPT-2.</td>
+          </tr>
+          <tr>
+            <td>5) R3 contrastive probe</td>
+            <td>Test if a learned classifier over hidden-derived features can recover Track C signal.</td>
+            <td>Early run looked promising, but robust follow-up was not stable enough.</td>
+            <td>Proceed to stricter fairness and robustness tests.</td>
+          </tr>
+          <tr>
+            <td>6) Option B fair profile comparison</td>
+            <td>Verify gains are real by re-auditing each profile, not just blending scores.</td>
+            <td>P1/P2/P3 were very close; required ordering test failed.</td>
+            <td>No strong evidence that added Track C weighting is helping.</td>
+          </tr>
+          <tr>
+            <td>7) Path C robust validation</td>
+            <td>Stress test on hard variant with train exclusions + grouped CV.</td>
+            <td>Single split near threshold, pooled CV below target.</td>
+            <td>Treat as not robust.</td>
+          </tr>
+          <tr>
+            <td>8) Mixed hidden + SAE ladder</td>
+            <td>Check if combining feature spaces adds independent signal.</td>
+            <td>No stable incremental gain beyond SAE block.</td>
+            <td>Close GPT-2 Track C negative under current protocol.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        This progression matters: each new step was chosen to answer a specific failure mode from the previous step.
+      </div>
+    </section>
+
+    <section class="slide" id="phase7-results">
+      <h2>Phase 7 Results: Clear Readout</h2>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Test</th>
+            <th>Main numbers</th>
+            <th>Plain-English meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>R1 confidence track</td>
+            <td>AUROC <code>0.6009</code>, CI <code>[0.5487, 0.6489]</code>, corr with text <code>0.6187</code></td>
+            <td>There is some useful signal, but not enough to make Track C robust by itself.</td>
+          </tr>
+          <tr>
+            <td>R2 trajectory track</td>
+            <td>AUROC <code>0.4497</code>, CI <code>[0.4090, 0.4929]</code></td>
+            <td>This version points in the wrong direction, so it is not usable.</td>
+          </tr>
+          <tr>
+            <td>R3 contrastive probe (early)</td>
+            <td>Control-conditioned <code>0.7136</code> vs source-trace <code>0.4995</code></td>
+            <td>Feature source matters, but this early signal did not survive stricter robustness checks.</td>
+          </tr>
+          <tr>
+            <td>R4 geometry</td>
+            <td>Best AUROC about <code>0.533 - 0.544</code></td>
+            <td>Near random. Useful as diagnostics, not as decision signal.</td>
+          </tr>
+          <tr>
+            <td>Option B fair comparison</td>
+            <td>P1 <code>0.8361</code>, P2 <code>0.8371</code>, P3 <code>0.8383</code>; ordering pass <code>false</code></td>
+            <td>Differences are small. No strong proof that adding more track weight gives real gain.</td>
+          </tr>
+          <tr>
+            <td>Path C robust gate</td>
+            <td><code>wrong_intermediate=0.6944</code>, CI <code>[0.5864, 0.8025]</code>; pooled 5-fold CV <code>0.6577</code>, CI <code>[0.6104, 0.7057]</code></td>
+            <td>Single split looked close, but pooled CV shows performance below robust target.</td>
+          </tr>
+          <tr>
+            <td>Mixed hidden + SAE</td>
+            <td>Final decision: <code>mixed_redundant_or_insufficient</code></td>
+            <td>Adding raw/projected hidden features did not give stable, independent improvement.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        Final result from all of these tests: keep the two-track GPT-2 deployment and report Track C as a negative finding for this model and protocol.
+      </div>
+    </section>
+
+    <section class="slide" id="phase7-sae-design">
+      <h2>Phase 7 SAE Experiment: Design and Rationale</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Data used</h3>
+          <ul>
+            <li>Used existing control-conditioned records from Phase 7.</li>
+            <li>These records already include per-step hidden states at the equation anchor.</li>
+            <li>No new data collection was needed for the SAE experiments.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Core SAE setup</h3>
+          <ul>
+            <li>For each layer, normalize hidden states with saved activation stats.</li>
+            <li>Encode into sparse SAE feature vectors (12,288 dimensions).</li>
+            <li>Run all tests on those feature vectors, not only raw hidden states.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Why this was important</h3>
+          <ul>
+            <li>Raw L2 can hide small but useful feature differences.</li>
+            <li>Sparse features let us test if specific dimensions separate faithful and unfaithful traces.</li>
+            <li>This directly tested whether Track C failed because of representation choice.</li>
+          </ul>
+        </article>
+      </div>
+
+      <h3>SAE Experiment Ladder</h3>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>SAE step</th>
+            <th>What we measured</th>
+            <th>Why we measured it</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SAE feature discrimination</td>
+            <td>Feature-space L2, per-feature divergence, sparse logistic probe, overlap with Phase 4 features</td>
+            <td>Check if single-step SAE features carry faithfulness signal.</td>
+          </tr>
+          <tr>
+            <td>SAE trajectory coherence</td>
+            <td>Step-to-step cosine smoothness, variance coherence, monotonicity coherence</td>
+            <td>Check if multi-step feature dynamics catch wrong reasoning chains.</td>
+          </tr>
+          <tr>
+            <td>Path B feature-set swaps</td>
+            <td>Compare <code>result_top50</code>, <code>eq_pre_result_150</code>, <code>divergent_top50</code></td>
+            <td>Test whether wrong feature subset caused weak hard-variant performance.</td>
+          </tr>
+          <tr>
+            <td>Path C robust validation</td>
+            <td>Variant-robust wrong_intermediate gate with bootstrap and grouped CV</td>
+            <td>Separate real signal from structural confounds and split noise.</td>
+          </tr>
+          <tr>
+            <td>Mixed hidden + SAE</td>
+            <td>Model ladder (SAE-only vs mixed) with incremental gain checks</td>
+            <td>Test if combining spaces adds independent signal.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide" id="phase7-sae-results">
+      <h2>Phase 7 SAE Experiment: Results and Decisions</h2>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>SAE stage</th>
+            <th>Result</th>
+            <th>Decision taken</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SAE feature discrimination (24 layers)</td>
+            <td>
+              L2 channel failed, but divergence and sparse probe channels were positive.
+              Best sparse probe test AUROC was <code>0.8409</code> (layer 4).
+            </td>
+            <td>
+              Promising single-step signal existed, so we moved to stricter multi-step and robust variant tests.
+            </td>
+          </tr>
+          <tr>
+            <td>SAE trajectory coherence (layers 4/7/22)</td>
+            <td>
+              Best overall AUROC was <code>0.6967</code> (layer4 cosine), but hard variant
+              <code>wrong_intermediate</code> stayed weak in baseline trajectory analysis.
+            </td>
+            <td>Do not claim success. Run feature-set swaps and robust gates.</td>
+          </tr>
+          <tr>
+            <td>Path B feature-set swap</td>
+            <td>
+              Best config <code>eq_pre_result_150</code> reached <code>0.6831</code>;
+              wrong_intermediate best was about <code>0.5716</code>.
+            </td>
+            <td>Feature selection alone did not solve the core failure.</td>
+          </tr>
+          <tr>
+            <td>Path C robust validation</td>
+            <td>
+              wrong_intermediate single split <code>0.6944</code>, CI <code>[0.5864, 0.8025]</code>,
+              robust gate pass <code>false</code>.
+            </td>
+            <td>Treat as underpowered/borderline, but still below robust publishability gate.</td>
+          </tr>
+          <tr>
+            <td>Mixed hidden + SAE ladder</td>
+            <td>Final decision was <code>mixed_redundant_or_insufficient</code>.</td>
+            <td>No stable independent gain from adding raw/projected hidden blocks.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        SAE takeaway: SAE features clearly capture useful arithmetic structure, but robust faithfulness discrimination on the hard variant did not clear the target gate for GPT-2.
+      </div>
+    </section>
+
+    <section class="slide" id="phase7-relevance">
+      <h2>Why Phase 7 Is Important (Academic Value)</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>A clean contrast</h3>
+          <ul>
+            <li>Earlier phases proved arithmetic features are real and causally active.</li>
+            <li>Phase 7 showed those same features do not robustly verify CoT faithfulness in GPT-2.</li>
+            <li>This is a strong and informative scientific contrast.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Better research discipline</h3>
+          <ul>
+            <li>We did not stop at first failure or first success.</li>
+            <li>We fixed bugs, reran fair comparisons, then applied robust validation.</li>
+            <li>This reduces the chance of false claims from noisy runs.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Clear claim boundaries</h3>
+          <ul>
+            <li>Operational detection can still be strong.</li>
+            <li>Mechanistic faithfulness verification is a higher bar and was not met here.</li>
+            <li>This makes the final paper claims honest and useful.</li>
+          </ul>
+        </article>
+      </div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Answer after Phase 7</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Did we prove GPT-2 has arithmetic internals?</td>
+            <td>Yes.</td>
+          </tr>
+          <tr>
+            <td>Did we prove Track C robustly verifies GPT-2 CoT faithfulness?</td>
+            <td>No.</td>
+          </tr>
+          <tr>
+            <td>Is this still publishable and meaningful?</td>
+            <td>Yes. The positive mechanism result plus negative faithfulness result is a strong contribution.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide" id="contrib">
+      <h2>Research Contribution (Why This Matters)</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Result 1: Internal arithmetic is real</h3>
+          <ul>
+            <li>Strong decodability of arithmetic state from internal features.</li>
+            <li>Positive subspace intervention signal in upper layers.</li>
+            <li>This is direct evidence the model stores structured arithmetic information.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Result 2: Internal arithmetic does not imply faithful CoT</h3>
+          <ul>
+            <li>Track C remained negative/non-robust for GPT-2 under strict protocol.</li>
+            <li>This shows a clear gap between "model can compute" and "text explains that computation."</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Result 3: Practical detection is still useful</h3>
+          <ul>
+            <li>Text + latent + structural penalties gives strong practical discrimination (Option B profile range around <code>0.836-0.838</code> AUROC).</li>
+            <li>Good for operational filtering, but not proof of mechanistic faithfulness.</li>
+          </ul>
+        </article>
+      </div>
+
+      <h3>Canonical Closure Artifacts (Final GPT-2 Evidence)</h3>
       <ul>
         <li><code>phase7_results/results/trackc_phase7v3_closure_note_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json</code></li>
         <li><code>phase7_results/results/trackc_phase7v3_decision_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json</code></li>
-        <li><code>phase7_results/results/optionb_canary_decision_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
-        <li><code>phase7_results/results/optionc_probe_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
         <li><code>phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
         <li><code>phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json</code></li>
         <li><code>phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json</code></li>
       </ul>
     </section>
 
-    <section class="section">
-      <h2>Qwen Next-Step Inquiry (Diagnostic-First)</h2>
+    <section class="slide" id="qwen">
+      <h2>Qwen Next Steps (Separate Open Inquiry)</h2>
       <div class="grid">
         <article class="card">
-          <h3>Q0 diagnostic design</h3>
+          <h3>Why this is separate from GPT-2</h3>
           <ul>
-            <li>Run 50 traces with faithful/unfaithful controls.</li>
-            <li>Use control-conditioned forward passes.</li>
-            <li>Measure within-trace hidden-state L2 separation at the `=` anchor.</li>
+            <li>GPT-2 closure is decision-complete for current protocol.</li>
+            <li>Qwen is a new test of whether model scale and training data change Track C viability.</li>
           </ul>
         </article>
         <article class="card">
-          <h3>Immediate workstream</h3>
+          <h3>Q0 diagnostic (go/no-go before big runs)</h3>
           <ul>
-            <li>Train Qwen SAEs first (layer-partitioned across GPUs) to make Track C probes executable.</li>
-            <li>Then run Q0 as the formal go/no-go for full Qwen Phase 7 promotion.</li>
-            <li>Qwen remains a separate model inquiry; GPT-2 closure is unchanged.</li>
+            <li>Sample 50 traces with faithful/unfaithful controls.</li>
+            <li>Use control-conditioned forward passes.</li>
+            <li>Measure within-trace hidden-state separation at the equation <code>=</code> anchor.</li>
+            <li>Only promote to full Qwen Phase 7 if this diagnostic clearly passes.</li>
           </ul>
         </article>
       </div>
-      <p class="small">See <code>TODO.md</code> for the exact Q0 execution and decision criteria.</p>
+
+      <div class="callout">
+        Rule: Qwen can extend the project, but it does not reopen the GPT-2 closure decision.
+      </div>
+      <p class="small">See <code>TODO.md</code> for exact Q0 criteria and promotion gating.</p>
     </section>
   </main>
 </body>

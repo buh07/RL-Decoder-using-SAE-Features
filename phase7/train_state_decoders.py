@@ -207,7 +207,11 @@ def _validate_schema_versions(records: List[dict], allow_mixed_schema: bool) -> 
     return versions[0]
 
 
-def _resolve_selected_configs(args: argparse.Namespace) -> Tuple[List[StateDecoderExperimentConfig], Optional[Dict]]:
+def _resolve_selected_configs(
+    args: argparse.Namespace,
+    *,
+    model_num_layers: int,
+) -> Tuple[List[StateDecoderExperimentConfig], Optional[Dict]]:
     custom_requested = any([args.layer_set_id, args.layers, args.input_variant])
     if args.config_name and custom_requested:
         raise ValueError("Use either preset --config-name or custom layer selection (--manifest/--layer-set-id/--layers), not both")
@@ -222,7 +226,12 @@ def _resolve_selected_configs(args: argparse.Namespace) -> Tuple[List[StateDecod
             raise ValueError("--layer-set-id requires --input-variant")
         row = get_layer_set(manifest_payload, args.layer_set_id)
         cfg_name = args.custom_config_name or f"state_{args.input_variant}_{row['layer_set_id']}"
-        cfg = make_custom_state_decoder_config(input_variant=args.input_variant, layers=row["layers"], name=cfg_name)
+        cfg = make_custom_state_decoder_config(
+            input_variant=args.input_variant,
+            layers=row["layers"],
+            name=cfg_name,
+            layers_total=int(model_num_layers),
+        )
         if args.seed is not None:
             cfg.seed = int(args.seed)
         return [cfg], manifest_payload
@@ -230,7 +239,12 @@ def _resolve_selected_configs(args: argparse.Namespace) -> Tuple[List[StateDecod
     if args.layers:
         if not args.input_variant:
             raise ValueError("--layers requires --input-variant")
-        cfg = make_custom_state_decoder_config(input_variant=args.input_variant, layers=args.layers, name=args.custom_config_name)
+        cfg = make_custom_state_decoder_config(
+            input_variant=args.input_variant,
+            layers=args.layers,
+            name=args.custom_config_name,
+            layers_total=int(model_num_layers),
+        )
         if args.seed is not None:
             cfg.seed = int(args.seed)
         return [cfg], manifest_payload
@@ -470,8 +484,8 @@ def main() -> None:
         torch.use_deterministic_algorithms(True)
     if args.config_name and args.all_configs:
         raise ValueError("Use either --config-name or --all-configs (or neither), not both")
-    selected, manifest_payload = _resolve_selected_configs(args)
     spec = resolve_model_spec(args.model_key, args.adapter_config)
+    selected, manifest_payload = _resolve_selected_configs(args, model_num_layers=int(spec.num_layers))
     model_meta = spec.to_dict()
     selected = [apply_model_metadata_to_config(cfg, model_meta, vocab_size_override=args.vocab_size) for cfg in selected]
 

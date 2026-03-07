@@ -1,0 +1,18 @@
+{
+  "source_dir": "phase2_results/saes_qwen25_7b_12x_topk/saes",
+  "num_entries": 28,
+  "counts_by_model": {
+    "qwen2.5-7b": 28
+  },
+  "final_loss": {
+    "min": 0.015489167484797929,
+    "max": 0.09238052887744025,
+    "mean": 0.032284702300409175
+  },
+  "final_sparsity": {
+    "min": 0.700009286403656,
+    "max": 0.7082998219289278,
+    "mean": 0.7048685759081876
+  },
+  "format_note": "training_summary.json is a list for compatibility with phase2/train_multilayer_saes.py"
+}

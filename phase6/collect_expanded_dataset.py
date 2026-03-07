@@ -33,67 +33,19 @@ import math
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
 import numpy as np
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "src"))
-sys.path.insert(0, str(REPO_ROOT / "phase4"))
+sys.path.insert(0, str(REPO_ROOT))
 
-from sae_architecture import SparseAutoencoder
-from sae_config import SAEConfig
+from phase7.model_registry import create_adapter, resolve_model_spec
+from phase7.sae_assets import load_norm_stats, load_saes, model_key_safe
 
-NUM_LAYERS = 24
-HIDDEN_DIM = 1024
-LATENT_DIM = 12288
-MODEL_ID   = "gpt2-medium"
 ANN_RE     = re.compile(r"<<([^>]*?)=\s*(-?\d+(?:\.\d+)?)\s*>>")
-
-
-# ── Reuse Phase 4 utilities ─────────────────────────────────────────────────
-
-def load_saes(saes_dir: Path, device: str) -> Dict[int, SparseAutoencoder]:
-    saes: Dict[int, SparseAutoencoder] = {}
-    for layer_idx in range(NUM_LAYERS):
-        ckpt_path = saes_dir / f"gpt2-medium_layer{layer_idx}_sae.pt"
-        ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
-        cd = ckpt["config"]
-        cfg = SAEConfig(
-            input_dim=cd["input_dim"],
-            expansion_factor=cd["expansion_factor"],
-            use_relu=cd.get("use_relu", True),
-            use_topk=cd.get("use_topk", False),
-            topk_k=cd.get("topk_k", 0),
-            use_amp=False,
-        )
-        sae = SparseAutoencoder(cfg)
-        sae.load_state_dict(ckpt["model_state_dict"])
-        sae = sae.to(device).eval()
-        saes[layer_idx] = sae
-    print(f"  Loaded {len(saes)} SAEs.")
-    return saes
-
-
-def load_norm_stats(activations_dir: Path, device: str) -> Dict[int, Tuple[torch.Tensor, torch.Tensor]]:
-    stats: Dict[int, Tuple[torch.Tensor, torch.Tensor]] = {}
-    for layer_idx in range(NUM_LAYERS):
-        path = activations_dir / f"gpt2-medium_layer{layer_idx}_activations.pt"
-        if not path.exists():
-            continue
-        payload = torch.load(path, map_location="cpu", weights_only=False)
-        acts = payload["activations"] if isinstance(payload, dict) else payload
-        if acts.dim() == 3:
-            acts = acts.reshape(-1, acts.shape[-1])
-        acts = acts.float()
-        stats[layer_idx] = (
-            acts.mean(dim=0).to(device),
-            acts.std(dim=0).clamp_min(1e-6).to(device),
-        )
-    return stats
 
 
 def normalize(x, stats):
@@ -101,19 +53,6 @@ def normalize(x, stats):
         return x
     mean, std = stats
     return (x - mean) / std
-
-
-def register_hooks(model):
-    store: Dict[int, torch.Tensor] = {}
-    handles = []
-    def make_hook(L):
-        def hook_fn(module, inp, output):
-            h = output[0] if isinstance(output, tuple) else output
-            store[L] = h.detach().cpu()
-        return hook_fn
-    for i in range(NUM_LAYERS):
-        handles.append(model.transformer.h[i].register_forward_hook(make_hook(i)))
-    return store, handles
 
 
 def find_tokens_for_span(offset_mapping, char_start, char_end):
@@ -167,6 +106,25 @@ def parse_annotations(text):
     return results
 
 
+@torch.no_grad()
+def forward_hidden_states_only(adapter, input_ids: torch.Tensor) -> Tuple[Tuple[torch.Tensor, ...], torch.Tensor]:
+    if adapter.model is None:
+        raise RuntimeError("Adapter model is not loaded")
+    ids = adapter.tokenize(input_ids)
+    model = adapter.model
+    if hasattr(model, "model"):  # Qwen/LLaMA style
+        out = model.model(ids, output_hidden_states=True, return_dict=True)
+        hs = tuple(out.hidden_states[1:]) if out.hidden_states is not None else tuple()
+        return hs, out.last_hidden_state
+    if hasattr(model, "transformer"):  # GPT-2 style
+        out = model.transformer(ids, output_hidden_states=True, return_dict=True)
+        hs = tuple(out.hidden_states[1:]) if out.hidden_states is not None else tuple()
+        return hs, out.last_hidden_state
+    # Fallback to adapter forward when base-model path is not recognized.
+    logits, hs = adapter.forward(ids)
+    return hs, hs[-1]
+
+
 # ── Feature extraction (extended to include raw hidden states) ────────────
 
 @torch.no_grad()
@@ -175,14 +133,17 @@ def extract_record(
     input_ids: torch.Tensor,
     offset_mapping: List[Tuple[int, int]],
     tokens_str: List[str],
-    activation_store: Dict[int, torch.Tensor],
-    saes: Dict[int, SparseAutoencoder],
+    hidden_states: Tuple[torch.Tensor, ...],
+    saes: Dict[int, torch.nn.Module],
     norm_stats: Dict[int, Tuple[torch.Tensor, torch.Tensor]],
-    logits: torch.Tensor,
+    log_probs_by_pred_pos: Dict[int, torch.Tensor],
     device: str,
     example_idx: int,
     ann_idx: int,
     gsm8k_split: str,
+    model_key: str,
+    model_family: str,
+    tokenizer_id: str,
 ) -> Tuple[Optional[dict], Optional[str]]:
     """Extract one annotation record with raw hidden states, SAE features, and baseline logprob."""
 
@@ -201,32 +162,36 @@ def extract_record(
     eq_tok_idx = eq_toks[0]
     result_tok_idx = result_toks[0]
     result_token_id = input_ids[0, result_tok_idx].item()
+    num_layers = len(hidden_states)
+    hidden_dim = int(hidden_states[0].shape[-1])
+    model_sae_dim = int(next(iter(saes.values())).decoder.weight.shape[1]) if saes else 0
 
-    # Raw hidden states at eq_tok position: (24, 1024) float16
+    # Raw hidden states at eq_tok position: (num_layers, hidden_dim) float16
     raw_hidden = torch.stack([
-        activation_store[L][0, eq_tok_idx, :] for L in range(NUM_LAYERS)
+        hidden_states[L][0, eq_tok_idx, :].detach().cpu() for L in range(num_layers)
     ]).half()  # (24, 1024)
 
-    # SAE features at eq_tok position: (24, 12288) float16
+    # SAE features at eq_tok position: (num_layers, latent_dim) float16
     sae_features_list = []
-    for L in range(NUM_LAYERS):
-        h_raw = activation_store[L][0, eq_tok_idx, :].to(device).float()
+    for L in range(num_layers):
+        h_raw = hidden_states[L][0, eq_tok_idx, :].to(device).float()
         h_norm = normalize(h_raw, norm_stats.get(L))
-        h_feat = saes[L].encode(h_norm.unsqueeze(0)).squeeze(0)
+        sae = saes[L]
+        sae_dtype = next(sae.parameters()).dtype
+        h_feat = sae.encode(h_norm.to(dtype=sae_dtype).unsqueeze(0)).squeeze(0)
         sae_features_list.append(h_feat.half().cpu())
-    sae_features = torch.stack(sae_features_list)  # (24, 12288)
+    sae_features = torch.stack(sae_features_list)  # (num_layers, latent_dim)
 
     # Baseline log-prob: model's own prediction of the result token
-    # at position eq_tok_idx (autoregressive: logits[eq_tok] predict token at eq_tok+1)
-    # Predict result token from the position just before it
+    # at the position just before result token.
     pred_pos = result_tok_idx - 1
-    if pred_pos < 0 or pred_pos >= logits.shape[1]:
+    lp_vec = log_probs_by_pred_pos.get(int(pred_pos))
+    if pred_pos < 0 or lp_vec is None:
         return None, "token_alignment"
-    log_probs = F.log_softmax(logits[0, pred_pos, :], dim=-1)
-    baseline_logprob = log_probs[result_token_id].item()
+    baseline_logprob = lp_vec[result_token_id].item()
 
     # Top-5 predictions at this position
-    top5_vals, top5_ids = log_probs.topk(5)
+    top5_vals, top5_ids = lp_vec.topk(5)
 
     C = ann["C"]
     return {
@@ -248,6 +213,12 @@ def extract_record(
         "baseline_logprob": baseline_logprob,
         "baseline_top5":   list(zip(top5_ids.tolist(), top5_vals.tolist())),
         "gsm8k_split":    gsm8k_split,
+        "model_key": model_key,
+        "model_family": model_family,
+        "num_layers": int(num_layers),
+        "hidden_dim": int(hidden_dim),
+        "sae_dim": int(model_sae_dim),
+        "tokenizer_id": tokenizer_id,
     }, None
 
 
@@ -257,19 +228,36 @@ def collect(args):
     device = args.device
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    spec = resolve_model_spec(args.model_key, args.adapter_config)
 
     # Load model + SAEs
-    print(f"Loading {MODEL_ID}...")
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-    model = AutoModelForCausalLM.from_pretrained(MODEL_ID, torch_dtype=torch.float32)
-    model = model.to(device).eval()
+    print(f"Loading model adapter for {spec.model_key}...")
+    adapter = create_adapter(model_key=spec.model_key, device=device, adapter_config=args.adapter_config).load(device=device)
+    if adapter.tokenizer is None:
+        raise RuntimeError("Adapter tokenizer is not loaded")
+    tokenizer = adapter.tokenizer
 
+    resolved_saes_dir = args.saes_dir if args.saes_dir is not None else spec.sae_dir
+    if not resolved_saes_dir:
+        raise ValueError(
+            f"No SAE directory configured for model_key={spec.model_key!r}; "
+            "pass --saes-dir or set model_registry.sae_dir."
+        )
+    resolved_activations_dir = args.activations_dir if args.activations_dir is not None else "phase2_results/activations"
     print("Loading SAEs...")
-    saes = load_saes(Path(args.saes_dir), device)
+    saes = load_saes(
+        saes_dir=Path(resolved_saes_dir),
+        model_key=spec.model_key,
+        num_layers=int(spec.num_layers),
+        device=device,
+    )
     print("Loading norm stats...")
-    norm_stats = load_norm_stats(Path(args.activations_dir), device)
-
-    activation_store, handles = register_hooks(model)
+    norm_stats = load_norm_stats(
+        activations_dir=Path(resolved_activations_dir),
+        model_key=spec.model_key,
+        num_layers=int(spec.num_layers),
+        device=device,
+    )
 
     # Load GSM8K data
     gsm8k_path = Path(args.gsm8k_path)
@@ -309,22 +297,46 @@ def collect(args):
             continue
 
         enc = tokenizer(
-            text, return_tensors="pt", return_offsets_mapping=True,
-            truncation=True, max_length=1024,
+            text,
+            return_tensors="pt",
+            return_offsets_mapping=True,
+            truncation=True,
+            max_length=1024,
+            add_special_tokens=adapter._tokenize_add_special_tokens(),
         )
         input_ids = enc["input_ids"].to(device)
-        offset_mapping = enc["offset_mapping"][0].tolist()
+        offset_mapping = enc["offset_mapping"][0].tolist() if "offset_mapping" in enc else [(0, 0)] * int(input_ids.shape[1])
         tokens_str = [tokenizer.decode([tid]) for tid in input_ids[0].tolist()]
 
-        # Forward pass — populates activation_store
-        with torch.no_grad():
-            logits = model(input_ids).logits
+        hidden_states, last_hidden = forward_hidden_states_only(adapter, input_ids)
+        if len(hidden_states) != int(spec.num_layers):
+            raise RuntimeError(
+                f"Hidden-state depth mismatch for model_key={spec.model_key!r}: "
+                f"adapter returned {len(hidden_states)} layers, expected {int(spec.num_layers)}"
+            )
+        pred_positions = set()
+        for ann in annotations:
+            result_toks = find_tokens_for_span(offset_mapping, ann["result_chars"][0], ann["result_chars"][1])
+            if len(result_toks) == 1 and int(result_toks[0]) > 0:
+                pred_positions.add(int(result_toks[0]) - 1)
+        log_probs_by_pred_pos: Dict[int, torch.Tensor] = {}
+        if pred_positions:
+            pred_pos_sorted = sorted(pred_positions)
+            idx = torch.tensor(pred_pos_sorted, dtype=torch.long, device=last_hidden.device)
+            h_sel = last_hidden[0].index_select(0, idx)
+            logits_sel = adapter.model.lm_head(h_sel)
+            lp_sel = F.log_softmax(logits_sel.float(), dim=-1).detach().cpu()
+            for i, pos in enumerate(pred_pos_sorted):
+                log_probs_by_pred_pos[int(pos)] = lp_sel[i]
 
         for ann_idx, ann in enumerate(annotations):
             rec, skip_reason = extract_record(
                 ann, input_ids, offset_mapping, tokens_str,
-                activation_store, saes, norm_stats, logits, device,
+                hidden_states, saes, norm_stats, log_probs_by_pred_pos, device,
                 ex_idx, ann_idx, gsm8k_split,
+                model_key=spec.model_key,
+                model_family=spec.model_family,
+                tokenizer_id=spec.tokenizer_id,
             )
             if rec is None:
                 if skip_reason == "multi_token_result":
@@ -339,19 +351,22 @@ def collect(args):
         if (local_idx + 1) % 100 == 0 or (local_idx + 1) == len(raw_examples):
             print(f"  {local_idx+1}/{len(raw_examples)} examples, {len(records)} records...")
 
-    for h in handles:
-        h.remove()
-
     # Save
+    prefix = str(args.output_prefix).strip() if args.output_prefix else (
+        "gsm8k_expanded" if str(spec.model_key) == "gpt2-medium" else f"{model_key_safe(spec.model_key)}_gsm8k_expanded"
+    )
     shard_suffix = f"_shard{args.shard[0]}" if args.shard else ""
-    out_path = output_dir / f"gsm8k_expanded_{gsm8k_split}{shard_suffix}.pt"
+    out_path = output_dir / f"{prefix}_{gsm8k_split}{shard_suffix}.pt"
     torch.save(records, out_path)
 
-    print(f"\n=== Collection Summary ({gsm8k_split}{shard_suffix}) ===")
+    print(f"\n=== Collection Summary ({spec.model_key} {gsm8k_split}{shard_suffix}) ===")
     print(f"  Records:          {len(records)}")
     print(f"  Skipped (no ann): {n_skipped_no_annotations}")
     print(f"  Skipped (token alignment): {n_skipped_alignment}")
     print(f"  Skipped (multi-token result): {n_multitoken}")
+    print(f"  Model:            {spec.model_key} ({spec.model_family})")
+    print(f"  SAE dir:          {resolved_saes_dir}")
+    print(f"  Activations dir:  {resolved_activations_dir}")
     if records:
         C_vals = [r["C"] for r in records]
         print(f"  C range: [{min(C_vals):.1f}, {max(C_vals):.1f}]")
@@ -363,8 +378,12 @@ def collect(args):
 def merge(args):
     """Merge shards for a given split."""
     output_dir = Path(args.output_dir)
+    spec = resolve_model_spec(args.model_key, args.adapter_config)
+    prefix = str(args.output_prefix).strip() if args.output_prefix else (
+        "gsm8k_expanded" if str(spec.model_key) == "gpt2-medium" else f"{model_key_safe(spec.model_key)}_gsm8k_expanded"
+    )
     for split in ["train", "test"]:
-        shards = sorted(output_dir.glob(f"gsm8k_expanded_{split}_shard*.pt"))
+        shards = sorted(output_dir.glob(f"{prefix}_{split}_shard*.pt"))
         if not shards:
             continue
         print(f"Merging {len(shards)} shards for {split}...")
@@ -373,7 +392,7 @@ def merge(args):
             records = torch.load(s, weights_only=False)
             all_records.extend(records)
             print(f"  {s.name}: {len(records)} records")
-        out_path = output_dir / f"gsm8k_expanded_{split}.pt"
+        out_path = output_dir / f"{prefix}_{split}.pt"
         torch.save(all_records, out_path)
         print(f"  Merged: {len(all_records)} records → {out_path}")
 
@@ -383,8 +402,11 @@ def parse_args():
     p.add_argument("--split", choices=["train", "test"], default="train")
     p.add_argument("--gsm8k-path", default=None,
                    help="Override GSM8K path (default: auto from split)")
-    p.add_argument("--saes-dir", default="phase2_results/saes_gpt2_12x_topk/saes")
-    p.add_argument("--activations-dir", default="phase2_results/activations")
+    p.add_argument("--model-key", default="gpt2-medium")
+    p.add_argument("--adapter-config", default=None, help="Optional JSON overrides for model registry entry")
+    p.add_argument("--saes-dir", default=None)
+    p.add_argument("--activations-dir", default=None)
+    p.add_argument("--output-prefix", default=None, help="Optional output filename prefix override.")
     p.add_argument("--output-dir", default="phase6_results/dataset")
     p.add_argument("--device", default="cuda:0")
     p.add_argument("--max-examples", type=int, default=None,

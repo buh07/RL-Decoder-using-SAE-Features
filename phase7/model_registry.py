@@ -53,7 +53,7 @@ _MODEL_SPECS: Dict[str, ModelSpec] = {
         hidden_dim=3584,
         default_dtype="bfloat16",
         adapter_class="Qwen25_7BAdapter",
-        sae_dir=None,
+        sae_dir="phase2_results/saes_qwen25_7b_12x_topk/saes",
         model_family="qwen2.5",
         vocab_size=152064,
     ),
