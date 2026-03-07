@@ -2,7 +2,7 @@
 
 **Mechanistic Interpretability of Arithmetic Reasoning in LLMs via Sparse Autoencoders**
 
-*Benjamin Huh, February 2026*
+*Jason Peng, Chris Kang, Benjamin Huh, February 2026*
 
 This repository implements a phased framework for extracting, validating, and analyzing
 reasoning features from LLM activations using sparse autoencoders (SAEs). Phases 1-6 are
