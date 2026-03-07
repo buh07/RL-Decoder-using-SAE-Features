@@ -1,0 +1,31 @@
+{
+  "schema_version": "phase7_trackA_gate_decision_v2",
+  "run_id": "raw_middle12_06_17",
+  "source_benchmark": "phase7_results/results/faithfulness_benchmark_controls_papercore_phase7v2_s01_20260302_225055_phase7v2_s01_g5_raw_middle12_06_17.json",
+  "checks": {
+    "latent_only_auroc_ge_0_70": false,
+    "causal_auditor_auroc_ge_0_75": true,
+    "text_only_auroc_ge_0_80": true,
+    "per_track_fpr_le_0_05": true,
+    "variant_vs_faithful_at_least_2_ge_0_80": true,
+    "has_track_keys_and_claim_boundary_disclaimer": true
+  },
+  "legacy_checks": {
+    "auroc_ge_0_85": true,
+    "false_positive_rate_le_0_05": true,
+    "readout_high_causal_fail_cases_n_ge_1": true
+  },
+  "stage1_gate_pass": false,
+  "summary": {
+    "overall_auroc": 0.9501862500000011,
+    "overall_false_positive_rate": 0.04925,
+    "readout_high_causal_fail_cases_n": 938,
+    "text_only_auroc": 0.9369945000000003,
+    "latent_only_auroc": 0.62594575,
+    "causal_auditor_auroc": 0.9501862500000011,
+    "text_only_fpr": 0.01325,
+    "latent_only_fpr": 0.0285,
+    "causal_auditor_fpr": 0.04925,
+    "variant_vs_faithful_ge_0_80_count": 8
+  }
+}

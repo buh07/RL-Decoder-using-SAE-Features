@@ -146,12 +146,12 @@
       </p>
       <p>
         The GPT-2 Medium branch is now closed for Phase 7: strong mechanistic arithmetic evidence,
-        but Track C remains a negative result for faithfulness discrimination.
+        and post-closure stress tests still leave Track C as a negative result for faithfulness discrimination.
       </p>
       <div class="meta">
         <div><strong>Project state:</strong> Phases 1-6 complete; Phase 7 GPT-2 closed; Qwen inquiry open.</div>
         <div><strong>Final GPT-2 Phase 7 config:</strong> <code>text=0.50</code>, <code>latent=0.50</code>, structural penalties on.</div>
-        <div><strong>Status snapshot date:</strong> March 6, 2026.</div>
+        <div><strong>Status snapshot date:</strong> March 7, 2026.</div>
       </div>
     </header>
 
@@ -258,6 +258,36 @@
     </section>
 
     <section class="section">
+      <h2>Latest GPT-2 Stress Tests (March 7)</h2>
+      <table class="status-table">
+        <thead>
+          <tr>
+            <th>Validation pass</th>
+            <th>Key result</th>
+            <th>Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Path B (feature-set swap)</td>
+            <td>Best AUROC <code>0.683</code></td>
+            <td>Changing SAE feature subsets improved some variants but did not produce robust wrong-intermediate discrimination.</td>
+          </tr>
+          <tr>
+            <td>Path C robust gate</td>
+            <td><code>wrong_intermediate=0.694</code>, CI <code>[0.586, 0.802]</code>; 5-fold pooled <code>0.658</code></td>
+            <td>Single split is borderline and high variance; pooled grouped CV remains below the publishability threshold.</td>
+          </tr>
+          <tr>
+            <td>Mixed hidden+SAE ladder</td>
+            <td>Final decision: <code>mixed_redundant_or_insufficient</code></td>
+            <td>Additional raw/projected features did not provide stable incremental gain over SAE-only under robust checks.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
       <h2>What This Means For Claims</h2>
       <table class="status-table">
         <thead>
@@ -299,6 +329,8 @@
         <li><code>phase7_results/results/optionb_canary_decision_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
         <li><code>phase7_results/results/optionc_probe_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
         <li><code>phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
+        <li><code>phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json</code></li>
+        <li><code>phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json</code></li>
       </ul>
     </section>
 
@@ -314,11 +346,11 @@
           </ul>
         </article>
         <article class="card">
-          <h3>Go/No-Go rule</h3>
+          <h3>Immediate workstream</h3>
           <ul>
-            <li>Go only if separation is consistently above near-zero collapse.</li>
-            <li>If Q0 fails, do not start full Qwen Stage 3.</li>
-            <li>If Q0 passes, promote to full pipeline with explicit comparability gates.</li>
+            <li>Train Qwen SAEs first (layer-partitioned across GPUs) to make Track C probes executable.</li>
+            <li>Then run Q0 as the formal go/no-go for full Qwen Phase 7 promotion.</li>
+            <li>Qwen remains a separate model inquiry; GPT-2 closure is unchanged.</li>
           </ul>
         </article>
       </div>

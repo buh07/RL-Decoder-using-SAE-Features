@@ -1,0 +1,324 @@
+{
+  "schema_version": "phase7_trackc_direction_quick_v1",
+  "run_tag": "trackc_direction_quick_20260305_210453_trackc_direction_quick",
+  "results": [
+    {
+      "anchor_priority": "template_first",
+      "variable": "subresult_value",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_template_first_subresult_value.json",
+      "audit_eval_path": "phase7_results/audits/trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_template_first_subresult_value_eval.json",
+      "coverage": 0.15598885793871867,
+      "causal_auroc": 0.11768176020408164,
+      "composite_auroc": 0.43094706632653057,
+      "text_auroc": 0.6837531887755102,
+      "ablation_auroc": 0.592091836734694,
+      "ablation_weights": {
+        "text": 0.5,
+        "latent": 0.5,
+        "causal": 0.0
+      },
+      "causal_anti_predictive_flag": true,
+      "causal_harms_composite_flag": true,
+      "causal_variant_score_identical_fraction": 0.175,
+      "e1_orientation": {
+        "raw_auroc_from_audit": 0.8824457908163265,
+        "inverted_auroc_from_audit": 0.11755420918367349,
+        "auroc_gain_if_inverted": -0.7648915816326529,
+        "raw_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        },
+        "inverted_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        }
+      },
+      "e2_within_trace_delta": {
+        "pair_count": 560,
+        "pair_delta_mean": -0.2963749484642342,
+        "pair_delta_median": -0.36,
+        "pair_delta_positive_fraction": 0.033928571428571426,
+        "pair_delta_surrogate_auroc": 0.12142857142857143
+      }
+    },
+    {
+      "anchor_priority": "template_first",
+      "variable": "magnitude_bucket",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_template_first_magnitude_bucket.json",
+      "audit_eval_path": "phase7_results/audits/trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_template_first_magnitude_bucket_eval.json",
+      "coverage": 0.15598885793871867,
+      "causal_auroc": 0.1129623724489796,
+      "composite_auroc": 0.3209980867346939,
+      "text_auroc": 0.6837531887755102,
+      "ablation_auroc": 0.592091836734694,
+      "ablation_weights": {
+        "text": 0.5,
+        "latent": 0.5,
+        "causal": 0.0
+      },
+      "causal_anti_predictive_flag": true,
+      "causal_harms_composite_flag": true,
+      "causal_variant_score_identical_fraction": 0.19642857142857142,
+      "e1_orientation": {
+        "raw_auroc_from_audit": 0.8870535714285714,
+        "inverted_auroc_from_audit": 0.11294642857142859,
+        "auroc_gain_if_inverted": -0.7741071428571429,
+        "raw_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        },
+        "inverted_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        }
+      },
+      "e2_within_trace_delta": {
+        "pair_count": 560,
+        "pair_delta_mean": -0.3669897830344259,
+        "pair_delta_median": -0.475,
+        "pair_delta_positive_fraction": 0.0125,
+        "pair_delta_surrogate_auroc": 0.10982142857142858
+      }
+    },
+    {
+      "anchor_priority": "equation_first",
+      "variable": "operator",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_equation_first_operator.json",
+      "audit_eval_path": "phase7_results/audits/trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_equation_first_operator_eval.json",
+      "coverage": 0.15598885793871867,
+      "causal_auroc": 0.11353635204081634,
+      "composite_auroc": 0.32857142857142857,
+      "text_auroc": 0.6837531887755102,
+      "ablation_auroc": 0.592091836734694,
+      "ablation_weights": {
+        "text": 0.5,
+        "latent": 0.5,
+        "causal": 0.0
+      },
+      "causal_anti_predictive_flag": true,
+      "causal_harms_composite_flag": true,
+      "causal_variant_score_identical_fraction": 0.18035714285714285,
+      "e1_orientation": {
+        "raw_auroc_from_audit": 0.8864636479591838,
+        "inverted_auroc_from_audit": 0.11353635204081634,
+        "auroc_gain_if_inverted": -0.7729272959183674,
+        "raw_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        },
+        "inverted_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        }
+      },
+      "e2_within_trace_delta": {
+        "pair_count": 560,
+        "pair_delta_mean": -0.3581566171923315,
+        "pair_delta_median": -0.45,
+        "pair_delta_positive_fraction": 0.02857142857142857,
+        "pair_delta_surrogate_auroc": 0.11875000000000001
+      }
+    },
+    {
+      "anchor_priority": "equation_first",
+      "variable": "sign",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_equation_first_sign.json",
+      "audit_eval_path": "phase7_results/audits/trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_equation_first_sign_eval.json",
+      "coverage": 0.15598885793871867,
+      "causal_auroc": 0.11293048469387756,
+      "composite_auroc": 0.31366390306122444,
+      "text_auroc": 0.6837531887755102,
+      "ablation_auroc": 0.592091836734694,
+      "ablation_weights": {
+        "text": 0.5,
+        "latent": 0.5,
+        "causal": 0.0
+      },
+      "causal_anti_predictive_flag": true,
+      "causal_harms_composite_flag": true,
+      "causal_variant_score_identical_fraction": 0.21071428571428572,
+      "e1_orientation": {
+        "raw_auroc_from_audit": 0.8870695153061224,
+        "inverted_auroc_from_audit": 0.11293048469387756,
+        "auroc_gain_if_inverted": -0.7741390306122449,
+        "raw_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        },
+        "inverted_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        }
+      },
+      "e2_within_trace_delta": {
+        "pair_count": 560,
+        "pair_delta_mean": -0.3717883812615955,
+        "pair_delta_median": -0.5,
+        "pair_delta_positive_fraction": 0.007142857142857143,
+        "pair_delta_surrogate_auroc": 0.1125
+      }
+    }
+  ],
+  "probe_results": [
+    {
+      "anchor_priority": "template_first",
+      "variable": "operator",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_template_first_operator_medalign.json",
+      "audit_eval_path": "phase7_results/audits/trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_template_first_operator_medalign_eval.json",
+      "coverage": 0.08356545961002786,
+      "causal_auroc": 0.2915656887755102,
+      "composite_auroc": 0.5376913265306124,
+      "text_auroc": 0.6837531887755102,
+      "ablation_auroc": 0.592091836734694,
+      "ablation_weights": {
+        "text": 0.5,
+        "latent": 0.5,
+        "causal": 0.0
+      },
+      "causal_anti_predictive_flag": true,
+      "causal_harms_composite_flag": true,
+      "causal_variant_score_identical_fraction": 0.5535714285714286,
+      "e1_orientation": {
+        "raw_auroc_from_audit": 0.7084343112244897,
+        "inverted_auroc_from_audit": 0.2915656887755102,
+        "auroc_gain_if_inverted": -0.41686862244897954,
+        "raw_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        },
+        "inverted_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        }
+      },
+      "e2_within_trace_delta": {
+        "pair_count": 560,
+        "pair_delta_mean": -0.18976659451659453,
+        "pair_delta_median": 0.0,
+        "pair_delta_positive_fraction": 0.017857142857142856,
+        "pair_delta_surrogate_auroc": 0.29464285714285715
+      }
+    },
+    {
+      "anchor_priority": "template_first",
+      "variable": "sign",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_template_first_sign_medalign.json",
+      "audit_eval_path": "phase7_results/audits/trackc_direction_quick_20260305_210453_trackc_direction_quick_raw_every2_even_template_first_sign_medalign_eval.json",
+      "coverage": 0.08356545961002786,
+      "causal_auroc": 0.2910076530612245,
+      "composite_auroc": 0.5278061224489797,
+      "text_auroc": 0.6837531887755102,
+      "ablation_auroc": 0.592091836734694,
+      "ablation_weights": {
+        "text": 0.5,
+        "latent": 0.5,
+        "causal": 0.0
+      },
+      "causal_anti_predictive_flag": true,
+      "causal_harms_composite_flag": true,
+      "causal_variant_score_identical_fraction": 0.575,
+      "e1_orientation": {
+        "raw_auroc_from_audit": 0.7089923469387756,
+        "inverted_auroc_from_audit": 0.2910076530612245,
+        "auroc_gain_if_inverted": -0.41798469387755105,
+        "raw_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        },
+        "inverted_best_recall_at_fpr_le_0p05": {
+          "defined": false,
+          "threshold": null,
+          "recall": null,
+          "fpr": null
+        }
+      },
+      "e2_within_trace_delta": {
+        "pair_count": 560,
+        "pair_delta_mean": -0.19933685064935064,
+        "pair_delta_median": 0.0,
+        "pair_delta_positive_fraction": 0.0035714285714285713,
+        "pair_delta_surrogate_auroc": 0.2910714285714286
+      }
+    }
+  ],
+  "summary": {
+    "summary_by_anchor": {
+      "template_first": {
+        "mean_causal_auroc": 0.11532206632653061,
+        "mean_composite_auroc": 0.3759725765306122,
+        "mean_coverage": 0.15598885793871867,
+        "mean_orientation_gain_if_inverted": -0.7694993622448979,
+        "mean_pair_delta_surrogate_auroc": 0.115625,
+        "mean_pair_delta_positive_fraction": 0.023214285714285715,
+        "causal_harm_rate": 1.0
+      },
+      "equation_first": {
+        "mean_causal_auroc": 0.11323341836734696,
+        "mean_composite_auroc": 0.3211176658163265,
+        "mean_coverage": 0.15598885793871867,
+        "mean_orientation_gain_if_inverted": -0.7735331632653062,
+        "mean_pair_delta_surrogate_auroc": 0.115625,
+        "mean_pair_delta_positive_fraction": 0.017857142857142856,
+        "causal_harm_rate": 1.0
+      }
+    },
+    "anchor_winner": {
+      "winner": "template_first",
+      "rule": "max_mean_causal_auroc"
+    },
+    "e1_orientation_misaligned_flag": false,
+    "e2_pairwise_signal_weak_flag": true,
+    "e5_causal_harming_flag": true,
+    "mean_orientation_gain_if_inverted": -0.771516262755102,
+    "mean_pair_delta_positive_fraction": 0.020535714285714286,
+    "causal_harm_rate": 1.0,
+    "ranked_recommendations": [
+      {
+        "rank": 1,
+        "experiment": "E2",
+        "name": "within_trace_delta_reformulation",
+        "reason": "Within-trace faithful-vs-variant causal deltas remain weak."
+      },
+      {
+        "rank": 2,
+        "experiment": "E5",
+        "name": "composite_causal_weight_diagnostic",
+        "reason": "Causal channel frequently harms composite AUROC."
+      },
+      {
+        "rank": 3,
+        "experiment": "E4",
+        "name": "anchor_priority_choice",
+        "reason": "Use template_first per deterministic anchor ablation rule (max_mean_causal_auroc)."
+      }
+    ]
+  },
+  "e3_mediation_alignment": {
+    "defined": false,
+    "mean_delta_causal_auroc": null,
+    "improves_flag": false,
+    "rows": []
+  }
+}

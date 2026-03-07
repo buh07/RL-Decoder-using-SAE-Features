@@ -1,0 +1,91 @@
+{
+  "schema_version": "phase7_sae_trajectory_pathb_summary_v1",
+  "run_id": "20260306_234123_phase7_sae_trajectory_pathb",
+  "run_tag": "phase7_sae_trajectory_pathb_20260306_234123_phase7_sae_trajectory_pathb",
+  "status": "ok",
+  "feature_sets": [
+    "result_top50",
+    "eq_pre_result_150",
+    "divergent_top50"
+  ],
+  "by_feature_set": {
+    "result_top50": {
+      "run_id": "20260306_234123_phase7_sae_trajectory_pathb_result_top50",
+      "run_tag": "phase7_sae_trajectory_20260306_234123_phase7_sae_trajectory_pathb_result_top50",
+      "merged_json": "phase7_results/results/phase7_sae_trajectory_coherence_phase7_sae_trajectory_20260306_234123_phase7_sae_trajectory_pathb_result_top50.json",
+      "best_layer_metric": "layer7:feature_variance_coherence",
+      "best_auroc_unfaithful_positive": 0.6662484722464723,
+      "confound_check": {
+        "cosine_smoothness": {
+          "wrong_intermediate_auroc": 0.5004914933837429,
+          "order_flip_only_auroc": 0.5273752883506344,
+          "wrong_minus_orderflip_delta": -0.026883794966891528
+        },
+        "feature_variance_coherence": {
+          "wrong_intermediate_auroc": 0.5170510396975425,
+          "order_flip_only_auroc": 0.7304462226066898,
+          "wrong_minus_orderflip_delta": -0.21339518290914727
+        },
+        "magnitude_monotonicity_coherence": {
+          "wrong_intermediate_auroc": 0.5128166351606805,
+          "order_flip_only_auroc": 0.18757208765859287,
+          "wrong_minus_orderflip_delta": 0.32524454750208764
+        }
+      }
+    },
+    "eq_pre_result_150": {
+      "run_id": "20260306_234123_phase7_sae_trajectory_pathb_eq_pre_result_150",
+      "run_tag": "phase7_sae_trajectory_20260306_234123_phase7_sae_trajectory_pathb_eq_pre_result_150",
+      "merged_json": "phase7_results/results/phase7_sae_trajectory_coherence_phase7_sae_trajectory_20260306_234123_phase7_sae_trajectory_pathb_eq_pre_result_150.json",
+      "best_layer_metric": "layer7:feature_variance_coherence",
+      "best_auroc_unfaithful_positive": 0.6830551896001651,
+      "confound_check": {
+        "cosine_smoothness": {
+          "wrong_intermediate_auroc": 0.5158916194076875,
+          "order_flip_only_auroc": 0.5738357843137255,
+          "wrong_minus_orderflip_delta": -0.05794416490603804
+        },
+        "feature_variance_coherence": {
+          "wrong_intermediate_auroc": 0.5716194076874607,
+          "order_flip_only_auroc": 0.7534421856978085,
+          "wrong_minus_orderflip_delta": -0.18182277801034785
+        },
+        "magnitude_monotonicity_coherence": {
+          "wrong_intermediate_auroc": 0.501625708884688,
+          "order_flip_only_auroc": 0.21921856978085352,
+          "wrong_minus_orderflip_delta": 0.2824071391038345
+        }
+      }
+    },
+    "divergent_top50": {
+      "run_id": "20260306_234123_phase7_sae_trajectory_pathb_divergent_top50",
+      "run_tag": "phase7_sae_trajectory_20260306_234123_phase7_sae_trajectory_pathb_divergent_top50",
+      "merged_json": "phase7_results/results/phase7_sae_trajectory_coherence_phase7_sae_trajectory_20260306_234123_phase7_sae_trajectory_pathb_divergent_top50.json",
+      "best_layer_metric": "layer7:feature_variance_coherence",
+      "best_auroc_unfaithful_positive": 0.6606530055078491,
+      "confound_check": {
+        "cosine_smoothness": {
+          "wrong_intermediate_auroc": 0.4339256458727158,
+          "order_flip_only_auroc": 0.5726102941176471,
+          "wrong_minus_orderflip_delta": -0.13868464824493126
+        },
+        "feature_variance_coherence": {
+          "wrong_intermediate_auroc": 0.4466792690611216,
+          "order_flip_only_auroc": 0.8160142733564014,
+          "wrong_minus_orderflip_delta": -0.3693350042952798
+        },
+        "magnitude_monotonicity_coherence": {
+          "wrong_intermediate_auroc": 0.5196723377441713,
+          "order_flip_only_auroc": 0.6729202710495964,
+          "wrong_minus_orderflip_delta": -0.15324793330542508
+        }
+      }
+    }
+  },
+  "best_overall": {
+    "feature_set": "eq_pre_result_150",
+    "auroc": 0.6830551896001651,
+    "layer_metric": "layer7:feature_variance_coherence"
+  },
+  "timestamp": "2026-03-06T23:43:23.936754"
+}

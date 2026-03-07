@@ -1,0 +1,196 @@
+{
+  "schema_version": "phase7_trackc_r1d_weight_tuning_v1",
+  "run_tag": "phase7v3_r1d_20260306_001623_phase7v3_r1d_matrix",
+  "profiles_evaluated": [
+    {
+      "profile": "A",
+      "weights": {
+        "text": 0.5,
+        "latent": 0.3,
+        "confidence": 0.2,
+        "causal": 0.0
+      },
+      "by_variable": [
+        {
+          "variable": "subresult_value",
+          "composite_auroc": 0.8399158163265307,
+          "composite_fpr": 0.02142857142857143,
+          "composite_recall": 0.6971428571428572,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21331122448979578
+        },
+        {
+          "variable": "operator",
+          "composite_auroc": 0.8399158163265307,
+          "composite_fpr": 0.02142857142857143,
+          "composite_recall": 0.6971428571428572,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21331122448979578
+        },
+        {
+          "variable": "magnitude_bucket",
+          "composite_auroc": 0.8399158163265307,
+          "composite_fpr": 0.02142857142857143,
+          "composite_recall": 0.6971428571428572,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21331122448979578
+        },
+        {
+          "variable": "sign",
+          "composite_auroc": 0.8399158163265307,
+          "composite_fpr": 0.02142857142857143,
+          "composite_recall": 0.6971428571428572,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21331122448979578
+        }
+      ],
+      "mean_composite_auroc": 0.8399158163265307,
+      "mean_composite_fpr": 0.02142857142857143,
+      "mean_composite_recall": 0.6971428571428572,
+      "mean_delta_vs_two_track": 0.21331122448979578
+    },
+    {
+      "profile": "B",
+      "weights": {
+        "text": 0.4,
+        "latent": 0.35,
+        "confidence": 0.25,
+        "causal": 0.0
+      },
+      "by_variable": [
+        {
+          "variable": "subresult_value",
+          "composite_auroc": 0.8398545918367346,
+          "composite_fpr": 0.02857142857142857,
+          "composite_recall": 0.6828571428571428,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21324999999999972
+        },
+        {
+          "variable": "operator",
+          "composite_auroc": 0.8398545918367346,
+          "composite_fpr": 0.02857142857142857,
+          "composite_recall": 0.6828571428571428,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21324999999999972
+        },
+        {
+          "variable": "magnitude_bucket",
+          "composite_auroc": 0.8398545918367346,
+          "composite_fpr": 0.02857142857142857,
+          "composite_recall": 0.6828571428571428,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21324999999999972
+        },
+        {
+          "variable": "sign",
+          "composite_auroc": 0.8398545918367346,
+          "composite_fpr": 0.02857142857142857,
+          "composite_recall": 0.6828571428571428,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21324999999999972
+        }
+      ],
+      "mean_composite_auroc": 0.8398545918367346,
+      "mean_composite_fpr": 0.02857142857142857,
+      "mean_composite_recall": 0.6828571428571428,
+      "mean_delta_vs_two_track": 0.21324999999999972
+    },
+    {
+      "profile": "C",
+      "weights": {
+        "text": 0.35,
+        "latent": 0.35,
+        "confidence": 0.3,
+        "causal": 0.0
+      },
+      "by_variable": [
+        {
+          "variable": "subresult_value",
+          "composite_auroc": 0.8399005102040816,
+          "composite_fpr": 0.02857142857142857,
+          "composite_recall": 0.6835714285714286,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21329591836734674
+        },
+        {
+          "variable": "operator",
+          "composite_auroc": 0.8399005102040816,
+          "composite_fpr": 0.02857142857142857,
+          "composite_recall": 0.6835714285714286,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21329591836734674
+        },
+        {
+          "variable": "magnitude_bucket",
+          "composite_auroc": 0.8399005102040816,
+          "composite_fpr": 0.02857142857142857,
+          "composite_recall": 0.6835714285714286,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21329591836734674
+        },
+        {
+          "variable": "sign",
+          "composite_auroc": 0.8399005102040816,
+          "composite_fpr": 0.02857142857142857,
+          "composite_recall": 0.6835714285714286,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21329591836734674
+        }
+      ],
+      "mean_composite_auroc": 0.8399005102040816,
+      "mean_composite_fpr": 0.02857142857142857,
+      "mean_composite_recall": 0.6835714285714286,
+      "mean_delta_vs_two_track": 0.21329591836734674
+    },
+    {
+      "profile": "D",
+      "weights": {
+        "text": 0.45,
+        "latent": 0.3,
+        "confidence": 0.25,
+        "causal": 0.0
+      },
+      "by_variable": [
+        {
+          "variable": "subresult_value",
+          "composite_auroc": 0.8398647959183673,
+          "composite_fpr": 0.02142857142857143,
+          "composite_recall": 0.6971428571428572,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21326020408163238
+        },
+        {
+          "variable": "operator",
+          "composite_auroc": 0.8398647959183673,
+          "composite_fpr": 0.02142857142857143,
+          "composite_recall": 0.6971428571428572,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21326020408163238
+        },
+        {
+          "variable": "magnitude_bucket",
+          "composite_auroc": 0.8398647959183673,
+          "composite_fpr": 0.02142857142857143,
+          "composite_recall": 0.6971428571428572,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21326020408163238
+        },
+        {
+          "variable": "sign",
+          "composite_auroc": 0.8398647959183673,
+          "composite_fpr": 0.02142857142857143,
+          "composite_recall": 0.6971428571428572,
+          "two_track_ablation_auroc": 0.6266045918367349,
+          "delta_vs_two_track": 0.21326020408163238
+        }
+      ],
+      "mean_composite_auroc": 0.8398647959183673,
+      "mean_composite_fpr": 0.02142857142857143,
+      "mean_composite_recall": 0.6971428571428572,
+      "mean_delta_vs_two_track": 0.21326020408163238
+    }
+  ],
+  "selection_rule": "max mean composite AUROC; tie-break lower mean FPR; tie-break higher mean recall",
+  "selected_profile": "A"
+}

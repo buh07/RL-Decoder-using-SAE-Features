@@ -1,6 +1,6 @@
 # RL-Decoder with SAE Features — Project Status
 
-**Last Updated:** March 6, 2026 (Phase 7 GPT-2 closure finalized; Qwen inquiry pending Q0 diagnostic)
+**Last Updated:** March 7, 2026 (GPT-2 closure stress tests completed; Qwen inquiry pending Q0 diagnostic)
 
 ---
 
@@ -259,11 +259,21 @@ Closure artifacts:
 - `phase7_results/results/optionc_probe_phase7_optionbc_20260306_092554_phase7_optionbc.json`
 - `phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json`
 - `phase7_results/results/trackc_intervention_archive_manifest.json`
+- `phase7_results/results/phase7_sae_trajectory_pathb_20260306_234123_phase7_sae_trajectory_pathb.json`
+- `phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json`
+- `phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json`
+- `phase7_results/results/mixed_gain_sweep_summary.json`
+- `phase7_results/results/mixed_result_top50_seed_sweep_summary.json`
 
 Research-level interpretation:
 1. GPT-2 arithmetic representations are real and causally active.
 2. Those representations do not yield robust CoT-faithfulness discrimination in Track C.
 3. Text-plus-structure auditing is useful (`~0.84` AUROC in fair profile comparisons) but is not a mechanistic faithfulness guarantee.
+
+Post-closure stress-test summary (March 7):
+- Path B feature-set sweep peaked at AUROC `0.683` and did not resolve `wrong_intermediate`.
+- Path C robust variant-exclusion run reported `wrong_intermediate` single-split AUROC `0.694` with CI `[0.586, 0.802]`; 5-fold pooled CV AUROC `0.658` (CI `[0.610, 0.706]`).
+- Mixed hidden+SAE validation remained below publishability thresholds; final mixed decision `mixed_redundant_or_insufficient`.
 
 Qwen status:
 - Qwen remains open as a separate inquiry.

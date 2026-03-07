@@ -1,0 +1,145 @@
+{
+  "schema_version": "phase7_v1_vs_v2_scoring_comparison_v1",
+  "v1_tag": "fixv3_matrix_v3",
+  "v2_tag": "phase7v2_s01_20260302_225055_phase7v2_s01_g5",
+  "rows": [
+    {
+      "checkpoint_id": "raw_every2_even",
+      "v1_path": "phase7_results/results/faithfulness_benchmark_controls_papercore_fixv3_matrix_v3_raw_every2_even.json",
+      "v2_path": "phase7_results/results/faithfulness_benchmark_controls_papercore_phase7v2_s01_20260302_225055_phase7v2_s01_g5_raw_every2_even.json",
+      "v1": {
+        "overall_auroc": 0.9676307499999993,
+        "overall_fpr": 0.018,
+        "text_only_auroc": 0.9369945000000003,
+        "latent_only_auroc": 0.5,
+        "causal_auditor_auroc": 0.9676307499999993,
+        "text_only_fpr": 0.24125,
+        "latent_only_fpr": 0.0,
+        "causal_auditor_fpr": 0.018,
+        "readout_high_causal_fail_cases_n": 1686
+      },
+      "v2": {
+        "overall_auroc": 0.949751250000001,
+        "overall_fpr": 0.04225,
+        "text_only_auroc": 0.9369945000000003,
+        "latent_only_auroc": 0.625988,
+        "causal_auditor_auroc": 0.949751250000001,
+        "text_only_fpr": 0.01325,
+        "latent_only_fpr": 0.033,
+        "causal_auditor_fpr": 0.04225,
+        "readout_high_causal_fail_cases_n": 974
+      },
+      "delta_v2_minus_v1": {
+        "overall_auroc": -0.017879499999998272,
+        "overall_fpr": 0.024250000000000004,
+        "text_only_auroc": 0.0,
+        "latent_only_auroc": 0.125988,
+        "causal_auditor_auroc": -0.017879499999998272,
+        "text_only_fpr": -0.22799999999999998,
+        "latent_only_fpr": 0.033,
+        "causal_auditor_fpr": 0.024250000000000004,
+        "readout_high_causal_fail_cases_n": -712
+      }
+    },
+    {
+      "checkpoint_id": "hybrid_every2_even",
+      "v1_path": "phase7_results/results/faithfulness_benchmark_controls_papercore_fixv3_matrix_v3_hybrid_every2_even.json",
+      "v2_path": "phase7_results/results/faithfulness_benchmark_controls_papercore_phase7v2_s01_20260302_225055_phase7v2_s01_g5_hybrid_every2_even.json",
+      "v1": {
+        "overall_auroc": 0.9676307499999993,
+        "overall_fpr": 0.018,
+        "text_only_auroc": 0.9369945000000003,
+        "latent_only_auroc": 0.49999999999999994,
+        "causal_auditor_auroc": 0.9676307499999993,
+        "text_only_fpr": 0.24125,
+        "latent_only_fpr": 0.0,
+        "causal_auditor_fpr": 0.018,
+        "readout_high_causal_fail_cases_n": 1726
+      },
+      "v2": {
+        "overall_auroc": 0.9493242500000012,
+        "overall_fpr": 0.049,
+        "text_only_auroc": 0.9369945000000003,
+        "latent_only_auroc": 0.6259567500000001,
+        "causal_auditor_auroc": 0.9493242500000012,
+        "text_only_fpr": 0.01325,
+        "latent_only_fpr": 0.0315,
+        "causal_auditor_fpr": 0.049,
+        "readout_high_causal_fail_cases_n": 989
+      },
+      "delta_v2_minus_v1": {
+        "overall_auroc": -0.018306499999998116,
+        "overall_fpr": 0.031000000000000003,
+        "text_only_auroc": 0.0,
+        "latent_only_auroc": 0.12595675000000012,
+        "causal_auditor_auroc": -0.018306499999998116,
+        "text_only_fpr": -0.22799999999999998,
+        "latent_only_fpr": 0.0315,
+        "causal_auditor_fpr": 0.031000000000000003,
+        "readout_high_causal_fail_cases_n": -737
+      }
+    },
+    {
+      "checkpoint_id": "raw_middle12_06_17",
+      "v1_path": "phase7_results/results/faithfulness_benchmark_controls_papercore_fixv3_matrix_v3_raw_middle12_06_17.json",
+      "v2_path": "phase7_results/results/faithfulness_benchmark_controls_papercore_phase7v2_s01_20260302_225055_phase7v2_s01_g5_raw_middle12_06_17.json",
+      "v1": {
+        "overall_auroc": 0.9676307499999993,
+        "overall_fpr": 0.018,
+        "text_only_auroc": 0.9369945000000003,
+        "latent_only_auroc": 0.5000000000000001,
+        "causal_auditor_auroc": 0.9676307499999993,
+        "text_only_fpr": 0.24125,
+        "latent_only_fpr": 0.0,
+        "causal_auditor_fpr": 0.018,
+        "readout_high_causal_fail_cases_n": 1648
+      },
+      "v2": {
+        "overall_auroc": 0.9501862500000011,
+        "overall_fpr": 0.04925,
+        "text_only_auroc": 0.9369945000000003,
+        "latent_only_auroc": 0.62594575,
+        "causal_auditor_auroc": 0.9501862500000011,
+        "text_only_fpr": 0.01325,
+        "latent_only_fpr": 0.0285,
+        "causal_auditor_fpr": 0.04925,
+        "readout_high_causal_fail_cases_n": 938
+      },
+      "delta_v2_minus_v1": {
+        "overall_auroc": -0.017444499999998198,
+        "overall_fpr": 0.03125,
+        "text_only_auroc": 0.0,
+        "latent_only_auroc": 0.12594574999999986,
+        "causal_auditor_auroc": -0.017444499999998198,
+        "text_only_fpr": -0.22799999999999998,
+        "latent_only_fpr": 0.0285,
+        "causal_auditor_fpr": 0.03125,
+        "readout_high_causal_fail_cases_n": -710
+      }
+    },
+    {
+      "checkpoint_id": "hybrid_middle12_06_17",
+      "v1_path": null,
+      "v2_path": "phase7_results/results/faithfulness_benchmark_controls_papercore_phase7v2_s01_20260302_225055_phase7v2_s01_g5_hybrid_middle12_06_17.json",
+      "v1": null,
+      "v2": {
+        "overall_auroc": 0.9480455000000013,
+        "overall_fpr": 0.043,
+        "text_only_auroc": 0.9369945000000003,
+        "latent_only_auroc": 0.6258382499999999,
+        "causal_auditor_auroc": 0.9480455000000013,
+        "text_only_fpr": 0.01325,
+        "latent_only_fpr": 0.03,
+        "causal_auditor_fpr": 0.043,
+        "readout_high_causal_fail_cases_n": 989
+      },
+      "delta_v2_minus_v1": null
+    }
+  ],
+  "coverage": {
+    "num_checkpoints_target": 4,
+    "num_checkpoints_with_v1": 3,
+    "num_checkpoints_with_v2": 4,
+    "num_checkpoints_with_both": 3
+  }
+}

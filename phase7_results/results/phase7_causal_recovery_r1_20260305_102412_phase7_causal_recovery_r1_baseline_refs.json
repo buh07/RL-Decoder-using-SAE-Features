@@ -1,0 +1,16 @@
+{
+  "schema_version": "phase7_causal_recovery_baseline_v1",
+  "run_id": "20260305_102412_phase7_causal_recovery_r1",
+  "run_tag": "phase7_causal_recovery_r1_20260305_102412_phase7_causal_recovery_r1",
+  "source_run_tag": "phase7_r2p1_20260305_025056_phase7_r2p1_full",
+  "source_matrix": "phase7_results/results/trackA_gate_matrix_phase7_r2p1_20260305_025056_phase7_r2p1_full.json",
+  "stats": {
+    "composite_auroc_mean": 0.7188258928571429,
+    "text_auroc_mean": 0.6892987755102041,
+    "latent_auroc_mean": 0.5035881632653061,
+    "causal_auroc_mean": 0.4999686989795918,
+    "coverage_mean": 0.30898366606170596,
+    "dual_gate_pass_n": 0,
+    "num_rows": 16
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "phase7_academic_closure_report_v2",
+  "run_tag": "phase7_review_closure_20260304_141131_phase7_review_closure",
+  "synthetic_matrix_path": "phase7_results/results/trackA_gate_matrix_phase7_review_closure_20260304_141131_phase7_review_closure.json",
+  "real_cot_benchmark_paths": [
+    "phase7_results/results/faithfulness_benchmark_real_cot_phase7_review_closure_20260304_141131_phase7_review_closure.json"
+  ],
+  "qwen_pilot_paths": [
+    "phase7_results/results/faithfulness_benchmark_qwen_pilot_phase7_review_closure_20260304_141131_phase7_review_closure.json"
+  ],
+  "notes": [
+    "raw checkpoints used variant_conditioned latent cache",
+    "hybrid checkpoints used shared latent fallback (no hybrid variant cache path yet)"
+  ]
+}

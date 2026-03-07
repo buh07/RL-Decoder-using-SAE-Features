@@ -1,0 +1,14 @@
+{
+  "schema_version": "phase7_faithfulness_benchmark_v1",
+  "benchmark_scope": "real_cot",
+  "external_validity_status": "blocked_no_strict_labels",
+  "model_comparability_status": "not_comparable",
+  "claim_boundary_disclaimer": "Causal support scores reflect measured variables/subspaces and tested interventions only; they are not a complete explanation of all internal reasoning.",
+  "scope_disclaimer": "Real-CoT labeled benchmark blocked: no strict external label source available.",
+  "gate_checks": {
+    "applicable": false,
+    "gate_pass": null,
+    "reason": "blocked_no_strict_labels"
+  },
+  "generated_at_unix": 1772693830
+}

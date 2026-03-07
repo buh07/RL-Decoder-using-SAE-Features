@@ -17,6 +17,12 @@
 - `phase7_results/results/optionb_canary_decision_phase7_optionbc_20260306_092554_phase7_optionbc.json`
 - `phase7_results/results/optionc_probe_phase7_optionbc_20260306_092554_phase7_optionbc.json`
 - `phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json`
+- `phase7_results/results/phase7_sae_trajectory_pathb_20260306_234123_phase7_sae_trajectory_pathb.json`
+- `phase7_results/results/phase7_sae_trajectory_pathc_20260306_235018_phase7_sae_trajectory_pathc.json`
+- `phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json`
+- `phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json`
+- `phase7_results/results/mixed_gain_sweep_summary.json`
+- `phase7_results/results/mixed_result_top50_seed_sweep_summary.json`
 
 ## R5.1 Decision Matrix Outcome
 Final closure branch used for GPT-2:
@@ -26,6 +32,27 @@ Final closure branch used for GPT-2:
 - `R4`: exploratory geometry remained weak.
 
 Outcome: **all-fail branch for Track C deployment relevance on GPT-2**.
+
+## Post-Closure Validation Passes (March 7, 2026)
+These follow-up runs were designed to check whether GPT-2 closure could be reversed under stronger feature engineering. It was not.
+
+1. Path B (feature-set swap in SAE trajectory metrics)
+- Best overall unfaithful-positive AUROC was `0.6831` (`eq_pre_result_150`, `layer7:feature_variance_coherence`).
+- `wrong_intermediate` remained weak (`0.5716` best under this pass), so signal did not meet robustness targets.
+
+2. Path C (trajectory probe with robust variant exclusion)
+- Naive split run showed `wrong_intermediate AUROC = 0.8025` (small test support).
+- Robust policy run (exclude structural variants in train positives) dropped to `0.6944`.
+- Bootstrap CI on wrong_intermediate (1000 resamples): `[0.5864, 0.8025]`.
+- 5-fold grouped CV pooled wrong_intermediate AUROC: `0.6577`, CI `[0.6104, 0.7057]`.
+- Interpretation: single-split signal is high-variance and does not hold robustly at the target threshold.
+
+3. Mixed hidden-state + SAE ladder
+- Baseline feature family sweep (`eq_pre_result_150`) produced mean CV delta `M3-M1 = +0.0008` across seeds.
+- Alternate `result_top50` feature set improved mean delta (`+0.0658`) but still did not cross the primary threshold (`M3 mean = 0.6369`, no run > `0.70`).
+- Final mixed-model decision remained `mixed_redundant_or_insufficient`.
+
+These additional checks strengthen the GPT-2 closure rather than reopening it.
 
 ## Three Publishable GPT-2 Results
 1. Arithmetic features exist and are causally active.

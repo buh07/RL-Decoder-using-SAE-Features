@@ -1,0 +1,23 @@
+{
+  "schema_version": "phase7_trackA_gate_decision_v1",
+  "run_id": "fixv3_matrix_v3_hybrid_every2_even",
+  "source_benchmark": "phase7_results/results/faithfulness_benchmark_controls_papercore_fixv3_matrix_v3_hybrid_every2_even.json",
+  "all_required_gates_pass": true,
+  "checks": {
+    "auroc_ge_0_85": true,
+    "false_positive_rate_le_0_05": true,
+    "readout_high_causal_fail_cases_n_ge_1": true,
+    "has_track_keys_and_claim_boundary_disclaimer": true
+  },
+  "metrics": {
+    "auroc": 0.9676307499999993,
+    "false_positive_rate": 0.018,
+    "readout_high_causal_fail_cases_n": 1726,
+    "readout_high_definition": {
+      "method": "latent_only_quantile",
+      "latent_high_quantile": 0.8,
+      "latent_high_threshold": 0.5714285714285714,
+      "causal_fail_threshold": 0.785
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "count": 5,
+  "rows": [
+    {
+      "file": "mixed_gain_sweep_seed20260307.json",
+      "seed": 20260307,
+      "final_decision": "mixed_redundant_or_insufficient",
+      "m1_cv": 0.635116598079561,
+      "m3_cv": 0.644718792866941,
+      "delta_cv": 0.009602194787380003,
+      "delta_single": -0.25,
+      "delta_ci": {
+        "lower": -0.25,
+        "upper": 0.0
+      },
+      "cv_gate": false,
+      "practical": false,
+      "stable_gain": false
+    },
+    {
+      "file": "mixed_gain_sweep_seed20260311.json",
+      "seed": 20260311,
+      "final_decision": "mixed_redundant_or_insufficient",
+      "m1_cv": 0.6543209876543211,
+      "m3_cv": 0.6035665294924554,
+      "delta_cv": -0.050754458161865745,
+      "delta_single": 0.0625,
+      "delta_ci": {
+        "lower": -0.125,
+        "upper": 0.375
+      },
+      "cv_gate": false,
+      "practical": false,
+      "stable_gain": false
+    },
+    {
+      "file": "mixed_gain_sweep_seed20260317.json",
+      "seed": 20260317,
+      "final_decision": "mixed_redundant_or_insufficient",
+      "m1_cv": 0.6255144032921811,
+      "m3_cv": 0.6282578875171467,
+      "delta_cv": 0.00274348422496562,
+      "delta_single": -0.05555555555555558,
+      "delta_ci": {
+        "lower": -0.16666666666666663,
+        "upper": 1.1102230246251565e-16
+      },
+      "cv_gate": false,
+      "practical": false,
+      "stable_gain": false
+    },
+    {
+      "file": "mixed_gain_sweep_seed20260323.json",
+      "seed": 20260323,
+      "final_decision": "mixed_redundant_or_insufficient",
+      "m1_cv": 0.6200274348422495,
+      "m3_cv": 0.6351165980795611,
+      "delta_cv": 0.015089163237311576,
+      "delta_single": -0.020408163265306145,
+      "delta_ci": {
+        "lower": -0.16326530612244905,
+        "upper": 0.1428571428571429
+      },
+      "cv_gate": false,
+      "practical": false,
+      "stable_gain": false
+    },
+    {
+      "file": "mixed_gain_sweep_seed20260329.json",
+      "seed": 20260329,
+      "final_decision": "mixed_redundant_or_insufficient",
+      "m1_cv": 0.6213991769547326,
+      "m3_cv": 0.6488340192043895,
+      "delta_cv": 0.027434842249656977,
+      "delta_single": 0.0,
+      "delta_ci": {
+        "lower": -0.1200000000000001,
+        "upper": 0.16000000000000003
+      },
+      "cv_gate": false,
+      "practical": false,
+      "stable_gain": false
+    }
+  ],
+  "m1_cv_mean": 0.6312757201646091,
+  "m3_cv_mean": 0.6320987654320988,
+  "delta_cv_mean": 0.000823045267489686,
+  "m3_beats_m1_count": 4,
+  "any_cv_gate_pass": false,
+  "any_practical_pass": false,
+  "any_stable_gain_pass": false
+}

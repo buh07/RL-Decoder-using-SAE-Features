@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** March 6, 2026
+**Last Updated:** March 7, 2026
 
 ## Core Project Docs
 | File | Purpose |
@@ -25,6 +25,11 @@
 | `phase7_results/results/optionb_canary_decision_phase7_optionbc_20260306_092554_phase7_optionbc.json` | Option B fair profile comparison decision |
 | `phase7_results/results/optionc_probe_phase7_optionbc_20260306_092554_phase7_optionbc.json` | Option C contrastive probe outcome |
 | `phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json` | Combined Option B/C closure summary |
+| `phase7_results/results/phase7_sae_trajectory_pathb_20260306_234123_phase7_sae_trajectory_pathb.json` | Path B feature-set swap summary |
+| `phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json` | Path C robust variant-exclusion + bootstrap/CV result |
+| `phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json` | Mixed hidden+SAE ladder decision artifact |
+| `phase7_results/results/mixed_gain_sweep_summary.json` | Multi-seed mixed-model stability sweep (baseline feature family) |
+| `phase7_results/results/mixed_result_top50_seed_sweep_summary.json` | Multi-seed mixed-model stability sweep (`result_top50`) |
 | `phase7_results/results/trackc_intervention_archive_manifest.json` | Archive index for Track C intervention-era artifacts |
 
 ## Active Inquiry Docs

@@ -1,0 +1,14 @@
+{
+  "schema_version": "phase7_academic_weakness_closure_report_v1",
+  "run_tag": "phase7_causal_recovery_r1_20260305_102412_phase7_causal_recovery_r1",
+  "canary_decision_path": "phase7_results/results/trackA_canary_decision_phase7_causal_recovery_r1_20260305_102412_phase7_causal_recovery_r1.json",
+  "matrix_path": "phase7_results/results/trackA_gate_matrix_phase7_causal_recovery_r1_20260305_102412_phase7_causal_recovery_r1.json",
+  "decision_path": "phase7_results/results/trackA_gate_decision_phase7_causal_recovery_r1_20260305_102412_phase7_causal_recovery_r1.json",
+  "causal_track_diagnostic_path": "phase7_results/results/causal_track_diagnostic_phase7_causal_recovery_r1_20260305_102412_phase7_causal_recovery_r1.json",
+  "resolved_items": [
+    "strict_variant_lookup",
+    "stratified_control_sampling",
+    "causal_degeneracy_diagnostics"
+  ],
+  "generated_at_unix": 1772728168
+}

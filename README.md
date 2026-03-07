@@ -8,6 +8,7 @@ This repository implements a phased framework for extracting, validating, and an
 reasoning features from LLM activations using sparse autoencoders (SAEs). Phases 1-6 are
 complete, with the primary target being GPT-2 medium (24-layer, 1024D). Phase 7 for GPT-2 is
 closed with a documented Track C negative result and a final two-track deployment configuration.
+March 7 stress tests (Path B / Path C robust / mixed hidden+SAE ladder) also support closure.
 Qwen work is now a separate diagnostic-first inquiry path.
 
 ## Quick Navigation
@@ -72,6 +73,8 @@ Primary closure references:
 - `docs/PHASE7V3_TRACKC_FINDINGS.md`
 - `docs/TRACKC_NEGATIVE_FINDING.md`
 - `phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json`
+- `phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json`
+- `phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json`
 
 ## Qwen Inquiry (Diagnostic-First)
 

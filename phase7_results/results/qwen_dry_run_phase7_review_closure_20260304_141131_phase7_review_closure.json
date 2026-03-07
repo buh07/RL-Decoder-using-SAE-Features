@@ -1,0 +1,41 @@
+{
+  "schema_version": "phase7_causal_checks_v2",
+  "status": "error_no_records_for_model_key",
+  "dry_run": true,
+  "model_spec": {
+    "model_key": "qwen2.5-7b",
+    "hf_model_id": "Qwen/Qwen2.5-7B",
+    "tokenizer_id": "Qwen/Qwen2.5-7B",
+    "num_layers": 28,
+    "hidden_dim": 3584,
+    "default_dtype": "bfloat16",
+    "adapter_class": "Qwen25_7BAdapter",
+    "sae_dir": null,
+    "model_family": "qwen2.5",
+    "vocab_size": 152064
+  },
+  "model_metadata": {
+    "model_key": "qwen2.5-7b",
+    "model_family": "qwen2.5",
+    "num_layers": 28,
+    "hidden_dim": 3584,
+    "tokenizer_id": "Qwen/Qwen2.5-7B",
+    "latent_dim": 0,
+    "supports_subspace_patching": false,
+    "resolved_saes_dir": null,
+    "resolved_activations_dir": null,
+    "unsupported_reason": "no_records_for_model_key:qwen2.5-7b"
+  },
+  "records_considered": 0,
+  "layers_requested": [
+    22
+  ],
+  "variable": "subresult_value",
+  "mediation": {
+    "enabled": false,
+    "variable": "subresult_value",
+    "checkpoint": null
+  },
+  "subspace_specs_schema": "causal_patch_spec_v1",
+  "rows": []
+}

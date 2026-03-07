@@ -1,0 +1,128 @@
+{
+  "schema_version": "phase7_contrastive_probe_v1",
+  "source_control_records": "phase7_results/interventions/control_records_20260305_234011_phase7v3_closure.json",
+  "source_control_records_stats": {
+    "controls_total": 4500,
+    "controls_used": 747,
+    "controls_missing_text": 0,
+    "controls_no_step_positions": 113,
+    "controls_no_matching_trace_steps": 0,
+    "records_built": 2200,
+    "records_skipped_missing_trace_step": 0,
+    "anchor_coverage_eq_like_rows": 2201,
+    "anchor_coverage_line_end_rows": 0,
+    "anchor_coverage_fallback_rows": 0,
+    "anchor_coverage_total_rows": 2201,
+    "position_convention_version": "phase7_pos_contract_v1",
+    "position_contract_validated": true,
+    "offset_alignment_degraded_rows": 0,
+    "control_sampling_policy": "stratified_trace_variant",
+    "controls_used_fraction": 0.166,
+    "unique_traces_used": 430,
+    "unique_variants_used": 7,
+    "faithful_rows": 1266,
+    "unfaithful_rows": 934
+  },
+  "feature_source": "both",
+  "primary_feature_source": "control_conditioned",
+  "layers": [
+    7,
+    12,
+    17,
+    22
+  ],
+  "train_variants": [
+    "faithful",
+    "prompt_bias_rationalization",
+    "reordered_steps",
+    "wrong_intermediate"
+  ],
+  "test_variants": [
+    "answer_first_order_flip",
+    "faithful",
+    "false_rationale_correct_answer",
+    "silent_error_correction"
+  ],
+  "trace_test_fraction": 0.3,
+  "trace_split_seed": 20260306,
+  "min_class_per_split": 10,
+  "trace_group_leakage_guard": true,
+  "num_train_samples": 1188,
+  "num_test_samples": 546,
+  "train_auroc_unfaithful_positive": 0.7731008671839342,
+  "test_auroc_unfaithful_positive": 0.7135549872122762,
+  "loss_start": 1.0125372409820557,
+  "loss_end": 0.5448939800262451,
+  "loss_mean": 0.8719197832047939,
+  "cross_variant_generalization_pass": true,
+  "by_feature_source": {
+    "control_conditioned": {
+      "status": "ok",
+      "input_dim": 4096,
+      "num_train_samples": 1188,
+      "num_test_samples": 546,
+      "train_auroc_unfaithful_positive": 0.7731008671839342,
+      "test_auroc_unfaithful_positive": 0.7135549872122762,
+      "loss_start": 1.0125372409820557,
+      "loss_end": 0.5448939800262451,
+      "loss_mean": 0.8719197832047939,
+      "cross_variant_generalization_pass": true,
+      "split_diagnostics": {
+        "trace_split_seed": 20260306,
+        "trace_test_fraction": 0.3,
+        "num_unique_traces_total": 430,
+        "num_unique_train_traces": 301,
+        "num_unique_test_traces": 129,
+        "trace_overlap_count": 0,
+        "trace_overlap_check_pass": true,
+        "variant_overlap_non_faithful": [],
+        "class_counts_train": {
+          "faithful": 875,
+          "unfaithful": 313
+        },
+        "class_counts_test": {
+          "faithful": 391,
+          "unfaithful": 155
+        },
+        "min_class_per_split": 10
+      }
+    },
+    "source_trace": {
+      "status": "ok",
+      "input_dim": 4096,
+      "num_train_samples": 1188,
+      "num_test_samples": 546,
+      "train_auroc_unfaithful_positive": 0.6078868096759471,
+      "test_auroc_unfaithful_positive": 0.49948024090421583,
+      "loss_start": 0.9316146373748779,
+      "loss_end": 0.583856999874115,
+      "loss_mean": 0.7636470772325993,
+      "cross_variant_generalization_pass": false,
+      "split_diagnostics": {
+        "trace_split_seed": 20260306,
+        "trace_test_fraction": 0.3,
+        "num_unique_traces_total": 430,
+        "num_unique_train_traces": 301,
+        "num_unique_test_traces": 129,
+        "trace_overlap_count": 0,
+        "trace_overlap_check_pass": true,
+        "variant_overlap_non_faithful": [],
+        "class_counts_train": {
+          "faithful": 875,
+          "unfaithful": 313
+        },
+        "class_counts_test": {
+          "faithful": 391,
+          "unfaithful": 155
+        },
+        "min_class_per_split": 10
+      }
+    }
+  },
+  "source_comparability": {
+    "control_conditioned_test_auroc": 0.7135549872122762,
+    "source_trace_test_auroc": 0.49948024090421583,
+    "control_minus_source_test_auroc_delta": 0.21407474630806034,
+    "interpretation_flag": "control_conditioned_only_signal"
+  }
+}

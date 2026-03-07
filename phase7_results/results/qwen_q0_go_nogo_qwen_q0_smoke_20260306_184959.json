@@ -1,0 +1,26 @@
+{
+  "schema_version": "phase7_qwen_q0_go_nogo_v1",
+  "run_tag": "qwen_q0_smoke_20260306_184959",
+  "decision": "no_go",
+  "status": "failed",
+  "reason": "failed_margin_and_trace_fraction",
+  "pass": false,
+  "checks": {
+    "margin_check": false,
+    "trace_fraction_check": false
+  },
+  "criteria": {
+    "min_margin": 0.005,
+    "min_positive_trace_fraction": 0.5
+  },
+  "metrics": {
+    "observed_mean_l2": 27.945360794854473,
+    "null_mean_l2": 38.47816394091799,
+    "margin": -10.532803146063515,
+    "exceedance_fraction": 1.0,
+    "positive_trace_fraction": 0.0,
+    "group_count": 52
+  },
+  "separation_ref": "phase7_results/results/qwen_q0_hidden_state_separation_qwen_q0_smoke_20260306_184959.json",
+  "timestamp": "2026-03-06T18:50:08.106969"
+}

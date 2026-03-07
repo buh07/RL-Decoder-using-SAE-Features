@@ -1,0 +1,16 @@
+{
+  "schema_version": "phase7_trackc_confidence_canary_summary_v1",
+  "run_tag": "phase7v3_20260305_234011_phase7v3_closure_non_smoke",
+  "source_benchmark": "phase7_results/results/trackc_r1_benchmark_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json",
+  "confidence_margin_auroc": 0.6008729181628539,
+  "confidence_margin_auroc_ci95": [
+    0.5554075538177289,
+    0.6455852333928398
+  ],
+  "confidence_margin_fpr": 0.05847953216374269,
+  "confidence_margin_recall": 0.04751461988304093,
+  "confidence_vs_text_corr": 0.6187108297657831,
+  "power_sufficient": true,
+  "leakage_check_pass": true,
+  "selection_pass": true
+}

@@ -5,6 +5,11 @@ For `gpt2-medium` arithmetic CoT under the Phase 7 protocol, Track C is a **nega
 
 Track C-style mechanistic signals (intervention, confidence reformulation, trajectory coherence, contrastive probe, geometry) did not produce a robust, gate-worthy faithful/unfaithful discriminator after correction passes and fair canary comparisons.
 
+Post-closure stress tests on March 7, 2026 did not overturn this:
+- Path B feature swaps peaked below robust deployment thresholds (`best AUROC ~0.683`).
+- Path C robust wrong-intermediate validation failed the `>0.70` gate (`single split 0.694`, pooled CV `0.658`).
+- Mixed hidden+SAE ladder remained insufficient (`mixed_redundant_or_insufficient`).
+
 ## What This Is
 - Evidence that GPT-2 can carry arithmetic mechanism signal without that signal being a reliable proxy for CoT faithfulness.
 - Evidence supporting deployment of a two-track auditor (`text` + `latent`) with structural penalties for GPT-2 in this project scope.

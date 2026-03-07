@@ -1,0 +1,35 @@
+{
+  "schema_version": "phase7_cutover_snapshot_v1",
+  "run_id": "20260305_121442_phase7_causal_recovery_r2p3",
+  "run_tag": "phase7_causal_recovery_r2p3_20260305_121442_phase7_causal_recovery_r2p3",
+  "timestamp_unix": 1772734124,
+  "active_sessions": [
+    "p7r23_canary_g6_20260305_121442_phase7_causal_recovery_r2p3: 1 windows (created Thu Mar  5 12:14:57 2026)",
+    "p7r23_coord_20260305_121442_phase7_causal_recovery_r2p3: 1 windows (created Thu Mar  5 12:14:57 2026)"
+  ],
+  "artifact_counts": {
+    "canary_bench": 1,
+    "matrix_bench": 0,
+    "causal_canary": 1,
+    "audit_canary": 1,
+    "threshold_canary": 1
+  },
+  "state_files": [],
+  "log_files": [
+    "canary_gpu6.log",
+    "coordinator.log"
+  ],
+  "latest_completed_canary_metrics": {
+    "path": "phase7_results/results/faithfulness_benchmark_phase7_causal_recovery_r2p3_20260305_121442_phase7_causal_recovery_r2p3_canary_raw_every2_even_subresult_value.json",
+    "leakage_check_pass": true,
+    "causal_signal_coverage_fraction": 0.17505362151460155,
+    "causal_variant_score_identical_fraction": 0.07714285714285714,
+    "causal_track_degenerate_flag": true,
+    "causal_anti_predictive_flag": true,
+    "causal_harms_composite_flag": true,
+    "text_only_auroc": 0.6892987755102041,
+    "latent_only_auroc": 0.5434289795918366,
+    "causal_auditor_auroc": 0.07452408163265305,
+    "composite_auroc": 0.4167159183673468
+  }
+}

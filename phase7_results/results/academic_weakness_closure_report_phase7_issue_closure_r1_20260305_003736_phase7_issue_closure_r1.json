@@ -1,0 +1,16 @@
+{
+  "schema_version": "phase7_academic_weakness_closure_report_v1",
+  "run_tag": "phase7_issue_closure_r1_20260305_003736_phase7_issue_closure_r1",
+  "synthetic_gate_matrix_path": "phase7_results/results/trackA_gate_matrix_phase7_issue_closure_r1_20260305_003736_phase7_issue_closure_r1.json",
+  "synthetic_gate_decision_path": "phase7_results/results/trackA_gate_decision_phase7_issue_closure_r1_20260305_003736_phase7_issue_closure_r1_raw_every2_even.json",
+  "real_cot_labeled_benchmark_path": "phase7_results/results/faithfulness_benchmark_real_cot_labeled_phase7_issue_closure_r1_20260305_003736_phase7_issue_closure_r1.json",
+  "resolved_items": [
+    "causal_component_weights_normalized",
+    "token_anchor_eq_like_enabled",
+    "no_answer_match_proxy_for_labeled_real_cot"
+  ],
+  "remaining_items": [
+    "qwen_full_comparability_out_of_scope"
+  ],
+  "generated_at_unix": 1772690396
+}

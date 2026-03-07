@@ -1,0 +1,82 @@
+{
+  "schema_version": "phase7_anchor_priority_ablation_v1",
+  "run_tag": "phase7_r2p1_20260305_025056_phase7_r2p1_full",
+  "selection_rule": "max(mean_latent_auroc), tie=max(mean_composite_auroc), tie=max(mean_coverage)",
+  "rows": [
+    {
+      "anchor_priority": "template_first",
+      "mean_latent_auroc": 0.5434289795918366,
+      "mean_composite_auroc": 0.7305623469387758,
+      "mean_coverage": 0.30898366606170596,
+      "num_variables": 4,
+      "per_variable": [
+        {
+          "variable": "subresult_value",
+          "path": "phase7_results/results/faithfulness_benchmark_phase7_r2p1_20260305_025056_phase7_r2p1_full_ablation_template_first_raw_every2_even_subresult_value.json",
+          "latent_auroc": 0.5434289795918366,
+          "composite_auroc": 0.7552922448979594,
+          "coverage": 0.30898366606170596
+        },
+        {
+          "variable": "operator",
+          "path": "phase7_results/results/faithfulness_benchmark_phase7_r2p1_20260305_025056_phase7_r2p1_full_ablation_template_first_raw_every2_even_operator.json",
+          "latent_auroc": 0.5434289795918366,
+          "composite_auroc": 0.7247073469387757,
+          "coverage": 0.30898366606170596
+        },
+        {
+          "variable": "magnitude_bucket",
+          "path": "phase7_results/results/faithfulness_benchmark_phase7_r2p1_20260305_025056_phase7_r2p1_full_ablation_template_first_raw_every2_even_magnitude_bucket.json",
+          "latent_auroc": 0.5434289795918366,
+          "composite_auroc": 0.7230759183673472,
+          "coverage": 0.30898366606170596
+        },
+        {
+          "variable": "sign",
+          "path": "phase7_results/results/faithfulness_benchmark_phase7_r2p1_20260305_025056_phase7_r2p1_full_ablation_template_first_raw_every2_even_sign.json",
+          "latent_auroc": 0.5434289795918366,
+          "composite_auroc": 0.7191738775510207,
+          "coverage": 0.30898366606170596
+        }
+      ]
+    },
+    {
+      "anchor_priority": "equation_first",
+      "mean_latent_auroc": 0.5434289795918366,
+      "mean_composite_auroc": 0.7305623469387758,
+      "mean_coverage": 0.30898366606170596,
+      "num_variables": 4,
+      "per_variable": [
+        {
+          "variable": "subresult_value",
+          "path": "phase7_results/results/faithfulness_benchmark_phase7_r2p1_20260305_025056_phase7_r2p1_full_ablation_equation_first_raw_every2_even_subresult_value.json",
+          "latent_auroc": 0.5434289795918366,
+          "composite_auroc": 0.7552922448979594,
+          "coverage": 0.30898366606170596
+        },
+        {
+          "variable": "operator",
+          "path": "phase7_results/results/faithfulness_benchmark_phase7_r2p1_20260305_025056_phase7_r2p1_full_ablation_equation_first_raw_every2_even_operator.json",
+          "latent_auroc": 0.5434289795918366,
+          "composite_auroc": 0.7247073469387757,
+          "coverage": 0.30898366606170596
+        },
+        {
+          "variable": "magnitude_bucket",
+          "path": "phase7_results/results/faithfulness_benchmark_phase7_r2p1_20260305_025056_phase7_r2p1_full_ablation_equation_first_raw_every2_even_magnitude_bucket.json",
+          "latent_auroc": 0.5434289795918366,
+          "composite_auroc": 0.7230759183673472,
+          "coverage": 0.30898366606170596
+        },
+        {
+          "variable": "sign",
+          "path": "phase7_results/results/faithfulness_benchmark_phase7_r2p1_20260305_025056_phase7_r2p1_full_ablation_equation_first_raw_every2_even_sign.json",
+          "latent_auroc": 0.5434289795918366,
+          "composite_auroc": 0.7191738775510207,
+          "coverage": 0.30898366606170596
+        }
+      ]
+    }
+  ],
+  "selected_anchor_priority": "template_first"
+}

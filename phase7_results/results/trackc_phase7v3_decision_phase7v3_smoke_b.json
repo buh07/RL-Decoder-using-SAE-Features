@@ -1,0 +1,14 @@
+{
+  "schema_version": "phase7_trackc_decision_v3",
+  "run_id": "20260305_smoke_phase7v3b",
+  "run_tag": "phase7v3_smoke_b",
+  "stage_status": {
+    "r0_done": true,
+    "r1_done": true,
+    "r2_done": false,
+    "r3_done": false,
+    "r4_done": true
+  },
+  "selected_track_c": "confidence_margin",
+  "claim_boundary": "If selected_track_c=two_track_negative_result, Track C remains unresolved for GPT-2 arithmetic and deployment defaults to text+latent composite."
+}

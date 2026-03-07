@@ -23,6 +23,22 @@ This file is now a closure document for GPT-2, not an open run tracker.
 - Fair profile comparison (Option B) produced composite AUROC around `0.836-0.838`.
 - This is useful detection, but not a mechanistic faithfulness claim.
 
+## March 7 Closure Stress Tests (Still Negative For Track C)
+1. Path B (feature-set swaps in trajectory metrics):
+- Best AUROC remained below robust target (`best ~0.683`).
+- `wrong_intermediate` stayed weak across feature sets.
+
+2. Path C robust variant-exclusion validation:
+- `wrong_intermediate` single split: `0.694` (CI includes `>=0.70` but point estimate below gate).
+- 5-fold grouped CV pooled: `0.658` with CI upper near threshold.
+- Outcome: underpowered borderline signal, not closure-grade for positive Track C claim.
+
+3. Mixed hidden+SAE ladder:
+- Multi-seed sweeps did not meet practical/stability criteria.
+- Final decision stayed `mixed_redundant_or_insufficient`.
+
+Net: these runs support GPT-2 closure and do not reopen Track C.
+
 ## Canonical Closure Artifacts
 - `phase7_results/results/trackc_phase7v3_closure_note_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json`
 - `phase7_results/results/trackc_phase7v3_decision_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json`

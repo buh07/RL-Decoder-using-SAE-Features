@@ -1,0 +1,22 @@
+{
+  "schema_version": "phase7_academic_weakness_closure_report_v1",
+  "run_tag": "phase7_r2p1_20260305_025056_phase7_r2p1_full",
+  "synthetic_gate_matrix_path": "phase7_results/results/trackA_gate_matrix_phase7_r2p1_20260305_025056_phase7_r2p1_full.json",
+  "synthetic_gate_decision_path": "phase7_results/results/trackA_gate_decision_phase7_r2p1_20260305_025056_phase7_r2p1_full.json",
+  "real_cot_labeled_benchmark_path": "phase7_results/results/faithfulness_benchmark_real_cot_labeled_phase7_r2p1_20260305_025056_phase7_r2p1_full.json",
+  "synthetic_to_real_gap": {
+    "status": "real_track_metrics_missing"
+  },
+  "external_validity_status": "blocked_no_strict_labels",
+  "resolved_items": [
+    "position_contract_hardened",
+    "special_token_policy_explicit",
+    "anchor_priority_ablation_executed",
+    "strict_external_label_policy_hardened"
+  ],
+  "remaining_items": [
+    "qwen_full_comparability_out_of_scope",
+    "causal_track_signal_still_empirical"
+  ],
+  "generated_at_unix": 1772720577
+}

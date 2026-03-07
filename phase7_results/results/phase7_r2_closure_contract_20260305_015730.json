@@ -1,0 +1,18 @@
+{
+  "schema_version": "phase7_r2_closure_contract_v1",
+  "generated_at": "20260305_015730",
+  "run_id": "20260305_015707_phase7_issue_closure_r1",
+  "run_tag": "phase7_issue_closure_r1_20260305_015707_phase7_issue_closure_r1",
+  "policies": {
+    "dual_gate_unchanged": true,
+    "strict_external_labels_required": true,
+    "real_cot_comparability_required_for_full_claims": true
+  },
+  "gate_rules": {
+    "composite_auroc_ge": 0.85,
+    "composite_fpr_le": 0.05,
+    "composite_recall_gt": 0.0,
+    "causal_auroc_ge_floor": 0.65,
+    "causal_coverage_ge": 0.25
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "phase7_trackA_gate_decision_v1",
+  "run_tag": "phase7v3_expanded_20260303_192113",
+  "checkpoint": "state_raw_every2_even_v2_expanded",
+  "benchmark_path": "phase7_results/results/faithfulness_benchmark_phase7v3_expanded_20260303_192113_raw_every2_even.json",
+  "checks": {
+    "auroc_ge_0_85": false,
+    "false_positive_rate_le_0_05": true,
+    "readout_high_causal_fail_cases_n_ge_1": true,
+    "has_track_keys_and_claim_boundary_disclaimer": true,
+    "leakage_check_pass": true
+  },
+  "all_pass": false,
+  "metrics": {
+    "auroc": 0.5,
+    "false_positive_rate": 0.017142857142857144,
+    "readout_high_causal_fail_cases_n": 866
+  }
+}

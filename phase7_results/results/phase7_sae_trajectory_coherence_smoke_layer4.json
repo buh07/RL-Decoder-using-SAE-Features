@@ -1,0 +1,544 @@
+{
+  "schema_version": "phase7_sae_trajectory_coherence_partial_v1",
+  "status": "ok",
+  "run_tag": "phase7_sae_traj_smoke",
+  "layer": 4,
+  "source_control_records": "phase7_results/interventions/control_records_phase7_causal_recovery_r2p4_20260305_133136_phase7_causal_recovery_r2p4_canary_raw_every2_even.json",
+  "source_control_records_sha256": "4e001217a19a7e3910ee2a194e2d047c32e4f71954c17bb7ae6c99dde53ab229",
+  "source_control_records_stats": {
+    "controls_total": 5500,
+    "controls_used": 1872,
+    "controls_missing_text": 0,
+    "controls_no_step_positions": 0,
+    "controls_no_matching_trace_steps": 0,
+    "records_built": 12000,
+    "records_skipped_missing_trace_step": 0,
+    "anchor_coverage_eq_like_rows": 12009,
+    "anchor_coverage_line_end_rows": 0,
+    "anchor_coverage_fallback_rows": 0,
+    "anchor_coverage_total_rows": 12009,
+    "position_convention_version": "phase7_pos_contract_v1",
+    "position_contract_validated": true,
+    "offset_alignment_degraded_rows": 0,
+    "control_sampling_policy": "stratified_trace_variant",
+    "controls_used_fraction": 0.34036363636363637,
+    "unique_traces_used": 500,
+    "unique_variants_used": 11,
+    "faithful_rows": 3108,
+    "unfaithful_rows": 8892
+  },
+  "sae_source": "phase2_results/saes_gpt2_12x_topk/saes",
+  "activations_source": "phase2_results/activations",
+  "phase4_top_features_source": "phase4_results/topk/probe/top_features_per_layer.json",
+  "subspace_specs_source": "phase7_results/interventions/variable_subspaces_phase7_causal_recovery_r2p4_20260305_133136_phase7_causal_recovery_r2p4.json",
+  "analysis_config": {
+    "sample_traces": 10,
+    "min_common_steps": 3,
+    "seed": 20260306,
+    "n_bootstrap": 50,
+    "batch_size": 128,
+    "device": "cuda:0",
+    "alignment_policy": "common_step_idx_sorted",
+    "metric_policy": "separate_only_no_blend"
+  },
+  "feature_selection": {
+    "eq_top50_features": [
+      4395,
+      12157,
+      4383,
+      8419,
+      4582,
+      7069,
+      5046,
+      10835,
+      6183,
+      3894,
+      8052,
+      7914,
+      5400,
+      3812,
+      537,
+      11918,
+      8016,
+      6246,
+      11539,
+      3337,
+      7165,
+      7277,
+      2155,
+      12164,
+      7549,
+      4200,
+      1277,
+      9056,
+      641,
+      3001,
+      7065,
+      9402,
+      5426,
+      1693,
+      3871,
+      7519,
+      1198,
+      6061,
+      7809,
+      6173,
+      10306,
+      3429,
+      9711,
+      2042,
+      10741,
+      6606,
+      4121,
+      11395,
+      4711,
+      4059
+    ],
+    "magnitude_subspace_features": [],
+    "magnitude_focus_features": [
+      4395,
+      12157,
+      4383,
+      8419,
+      4582,
+      7069,
+      5046,
+      10835,
+      6183,
+      3894,
+      8052,
+      7914,
+      5400,
+      3812,
+      537,
+      11918,
+      8016,
+      6246,
+      11539,
+      3337,
+      7165,
+      7277,
+      2155,
+      12164,
+      7549,
+      4200,
+      1277,
+      9056,
+      641,
+      3001,
+      7065,
+      9402,
+      5426,
+      1693,
+      3871,
+      7519,
+      1198,
+      6061,
+      7809,
+      6173,
+      10306,
+      3429,
+      9711,
+      2042,
+      10741,
+      6606,
+      4121,
+      11395,
+      4711,
+      4059
+    ],
+    "magnitude_focus_source": "fallback_eq_top50",
+    "magnitude_focus_overlap_count": 0
+  },
+  "coverage_diagnostics": {
+    "rows_total_input": 12000,
+    "rows_total_valid": 12000,
+    "trace_count_pre_filter": 500,
+    "trace_count_eligible_common_ge_min": 455,
+    "trace_count_sampled": 10,
+    "trace_ids_sampled": [
+      "gsm8k_test_00101",
+      "gsm8k_test_00216",
+      "gsm8k_test_00297",
+      "gsm8k_test_00334",
+      "gsm8k_test_00339",
+      "gsm8k_test_00345",
+      "gsm8k_test_00415",
+      "gsm8k_test_00481",
+      "gsm8k_test_00505",
+      "gsm8k_test_00520"
+    ],
+    "variant_pairs_total_common_ge_min": 10,
+    "skipped_variant_pairs_common_lt_min": 117,
+    "rows_used_for_encoding": 156,
+    "pair_descriptor_count": 10,
+    "variant_pair_counts": {
+      "answer_first_only": 1,
+      "answer_first_order_flip": 2,
+      "false_rationale_correct_answer": 1,
+      "irrelevant_rationale": 1,
+      "order_flip_only": 2,
+      "prompt_bias_rationalization": 2,
+      "silent_error_correction": 1
+    },
+    "samples_count": 20,
+    "samples_faithful": 10,
+    "samples_unfaithful": 10
+  },
+  "overall_metrics": {
+    "cosine_smoothness": {
+      "auroc_unfaithful_positive": 0.56,
+      "auroc_ci95_lower": 0.2967032967032967,
+      "auroc_ci95_upper": 0.7676767676767676,
+      "bootstrap_n": 50,
+      "bootstrap_effective_n": 50,
+      "defined": true,
+      "defined_fraction": 1.0,
+      "sample_count": 20
+    },
+    "feature_variance_coherence": {
+      "auroc_unfaithful_positive": 0.8,
+      "auroc_ci95_lower": 0.54,
+      "auroc_ci95_upper": 0.9797979797979798,
+      "bootstrap_n": 50,
+      "bootstrap_effective_n": 50,
+      "defined": true,
+      "defined_fraction": 1.0,
+      "sample_count": 20
+    },
+    "magnitude_monotonicity_coherence": {
+      "auroc_unfaithful_positive": 0.31,
+      "auroc_ci95_lower": 0.10714285714285714,
+      "auroc_ci95_upper": 0.5164835164835165,
+      "bootstrap_n": 50,
+      "bootstrap_effective_n": 50,
+      "defined": true,
+      "defined_fraction": 1.0,
+      "sample_count": 20
+    }
+  },
+  "variant_stratified_metrics": {
+    "cosine_smoothness": {
+      "answer_first_only": {
+        "auroc_unfaithful_positive": 0.0,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 0.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 27,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      },
+      "answer_first_order_flip": {
+        "auroc_unfaithful_positive": 0.5,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 45,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 4,
+        "class_counts": {
+          "faithful": 2,
+          "unfaithful": 2
+        },
+        "pair_count": 2
+      },
+      "false_rationale_correct_answer": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 27,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      },
+      "irrelevant_rationale": {
+        "auroc_unfaithful_positive": 0.0,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 0.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 24,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      },
+      "order_flip_only": {
+        "auroc_unfaithful_positive": 0.75,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 43,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 4,
+        "class_counts": {
+          "faithful": 2,
+          "unfaithful": 2
+        },
+        "pair_count": 2
+      },
+      "prompt_bias_rationalization": {
+        "auroc_unfaithful_positive": 0.5,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 45,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 4,
+        "class_counts": {
+          "faithful": 2,
+          "unfaithful": 2
+        },
+        "pair_count": 2
+      },
+      "silent_error_correction": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 26,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      }
+    },
+    "feature_variance_coherence": {
+      "answer_first_only": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 19,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      },
+      "answer_first_order_flip": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 39,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 4,
+        "class_counts": {
+          "faithful": 2,
+          "unfaithful": 2
+        },
+        "pair_count": 2
+      },
+      "false_rationale_correct_answer": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 22,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      },
+      "irrelevant_rationale": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 25,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      },
+      "order_flip_only": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 41,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 4,
+        "class_counts": {
+          "faithful": 2,
+          "unfaithful": 2
+        },
+        "pair_count": 2
+      },
+      "prompt_bias_rationalization": {
+        "auroc_unfaithful_positive": 0.5,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 44,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 4,
+        "class_counts": {
+          "faithful": 2,
+          "unfaithful": 2
+        },
+        "pair_count": 2
+      },
+      "silent_error_correction": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 16,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      }
+    },
+    "magnitude_monotonicity_coherence": {
+      "answer_first_only": {
+        "auroc_unfaithful_positive": 0.0,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 0.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 25,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      },
+      "answer_first_order_flip": {
+        "auroc_unfaithful_positive": 0.0,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 0.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 43,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 4,
+        "class_counts": {
+          "faithful": 2,
+          "unfaithful": 2
+        },
+        "pair_count": 2
+      },
+      "false_rationale_correct_answer": {
+        "auroc_unfaithful_positive": 0.0,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 0.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 23,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      },
+      "irrelevant_rationale": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 28,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      },
+      "order_flip_only": {
+        "auroc_unfaithful_positive": 0.0,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 0.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 47,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 4,
+        "class_counts": {
+          "faithful": 2,
+          "unfaithful": 2
+        },
+        "pair_count": 2
+      },
+      "prompt_bias_rationalization": {
+        "auroc_unfaithful_positive": 0.0,
+        "auroc_ci95_lower": 0.0,
+        "auroc_ci95_upper": 0.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 40,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 4,
+        "class_counts": {
+          "faithful": 2,
+          "unfaithful": 2
+        },
+        "pair_count": 2
+      },
+      "silent_error_correction": {
+        "auroc_unfaithful_positive": 1.0,
+        "auroc_ci95_lower": 1.0,
+        "auroc_ci95_upper": 1.0,
+        "bootstrap_n": 50,
+        "bootstrap_effective_n": 21,
+        "defined": true,
+        "defined_fraction": 1.0,
+        "sample_count": 2,
+        "class_counts": {
+          "faithful": 1,
+          "unfaithful": 1
+        },
+        "pair_count": 1
+      }
+    }
+  },
+  "timestamp": "2026-03-06T23:25:58.735977"
+}

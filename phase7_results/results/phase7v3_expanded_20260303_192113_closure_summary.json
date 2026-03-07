@@ -1,0 +1,85 @@
+{
+  "run_tag": "phase7v3_expanded_20260303_192113",
+  "artifacts": {
+    "baseline_refs": "phase7_results/results/phase7v3_expanded_20260303_192113_baseline_refs.json",
+    "real_cot_jsonl": "phase7_results/real_cot/gsm8k_test_real_cot.jsonl",
+    "real_cot_eval": "phase7_results/real_cot/gsm8k_test_real_cot_eval_input_v1.json",
+    "real_cot_controls": "phase7_results/real_cot/gsm8k_test_real_cot_controls.json",
+    "build_summary": "phase7_results/dataset/build_summary.json",
+    "canary_ckpt": "phase7_results/checkpoints/state_raw_every2_even_v2_expanded.pt",
+    "subspaces": "phase7_results/interventions/variable_subspaces_phase7v3_expanded_20260303_192113.json",
+    "causal_checks": "phase7_results/interventions/causal_checks_phase7v3_expanded_20260303_192113_raw_every2_even.json",
+    "controls": "phase7_results/controls/cot_controls_test_papercore_phase7v3_expanded_20260303_192113.json",
+    "audit_synth": "phase7_results/audits/text_causal_audit_controls_papercore_phase7v3_expanded_20260303_192113_raw_every2_even.json",
+    "split_manifest": "phase7_results/audits/phase7v3_expanded_20260303_192113_raw_every2_even_split_manifest.json",
+    "thresholds": "phase7_results/calibration/phase7v3_expanded_20260303_192113_raw_every2_even_thresholds.json",
+    "benchmark_synth": "phase7_results/results/faithfulness_benchmark_phase7v3_expanded_20260303_192113_raw_every2_even.json",
+    "gate_decision": "phase7_results/results/trackA_gate_decision_phase7v3_expanded_20260303_192113.json",
+    "gate_matrix": "phase7_results/results/trackA_gate_matrix_phase7v3_expanded_20260303_192113.json",
+    "audit_real": "phase7_results/audits/real_cot_audit_phase7v3_expanded_20260303_192113_raw_every2_even.json",
+    "benchmark_real": "phase7_results/results/faithfulness_benchmark_real_cot_phase7v3_expanded_20260303_192113.json",
+    "external_validity_gate": "phase7_results/results/faithfulness_benchmark_real_cot_phase7v3_expanded_20260303_192113_external_validity_gate.json"
+  },
+  "exists": {
+    "baseline_refs": true,
+    "real_cot_jsonl": true,
+    "real_cot_eval": true,
+    "real_cot_controls": true,
+    "build_summary": true,
+    "canary_ckpt": true,
+    "subspaces": true,
+    "causal_checks": true,
+    "controls": true,
+    "audit_synth": true,
+    "split_manifest": true,
+    "thresholds": true,
+    "benchmark_synth": true,
+    "gate_decision": true,
+    "gate_matrix": true,
+    "audit_real": true,
+    "benchmark_real": true,
+    "external_validity_gate": true
+  },
+  "real_cot_eval_stats": {
+    "num_rows": 1248,
+    "matched_trace_count": 1248,
+    "parser_success_by_trace": {
+      "parseable_rows": 0,
+      "unparseable_rows": 1248,
+      "parseable_fraction": 0.0
+    },
+    "split_distribution": {
+      "test": 1248
+    }
+  },
+  "dataset_v2": {
+    "schema_version": "phase7_trace_v2",
+    "state_ontology": "v2_expanded",
+    "test_multiop_rows": 1471
+  },
+  "causal_checks_v2": {
+    "schema_version": "phase7_causal_checks_v2",
+    "has_mediation_block": true,
+    "num_rows": 200
+  },
+  "benchmark_synth": {
+    "auroc": 0.5,
+    "false_positive_rate": 0.017142857142857144,
+    "leakage_check_pass": true,
+    "track_keys": [
+      "causal_auditor",
+      "latent_only",
+      "text_only"
+    ]
+  },
+  "benchmark_real": {
+    "benchmark_scope": "real_cot",
+    "external_validity_status": "pilot",
+    "num_labeled_audits": 0
+  },
+  "external_validity_gate": {
+    "has_real_cot_pilot": true,
+    "externally_supported_claims": true,
+    "reason": "Real-CoT pilot/validated benchmark present."
+  }
+}

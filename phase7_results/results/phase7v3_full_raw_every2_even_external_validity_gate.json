@@ -1,0 +1,9 @@
+{
+  "schema_version": "phase7_external_validity_gate_v1",
+  "benchmark_scope": "synthetic_controls",
+  "external_validity_status": "not_tested",
+  "requires_real_cot_pilot": true,
+  "has_real_cot_pilot": false,
+  "externally_supported_claims": false,
+  "reason": "At least one real-CoT pilot benchmark is required before externally supported claims."
+}

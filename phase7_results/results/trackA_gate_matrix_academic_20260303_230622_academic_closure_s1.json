@@ -1,0 +1,988 @@
+{
+  "schema_version": "phase7_trackA_gate_matrix_v1",
+  "run_id": "20260303_230622_academic_closure_s1",
+  "generated_at_unix": 1772646075,
+  "num_checkpoints": 4,
+  "checkpoints": [
+    {
+      "checkpoint_id": "hybrid_every2_even",
+      "gate_decision_path": "phase7_results/results/trackA_gate_decision_academic_academic_20260303_230622_academic_closure_s1_hybrid_every2_even.json",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_academic_academic_20260303_230622_academic_closure_s1_hybrid_every2_even.json",
+      "gate_pass": false,
+      "auroc": 0.8093730612244896,
+      "false_positive_rate": 0.045714285714285714,
+      "recall_at_gate": 0.15085714285714286,
+      "causal_signal_coverage_fraction": 0.05127041742286751,
+      "gate_checks": {
+        "applicable": true,
+        "gate_track": "composite",
+        "auroc_ge_0_85": false,
+        "false_positive_rate_le_0_05": true,
+        "has_track_keys_and_claim_boundary_disclaimer": true,
+        "causal_signal_coverage_gate_pass": false,
+        "gate_pass": false,
+        "dual_gate_required": true,
+        "composite_gate_pass": false,
+        "causal_floor_gate_pass": false,
+        "dual_gate_pass": false
+      },
+      "leakage_check_pass": true,
+      "by_benchmark_track": {
+        "text_only": {
+          "threshold": 0.023809523809523836,
+          "gate_threshold": 0.023809523809523836,
+          "analysis_threshold": 0.0,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.6896073469387756,
+          "false_positive_rate": 0.06,
+          "precision": 0.9849785407725322,
+          "recall": 0.3934285714285714,
+          "confusion": {
+            "tp": 1377,
+            "fp": 21,
+            "tn": 329,
+            "fn": 2123
+          },
+          "gate_confusion": {
+            "tp": 1377,
+            "fp": 21,
+            "tn": 329,
+            "fn": 2123
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "latent_only": {
+          "threshold": 0.5657142857142857,
+          "gate_threshold": 0.5657142857142857,
+          "analysis_threshold": 0.19999999999999996,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.5061514285714286,
+          "false_positive_rate": 0.09428571428571429,
+          "precision": 0.9105691056910569,
+          "recall": 0.096,
+          "confusion": {
+            "tp": 336,
+            "fp": 33,
+            "tn": 317,
+            "fn": 3164
+          },
+          "gate_confusion": {
+            "tp": 336,
+            "fp": 33,
+            "tn": 317,
+            "fn": 3164
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "causal_auditor": {
+          "threshold": 0.9090909090909091,
+          "gate_threshold": 0.9090909090909091,
+          "analysis_threshold": 0.4,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.5,
+          "false_positive_rate": 0.014285714285714285,
+          "precision": 0.9090909090909091,
+          "recall": 0.014285714285714285,
+          "confusion": {
+            "tp": 50,
+            "fp": 5,
+            "tn": 345,
+            "fn": 3450
+          },
+          "gate_confusion": {
+            "tp": 50,
+            "fp": 5,
+            "tn": 345,
+            "fn": 3450
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "composite": {
+          "threshold": 0.45052083333333337,
+          "gate_threshold": 0.45052083333333337,
+          "analysis_threshold": 0.19000000000000017,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.8093730612244896,
+          "false_positive_rate": 0.045714285714285714,
+          "precision": 0.9705882352941176,
+          "recall": 0.15085714285714286,
+          "confusion": {
+            "tp": 528,
+            "fp": 16,
+            "tn": 334,
+            "fn": 2972
+          },
+          "gate_confusion": {
+            "tp": 528,
+            "fp": 16,
+            "tn": 334,
+            "fn": 2972
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        }
+      },
+      "claim_boundary_disclaimer": "Causal support scores reflect measured variables/subspaces and tested interventions only; they are not a complete explanation of all internal reasoning.",
+      "readout_high_causal_fail_cases_n": 1259
+    },
+    {
+      "checkpoint_id": "hybrid_middle12_06_17",
+      "gate_decision_path": "phase7_results/results/trackA_gate_decision_academic_academic_20260303_230622_academic_closure_s1_hybrid_middle12_06_17.json",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_academic_academic_20260303_230622_academic_closure_s1_hybrid_middle12_06_17.json",
+      "gate_pass": false,
+      "auroc": 0.8055212244897959,
+      "false_positive_rate": 0.03142857142857143,
+      "recall_at_gate": 0.09457142857142857,
+      "causal_signal_coverage_fraction": 0.05127041742286751,
+      "gate_checks": {
+        "applicable": true,
+        "gate_track": "composite",
+        "auroc_ge_0_85": false,
+        "false_positive_rate_le_0_05": true,
+        "has_track_keys_and_claim_boundary_disclaimer": true,
+        "causal_signal_coverage_gate_pass": false,
+        "gate_pass": false,
+        "dual_gate_required": true,
+        "composite_gate_pass": false,
+        "causal_floor_gate_pass": false,
+        "dual_gate_pass": false
+      },
+      "leakage_check_pass": true,
+      "by_benchmark_track": {
+        "text_only": {
+          "threshold": 0.023809523809523836,
+          "gate_threshold": 0.023809523809523836,
+          "analysis_threshold": 0.0,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.6896073469387756,
+          "false_positive_rate": 0.06,
+          "precision": 0.9849785407725322,
+          "recall": 0.3934285714285714,
+          "confusion": {
+            "tp": 1377,
+            "fp": 21,
+            "tn": 329,
+            "fn": 2123
+          },
+          "gate_confusion": {
+            "tp": 1377,
+            "fp": 21,
+            "tn": 329,
+            "fn": 2123
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "latent_only": {
+          "threshold": 0.5775510204081633,
+          "gate_threshold": 0.5775510204081633,
+          "analysis_threshold": 0.19999999999999996,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.5062551020408165,
+          "false_positive_rate": 0.08,
+          "precision": 0.9102564102564102,
+          "recall": 0.08114285714285714,
+          "confusion": {
+            "tp": 284,
+            "fp": 28,
+            "tn": 322,
+            "fn": 3216
+          },
+          "gate_confusion": {
+            "tp": 284,
+            "fp": 28,
+            "tn": 322,
+            "fn": 3216
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "causal_auditor": {
+          "threshold": 1.000001,
+          "gate_threshold": 1.000001,
+          "analysis_threshold": 0.4,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": false,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.5,
+          "false_positive_rate": 0.0,
+          "precision": null,
+          "recall": 0.0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 350,
+            "fn": 3500
+          },
+          "gate_confusion": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 350,
+            "fn": 3500
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "composite": {
+          "threshold": 0.48250000000000004,
+          "gate_threshold": 0.48250000000000004,
+          "analysis_threshold": 0.19000000000000017,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.8055212244897959,
+          "false_positive_rate": 0.03142857142857143,
+          "precision": 0.9678362573099415,
+          "recall": 0.09457142857142857,
+          "confusion": {
+            "tp": 331,
+            "fp": 11,
+            "tn": 339,
+            "fn": 3169
+          },
+          "gate_confusion": {
+            "tp": 331,
+            "fp": 11,
+            "tn": 339,
+            "fn": 3169
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        }
+      },
+      "claim_boundary_disclaimer": "Causal support scores reflect measured variables/subspaces and tested interventions only; they are not a complete explanation of all internal reasoning.",
+      "readout_high_causal_fail_cases_n": 1133
+    },
+    {
+      "checkpoint_id": "raw_every2_even",
+      "gate_decision_path": "phase7_results/results/trackA_gate_decision_academic_academic_20260303_230622_academic_closure_s1_raw_every2_even.json",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_academic_academic_20260303_230622_academic_closure_s1_raw_every2_even.json",
+      "gate_pass": false,
+      "auroc": 0.8102281632653061,
+      "false_positive_rate": 0.045714285714285714,
+      "recall_at_gate": 0.14742857142857144,
+      "causal_signal_coverage_fraction": 0.05127041742286751,
+      "gate_checks": {
+        "applicable": true,
+        "gate_track": "composite",
+        "auroc_ge_0_85": false,
+        "false_positive_rate_le_0_05": true,
+        "has_track_keys_and_claim_boundary_disclaimer": true,
+        "causal_signal_coverage_gate_pass": false,
+        "gate_pass": false,
+        "dual_gate_required": true,
+        "composite_gate_pass": false,
+        "causal_floor_gate_pass": false,
+        "dual_gate_pass": false
+      },
+      "leakage_check_pass": true,
+      "by_benchmark_track": {
+        "text_only": {
+          "threshold": 0.023809523809523836,
+          "gate_threshold": 0.023809523809523836,
+          "analysis_threshold": 0.0,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.6896073469387756,
+          "false_positive_rate": 0.06,
+          "precision": 0.9849785407725322,
+          "recall": 0.3934285714285714,
+          "confusion": {
+            "tp": 1377,
+            "fp": 21,
+            "tn": 329,
+            "fn": 2123
+          },
+          "gate_confusion": {
+            "tp": 1377,
+            "fp": 21,
+            "tn": 329,
+            "fn": 2123
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "latent_only": {
+          "threshold": 0.5836734693877551,
+          "gate_threshold": 0.5836734693877551,
+          "analysis_threshold": 0.19999999999999996,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.5052191836734694,
+          "false_positive_rate": 0.07428571428571429,
+          "precision": 0.9090909090909091,
+          "recall": 0.07428571428571429,
+          "confusion": {
+            "tp": 260,
+            "fp": 26,
+            "tn": 324,
+            "fn": 3240
+          },
+          "gate_confusion": {
+            "tp": 260,
+            "fp": 26,
+            "tn": 324,
+            "fn": 3240
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "causal_auditor": {
+          "threshold": 0.9,
+          "gate_threshold": 0.9,
+          "analysis_threshold": 0.4,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.5,
+          "false_positive_rate": 0.017142857142857144,
+          "precision": 0.9090909090909091,
+          "recall": 0.017142857142857144,
+          "confusion": {
+            "tp": 60,
+            "fp": 6,
+            "tn": 344,
+            "fn": 3440
+          },
+          "gate_confusion": {
+            "tp": 60,
+            "fp": 6,
+            "tn": 344,
+            "fn": 3440
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "composite": {
+          "threshold": 0.45525000000000004,
+          "gate_threshold": 0.45525000000000004,
+          "analysis_threshold": 0.19000000000000017,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.8102281632653061,
+          "false_positive_rate": 0.045714285714285714,
+          "precision": 0.9699248120300752,
+          "recall": 0.14742857142857144,
+          "confusion": {
+            "tp": 516,
+            "fp": 16,
+            "tn": 334,
+            "fn": 2984
+          },
+          "gate_confusion": {
+            "tp": 516,
+            "fp": 16,
+            "tn": 334,
+            "fn": 2984
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        }
+      },
+      "claim_boundary_disclaimer": "Causal support scores reflect measured variables/subspaces and tested interventions only; they are not a complete explanation of all internal reasoning.",
+      "readout_high_causal_fail_cases_n": 1304
+    },
+    {
+      "checkpoint_id": "raw_middle12_06_17",
+      "gate_decision_path": "phase7_results/results/trackA_gate_decision_academic_academic_20260303_230622_academic_closure_s1_raw_middle12_06_17.json",
+      "benchmark_path": "phase7_results/results/faithfulness_benchmark_academic_academic_20260303_230622_academic_closure_s1_raw_middle12_06_17.json",
+      "gate_pass": false,
+      "auroc": 0.8052791836734692,
+      "false_positive_rate": 0.03142857142857143,
+      "recall_at_gate": 0.09514285714285714,
+      "causal_signal_coverage_fraction": 0.05127041742286751,
+      "gate_checks": {
+        "applicable": true,
+        "gate_track": "composite",
+        "auroc_ge_0_85": false,
+        "false_positive_rate_le_0_05": true,
+        "has_track_keys_and_claim_boundary_disclaimer": true,
+        "causal_signal_coverage_gate_pass": false,
+        "gate_pass": false,
+        "dual_gate_required": true,
+        "composite_gate_pass": false,
+        "causal_floor_gate_pass": false,
+        "dual_gate_pass": false
+      },
+      "leakage_check_pass": true,
+      "by_benchmark_track": {
+        "text_only": {
+          "threshold": 0.023809523809523836,
+          "gate_threshold": 0.023809523809523836,
+          "analysis_threshold": 0.0,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.6896073469387756,
+          "false_positive_rate": 0.06,
+          "precision": 0.9849785407725322,
+          "recall": 0.3934285714285714,
+          "confusion": {
+            "tp": 1377,
+            "fp": 21,
+            "tn": 329,
+            "fn": 2123
+          },
+          "gate_confusion": {
+            "tp": 1377,
+            "fp": 21,
+            "tn": 329,
+            "fn": 2123
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "latent_only": {
+          "threshold": 0.5857142857142857,
+          "gate_threshold": 0.5857142857142857,
+          "analysis_threshold": 0.19999999999999996,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.5055542857142858,
+          "false_positive_rate": 0.08,
+          "precision": 0.9087947882736156,
+          "recall": 0.07971428571428571,
+          "confusion": {
+            "tp": 279,
+            "fp": 28,
+            "tn": 322,
+            "fn": 3221
+          },
+          "gate_confusion": {
+            "tp": 279,
+            "fp": 28,
+            "tn": 322,
+            "fn": 3221
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "causal_auditor": {
+          "threshold": 1.000001,
+          "gate_threshold": 1.000001,
+          "analysis_threshold": 0.4,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": false,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.5,
+          "false_positive_rate": 0.0,
+          "precision": null,
+          "recall": 0.0,
+          "confusion": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 350,
+            "fn": 3500
+          },
+          "gate_confusion": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 350,
+            "fn": 3500
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        },
+        "composite": {
+          "threshold": 0.48250000000000004,
+          "gate_threshold": 0.48250000000000004,
+          "analysis_threshold": 0.19000000000000017,
+          "threshold_source": "track_thresholds.gate_point",
+          "num_labeled_audits": 3850,
+          "class_counts": {
+            "faithful": 350,
+            "unfaithful": 3500
+          },
+          "metric_defined": {
+            "auroc": true,
+            "precision": true,
+            "recall": true,
+            "false_positive_rate": true
+          },
+          "auroc": 0.8052791836734692,
+          "false_positive_rate": 0.03142857142857143,
+          "precision": 0.9680232558139535,
+          "recall": 0.09514285714285714,
+          "confusion": {
+            "tp": 333,
+            "fp": 11,
+            "tn": 339,
+            "fn": 3167
+          },
+          "gate_confusion": {
+            "tp": 333,
+            "fp": 11,
+            "tn": 339,
+            "fn": 3167
+          },
+          "analysis_confusion": {
+            "tp": 3500,
+            "fp": 350,
+            "tn": 0,
+            "fn": 0
+          },
+          "analysis_precision": 0.9090909090909091,
+          "analysis_recall": 1.0,
+          "analysis_false_positive_rate": 1.0
+        }
+      },
+      "claim_boundary_disclaimer": "Causal support scores reflect measured variables/subspaces and tested interventions only; they are not a complete explanation of all internal reasoning.",
+      "readout_high_causal_fail_cases_n": 1219
+    }
+  ],
+  "best_checkpoint_by_auroc_under_fpr_0_05": {
+    "checkpoint_id": "raw_every2_even",
+    "gate_decision_path": "phase7_results/results/trackA_gate_decision_academic_academic_20260303_230622_academic_closure_s1_raw_every2_even.json",
+    "benchmark_path": "phase7_results/results/faithfulness_benchmark_academic_academic_20260303_230622_academic_closure_s1_raw_every2_even.json",
+    "gate_pass": false,
+    "auroc": 0.8102281632653061,
+    "false_positive_rate": 0.045714285714285714,
+    "recall_at_gate": 0.14742857142857144,
+    "causal_signal_coverage_fraction": 0.05127041742286751,
+    "gate_checks": {
+      "applicable": true,
+      "gate_track": "composite",
+      "auroc_ge_0_85": false,
+      "false_positive_rate_le_0_05": true,
+      "has_track_keys_and_claim_boundary_disclaimer": true,
+      "causal_signal_coverage_gate_pass": false,
+      "gate_pass": false,
+      "dual_gate_required": true,
+      "composite_gate_pass": false,
+      "causal_floor_gate_pass": false,
+      "dual_gate_pass": false
+    },
+    "leakage_check_pass": true,
+    "by_benchmark_track": {
+      "text_only": {
+        "threshold": 0.023809523809523836,
+        "gate_threshold": 0.023809523809523836,
+        "analysis_threshold": 0.0,
+        "threshold_source": "track_thresholds.gate_point",
+        "num_labeled_audits": 3850,
+        "class_counts": {
+          "faithful": 350,
+          "unfaithful": 3500
+        },
+        "metric_defined": {
+          "auroc": true,
+          "precision": true,
+          "recall": true,
+          "false_positive_rate": true
+        },
+        "auroc": 0.6896073469387756,
+        "false_positive_rate": 0.06,
+        "precision": 0.9849785407725322,
+        "recall": 0.3934285714285714,
+        "confusion": {
+          "tp": 1377,
+          "fp": 21,
+          "tn": 329,
+          "fn": 2123
+        },
+        "gate_confusion": {
+          "tp": 1377,
+          "fp": 21,
+          "tn": 329,
+          "fn": 2123
+        },
+        "analysis_confusion": {
+          "tp": 3500,
+          "fp": 350,
+          "tn": 0,
+          "fn": 0
+        },
+        "analysis_precision": 0.9090909090909091,
+        "analysis_recall": 1.0,
+        "analysis_false_positive_rate": 1.0
+      },
+      "latent_only": {
+        "threshold": 0.5836734693877551,
+        "gate_threshold": 0.5836734693877551,
+        "analysis_threshold": 0.19999999999999996,
+        "threshold_source": "track_thresholds.gate_point",
+        "num_labeled_audits": 3850,
+        "class_counts": {
+          "faithful": 350,
+          "unfaithful": 3500
+        },
+        "metric_defined": {
+          "auroc": true,
+          "precision": true,
+          "recall": true,
+          "false_positive_rate": true
+        },
+        "auroc": 0.5052191836734694,
+        "false_positive_rate": 0.07428571428571429,
+        "precision": 0.9090909090909091,
+        "recall": 0.07428571428571429,
+        "confusion": {
+          "tp": 260,
+          "fp": 26,
+          "tn": 324,
+          "fn": 3240
+        },
+        "gate_confusion": {
+          "tp": 260,
+          "fp": 26,
+          "tn": 324,
+          "fn": 3240
+        },
+        "analysis_confusion": {
+          "tp": 3500,
+          "fp": 350,
+          "tn": 0,
+          "fn": 0
+        },
+        "analysis_precision": 0.9090909090909091,
+        "analysis_recall": 1.0,
+        "analysis_false_positive_rate": 1.0
+      },
+      "causal_auditor": {
+        "threshold": 0.9,
+        "gate_threshold": 0.9,
+        "analysis_threshold": 0.4,
+        "threshold_source": "track_thresholds.gate_point",
+        "num_labeled_audits": 3850,
+        "class_counts": {
+          "faithful": 350,
+          "unfaithful": 3500
+        },
+        "metric_defined": {
+          "auroc": true,
+          "precision": true,
+          "recall": true,
+          "false_positive_rate": true
+        },
+        "auroc": 0.5,
+        "false_positive_rate": 0.017142857142857144,
+        "precision": 0.9090909090909091,
+        "recall": 0.017142857142857144,
+        "confusion": {
+          "tp": 60,
+          "fp": 6,
+          "tn": 344,
+          "fn": 3440
+        },
+        "gate_confusion": {
+          "tp": 60,
+          "fp": 6,
+          "tn": 344,
+          "fn": 3440
+        },
+        "analysis_confusion": {
+          "tp": 3500,
+          "fp": 350,
+          "tn": 0,
+          "fn": 0
+        },
+        "analysis_precision": 0.9090909090909091,
+        "analysis_recall": 1.0,
+        "analysis_false_positive_rate": 1.0
+      },
+      "composite": {
+        "threshold": 0.45525000000000004,
+        "gate_threshold": 0.45525000000000004,
+        "analysis_threshold": 0.19000000000000017,
+        "threshold_source": "track_thresholds.gate_point",
+        "num_labeled_audits": 3850,
+        "class_counts": {
+          "faithful": 350,
+          "unfaithful": 3500
+        },
+        "metric_defined": {
+          "auroc": true,
+          "precision": true,
+          "recall": true,
+          "false_positive_rate": true
+        },
+        "auroc": 0.8102281632653061,
+        "false_positive_rate": 0.045714285714285714,
+        "precision": 0.9699248120300752,
+        "recall": 0.14742857142857144,
+        "confusion": {
+          "tp": 516,
+          "fp": 16,
+          "tn": 334,
+          "fn": 2984
+        },
+        "gate_confusion": {
+          "tp": 516,
+          "fp": 16,
+          "tn": 334,
+          "fn": 2984
+        },
+        "analysis_confusion": {
+          "tp": 3500,
+          "fp": 350,
+          "tn": 0,
+          "fn": 0
+        },
+        "analysis_precision": 0.9090909090909091,
+        "analysis_recall": 1.0,
+        "analysis_false_positive_rate": 1.0
+      }
+    },
+    "claim_boundary_disclaimer": "Causal support scores reflect measured variables/subspaces and tested interventions only; they are not a complete explanation of all internal reasoning.",
+    "readout_high_causal_fail_cases_n": 1304
+  }
+}

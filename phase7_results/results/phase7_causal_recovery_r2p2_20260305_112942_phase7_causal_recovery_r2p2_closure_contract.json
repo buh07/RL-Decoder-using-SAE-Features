@@ -1,0 +1,13 @@
+{
+  "schema_version": "phase7_r2p2_closure_contract_v1",
+  "run_tag": "phase7_causal_recovery_r2p2_20260305_112942_phase7_causal_recovery_r2p2",
+  "dual_gate_unchanged": true,
+  "strict_external_labels_required": true,
+  "run_scope": "four_checkpoint_matrix",
+  "hardware_target": [
+    "gpu6",
+    "gpu7"
+  ],
+  "causal_degenerate_identical_threshold": 0.8,
+  "generated_at_unix": 1772728413
+}

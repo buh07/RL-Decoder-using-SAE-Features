@@ -1,0 +1,47 @@
+{
+  "schema_version": "phase7_runtime_cleanup_v1",
+  "timestamp": "2026-03-03T20:10:17-0500",
+  "user": "f004ndc",
+  "safe_scope": "current_user_only",
+  "pre": {
+    "tmux": {
+      "cmd": "tmux ls || true",
+      "rc": 0,
+      "stdout": "",
+      "stderr": "no server running on /tmp/tmux-516097/default"
+    },
+    "processes": {
+      "cmd": "ps -u $USER -o pid,etimes,cmd | rg -i 'phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness' || true",
+      "rc": 0,
+      "stdout": "2850914       0 /usr/bin/bash -c RUN_TS=$(date +%Y%m%d_%H%M%S) OUT=\"phase7_results/results/runtime_cleanup_${RUN_TS}.json\" export OUT mkdir -p phase7_results/results .venv/bin/python3 - <<'PY' import json, os, subprocess, time from pathlib import Path  ts = time.strftime('%Y-%m-%dT%H:%M:%S%z') out = os.environ['OUT']  def run(cmd):     p = subprocess.run(cmd, shell=True, text=True, capture_output=True)     return {\"cmd\": cmd, \"rc\": p.returncode, \"stdout\": p.stdout.strip(), \"stderr\": p.stderr.strip()}  pre_tmux = run(\"tmux ls || true\") pre_ps = run(\"ps -u $USER -o pid,etimes,cmd | rg -i 'phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness' || true\")  post_tmux = run(\"tmux ls || true\") post_ps = run(\"ps -u $USER -o pid,etimes,cmd | rg -i 'phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness' || true\") gpu = run(\"nvidia-smi --query-gpu=index,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits\")  payload = {     \"schema_version\": \"phase7_runtime_cleanup_v1\",     \"timestamp\": ts,     \"user\": os.environ.get(\"USER\"),     \"safe_scope\": \"current_user_only\",     \"pre\": {\"tmux\": pre_tmux, \"processes\": pre_ps},     \"actions\": {\"killed_tmux_sessions\": [], \"killed_pids\": [], \"notes\": [\"No current-user phase7 tmux sessions/processes found.\"]},     \"post\": {\"tmux\": post_tmux, \"processes\": post_ps, \"gpu_snapshot\": gpu}, } Path(out).write_text(json.dumps(payload, indent=2)) print(out) PY\n2850925       0 /bin/sh -c ps -u $USER -o pid,etimes,cmd | rg -i 'phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness' || true\n2850927       0 rg -i phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness",
+      "stderr": ""
+    }
+  },
+  "actions": {
+    "killed_tmux_sessions": [],
+    "killed_pids": [],
+    "notes": [
+      "No current-user phase7 tmux sessions/processes found."
+    ]
+  },
+  "post": {
+    "tmux": {
+      "cmd": "tmux ls || true",
+      "rc": 0,
+      "stdout": "",
+      "stderr": "no server running on /tmp/tmux-516097/default"
+    },
+    "processes": {
+      "cmd": "ps -u $USER -o pid,etimes,cmd | rg -i 'phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness' || true",
+      "rc": 0,
+      "stdout": "2850914       0 /usr/bin/bash -c RUN_TS=$(date +%Y%m%d_%H%M%S) OUT=\"phase7_results/results/runtime_cleanup_${RUN_TS}.json\" export OUT mkdir -p phase7_results/results .venv/bin/python3 - <<'PY' import json, os, subprocess, time from pathlib import Path  ts = time.strftime('%Y-%m-%dT%H:%M:%S%z') out = os.environ['OUT']  def run(cmd):     p = subprocess.run(cmd, shell=True, text=True, capture_output=True)     return {\"cmd\": cmd, \"rc\": p.returncode, \"stdout\": p.stdout.strip(), \"stderr\": p.stderr.strip()}  pre_tmux = run(\"tmux ls || true\") pre_ps = run(\"ps -u $USER -o pid,etimes,cmd | rg -i 'phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness' || true\")  post_tmux = run(\"tmux ls || true\") post_ps = run(\"ps -u $USER -o pid,etimes,cmd | rg -i 'phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness' || true\") gpu = run(\"nvidia-smi --query-gpu=index,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits\")  payload = {     \"schema_version\": \"phase7_runtime_cleanup_v1\",     \"timestamp\": ts,     \"user\": os.environ.get(\"USER\"),     \"safe_scope\": \"current_user_only\",     \"pre\": {\"tmux\": pre_tmux, \"processes\": pre_ps},     \"actions\": {\"killed_tmux_sessions\": [], \"killed_pids\": [], \"notes\": [\"No current-user phase7 tmux sessions/processes found.\"]},     \"post\": {\"tmux\": post_tmux, \"processes\": post_ps, \"gpu_snapshot\": gpu}, } Path(out).write_text(json.dumps(payload, indent=2)) print(out) PY\n2850933       0 /bin/sh -c ps -u $USER -o pid,etimes,cmd | rg -i 'phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness' || true\n2850935       0 rg -i phase7|worker.py|train_state_decoders|causal_audit|benchmark_faithfulness",
+      "stderr": ""
+    },
+    "gpu_snapshot": {
+      "cmd": "nvidia-smi --query-gpu=index,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits",
+      "rc": 0,
+      "stdout": "0, 100, 18509, 49140\n1, 98, 42188, 49140\n2, 67, 42299, 49140\n3, 97, 16200, 49140\n4, 66, 45809, 49140\n5, 96, 45079, 49140\n6, 100, 29600, 49140\n7, 98, 24045, 49140",
+      "stderr": ""
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": "phase7_external_validity_gate_v1",
+  "benchmark_scope": "real_cot",
+  "external_validity_status": "blocked_no_strict_labels",
+  "requires_real_cot_pilot": true,
+  "has_real_cot_pilot": false,
+  "externally_supported_claims": false,
+  "comparability_status": "not_comparable",
+  "comparability_gate_pass": false,
+  "reason": "Strict external labels unavailable; labeled real-CoT benchmark blocked."
+}

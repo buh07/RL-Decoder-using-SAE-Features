@@ -1,6 +1,6 @@
 # Active Tasks
 
-**Last Updated:** March 6, 2026
+**Last Updated:** March 7, 2026
 
 ## Project State
 - GPT-2 Phase 7 is closed.
@@ -51,6 +51,16 @@ Goal: determine if Qwen hidden states actually separate faithful vs unfaithful c
 ### Stage 3 (Qwen full pipeline) dependency
 - [ ] Start full Qwen Stage 3 **only if Q0 passes**.
 - [ ] If Q0 fails, stop and document "blocked_no_hidden_state_separation".
+
+## Qwen Preparation Track (In Progress)
+- [ ] Capture Qwen activation tensors for layer-wise SAE training (`phase2_results/activations`).
+- [ ] Launch Qwen SAE training split across GPUs 5/6/7 with deterministic layer partitioning.
+- [ ] Emit Qwen SAE training summary under `phase2_results/saes_qwen25_7b_12x_topk/`.
+- [ ] Rebuild Qwen training summary index after all layers complete.
+
+Note:
+- This preparation track does not change GPT-2 closure status.
+- Qwen claims remain gated by Q0/Qwen-specific evidence once assets are ready.
 
 ## Deferred / Out Of Scope For Current Pass
 - Cross-model publication claims beyond Qwen Q0.
