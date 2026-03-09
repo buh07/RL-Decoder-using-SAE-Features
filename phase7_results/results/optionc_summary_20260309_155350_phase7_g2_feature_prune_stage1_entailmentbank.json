@@ -1,0 +1,38 @@
+{
+  "schema_version": "phase7_optionc_summary_v1",
+  "status": "ok",
+  "run_id": "20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank",
+  "domain": "entailmentbank",
+  "settings": {
+    "logical_decoder_feature_mode": "truth_inference_only",
+    "sae_layer_allowlist": [
+      9,
+      10,
+      12,
+      13,
+      16,
+      17,
+      22,
+      25
+    ],
+    "sae_feature_count_after_filter": 40
+  },
+  "artifacts": {
+    "dataset_canary": "phase7_results/results/optionc_paired_dataset_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank_canary.json",
+    "dataset_full": "phase7_results/results/optionc_paired_dataset_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank_full.json",
+    "eval_canary": "phase7_results/results/optionc_eval_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank_canary.json",
+    "eval_full": "phase7_results/results/optionc_eval_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank_full.json",
+    "claim_full": "phase7_results/results/optionc_claim_boundary_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank_full.json"
+  },
+  "canary": {
+    "primary_member_auroc": 0.9914285714285714,
+    "strict_gate_pass": true
+  },
+  "full": {
+    "cv_primary_pooled_auroc": 0.9990979000295771,
+    "lexical_probe_auroc": 0.3374260355029586,
+    "wrong_minus_lexical_delta": 0.6616718645266185,
+    "strict_gate_pass": true,
+    "faithfulness_claim_enabled": true
+  }
+}

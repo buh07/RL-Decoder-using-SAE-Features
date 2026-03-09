@@ -1,0 +1,129 @@
+{
+  "schema_version": "phase7_optionc_stress_final_v1",
+  "status": "ok",
+  "inputs": {
+    "permutation_json": "phase7_results/runs/20260309_stress_featureprune_prontoqa_mixedfix/meta/permutation.json",
+    "ablation_reg_json": "phase7_results/runs/20260309_stress_featureprune_prontoqa_mixedfix/meta/ablation_reg.json",
+    "multiseed_json": "phase7_results/runs/20260309_stress_featureprune_prontoqa_mixedfix/meta/multiseed.json"
+  },
+  "feature_config": {
+    "decoder_features_enabled": true,
+    "decoder_feature_block_status": "enabled_logical",
+    "logical_decoder_feature_mode": "truth_inference_only",
+    "feature_count_total": 45,
+    "sae_feature_count": 40,
+    "decoder_feature_count": 5,
+    "sae_layer_allowlist": [
+      1,
+      4,
+      9,
+      10,
+      17,
+      22,
+      26,
+      27
+    ]
+  },
+  "permutation": {
+    "observed_primary_member_auroc": 0.9668888888888889,
+    "observed_wrong_intermediate_auroc": null,
+    "distribution": {
+      "count": 1000,
+      "mean": 0.47966525925925924,
+      "std": 0.1285257412635366,
+      "p95": 0.6872259259259259,
+      "min": 0.12896296296296297,
+      "max": 0.8792592592592593
+    },
+    "primary_distribution": {
+      "count": 1000,
+      "mean": 0.47966525925925924,
+      "std": 0.1285257412635366,
+      "p95": 0.6872259259259259,
+      "min": 0.12896296296296297,
+      "max": 0.8792592592592593
+    },
+    "empirical_p_value": 0.000999000999000999,
+    "p_value_primary_pass": true,
+    "legacy_strict_pass": false
+  },
+  "regularization": {
+    "regularization_pass": true,
+    "details": {
+      "0.0001": {
+        "primary_member_auroc": 0.9668888888888889,
+        "wrong_intermediate_auroc": null,
+        "lexical_variant_auroc": 1.0,
+        "test_auroc": 0.9678197908286403,
+        "train_auroc": 0.9607844007384266,
+        "loss_end": 0.13085977733135223
+      },
+      "0.01": {
+        "primary_member_auroc": 0.9668888888888889,
+        "wrong_intermediate_auroc": null,
+        "lexical_variant_auroc": 1.0,
+        "test_auroc": 0.9678197908286403,
+        "train_auroc": 0.9607844007384266,
+        "loss_end": 0.15247303247451782
+      },
+      "0.1": {
+        "primary_member_auroc": 0.9668888888888889,
+        "wrong_intermediate_auroc": null,
+        "lexical_variant_auroc": 1.0,
+        "test_auroc": 0.9678197908286403,
+        "train_auroc": 0.9600521868787276,
+        "loss_end": 0.26915353536605835
+      },
+      "1.0": {
+        "primary_member_auroc": 0.9002222222222223,
+        "wrong_intermediate_auroc": null,
+        "lexical_variant_auroc": 1.0,
+        "test_auroc": 0.8980960042906946,
+        "train_auroc": 0.8782883058790116,
+        "loss_end": 0.5460734367370605
+      }
+    }
+  },
+  "multiseed": {
+    "multiseed_pass": true,
+    "primary_member_summary": {
+      "count": 10,
+      "mean": 0.9608039520188193,
+      "std": 0.0064093438457710015,
+      "p95": 0.9689356950718165,
+      "min": 0.9473935155753338,
+      "max": 0.9711730306157551
+    },
+    "wrong_intermediate_summary": {
+      "count": 10,
+      "mean": 0.9608039520188193,
+      "std": 0.0064093438457710015,
+      "p95": 0.9689356950718165,
+      "min": 0.9473935155753338,
+      "max": 0.9711730306157551
+    },
+    "pooled_wrong_intermediate": {
+      "auroc": 0.9605538382712295,
+      "ci95": {
+        "lower": 0.9529180220620771,
+        "upper": 0.9676893581282239,
+        "defined": true,
+        "bootstrap_n": 1000
+      },
+      "row_count": 3056
+    },
+    "pooled_primary_member": {
+      "auroc": 0.9605538382712295,
+      "ci95": {
+        "lower": 0.9529180220620771,
+        "upper": 0.9676893581282239,
+        "defined": true,
+        "bootstrap_n": 1000
+      },
+      "row_count": 3056
+    }
+  },
+  "final_verdict_primary": "pass",
+  "final_verdict_legacy": "fail",
+  "timestamp": "2026-03-09T17:34:16.506903"
+}

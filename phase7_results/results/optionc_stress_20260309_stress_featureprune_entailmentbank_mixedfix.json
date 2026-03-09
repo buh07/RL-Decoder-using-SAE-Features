@@ -1,0 +1,129 @@
+{
+  "schema_version": "phase7_optionc_stress_final_v1",
+  "status": "ok",
+  "inputs": {
+    "permutation_json": "phase7_results/runs/20260309_stress_featureprune_entailmentbank_mixedfix/meta/permutation.json",
+    "ablation_reg_json": "phase7_results/runs/20260309_stress_featureprune_entailmentbank_mixedfix/meta/ablation_reg.json",
+    "multiseed_json": "phase7_results/runs/20260309_stress_featureprune_entailmentbank_mixedfix/meta/multiseed.json"
+  },
+  "feature_config": {
+    "decoder_features_enabled": true,
+    "decoder_feature_block_status": "enabled_logical",
+    "logical_decoder_feature_mode": "truth_inference_only",
+    "feature_count_total": 45,
+    "sae_feature_count": 40,
+    "decoder_feature_count": 5,
+    "sae_layer_allowlist": [
+      9,
+      10,
+      12,
+      13,
+      16,
+      17,
+      22,
+      25
+    ]
+  },
+  "permutation": {
+    "observed_primary_member_auroc": 0.9994165207968659,
+    "observed_wrong_intermediate_auroc": null,
+    "distribution": {
+      "count": 1000,
+      "mean": 0.49155897307660246,
+      "std": 0.2009076158881364,
+      "p95": 0.8366591647911976,
+      "min": 0.02834041843794282,
+      "max": 0.9846628323747604
+    },
+    "primary_distribution": {
+      "count": 1000,
+      "mean": 0.49155897307660246,
+      "std": 0.2009076158881364,
+      "p95": 0.8366591647911976,
+      "min": 0.02834041843794282,
+      "max": 0.9846628323747604
+    },
+    "empirical_p_value": 0.000999000999000999,
+    "p_value_primary_pass": true,
+    "legacy_strict_pass": false
+  },
+  "regularization": {
+    "regularization_pass": true,
+    "details": {
+      "0.0001": {
+        "primary_member_auroc": 0.9994165207968659,
+        "wrong_intermediate_auroc": null,
+        "lexical_variant_auroc": null,
+        "test_auroc": 0.9993449066491975,
+        "train_auroc": 0.9991472887211781,
+        "loss_end": 0.01243559643626213
+      },
+      "0.01": {
+        "primary_member_auroc": 0.9985829790781029,
+        "wrong_intermediate_auroc": null,
+        "lexical_variant_auroc": null,
+        "test_auroc": 0.9986243039633148,
+        "train_auroc": 0.9987454362794345,
+        "loss_end": 0.03870094195008278
+      },
+      "0.1": {
+        "primary_member_auroc": 0.9891639576560807,
+        "wrong_intermediate_auroc": null,
+        "lexical_variant_auroc": null,
+        "test_auroc": 0.9897805437274811,
+        "train_auroc": 0.9945308862806597,
+        "loss_end": 0.16963309049606323
+      },
+      "1.0": {
+        "primary_member_auroc": 0.9780778527965325,
+        "wrong_intermediate_auroc": null,
+        "lexical_variant_auroc": null,
+        "test_auroc": 0.9779233540779562,
+        "train_auroc": 0.9887628335497782,
+        "loss_end": 0.48260241746902466
+      }
+    }
+  },
+  "multiseed": {
+    "multiseed_pass": true,
+    "primary_member_summary": {
+      "count": 10,
+      "mean": 0.9994540971252659,
+      "std": 0.0007743997088247774,
+      "p95": 1.0,
+      "min": 0.9981900452488688,
+      "max": 1.0
+    },
+    "wrong_intermediate_summary": {
+      "count": 10,
+      "mean": 0.9994540971252659,
+      "std": 0.0007743997088247774,
+      "p95": 1.0,
+      "min": 0.9981900452488688,
+      "max": 1.0
+    },
+    "pooled_wrong_intermediate": {
+      "auroc": 0.9993734370450218,
+      "ci95": {
+        "lower": 0.998751603107942,
+        "upper": 0.9998716571943526,
+        "defined": true,
+        "bootstrap_n": 1000
+      },
+      "row_count": 3200
+    },
+    "pooled_primary_member": {
+      "auroc": 0.9993734370450218,
+      "ci95": {
+        "lower": 0.998751603107942,
+        "upper": 0.9998716571943526,
+        "defined": true,
+        "bootstrap_n": 1000
+      },
+      "row_count": 3200
+    }
+  },
+  "final_verdict_primary": "pass",
+  "final_verdict_legacy": "fail",
+  "timestamp": "2026-03-09T17:38:21.259085"
+}

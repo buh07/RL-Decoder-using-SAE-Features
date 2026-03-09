@@ -1,0 +1,37 @@
+{
+  "schema_version": "phase7_g2_cross_task_decision_v1",
+  "status": "ok",
+  "run_id": "20260309_155350_phase7_g2_feature_prune_stage1",
+  "domains_order": [
+    "prontoqa",
+    "entailmentbank"
+  ],
+  "domains": {
+    "prontoqa": {
+      "run_id": "20260309_155350_phase7_g2_feature_prune_stage1_prontoqa",
+      "summary_path": "phase7_results/results/optionc_summary_20260309_155350_phase7_g2_feature_prune_stage1_prontoqa.json",
+      "claim_path": "phase7_results/results/optionc_claim_boundary_20260309_155350_phase7_g2_feature_prune_stage1_prontoqa_full.json",
+      "cv_primary_pooled_auroc": 0.9636627522883563,
+      "lexical_probe_auroc": 0.4980060262318327,
+      "wrong_minus_lexical_delta": 0.4656567260565236,
+      "strict_gate_pass": true,
+      "faithfulness_claim_enabled": true
+    },
+    "entailmentbank": {
+      "run_id": "20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank",
+      "summary_path": "phase7_results/results/optionc_summary_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank.json",
+      "claim_path": "phase7_results/results/optionc_claim_boundary_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank_full.json",
+      "cv_primary_pooled_auroc": 0.9990979000295771,
+      "lexical_probe_auroc": 0.3374260355029586,
+      "wrong_minus_lexical_delta": 0.6616718645266185,
+      "strict_gate_pass": true,
+      "faithfulness_claim_enabled": true
+    }
+  },
+  "publishability_gate": {
+    "policy": "both_domains_must_pass",
+    "publishable_cross_domain_pass": true,
+    "final_recommendation": "publishable_cross_domain",
+    "status": "pass"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": "phase7_optionc_stress_comparison_v1",
+  "status": "ok",
+  "comparison": {
+    "prontoqa": {
+      "old_sae_only": {
+        "final_verdict_primary": "fail",
+        "perm_p": 0.01098901098901099,
+        "reg_pass": false,
+        "ms_pass": false,
+        "feat_total": null,
+        "feat_sae": null,
+        "feat_decoder": null,
+        "primary_mean": 0.6632415197164934,
+        "primary_pooled": 0.6561359819504996
+      },
+      "new_mixed": {
+        "final_verdict_primary": "pass",
+        "perm_p": 0.000999000999000999,
+        "reg_pass": true,
+        "ms_pass": true,
+        "feat_total": 45,
+        "feat_sae": 40,
+        "feat_decoder": 5,
+        "primary_mean": 0.9608039520188193,
+        "primary_pooled": 0.9605538382712295
+      },
+      "delta_pooled_auroc": 0.30441785632072993,
+      "delta_mean_auroc": 0.29756243230232593
+    },
+    "entailmentbank": {
+      "old_sae_only": null,
+      "new_mixed": {
+        "final_verdict_primary": "pass",
+        "perm_p": 0.000999000999000999,
+        "reg_pass": true,
+        "ms_pass": true,
+        "feat_total": 45,
+        "feat_sae": 40,
+        "feat_decoder": 5,
+        "primary_mean": 0.9994540971252659,
+        "primary_pooled": 0.9993734370450218
+      }
+    }
+  }
+}
