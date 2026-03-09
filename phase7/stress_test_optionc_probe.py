@@ -16,8 +16,10 @@ import torch
 
 try:  # pragma: no cover
     from phase7.common import load_json, save_json
+    from phase7.optionc_feature_builder import build_optionc_feature_rows
 except ImportError:  # pragma: no cover
     from common import load_json, save_json
+    from optionc_feature_builder import build_optionc_feature_rows
 
 TASK_CHOICES = ("permutation", "ablation_reg", "multiseed", "final")
 
@@ -215,41 +217,32 @@ def _load_rows(
     *,
     layer_allowlist: Optional[set[int]] = None,
     layer_allowlist_values: Optional[Sequence[int]] = None,
+    decoder_checkpoint: str = "",
+    decoder_domain: str = "auto",
+    logical_decoder_feature_mode: str = "full",
+    decoder_device: str = "cuda:0",
+    decoder_batch_size: int = 128,
+    require_decoder_enabled: bool = False,
 ) -> Tuple[List[Row], List[str], Dict[str, Any]]:
-    ds = load_json(paired_dataset)
-    members_meta = {str(m.get("member_id")): dict(m) for m in list(ds.get("members", [])) if isinstance(m, dict)}
-
-    feats_by_member: Dict[str, Dict[str, float]] = {}
-    feature_name_set: set[str] = set()
-    for p in partials:
-        payload = load_json(p)
-        for m in list(payload.get("members", [])):
-            if not isinstance(m, dict):
-                continue
-            mid = str(m.get("member_id", ""))
-            if not mid:
-                continue
-            f = m.get("features", {})
-            if not isinstance(f, dict):
-                continue
-            rec = feats_by_member.setdefault(mid, {})
-            for k, v in f.items():
-                if isinstance(v, (int, float)) and str(k):
-                    fn = str(k)
-                    if not _feature_allowed_by_layer(fn, layer_allowlist):
-                        continue
-                    rec[fn] = float(v)
-                    feature_name_set.add(fn)
-
-    feature_names = sorted(feature_name_set)
+    assembled = build_optionc_feature_rows(
+        paired_dataset=str(paired_dataset),
+        partials=[str(p) for p in partials],
+        decoder_checkpoint=str(decoder_checkpoint),
+        decoder_domain_requested=str(decoder_domain),
+        logical_decoder_feature_mode=str(logical_decoder_feature_mode),
+        sae_layer_allowlist_values=[int(x) for x in list(layer_allowlist_values or [])],
+        decoder_device=str(decoder_device),
+        decoder_batch_size=int(decoder_batch_size),
+        require_decoder_enabled=bool(require_decoder_enabled),
+    )
+    ds = assembled["payload"]
+    feature_names = list(assembled["feature_names"])
     rows: List[Row] = []
     dropped = 0
-    for mid, feat_map in feats_by_member.items():
-        meta = members_meta.get(mid)
-        if not meta:
-            dropped += 1
-            continue
-        if not bool(meta.get("label_defined", False)):
+    for rec in list(assembled["eval_rows"]):
+        mid = str(rec.get("member_id", ""))
+        feat_map = rec.get("features", {})
+        if not isinstance(feat_map, dict):
             dropped += 1
             continue
         vals: List[float] = []
@@ -263,10 +256,10 @@ def _load_rows(
         if not ok:
             dropped += 1
             continue
-        lexical = bool(meta.get("lexical_control", False))
-        pair_ambiguous = bool(meta.get("pair_ambiguous", False))
-        label = int(meta.get("label_binary", 0))
-        raw_variant = str(meta.get("variant_name") or meta.get("pair_type") or "").strip()
+        lexical = bool(rec.get("lexical_control", False))
+        pair_ambiguous = bool(rec.get("pair_ambiguous", False))
+        label = int(rec.get("label", 0))
+        raw_variant = str(rec.get("pair_type", "")).strip()
         if lexical:
             variant = "lexical_consistent_swap"
         elif pair_ambiguous:
@@ -280,7 +273,7 @@ def _load_rows(
         rows.append(
             Row(
                 member_id=str(mid),
-                pair_id=str(meta.get("pair_id", "")),
+                pair_id=str(rec.get("pair_id", "")),
                 trace_id=str(mid),
                 variant=str(variant),
                 label=int(label),
@@ -295,8 +288,14 @@ def _load_rows(
         "rows_after_join": int(len(rows)),
         "rows_dropped": int(dropped),
         "feature_count": int(len(feature_names)),
+        "feature_count_total": int(assembled.get("feature_count_total", len(feature_names))),
+        "sae_feature_count": int(assembled.get("sae_feature_count_after_filter", 0)),
+        "decoder_feature_count": int(assembled.get("decoder_feature_count", 0)),
+        "decoder_features_enabled": bool(assembled.get("decoder_features_enabled", False)),
+        "decoder_feature_block_status": str(assembled.get("decoder_feature_block_status", "unknown")),
+        "logical_decoder_feature_mode": str(assembled.get("logical_decoder_feature_mode", logical_decoder_feature_mode)),
         "sae_layer_allowlist": [int(x) for x in (layer_allowlist_values or [])],
-        "member_count_dataset": int(len(members_meta)),
+        "member_count_dataset": int(len(list(ds.get("members", [])))),
         "partial_count": int(len(partials)),
     }
     return rows, feature_names, meta
@@ -584,6 +583,12 @@ def run_permutation(args: argparse.Namespace) -> Dict[str, Any]:
         args.partials,
         layer_allowlist=layer_allow,
         layer_allowlist_values=layer_vals,
+        decoder_checkpoint=str(args.decoder_checkpoint),
+        decoder_domain=str(args.decoder_domain),
+        logical_decoder_feature_mode=str(args.logical_decoder_feature_mode),
+        decoder_device=str(args.decoder_device),
+        decoder_batch_size=int(args.decoder_batch_size),
+        require_decoder_enabled=bool(int(args.require_decoder_enabled)),
     )
     split = _make_split(rows_master, args)
     rows_train = split["train_rows"]
@@ -659,6 +664,13 @@ def run_permutation(args: argparse.Namespace) -> Dict[str, Any]:
         "schema_version": "phase7_optionc_stress_permutation_v1",
         "status": "ok",
         "meta": meta,
+        "decoder_features_enabled": bool(meta.get("decoder_features_enabled", False)),
+        "decoder_feature_block_status": str(meta.get("decoder_feature_block_status", "unknown")),
+        "logical_decoder_feature_mode": str(meta.get("logical_decoder_feature_mode", "")),
+        "feature_count_total": int(meta.get("feature_count_total", meta.get("feature_count", 0))),
+        "sae_feature_count": int(meta.get("sae_feature_count", 0)),
+        "decoder_feature_count": int(meta.get("decoder_feature_count", 0)),
+        "sae_layer_allowlist": list(meta.get("sae_layer_allowlist", [])),
         "split_diagnostics": split["split_diagnostics"],
         "train_exclusion_diagnostics": split["train_exclusion_diagnostics"],
         "observed_primary_member_auroc": observed,
@@ -692,6 +704,12 @@ def run_ablation_reg(args: argparse.Namespace) -> Dict[str, Any]:
         args.partials,
         layer_allowlist=layer_allow,
         layer_allowlist_values=layer_vals,
+        decoder_checkpoint=str(args.decoder_checkpoint),
+        decoder_domain=str(args.decoder_domain),
+        logical_decoder_feature_mode=str(args.logical_decoder_feature_mode),
+        decoder_device=str(args.decoder_device),
+        decoder_batch_size=int(args.decoder_batch_size),
+        require_decoder_enabled=bool(int(args.require_decoder_enabled)),
     )
     split = _make_split(rows_master, args)
     rows_train = split["train_rows"]
@@ -783,6 +801,13 @@ def run_ablation_reg(args: argparse.Namespace) -> Dict[str, Any]:
         "schema_version": "phase7_optionc_stress_ablation_reg_v1",
         "status": "ok",
         "meta": meta,
+        "decoder_features_enabled": bool(meta.get("decoder_features_enabled", False)),
+        "decoder_feature_block_status": str(meta.get("decoder_feature_block_status", "unknown")),
+        "logical_decoder_feature_mode": str(meta.get("logical_decoder_feature_mode", "")),
+        "feature_count_total": int(meta.get("feature_count_total", meta.get("feature_count", 0))),
+        "sae_feature_count": int(meta.get("sae_feature_count", 0)),
+        "decoder_feature_count": int(meta.get("decoder_feature_count", 0)),
+        "sae_layer_allowlist": list(meta.get("sae_layer_allowlist", [])),
         "split_diagnostics": split["split_diagnostics"],
         "train_exclusion_diagnostics": split["train_exclusion_diagnostics"],
         "single_best_layer": int(best_layer),
@@ -808,6 +833,12 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
         args.partials,
         layer_allowlist=layer_allow,
         layer_allowlist_values=layer_vals,
+        decoder_checkpoint=str(args.decoder_checkpoint),
+        decoder_domain=str(args.decoder_domain),
+        logical_decoder_feature_mode=str(args.logical_decoder_feature_mode),
+        decoder_device=str(args.decoder_device),
+        decoder_batch_size=int(args.decoder_batch_size),
+        require_decoder_enabled=bool(int(args.require_decoder_enabled)),
     )
     seeds = _parse_int_csv(args.multi_seed_values)
     if not seeds:
@@ -895,6 +926,13 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
         "schema_version": "phase7_optionc_stress_multiseed_v1",
         "status": "ok",
         "meta": meta,
+        "decoder_features_enabled": bool(meta.get("decoder_features_enabled", False)),
+        "decoder_feature_block_status": str(meta.get("decoder_feature_block_status", "unknown")),
+        "logical_decoder_feature_mode": str(meta.get("logical_decoder_feature_mode", "")),
+        "feature_count_total": int(meta.get("feature_count_total", meta.get("feature_count", 0))),
+        "sae_feature_count": int(meta.get("sae_feature_count", 0)),
+        "decoder_feature_count": int(meta.get("decoder_feature_count", 0)),
+        "sae_layer_allowlist": list(meta.get("sae_layer_allowlist", [])),
         "seeds": [int(x) for x in seeds],
         "per_seed": per_seed,
         "primary_member_summary": _summ(primary_aucs),
@@ -952,6 +990,15 @@ def run_final(args: argparse.Namespace) -> Dict[str, Any]:
             "ablation_reg_json": str(args.ablation_reg_json),
             "multiseed_json": str(args.multiseed_json),
         },
+        "feature_config": {
+            "decoder_features_enabled": bool(perm.get("decoder_features_enabled", False)),
+            "decoder_feature_block_status": str(perm.get("decoder_feature_block_status", "unknown")),
+            "logical_decoder_feature_mode": str(perm.get("logical_decoder_feature_mode", "")),
+            "feature_count_total": perm.get("feature_count_total"),
+            "sae_feature_count": perm.get("sae_feature_count"),
+            "decoder_feature_count": perm.get("decoder_feature_count"),
+            "sae_layer_allowlist": perm.get("sae_layer_allowlist"),
+        },
         "permutation": {
             "observed_primary_member_auroc": perm.get("observed_primary_member_auroc"),
             "observed_wrong_intermediate_auroc": perm.get("observed_wrong_intermediate_auroc"),
@@ -1000,6 +1047,17 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--paired-dataset", default="")
     p.add_argument("--partials", nargs="*", default=[])
     p.add_argument("--sae-layer-allowlist", default="", help="Optional CSV SAE layer allowlist.")
+    p.add_argument("--decoder-checkpoint", default="", help="Optional decoder checkpoint to inject decoder transition features.")
+    p.add_argument("--decoder-domain", choices=["auto", "arithmetic", "prontoqa", "entailmentbank"], default="auto")
+    p.add_argument("--logical-decoder-feature-mode", choices=["full", "truth_inference_only"], default="full")
+    p.add_argument("--decoder-device", default="cuda:0")
+    p.add_argument("--decoder-batch-size", type=int, default=128)
+    p.add_argument(
+        "--require-decoder-enabled",
+        type=int,
+        default=0,
+        help="If 1 and decoder checkpoint is set, fail if decoder feature block is not enabled.",
+    )
 
     p.add_argument("--train-exclude-variants", default="order_flip_only,answer_first_order_flip,reordered_steps")
     p.add_argument("--trace-test-fraction", type=float, default=0.20)

@@ -355,7 +355,7 @@ run_train_decoder() {
   fi
   {
     echo "[$(date -Is)] train-decoder start scope=${SCOPE} domain=${DECODER_DOMAIN}"
-    wait_for_gpus_free "${GPU_IDS_CSV}" "${GPU_WAIT_UTIL_MAX}" "${GPU_WAIT_MEM_MAX_MB}" 3 20 "${GPU_WAIT_TIMEOUT_S}"
+    wait_for_gpus_free "${DECODER_TRAIN_GPU}" "${GPU_WAIT_UTIL_MAX}" "${GPU_WAIT_MEM_MAX_MB}" 3 20 "${GPU_WAIT_TIMEOUT_S}"
     CUDA_VISIBLE_DEVICES="${DECODER_TRAIN_GPU}" "$PY" phase7/train_optionc_domain_decoder.py \
       --paired-dataset "$SCOPE_DATASET_JSON" \
       --decoder-domain "$DECODER_DOMAIN" \
@@ -810,7 +810,7 @@ PY
     FIT_LR="${FIT_LR:-0.03}"
     FIT_WEIGHT_DECAY="${FIT_WEIGHT_DECAY:-0.0001}"
     FIT_DEVICE="${FIT_DEVICE:-cpu}"
-    CPU_WORKERS="${CPU_WORKERS:-8}"
+    CPU_WORKERS="${CPU_WORKERS:-24}"
     LOGICAL_DECODER_FEATURE_MODE="${LOGICAL_DECODER_FEATURE_MODE:-full}"
     SAE_LAYER_SELECT_MODE="${SAE_LAYER_SELECT_MODE:-none}"
     SAE_LAYER_TOPK="${SAE_LAYER_TOPK:-8}"

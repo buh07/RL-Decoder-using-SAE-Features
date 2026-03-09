@@ -14,10 +14,12 @@ import torch
 
 try:  # pragma: no cover
     from .common import load_json, load_pt, save_json
+    from .optionc_feature_builder import build_optionc_feature_rows
     from .optionc_domain_decoder import decode_optionc_domain_states, load_optionc_domain_decoder_checkpoint
     from .state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
 except ImportError:  # pragma: no cover
     from common import load_json, load_pt, save_json
+    from optionc_feature_builder import build_optionc_feature_rows
     from optionc_domain_decoder import decode_optionc_domain_states, load_optionc_domain_decoder_checkpoint
     from state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
 
@@ -546,167 +548,34 @@ def main() -> None:
     cpu_workers = int(args.cpu_workers)
     if cpu_workers <= 0:
         cpu_workers = max(1, min(16, (os.cpu_count() or 4)))
-    payload = load_json(args.paired_dataset)
-    dataset_domain = _infer_dataset_domain(payload)
-    expected_decoder_domain = dataset_domain if str(args.decoder_domain) == "auto" else str(args.decoder_domain).strip().lower()
-    rows_path = payload.get("rows_path")
-    if not rows_path:
-        raise RuntimeError("paired dataset missing rows_path")
-    rp = Path(str(rows_path))
-    if not rp.is_absolute():
-        candidate = (Path(args.paired_dataset).parent / rp).resolve()
-        rp = candidate if candidate.exists() else rp.resolve()
-    rows = list(load_pt(rp))
-    rows_sorted = sorted(
-        [r for r in rows if isinstance(r, dict)],
-        key=lambda r: (str(r.get("member_id", "")), int(r.get("step_idx", -1)), int(r.get("line_index", -1))),
-    )
-
-    members = list(payload.get("members", []))
-    members_by_id: Dict[str, Dict[str, Any]] = {str(m.get("member_id")): dict(m) for m in members}
-    pairs = list(payload.get("pairs", []))
-    logical_decoder_feature_mode = str(args.logical_decoder_feature_mode).strip().lower()
     layer_allowlist_values = _parse_int_csv(str(args.sae_layer_allowlist)) if str(args.sae_layer_allowlist).strip() else []
-    layer_allowlist_set = set(int(x) for x in layer_allowlist_values) if layer_allowlist_values else None
-
-    # Merge per-layer partial features.
-    merged_features: Dict[str, Dict[str, float]] = defaultdict(dict)
-    partial_paths = [str(p) for p in args.partials]
-    for pp in partial_paths:
-        pj = load_json(pp)
-        if str(pj.get("status")) != "ok":
-            raise RuntimeError(f"partial not ok: {pp}")
-        for m in list(pj.get("members", [])):
-            mid = str(m.get("member_id", ""))
-            if not mid:
-                continue
-            for k, v in dict(m.get("features", {})).items():
-                if isinstance(v, (int, float)):
-                    fk = str(k)
-                    if _feature_allowed_by_layer(fk, layer_allowlist_set):
-                        merged_features[mid][fk] = float(v)
-    sae_feature_names = sorted({k for d in merged_features.values() for k in d.keys() if str(k).startswith("layer")})
-
-    # Decoder-based transition consistency block.
-    decoder_added = False
-    decoder_domain: Optional[str] = None
-    decoder_domain_match = False
-    decoder_feature_block_status = "disabled_no_checkpoint"
-    decoder_quality: Optional[Dict[str, Any]] = None
-    if str(args.decoder_checkpoint).strip():
-        ckpt_path = str(args.decoder_checkpoint)
-        try:
-            raw_ckpt = torch.load(ckpt_path, map_location="cpu")
-        except Exception:
-            raw_ckpt = {}
-        schema = str((raw_ckpt or {}).get("schema_version", ""))
-        if schema == "phase7_optionc_domain_decoder_v1":
-            ckpt, cfg, model = load_optionc_domain_decoder_checkpoint(ckpt_path, device=str(args.decoder_device))
-            decoder_domain = str(cfg.decoder_domain).strip().lower()
-            decoder_quality = dict(ckpt.get("best_val") or {})
-            decoder_domain_match = bool(decoder_domain == expected_decoder_domain)
-            if not decoder_domain_match:
-                decoder_feature_block_status = "blocked_domain_mismatch"
-            else:
-                preds = decode_optionc_domain_states(
-                    model,
-                    cfg,
-                    rows_sorted,
-                    device=str(args.decoder_device),
-                    batch_size=int(args.decoder_batch_size),
-                )
-                member_pred: Dict[str, List[Optional[Dict[str, Any]]]] = defaultdict(list)
-                for row, pred in zip(rows_sorted, preds):
-                    mid = str(row.get("member_id", ""))
-                    s = (pred or {}).get("latent_pred_state", {}) if isinstance(pred, dict) else {}
-                    c = (pred or {}).get("latent_pred_confidence", {}) if isinstance(pred, dict) else {}
-                    member_pred[mid].append(
-                        {
-                            "inference_type_id": int(s.get("inference_type_id", 0) or 0),
-                            "chain_depth_id": int(s.get("chain_depth_id", 0) or 0),
-                            "truth_value_id": int(s.get("truth_value_id", 0) or 0),
-                            "conclusion_class_id": int(s.get("conclusion_class_id", 0) or 0),
-                            "premise_class_id": int(s.get("premise_class_id", 0) or 0),
-                            "target_entity_id": int(s.get("target_entity_id", 0) or 0),
-                            "inference_top1_prob": _safe_float(c.get("inference_top1_prob")),
-                            "conclusion_top1_prob": _safe_float(c.get("conclusion_top1_prob")),
-                            "premise_top1_prob": _safe_float(c.get("premise_top1_prob")),
-                            "truth_top1_prob": _safe_float(c.get("truth_top1_prob")),
-                        }
-                    )
-                for mid, seq in member_pred.items():
-                    mm = members_by_id.get(mid, {})
-                    merged_features[mid].update(
-                        _decoder_transition_features_logical(
-                            seq,
-                            expected_truth=bool(mm.get("is_correct", False)),
-                            feature_mode=logical_decoder_feature_mode,
-                        )
-                    )
-                decoder_added = True
-                decoder_feature_block_status = "enabled_logical"
-        else:
-            decoder_domain = "arithmetic"
-            decoder_quality = None
-            decoder_domain_match = bool(decoder_domain == expected_decoder_domain)
-            if not decoder_domain_match:
-                decoder_feature_block_status = "blocked_domain_mismatch"
-            else:
-                _, cfg, numeric_stats, model = load_model_from_checkpoint(ckpt_path, device=str(args.decoder_device))
-                preds = decode_latent_pred_states(
-                    model,
-                    rows_sorted,
-                    cfg,
-                    numeric_stats,
-                    device=str(args.decoder_device),
-                    batch_size=int(args.decoder_batch_size),
-                    cache_inputs="auto",
-                    cache_max_gb=8.0,
-                    non_blocking_transfer=True,
-                )
-                member_pred: Dict[str, List[Optional[Dict[str, Any]]]] = defaultdict(list)
-                for row, pred in zip(rows_sorted, preds):
-                    mid = str(row.get("member_id", ""))
-                    s = (pred or {}).get("latent_pred_state", {}) if isinstance(pred, dict) else {}
-                    member_pred[mid].append(
-                        {
-                            "subresult_value": _safe_float(s.get("subresult_value")),
-                            "lhs_value": _safe_float(s.get("lhs_value")),
-                            "rhs_value": _safe_float(s.get("rhs_value")),
-                        }
-                    )
-                for mid, seq in member_pred.items():
-                    merged_features[mid].update(_decoder_transition_features(seq))
-                decoder_added = True
-                decoder_feature_block_status = "enabled_arithmetic"
-
-    # Build member rows for scoring.
-    eval_rows: List[Dict[str, Any]] = []
-    dropped_ambiguous = 0
-    feature_names = sorted({k for d in merged_features.values() for k in d.keys()})
-    for mid, mm in sorted(members_by_id.items()):
-        if not bool(mm.get("label_defined", False)):
-            continue
-        if bool(mm.get("pair_ambiguous", False)):
-            dropped_ambiguous += 1
-            continue
-        if mid not in merged_features:
-            continue
-        feats = {fn: float(merged_features[mid].get(fn, 0.0)) for fn in feature_names}
-        eval_rows.append(
-            {
-                "member_id": str(mid),
-                "pair_id": str(mm.get("pair_id", "")),
-                "pair_type": str(mm.get("pair_type", "")),
-                "label": int(mm.get("label_binary", 1)),
-                "gold_label": str(mm.get("gold_label", "unknown")),
-                "lexical_control": bool(mm.get("lexical_control", False)),
-                "pair_ambiguous": bool(mm.get("pair_ambiguous", False)),
-                "features": feats,
-            }
-        )
-    if len(eval_rows) < 20:
-        raise RuntimeError(f"Insufficient evaluation rows: {len(eval_rows)}")
+    assembled = build_optionc_feature_rows(
+        paired_dataset=str(args.paired_dataset),
+        partials=[str(p) for p in args.partials],
+        decoder_checkpoint=str(args.decoder_checkpoint),
+        decoder_domain_requested=str(args.decoder_domain),
+        logical_decoder_feature_mode=str(args.logical_decoder_feature_mode),
+        sae_layer_allowlist_values=layer_allowlist_values,
+        decoder_device=str(args.decoder_device),
+        decoder_batch_size=int(args.decoder_batch_size),
+        require_decoder_enabled=False,
+    )
+    payload = assembled["payload"]
+    dataset_domain = str(assembled["dataset_domain"])
+    expected_decoder_domain = str(assembled["expected_decoder_domain"])
+    pairs = list(assembled["pairs"])
+    eval_rows = list(assembled["eval_rows"])
+    partial_paths = list(assembled["partial_paths"])
+    logical_decoder_feature_mode = str(assembled["logical_decoder_feature_mode"])
+    layer_allowlist_values = [int(x) for x in list(assembled["sae_layer_allowlist_values"])]
+    sae_feature_names = list(assembled["sae_feature_names"])
+    feature_names = list(assembled["feature_names"])
+    decoder_domain = assembled.get("decoder_domain")
+    decoder_domain_match = bool(assembled.get("decoder_domain_match"))
+    decoder_feature_block_status = str(assembled.get("decoder_feature_block_status"))
+    decoder_quality = assembled.get("decoder_quality")
+    decoder_added = bool(assembled.get("decoder_features_enabled"))
+    dropped_ambiguous = int(assembled.get("dropped_pair_ambiguous", 0))
 
     # Single split eval.
     train_rows_raw, test_rows, split_diag = _build_pair_split(

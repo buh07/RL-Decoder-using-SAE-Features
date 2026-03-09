@@ -69,6 +69,12 @@ run_worker_permutation() {
       --paired-dataset "$PAIRED_DATASET" \
       --partials "${PARTIALS[@]}" \
       --sae-layer-allowlist "$SAE_LAYER_ALLOWLIST" \
+      --decoder-checkpoint "$DECODER_CHECKPOINT" \
+      --decoder-domain "$DECODER_DOMAIN" \
+      --logical-decoder-feature-mode "$LOGICAL_DECODER_FEATURE_MODE" \
+      --decoder-device "$DECODER_DEVICE" \
+      --decoder-batch-size "$DECODER_BATCH_SIZE" \
+      --require-decoder-enabled "$REQUIRE_DECODER_ENABLED" \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
       --train-exclude-variants "$TRAIN_EXCLUDE_VARIANTS" \
@@ -99,6 +105,12 @@ run_worker_ablation_reg() {
       --paired-dataset "$PAIRED_DATASET" \
       --partials "${PARTIALS[@]}" \
       --sae-layer-allowlist "$SAE_LAYER_ALLOWLIST" \
+      --decoder-checkpoint "$DECODER_CHECKPOINT" \
+      --decoder-domain "$DECODER_DOMAIN" \
+      --logical-decoder-feature-mode "$LOGICAL_DECODER_FEATURE_MODE" \
+      --decoder-device "$DECODER_DEVICE" \
+      --decoder-batch-size "$DECODER_BATCH_SIZE" \
+      --require-decoder-enabled "$REQUIRE_DECODER_ENABLED" \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
       --train-exclude-variants "$TRAIN_EXCLUDE_VARIANTS" \
@@ -128,6 +140,12 @@ run_worker_multiseed() {
       --paired-dataset "$PAIRED_DATASET" \
       --partials "${PARTIALS[@]}" \
       --sae-layer-allowlist "$SAE_LAYER_ALLOWLIST" \
+      --decoder-checkpoint "$DECODER_CHECKPOINT" \
+      --decoder-domain "$DECODER_DOMAIN" \
+      --logical-decoder-feature-mode "$LOGICAL_DECODER_FEATURE_MODE" \
+      --decoder-device "$DECODER_DEVICE" \
+      --decoder-batch-size "$DECODER_BATCH_SIZE" \
+      --require-decoder-enabled "$REQUIRE_DECODER_ENABLED" \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
       --train-exclude-variants "$TRAIN_EXCLUDE_VARIANTS" \
@@ -162,6 +180,47 @@ run_coordinator() {
     json_parseable "$PERMUTATION_JSON" || { echo "bad json: $PERMUTATION_JSON" >&2; exit 1; }
     json_parseable "$ABLATION_REG_JSON" || { echo "bad json: $ABLATION_REG_JSON" >&2; exit 1; }
     json_parseable "$MULTISEED_JSON" || { echo "bad json: $MULTISEED_JSON" >&2; exit 1; }
+
+    "$PY" - <<PY
+import json,sys
+files = [${PERMUTATION_JSON@Q}, ${ABLATION_REG_JSON@Q}, ${MULTISEED_JSON@Q}]
+require_decoder = int(${REQUIRE_DECODER_ENABLED@Q})
+expected_total = ${EXPECTED_FEATURE_COUNT_TOTAL@Q}.strip()
+expected_sae = ${EXPECTED_SAE_FEATURE_COUNT@Q}.strip()
+expected_decoder = ${EXPECTED_DECODER_FEATURE_COUNT@Q}.strip()
+errors = []
+for fp in files:
+    data = json.load(open(fp))
+    total = data.get("feature_count_total")
+    sae = data.get("sae_feature_count")
+    dec = data.get("decoder_feature_count")
+    dec_enabled = bool(data.get("decoder_features_enabled", False))
+    dec_status = str(data.get("decoder_feature_block_status", ""))
+    if require_decoder and (not dec_enabled or not dec_status.startswith("enabled_")):
+        errors.append(f"{fp}: decoder block not enabled (enabled={dec_enabled}, status={dec_status})")
+    if expected_total:
+        try:
+            if int(total) != int(expected_total):
+                errors.append(f"{fp}: feature_count_total={total} expected={expected_total}")
+        except Exception:
+            errors.append(f"{fp}: invalid feature_count_total={total}")
+    if expected_sae:
+        try:
+            if int(sae) != int(expected_sae):
+                errors.append(f"{fp}: sae_feature_count={sae} expected={expected_sae}")
+        except Exception:
+            errors.append(f"{fp}: invalid sae_feature_count={sae}")
+    if expected_decoder:
+        try:
+            if int(dec) != int(expected_decoder):
+                errors.append(f"{fp}: decoder_feature_count={dec} expected={expected_decoder}")
+        except Exception:
+            errors.append(f"{fp}: invalid decoder_feature_count={dec}")
+if errors:
+    for e in errors:
+        print(e, file=sys.stderr)
+    sys.exit(1)
+PY
 
     "$PY" phase7/stress_test_optionc_probe.py \
       --task final \
@@ -198,8 +257,17 @@ case "$MODE" in
     LR="${LR:-0.03}"
     WEIGHT_DECAY_BASE="${WEIGHT_DECAY_BASE:-0.0001}"
     DEVICE="${DEVICE:-cpu}"
-    CPU_WORKERS="${CPU_WORKERS:-8}"
+    CPU_WORKERS="${CPU_WORKERS:-24}"
     SAE_LAYER_ALLOWLIST="${SAE_LAYER_ALLOWLIST:-}"
+    DECODER_CHECKPOINT="${DECODER_CHECKPOINT:-}"
+    DECODER_DOMAIN="${DECODER_DOMAIN:-auto}"
+    LOGICAL_DECODER_FEATURE_MODE="${LOGICAL_DECODER_FEATURE_MODE:-full}"
+    DECODER_DEVICE="${DECODER_DEVICE:-cuda:0}"
+    DECODER_BATCH_SIZE="${DECODER_BATCH_SIZE:-128}"
+    REQUIRE_DECODER_ENABLED="${REQUIRE_DECODER_ENABLED:-0}"
+    EXPECTED_FEATURE_COUNT_TOTAL="${EXPECTED_FEATURE_COUNT_TOTAL:-}"
+    EXPECTED_SAE_FEATURE_COUNT="${EXPECTED_SAE_FEATURE_COUNT:-}"
+    EXPECTED_DECODER_FEATURE_COUNT="${EXPECTED_DECODER_FEATURE_COUNT:-}"
 
     PERMUTATION_RUNS="${PERMUTATION_RUNS:-1000}"
     PERMUTATION_SEED="${PERMUTATION_SEED:-20260308}"
@@ -246,6 +314,15 @@ WEIGHT_DECAY_BASE=${WEIGHT_DECAY_BASE@Q}
 DEVICE=${DEVICE@Q}
 CPU_WORKERS=${CPU_WORKERS@Q}
 SAE_LAYER_ALLOWLIST=${SAE_LAYER_ALLOWLIST@Q}
+DECODER_CHECKPOINT=${DECODER_CHECKPOINT@Q}
+DECODER_DOMAIN=${DECODER_DOMAIN@Q}
+LOGICAL_DECODER_FEATURE_MODE=${LOGICAL_DECODER_FEATURE_MODE@Q}
+DECODER_DEVICE=${DECODER_DEVICE@Q}
+DECODER_BATCH_SIZE=${DECODER_BATCH_SIZE@Q}
+REQUIRE_DECODER_ENABLED=${REQUIRE_DECODER_ENABLED@Q}
+EXPECTED_FEATURE_COUNT_TOTAL=${EXPECTED_FEATURE_COUNT_TOTAL@Q}
+EXPECTED_SAE_FEATURE_COUNT=${EXPECTED_SAE_FEATURE_COUNT@Q}
+EXPECTED_DECODER_FEATURE_COUNT=${EXPECTED_DECODER_FEATURE_COUNT@Q}
 PERMUTATION_RUNS=${PERMUTATION_RUNS@Q}
 PERMUTATION_SEED=${PERMUTATION_SEED@Q}
 WEIGHT_DECAY_VALUES=${WEIGHT_DECAY_VALUES@Q}
