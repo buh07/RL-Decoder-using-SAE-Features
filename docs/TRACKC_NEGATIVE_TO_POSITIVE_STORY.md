@@ -58,16 +58,16 @@ This phase has two lineages and both are important:
 - PrOntoQA failed narrowly; EntailmentBank passed.
 - This run isolated the decoder-mismatch problem.
 
-2. Canonical domain-decoder lineage (post-fix):
-- `20260309_141106_phase7_g2_domain_decoder_fix`
-- Both domains pass strict full-eval gates.
+2. Canonical stress-validated lineage:
+- `20260309_155350_phase7_g2_feature_prune_stage1`
+- Both domains pass strict full-eval gates and full stress gates.
 
 Strict full-eval results (canonical lineage):
 
 | Domain | CV AUROC | Lexical AUROC | Delta | Strict Eval Gate |
 |---|---|---|---|---|
-| PrOntoQA | 0.964 | 0.467 | 0.497 | **PASS** |
-| EntailmentBank | 0.999 | 0.430 | 0.569 | **PASS** |
+| PrOntoQA | 0.964 | 0.498 | 0.466 | **PASS** |
+| EntailmentBank | 0.999 | 0.337 | 0.662 | **PASS** |
 
 Cross-domain eval decision: pass.
 
@@ -80,24 +80,24 @@ Full stress was run on both canonical full-domain artifacts:
 
 Results:
 
-| Domain | Primary Stress Verdict | p-value | Regularization | Multiseed |
+| Domain | Primary Stress Verdict | p-value | Regularization | Multiseed | Stress pooled AUROC |
 |---|---|---:|---|---|
-| PrOntoQA | **FAIL** | 0.000999 | fail | pass |
-| EntailmentBank | **PASS** | 0.000999 | pass | pass |
+| PrOntoQA | **PASS** | 0.000999 | pass | pass | 0.9606 |
+| EntailmentBank | **PASS** | 0.000999 | pass | pass | 0.9994 |
 
 Interpretation:
 - The domain-decoder fix resolved the original PrOntoQA eval failure.
-- The remaining blocker is robustness under strong regularization, not lexical confound or leakage.
+- The stress/eval parity fix (mixed 40 SAE + 5 decoder) resolved the remaining stress mismatch.
+- Cross-domain stress validation is now complete under unchanged gates.
 
 ## 7) Current Claim Boundary
 
 Supported:
 - Arithmetic Option C faithfulness claim (stress-validated).
+- PrOntoQA Option C faithfulness claim (eval + stress pass).
 - EntailmentBank Option C faithfulness claim (eval + stress pass).
-- Decoder mismatch diagnosis and remediation are now validated by the eval recovery on PrOntoQA.
-
-Not yet supported:
-- `publishable_cross_domain` claim under the full stress policy (PrOntoQA stress final verdict is fail).
+- `publishable_cross_domain` claim for tested Option C protocol.
+- Decoder mismatch diagnosis and remediation validated by ablation and stress/eval parity recovery.
 
 ## 8) Research Narrative
 
@@ -107,4 +107,5 @@ The paper arc is now:
 - contradictory-pair labeling + internal consistency fixed the confound pathway,
 - domain-decoder mismatch was identified as an ablation failure mode,
 - domain-decoder fix restored PrOntoQA full-eval performance,
-- final cross-domain stress gate remains a rigorous blocker until PrOntoQA regularization stability is improved.
+- stress/eval feature parity fix restored PrOntoQA stress stability,
+- final cross-domain stress gate is now passed under unchanged protocol rigor.

@@ -248,8 +248,11 @@
       <a href="#phase7-sae-design">P7 SAE Design</a>
       <a href="#phase7-sae-results">P7 SAE Results</a>
       <a href="#phase7-relevance">P7 Relevance</a>
+      <a href="#phase7-qwen-optionc">P7 Qwen Option C</a>
+      <a href="#phase7-g2-stress">P7 G2 Stress</a>
+      <a href="#phase7-live-status">Latest Status</a>
       <a href="#contrib">Contributions</a>
-      <a href="#qwen">Qwen Inquiry</a>
+      <a href="#qwen">Next Steps</a>
     </nav>
 
     <section class="slide hero" id="intro">
@@ -263,8 +266,8 @@
       </p>
       <div class="meta">
         <div><strong>Plain definitions:</strong> <code>CoT</code> = Chain-of-Thought text. <code>SAE</code> = sparse autoencoder used to turn hidden states into interpretable sparse features. <code>AUROC</code> = ranking quality score (0.5 random, 1.0 perfect).</div>
-        <div><strong>Snapshot:</strong> as of March 7, 2026.</div>
-        <div><strong>Project state:</strong> GPT-2 Phase 7 is closed. Track C is a negative result under this protocol. Qwen is now a separate next-model test.</div>
+        <div><strong>Snapshot:</strong> as of March 9, 2026 (America/New_York).</div>
+        <div><strong>Project state:</strong> GPT-2 Phase 7 is closed negative for Track C. Qwen Option C is positive on arithmetic and now stress-validated cross-domain (PrOntoQA + EntailmentBank both pass) in canonical lineage <code>20260309_155350_phase7_g2_feature_prune_stage1</code>.</div>
         <div><strong>Final GPT-2 Phase 7 config:</strong> <code>text=0.50</code>, <code>latent=0.50</code>, <code>confidence=0.0</code>, <code>causal=0.0</code>, with structural penalties enabled.</div>
       </div>
     </section>
@@ -301,9 +304,9 @@
             <td>No in GPT-2 under this protocol. Track C closed negative. Final GPT-2 system is a two-track detector.</td>
           </tr>
           <tr>
-            <td>Next</td>
-            <td>Is this only a GPT-2 issue?</td>
-            <td>Still open. Qwen is treated as a new, gated hypothesis test rather than a continuation of GPT-2 closure.</td>
+            <td>Next-model (Qwen)</td>
+            <td>Does Option C generalize beyond GPT-2?</td>
+            <td>Yes for tested domains and protocol. Arithmetic, PrOntoQA, and EntailmentBank all pass eval and stress in the canonical stress-validated lineage.</td>
           </tr>
         </tbody>
       </table>
@@ -354,9 +357,14 @@
             <td>Run Phase 7 Track A/B/C with leakage guards and fixed gates.</td>
           </tr>
           <tr>
-            <td>P7 and follow-up stress tests failed to make Track C robust.</td>
-            <td>In GPT-2, arithmetic internals did not cleanly track CoT faithfulness labels.</td>
-            <td>Close GPT-2 with two tracks. Start Qwen as a new gated inquiry.</td>
+            <td>P7 and follow-up stress tests failed to make Track C robust in GPT-2.</td>
+            <td>Model-internal arithmetic and CoT-faithfulness are separable in GPT-2.</td>
+            <td>Close GPT-2 with two tracks. Move to Qwen Option C with model-generated CoT and lexical controls.</td>
+          </tr>
+          <tr>
+            <td>Qwen Option C passed arithmetic and passed G2 eval in two logic domains.</td>
+            <td>Stress/eval mismatch (SAE-only stress vs mixed eval) was the last blocker.</td>
+            <td>Fix feature parity in stress, rerun both domains, and lock stress-validated cross-domain boundary.</td>
           </tr>
         </tbody>
       </table>
@@ -884,37 +892,422 @@
       </table>
     </section>
 
-    <section class="slide" id="contrib">
-      <h2>Research Contribution (Why This Matters)</h2>
+    <section class="slide" id="phase7-qwen-optionc">
+      <h2>Phase 7 (Qwen): Exactly How We Extended the Experiment</h2>
+      <p>
+        Qwen is where the strongest Track C signal appears so far. This section shows the exact extension from GPT-2 to Qwen and the detailed arithmetic Option C outcome.
+      </p>
       <div class="grid">
         <article class="card">
-          <h3>Result 1: Internal arithmetic is real</h3>
+          <h3>Why we moved to Qwen</h3>
           <ul>
-            <li>Strong decodability of arithmetic state from internal features.</li>
-            <li>Positive subspace intervention signal in upper layers.</li>
-            <li>This is direct evidence the model stores structured arithmetic information.</li>
+            <li>GPT-2 showed real arithmetic internals but failed robust faithfulness gating.</li>
+            <li>We needed a stronger model and a cleaner label protocol.</li>
+            <li>Qwen Option C is model-generated CoT, not passive encoding of prewritten chains.</li>
           </ul>
         </article>
         <article class="card">
-          <h3>Result 2: Internal arithmetic does not imply faithful CoT</h3>
+          <h3>What changed from GPT-2 runs</h3>
           <ul>
-            <li>Track C remained negative/non-robust for GPT-2 under strict protocol.</li>
-            <li>This shows a clear gap between "model can compute" and "text explains that computation."</li>
+            <li>Generation-time hidden-state capture at each generated step.</li>
+            <li>Contradictory prompt pairs to create grounded labels.</li>
+            <li>Lexical-control pairs to test text-only confounds directly.</li>
+            <li>Domain-aware decoder path for logic tasks (added later in G2).</li>
           </ul>
         </article>
         <article class="card">
-          <h3>Result 3: Practical detection is still useful</h3>
+          <h3>Labeling rules (member level)</h3>
           <ul>
-            <li>Text + latent + structural penalties gives strong practical discrimination (Option B profile range around <code>0.836-0.838</code> AUROC).</li>
-            <li>Good for operational filtering, but not proof of mechanistic faithfulness.</li>
+            <li>Correct answer member -&gt; <code>faithful</code>.</li>
+            <li>Incorrect answer member -&gt; <code>unfaithful</code>.</li>
+            <li>Both wrong -&gt; <code>pair_ambiguous</code> and dropped from primary training target.</li>
+            <li>Behavioral contradiction score is kept as a baseline channel.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Rigor invariants kept fixed</h3>
+          <ul>
+            <li>Pair/trace disjoint splitting, leakage overlap must be zero.</li>
+            <li>5-fold grouped CV + bootstrap CI.</li>
+            <li>Lexical-control gate must stay near chance.</li>
+            <li>Stress uses permutation + regularization + multi-seed checks.</li>
           </ul>
         </article>
       </div>
 
-      <h3>Canonical Closure Artifacts (Final GPT-2 Evidence)</h3>
+      <h3>Arithmetic Option C Dataset Minutiae (Full: <code>20260309_084825_phase7_optionc_generated_qwen_arith</code>)</h3>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Value</th>
+            <th>Why it matters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pairs / members / rows</td>
+            <td><code>2400 / 4800 / 9668</code></td>
+            <td>Large enough for stable full-run estimates.</td>
+          </tr>
+          <tr>
+            <td>Pair types</td>
+            <td><code>equivalent=958</code>, <code>inverse=967</code>, <code>lexical_control=475</code></td>
+            <td>Includes both semantic and confound-control conditions.</td>
+          </tr>
+          <tr>
+            <td>Member labels</td>
+            <td><code>faithful=4468</code>, <code>unfaithful=332</code>, <code>pair_ambiguous=22</code></td>
+            <td>Ambiguous members are tracked explicitly, not silently mixed in.</td>
+          </tr>
+          <tr>
+            <td>Behavioral contradiction coverage</td>
+            <td><code>2400/2400</code> pairs defined, rate <code>0.1321</code></td>
+            <td>Baseline contradiction signal is available for every pair.</td>
+          </tr>
+          <tr>
+            <td>Split diagnostics</td>
+            <td><code>train pairs=1920</code>, <code>test pairs=480</code>, <code>trace_overlap_count=0</code></td>
+            <td>No trace leakage in primary split.</td>
+          </tr>
+          <tr>
+            <td>Feature count</td>
+            <td><code>145</code> (SAE transitions + decoder transitions + aggregate features)</td>
+            <td>Mixed internal-consistency feature block used in canonical arithmetic run.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Arithmetic Option C Results (Full)</h3>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Value</th>
+            <th>Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Single-split primary member AUROC</td>
+            <td><code>0.8703</code> (CI95 <code>[0.8189, 0.9296]</code>)</td>
+            <td>Strong member-level separation between faithful and unfaithful.</td>
+          </tr>
+          <tr>
+            <td>5-fold pooled CV AUROC</td>
+            <td><code>0.8771</code> (CI95 <code>[0.8537, 0.8985]</code>)</td>
+            <td>Performance stays strong across grouped CV folds.</td>
+          </tr>
+          <tr>
+            <td>Behavioral pair AUROC</td>
+            <td><code>0.9864</code> (CI95 <code>[0.9647, 1.0000]</code>)</td>
+            <td>Behavioral contradiction baseline is very strong in arithmetic.</td>
+          </tr>
+          <tr>
+            <td>Lexical-control AUROC</td>
+            <td><code>0.4535</code></td>
+            <td>Near chance, so lexical-only confound is not driving success.</td>
+          </tr>
+          <tr>
+            <td>Wrong-minus-lexical delta</td>
+            <td><code>0.4236</code></td>
+            <td>Large gap supports content-level discrimination.</td>
+          </tr>
+          <tr>
+            <td>Stress primary verdict</td>
+            <td><code>pass</code> (<code>empirical_p_value=0.000999</code>)</td>
+            <td>Arithmetic Option C is stress-validated under p-value-primary policy.</td>
+          </tr>
+          <tr>
+            <td>Claim boundary</td>
+            <td><code>faithfulness_claim_enabled=true</code></td>
+            <td>Arithmetic strict gate is fully satisfied in this lineage.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        Plain-language readout: Qwen arithmetic Option C is the strongest validated positive result in the project so far.
+      </div>
+    </section>
+
+    <section class="slide" id="phase7-g2-stress">
+      <h2>Qwen G2 Cross-Task Extension: PrOntoQA + EntailmentBank</h2>
+      <p>
+        After arithmetic success, we ran the same Option C protocol in two logic domains. The final canonical lineage is
+        <code>20260309_155350_phase7_g2_feature_prune_stage1</code> with stress/eval feature parity.
+      </p>
+
+      <h3>Canonical G2 Inputs (Stage-1 Feature-Pruned Mixed Setup)</h3>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Domain</th>
+            <th>Pairs / members / rows</th>
+            <th>Lexical pairs</th>
+            <th>Behavioral contradiction rate</th>
+            <th>Split leakage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PrOntoQA</td>
+            <td><code>1000 / 2000 / 3847</code></td>
+            <td><code>220</code></td>
+            <td><code>0.602</code></td>
+            <td><code>pair=0, trace=0</code></td>
+          </tr>
+          <tr>
+            <td>EntailmentBank</td>
+            <td><code>1000 / 2000 / 4627</code></td>
+            <td><code>192</code></td>
+            <td><code>0.595</code></td>
+            <td><code>pair=0, trace=0</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>What Changed vs Earlier Stress-Fail Lineage</h3>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Earlier stress-fail lineage</th>
+            <th>Canonical stress-pass lineage</th>
+            <th>Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Stress feature block</td>
+            <td>SAE-only (<code>40</code>)</td>
+            <td>Mixed (<code>40 SAE + 5 decoder = 45</code>)</td>
+            <td>Restored stress/eval comparability.</td>
+          </tr>
+          <tr>
+            <td>Decoder mode</td>
+            <td>implicitly inconsistent in stress</td>
+            <td><code>truth_inference_only</code> with decoder-enabled guard</td>
+            <td>Removed silent mismatch fallback.</td>
+          </tr>
+          <tr>
+            <td>SAE layers</td>
+            <td>broader/noisier mix</td>
+            <td>train-only top-8 per domain</td>
+            <td>Reduced noise without leakage.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Canonical G2 Eval + Stress Outcomes</h3>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Domain</th>
+            <th>Eval pooled CV AUROC (CI95)</th>
+            <th>Stress pooled AUROC (CI95)</th>
+            <th>Lexical AUROC</th>
+            <th>Wrong-minus-lexical</th>
+            <th>Stress primary verdict</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PrOntoQA</td>
+            <td><code>0.9637</code> (<code>[0.9545, 0.9726]</code>)</td>
+            <td><code>0.9606</code> (<code>[0.9529, 0.9677]</code>)</td>
+            <td><code>0.4980</code></td>
+            <td><code>0.4657</code></td>
+            <td><code>pass</code></td>
+          </tr>
+          <tr>
+            <td>EntailmentBank</td>
+            <td><code>0.9991</code> (<code>[0.9978, 1.0000]</code>)</td>
+            <td><code>0.9994</code> (<code>[0.9988, 0.9999]</code>)</td>
+            <td><code>0.3374</code></td>
+            <td><code>0.6617</code></td>
+            <td><code>pass</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        Canonical stress-validated decision artifact
+        <code>trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1_stress_validated.json</code>
+        sets <code>publishable_cross_domain_pass=true</code>.
+      </div>
+    </section>
+
+    <section class="slide" id="phase7-live-status">
+      <h2>G2 Closure Readout: Why This Now Passes</h2>
+      <p>
+        The key issue was not protocol weakness; it was stress/eval feature mismatch. Stress had SAE-only features while eval had mixed features.
+        After parity fix, PrOntoQA and EntailmentBank both pass stress under unchanged gates.
+      </p>
+
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Change vs canonical G2</th>
+            <th>Applied setting</th>
+            <th>Why it was done</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Logical decoder feature mode</td>
+            <td><code>truth_inference_only</code></td>
+            <td>Keep strongest decoder signals; drop weaker logical heads from feature block.</td>
+          </tr>
+          <tr>
+            <td>Decoder head loss weights</td>
+            <td><code>truth=2.5</code>, <code>inference=1.5</code>, <code>chain_depth=0.5</code>, others <code>0.0</code></td>
+            <td>Train decoder toward reliable heads without changing schema compatibility.</td>
+          </tr>
+          <tr>
+            <td>SAE layer selection</td>
+            <td>train-only auto top-8 per domain</td>
+            <td>Reduce dimensionality with no test leakage.</td>
+          </tr>
+          <tr>
+            <td>Selected layers (PrOntoQA)</td>
+            <td><code>1,4,9,10,17,22,26,27</code></td>
+            <td>Top train-only layer ranking for PrOntoQA.</td>
+          </tr>
+          <tr>
+            <td>Selected layers (EntailmentBank)</td>
+            <td><code>9,10,12,13,16,17,22,25</code></td>
+            <td>Top train-only layer ranking for EntailmentBank.</td>
+          </tr>
+          <tr>
+            <td>Feature count after pruning</td>
+            <td><code>45</code> total (<code>40</code> SAE + <code>5</code> decoder)</td>
+            <td>Lower feature-to-sample ratio than canonical <code>145</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Before vs After Parity Fix (PrOntoQA)</h3>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Before (SAE-only stress)</th>
+            <th>After (mixed stress)</th>
+            <th>Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Stress pooled AUROC</td>
+            <td><code>0.6561</code></td>
+            <td><code>0.9606</code></td>
+            <td><code>+0.3045</code></td>
+          </tr>
+          <tr>
+            <td>Regularization pass</td>
+            <td><code>false</code></td>
+            <td><code>true</code></td>
+            <td>fixed</td>
+          </tr>
+          <tr>
+            <td>Multiseed pass</td>
+            <td><code>false</code></td>
+            <td><code>true</code></td>
+            <td>fixed</td>
+          </tr>
+          <tr>
+            <td>Permutation p-value</td>
+            <td><code>0.010989</code></td>
+            <td><code>0.000999</code></td>
+            <td>stronger significance</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Cross-Domain Summary (Canonical Stress-Validated)</h3>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Domain</th>
+            <th>CV AUROC</th>
+            <th>Stress status</th>
+            <th>Lexical delta</th>
+            <th>Final boundary</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Arithmetic</td>
+            <td><code>0.877</code></td>
+            <td><code>pass</code> (p=<code>0.000999</code>)</td>
+            <td><code>+0.424</code></td>
+            <td>included</td>
+          </tr>
+          <tr>
+            <td>PrOntoQA</td>
+            <td><code>0.9637</code></td>
+            <td><code>pass</code> (pooled <code>0.9606</code>)</td>
+            <td><code>+0.466</code></td>
+            <td>included</td>
+          </tr>
+          <tr>
+            <td>EntailmentBank</td>
+            <td><code>0.9991</code></td>
+            <td><code>pass</code> (pooled <code>0.9994</code>)</td>
+            <td><code>+0.662</code></td>
+            <td>included</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        Final cross-domain stress decision:
+        <code>trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1_stress_validated.json</code>.
+        Status: <code>publishable_cross_domain_pass=true</code>.
+      </div>
+    </section>
+
+    <section class="slide" id="contrib">
+      <h2>Research Contribution (Why This Matters)</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Contribution 1: Mechanistic arithmetic map is real</h3>
+          <ul>
+            <li>Phase 4/4r showed strong arithmetic decodability (<code>R^2=0.977</code>) and causal effect (<code>+0.107 delta_logprob</code> peak).</li>
+            <li>This establishes that internal arithmetic structure exists and is causally active.</li>
+            <li>This part of the project is stable and no longer in dispute.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Contribution 2: GPT-2 closure is a clean negative finding</h3>
+          <ul>
+            <li>Track C stayed non-robust across corrected reruns, fair comparisons, Path B/Path C stress, and mixed hidden+SAE tests.</li>
+            <li>Final GPT-2 deployment remains two-track with structural penalties.</li>
+            <li>This gives a clear claim boundary: computation ability does not automatically imply faithful explanation text.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Contribution 3: Option C gives strong next-model signal</h3>
+          <ul>
+            <li>Qwen arithmetic Option C passed strongly with lexical controls and model-generated CoT.</li>
+            <li>In G2, both PrOntoQA and EntailmentBank pass strict eval and full stress in canonical stress-validated lineage.</li>
+            <li>Cross-domain claim boundary is now publishable for tested domains/protocol.</li>
+          </ul>
+        </article>
+      </div>
+
+      <h3>Canonical Artifacts Used for Claims</h3>
+      <ul>
+        <li><strong>GPT-2 closure:</strong> <code>phase7_results/results/trackc_phase7v3_decision_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json</code></li>
+        <li><strong>Qwen arithmetic Option C:</strong> <code>phase7_results/results/optionc_summary_20260309_084825_phase7_optionc_generated_qwen_arith.json</code></li>
+        <li><strong>G2 canonical eval:</strong> <code>phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1.json</code></li>
+        <li><strong>G2 canonical stress decision:</strong> <code>phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1_stress_validated.json</code></li>
+        <li><strong>Stress parity delta (PrOntoQA):</strong> <code>phase7_results/results/optionc_stress_comparison_20260309_featureprune_mixedfix.json</code></li>
+      </ul>
+
+      <h3>Historical GPT-2 Closure Artifacts</h3>
       <ul>
         <li><code>phase7_results/results/trackc_phase7v3_closure_note_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json</code></li>
-        <li><code>phase7_results/results/trackc_phase7v3_decision_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json</code></li>
         <li><code>phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json</code></li>
         <li><code>phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json</code></li>
         <li><code>phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json</code></li>
@@ -922,30 +1315,30 @@
     </section>
 
     <section class="slide" id="qwen">
-      <h2>Qwen Next Steps (Separate Open Inquiry)</h2>
+      <h2>Next Steps and Decision Rules</h2>
       <div class="grid">
         <article class="card">
-          <h3>Why this is separate from GPT-2</h3>
+          <h3>What is already closed</h3>
           <ul>
-            <li>GPT-2 closure is decision-complete for current protocol.</li>
-            <li>Qwen is a new test of whether model scale and training data change Track C viability.</li>
+            <li>GPT-2 Track C is closed negative for this protocol.</li>
+            <li>Arithmetic Option C on Qwen is positive.</li>
+            <li>EntailmentBank G2 stress is positive in the canonical stress-validated lineage.</li>
           </ul>
         </article>
         <article class="card">
-          <h3>Active plan: SAE trajectory ladder</h3>
+          <h3>What is still open</h3>
           <ul>
-            <li>Precompute Qwen expanded dataset with SAE features and extra anchors.</li>
-            <li>Train Qwen D1 decoders, then run Path A → Path B → Path C on control-conditioned records.</li>
-            <li>Run canary first, then full run only if integrity checks pass.</li>
-            <li>Main success criterion: robust-CV <code>wrong_intermediate AUROC &gt; 0.70</code>.</li>
+            <li>Domain expansion beyond current three-domain set (new tasks, same strict controls).</li>
+            <li>Model expansion beyond current Qwen lineage (same Option C protocol).</li>
+            <li>Paper framing and reproducibility packaging of the full negative-to-positive arc.</li>
           </ul>
         </article>
       </div>
 
       <div class="callout">
-        Rule: Qwen can extend the project, but it does not reopen the GPT-2 closure decision.
+        Hard rule: do not relax split, leakage, lexical-control, or stress settings just to pass a gate.
       </div>
-      <p class="small">Q0 raw-L2 diagnostic is now obsolete in active planning. See <code>TODO.md</code> for the current Qwen ladder gates.</p>
+      <p class="small">This presentation reflects completed artifacts plus in-flight status as of March 9, 2026. For operational status, see <code>PROJECT_STATUS.md</code> and run-scoped summaries under <code>phase7_results/results/</code>.</p>
     </section>
   </main>
 </body>

@@ -120,43 +120,46 @@ Canonical artifacts:
 - `phase7_results/results/optionc_claim_boundary_20260309_084825_phase7_optionc_generated_qwen_arith_full.json`
 - `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json`
 
-### G2 Cross-Task Validation (Domain-Decoder Lineage)
-Run: `20260309_141106_phase7_g2_domain_decoder_fix`
+### G2 Cross-Task Validation (Canonical Stress-Validated Lineage)
+Run: `20260309_155350_phase7_g2_feature_prune_stage1`
 
 Full-eval results:
 
 | Domain | CV AUROC | Lexical AUROC | Delta | Strict Eval Gate |
 |---|---|---|---|---|
-| PrOntoQA | **0.964** | 0.467 | 0.497 | **PASS** |
-| EntailmentBank | **0.999** | 0.430 | 0.569 | **PASS** |
+| PrOntoQA | **0.9637** | 0.4980 | 0.4657 | **PASS** |
+| EntailmentBank | **0.9991** | 0.3374 | 0.6617 | **PASS** |
 
 Cross-domain eval gate: **PASS**
 
 Decision artifact:
-- `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json`
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1.json`
 
 ### G2 Full Stress Validation (Final Gate)
 
 Stress runs:
-- PrOntoQA: `20260309_145050_optionc_stress_g2fix_prontoqa`
-- EntailmentBank: `20260309_145052_optionc_stress_g2fix_entailmentbank`
+- PrOntoQA: `20260309_stress_featureprune_prontoqa_mixedfix`
+- EntailmentBank: `20260309_stress_featureprune_entailmentbank_mixedfix`
 
 Stress summary:
 
-| Domain | Primary Stress Verdict | p-value | Regularization | Multiseed |
-|---|---|---:|---|---|
-| PrOntoQA | **FAIL** | 0.000999 | fail | pass |
-| EntailmentBank | **PASS** | 0.000999 | pass | pass |
+| Domain | Primary Stress Verdict | p-value | Regularization | Multiseed | Stress pooled AUROC |
+|---|---|---:|---|---|---:|
+| PrOntoQA | **PASS** | 0.000999 | pass | pass | 0.9606 |
+| EntailmentBank | **PASS** | 0.000999 | pass | pass | 0.9994 |
 
-PrOntoQA stress failure is not a leakage issue (pair/trace overlap remains zero). It is a stability issue under stronger weight decay.
+Stress/eval comparability is now explicit and audited:
+- feature parity: `45 total = 40 SAE + 5 decoder`,
+- decoder block enabled in stress metadata for both domains,
+- same exclusion/split policy as eval (no threshold relaxation).
 
 Stress-validated cross-domain decision:
-- `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json`
-- `publishable_cross_domain_pass=false`
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1_stress_validated.json`
+- `publishable_cross_domain_pass=true`
 
 ### Current Claim Boundary (March 9, 2026)
 - Arithmetic: faithfulness claim **enabled** (stress-validated).
+- PrOntoQA: faithfulness claim **enabled** (eval + stress pass).
 - EntailmentBank: faithfulness claim **enabled** (eval + stress pass).
-- PrOntoQA: strict eval claim **enabled**, but stress final gate currently **fails** on regularization stability.
-- Cross-domain publishability (`publishable_cross_domain`): **not yet met** under full stress policy.
+- Cross-domain publishability (`publishable_cross_domain`): **met** for tested Option C protocol.
 - GPT-2 closure remains unchanged and is not reopened.

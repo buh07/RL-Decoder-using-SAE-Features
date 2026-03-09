@@ -76,34 +76,39 @@ Primary closure references:
 - `phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json`
 - `phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json`
 
-## Qwen Option C — Faithfulness Detection (Active)
+## Qwen Option C — Faithfulness Detection (Stress-Validated Cross-Domain)
 
-Qwen is the active model for Track C faithfulness validation using the Option C method:
+Qwen is the active model for Track C faithfulness validation using Option C:
 behavioral contradiction labeling + internal consistency detection + lexical confound control.
 
 ### Current Results (March 9, 2026)
 
-| Domain | CV AUROC (full eval) | Lexical AUROC | Delta | Eval Gate | Full Stress Gate |
-|---|---|---|---|---|---|
-| **Arithmetic** | 0.877 | 0.454 | 0.424 | **PASS** | **PASS** |
-| **PrOntoQA** (domain decoder) | 0.964 | 0.467 | 0.497 | **PASS** | FAIL (regularization stability) |
-| **EntailmentBank** (domain decoder) | 0.999 | 0.430 | 0.569 | **PASS** | **PASS** |
+| Domain | CV AUROC (full eval) | Stress pooled AUROC | Lexical AUROC | Delta | Eval Gate | Full Stress Gate |
+|---|---|---|---|---|---|---|
+| **Arithmetic** | 0.877 | 0.875 | 0.454 | 0.424 | **PASS** | **PASS** |
+| **PrOntoQA** (domain decoder) | 0.964 | 0.961 | 0.498 | 0.466 | **PASS** | **PASS** |
+| **EntailmentBank** (domain decoder) | 0.999 | 0.999 | 0.337 | 0.662 | **PASS** | **PASS** |
 
 Cross-domain status:
 - G2 full eval gate (both domains strict gate): **PASS**.
-- G2 stress-validated gate: **not yet met** (`publishable_cross_domain_pass=false`) because PrOntoQA stress final primary verdict is `fail`.
+- G2 stress-validated gate: **PASS** (`publishable_cross_domain_pass=true`).
 
 Canonical G2 lineage:
-- `20260309_141106_phase7_g2_domain_decoder_fix`
+- `20260309_155350_phase7_g2_feature_prune_stage1`
 
 Key artifacts:
-- Eval decision: `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json`
-- Stress (PrOntoQA): `phase7_results/results/optionc_stress_20260309_145050_optionc_stress_g2fix_prontoqa.json`
-- Stress (EntailmentBank): `phase7_results/results/optionc_stress_20260309_145052_optionc_stress_g2fix_entailmentbank.json`
-- Stress-validated cross-domain decision: `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json`
+- Stress-validated cross-domain decision:
+  `phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1_stress_validated.json`
+- Stress (PrOntoQA, mixed features):
+  `phase7_results/results/optionc_stress_20260309_stress_featureprune_prontoqa_mixedfix.json`
+- Stress (EntailmentBank, mixed features):
+  `phase7_results/results/optionc_stress_20260309_stress_featureprune_entailmentbank_mixedfix.json`
+- Stress delta comparison (SAE-only vs mixed):
+  `phase7_results/results/optionc_stress_comparison_20260309_featureprune_mixedfix.json`
 
-Historical ablation lineage:
+Historical ablation lineages:
 - `20260309_124650_phase7_g2_cross_task_gpu135` (pre domain-decoder fix)
+- `20260309_141106_phase7_g2_domain_decoder_fix` (post decoder-fix eval pass, stress-fail before mixed-feature parity fix)
 
 ## Project Structure
 

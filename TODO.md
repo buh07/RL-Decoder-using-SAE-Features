@@ -6,7 +6,7 @@
 - GPT-2 Phase 7 is closed with a negative Track C result for mechanistic faithfulness.
 - Qwen is the active model for Track C faithfulness validation.
 - Arithmetic Option C is now the baseline evidence source.
-- Publishability gate is **cross-domain G2** (PrOntoQA + EntailmentBank), both must pass.
+- Cross-domain G2 publishability gate is now **passed** in canonical stress-validated lineage.
 
 ## Confirmed Baseline: Arithmetic Option C (Completed)
 Run lineage:
@@ -57,13 +57,13 @@ Stress outcome (`20260309_130420_optionc_stress_full_rigor`):
 - [x] **Option B (behavioral contradiction baseline)** completed for arithmetic Option C lineage.
 - [x] Arithmetic claim boundary updated to full Option C artifact path.
 
-## Phase G2 Cross-Task Validation (Canonical Domain-Decoder Lineage)
+## Phase G2 Cross-Task Validation (Canonical Stress-Validated Lineage)
 Domain order (locked):
 1. PrOntoQA
 2. EntailmentBank
 
 Canonical lineage:
-- `20260309_141106_phase7_g2_domain_decoder_fix`
+- `20260309_155350_phase7_g2_feature_prune_stage1`
 
 Strict eval requirement (unchanged):
 - pooled CV AUROC > 0.70
@@ -75,20 +75,21 @@ Strict eval requirement (unchanged):
 Implementation status:
 - [x] Domain-aware decoder training/eval path added
 - [x] Domain-mismatch guard added in Option C evaluator
+- [x] Stress/eval feature parity fix added (shared feature assembly path)
 - [x] PrOntoQA full run passed strict eval gate
 - [x] EntailmentBank full run passed strict eval gate
 - [x] Cross-domain eval decision artifact emitted
 
 Canonical eval outputs:
-- `phase7_results/results/optionc_summary_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa.json`
-- `phase7_results/results/optionc_claim_boundary_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa_full.json`
-- `phase7_results/results/optionc_summary_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank.json`
-- `phase7_results/results/optionc_claim_boundary_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank_full.json`
-- `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json`
+- `phase7_results/results/optionc_summary_20260309_155350_phase7_g2_feature_prune_stage1_prontoqa.json`
+- `phase7_results/results/optionc_eval_20260309_155350_phase7_g2_feature_prune_stage1_prontoqa_full.json`
+- `phase7_results/results/optionc_summary_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank.json`
+- `phase7_results/results/optionc_eval_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank_full.json`
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1.json`
 
 Eval result summary:
-- PrOntoQA: strict eval `pass` (`cv_primary_pooled_auroc=0.9636`, lexical `0.4666`, delta `0.4970`)
-- EntailmentBank: strict eval `pass` (`cv_primary_pooled_auroc=0.9992`, lexical `0.4301`, delta `0.5691`)
+- PrOntoQA: strict eval `pass` (`cv_primary_pooled_auroc=0.9637`, lexical `0.4980`, delta `0.4657`)
+- EntailmentBank: strict eval `pass` (`cv_primary_pooled_auroc=0.9991`, lexical `0.3374`, delta `0.6617`)
 - Cross-domain eval decision: `publishable_cross_domain_pass=true`
 
 ## G2 Full Stress Validation (Final Gate)
@@ -98,29 +99,29 @@ Status:
 - [x] Stress-validated cross-domain decision emitted
 
 Stress outputs:
-- `phase7_results/results/optionc_stress_20260309_145050_optionc_stress_g2fix_prontoqa.json`
-- `phase7_results/results/optionc_stress_20260309_145052_optionc_stress_g2fix_entailmentbank.json`
-- `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json`
+- `phase7_results/results/optionc_stress_20260309_stress_featureprune_prontoqa_mixedfix.json`
+- `phase7_results/results/optionc_stress_20260309_stress_featureprune_entailmentbank_mixedfix.json`
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1_stress_validated.json`
+- `phase7_results/results/optionc_stress_comparison_20260309_featureprune_mixedfix.json`
 
 Stress result summary:
-- PrOntoQA: `final_verdict_primary=fail`
+- PrOntoQA: `final_verdict_primary=pass` (all stress components pass)
   - permutation p-value pass (`0.000999`)
-  - multiseed pass (mean `0.7196`, std `0.0374`, pooled CI lower `0.6895`)
-  - **regularization pass fails** (WD 0.1 and 1.0 below thresholds)
+  - regularization pass (`true`)
+  - multiseed pass (mean `0.9608`, std `0.0064`, pooled `0.9606`)
 - EntailmentBank: `final_verdict_primary=pass` (all stress components pass)
-- Stress-validated cross-domain decision: `publishable_cross_domain_pass=false`
+- Stress-validated cross-domain decision: `publishable_cross_domain_pass=true`
 
 ## Next Steps (Current)
-1. Improve PrOntoQA stress regularization stability without changing split/leakage policy.
-2. Keep domain-decoder lineage fixed as canonical (`20260309_141106...`).
-3. Rerun PrOntoQA full stress and regenerate stress-validated cross-domain decision.
-4. Keep old `20260309_124650...` run tagged as historical pre-fix ablation.
+1. Freeze `20260309_155350_phase7_g2_feature_prune_stage1` as canonical G2 lineage in all docs and status pages.
+2. Keep `20260309_141106...` and `20260309_124650...` as historical ablation evidence only.
+3. Prepare paper package around cross-domain Option C result and decoder/feature-parity ablation.
 
 ## Claim Boundary (Current)
 - Arithmetic Option C: faithfulness claim enabled (stress-validated).
+- PrOntoQA Option C: faithfulness claim enabled (eval + stress pass).
 - EntailmentBank Option C: faithfulness claim enabled (eval + stress pass).
-- PrOntoQA Option C: faithfulness claim enabled at eval stage, but stress final gate currently fails on regularization stability.
-- Cross-domain `publishable_cross_domain`: not yet enabled under full stress policy.
+- Cross-domain `publishable_cross_domain`: enabled for tested Option C protocol.
 
 ## Narrative and Documentation Tasks
 - [x] Add canonical memo:
@@ -135,7 +136,7 @@ Stress result summary:
 Narrative target:
 - negative (coherence-confounded lineages) -> positive (Option C with lexical control + model-generated CoT)
 - arithmetic is supportive and technically validated
-- publishability requires passing the full cross-domain stress gate
+- publishability achieved after passing the full cross-domain stress gate in canonical lineage
 
 ## Deprecated / Obsolete
 - [x] Legacy Qwen `Q0` raw hidden-state L2 diagnostic is obsolete.

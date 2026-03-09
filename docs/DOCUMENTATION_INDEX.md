@@ -56,16 +56,15 @@
 | Path | Purpose |
 |---|---|
 | `experiments/run_phase7_g2_cross_task.sh` | PrOntoQA → EntailmentBank cross-task gate orchestrator |
-| `phase7_results/results/optionc_summary_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa.json` | PrOntoQA Option C full summary (domain-decoder, CV AUROC 0.964, strict eval PASS) |
-| `phase7_results/results/optionc_claim_boundary_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa_full.json` | PrOntoQA claim boundary artifact for canonical G2 lineage |
-| `phase7_results/results/optionc_eval_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa_full.json` | PrOntoQA detailed eval (zero overlap, strict gate pass) |
-| `phase7_results/results/optionc_summary_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank.json` | EntailmentBank Option C full summary (domain-decoder, CV AUROC 0.999, strict eval PASS) |
-| `phase7_results/results/optionc_claim_boundary_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank_full.json` | EntailmentBank claim boundary artifact for canonical G2 lineage |
-| `phase7_results/results/optionc_eval_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank_full.json` | EntailmentBank detailed eval (zero overlap, strict gate pass) |
-| `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json` | Cross-domain decision on strict eval gates (PASS) |
-| `phase7_results/results/optionc_stress_20260309_145050_optionc_stress_g2fix_prontoqa.json` | PrOntoQA full stress result (primary fail due regularization stability) |
-| `phase7_results/results/optionc_stress_20260309_145052_optionc_stress_g2fix_entailmentbank.json` | EntailmentBank full stress result (primary pass) |
-| `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json` | Stress-validated cross-domain decision (not publishable_cross_domain yet) |
+| `phase7_results/results/optionc_summary_20260309_155350_phase7_g2_feature_prune_stage1_prontoqa.json` | PrOntoQA Option C full summary (feature-pruned mixed config, strict eval PASS) |
+| `phase7_results/results/optionc_eval_20260309_155350_phase7_g2_feature_prune_stage1_prontoqa_full.json` | PrOntoQA detailed eval (zero overlap, strict gate pass) |
+| `phase7_results/results/optionc_summary_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank.json` | EntailmentBank Option C full summary (feature-pruned mixed config, strict eval PASS) |
+| `phase7_results/results/optionc_eval_20260309_155350_phase7_g2_feature_prune_stage1_entailmentbank_full.json` | EntailmentBank detailed eval (zero overlap, strict gate pass) |
+| `phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1.json` | Cross-domain decision on strict eval gates (PASS) |
+| `phase7_results/results/optionc_stress_20260309_stress_featureprune_prontoqa_mixedfix.json` | PrOntoQA full stress result with mixed-feature parity (primary pass) |
+| `phase7_results/results/optionc_stress_20260309_stress_featureprune_entailmentbank_mixedfix.json` | EntailmentBank full stress result with mixed-feature parity (primary pass) |
+| `phase7_results/results/optionc_stress_comparison_20260309_featureprune_mixedfix.json` | SAE-only vs mixed-feature stress delta comparison |
+| `phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1_stress_validated.json` | Stress-validated cross-domain decision (`publishable_cross_domain=true`) |
 
 ## Option C Pipeline Scripts
 | Path | Purpose |
@@ -80,12 +79,13 @@
 ## Active Inquiry Docs
 | File | Purpose |
 |---|---|
-| `TODO.md` | Active work queue: PrOntoQA stress-stability remediation after canonical domain-decoder eval pass |
+| `TODO.md` | Active work queue after cross-domain stress-validated pass |
 
 ## Historical Ablation Lineages
 | Path | Purpose |
 |---|---|
 | `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json` | Pre domain-decoder-fix cross-task decision (historical ablation: PrOntoQA fail due decoder mismatch) |
+| `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json` | Historical stress-fail lineage before mixed-feature parity fix |
 
 ## Archived Material
 Historical execution reports and superseded plans are under `docs/archived_reports/`.

@@ -1,6 +1,6 @@
 # RL-Decoder with SAE Features — Project Status
 
-**Last Updated:** March 9, 2026 (GPT-2 closed; Qwen Option C domain-decoder G2 eval pass; full stress gate pending PrOntoQA stability)
+**Last Updated:** March 9, 2026 (GPT-2 closed; Qwen Option C stress-validated cross-domain pass)
 
 ---
 
@@ -326,21 +326,23 @@ Canonical artifacts:
 - `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json`
 - `phase7_results/results/trackc_arithmetic_significance_reframe_20260309_130420_optionc_stress_full_rigor.json`
 
-### Phase G2 Cross-Task Validation (Domain-Decoder Lineage)
+### Phase G2 Cross-Task Validation (Canonical Stress-Validated Lineage)
 
-Canonical run: `20260309_141106_phase7_g2_domain_decoder_fix`
+Canonical run: `20260309_155350_phase7_g2_feature_prune_stage1`
 
-Gate policy (unchanged): both domains must pass all five criteria (CV AUROC > 0.70, CI lower >= 0.65, lexical AUROC <= 0.60, delta >= 0.10, zero overlap).
+Gate policy (unchanged): both domains must pass all five criteria
+(`CV AUROC > 0.70`, `CI lower >= 0.65`, `lexical AUROC <= 0.60`, `delta >= 0.10`, zero overlap),
+plus full stress primary pass in both domains.
 
 Full-eval results (both domains pass strict gate):
 
 | Domain | CV pooled primary AUROC | Lexical AUROC | Wrong-minus-lexical delta | Strict gate | Leakage (pair/trace) |
 |---|---:|---:|---:|---|---|
-| PrOntoQA | **0.9636** | 0.4666 | 0.4970 | **pass** | 0 / 0 |
-| EntailmentBank | **0.9992** | 0.4301 | 0.5691 | **pass** | 0 / 0 |
+| PrOntoQA | **0.9637** | 0.4980 | 0.4657 | **pass** | 0 / 0 |
+| EntailmentBank | **0.9991** | 0.3374 | 0.6617 | **pass** | 0 / 0 |
 
 Full-eval cross-domain decision: **PASS**
-- Artifact: `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json`
+- Artifact: `phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1.json`
 
 ### G2 Full Stress Validation (Post-Eval Final Gate)
 
@@ -352,42 +354,26 @@ Stress policy (unchanged):
 
 Stress results:
 
-| Domain | Final primary verdict | p-value | Regularization pass | Multiseed pass |
-|---|---|---:|---|---|
-| PrOntoQA | **fail** | 0.000999 | **fail** | pass |
-| EntailmentBank | **pass** | 0.000999 | pass | pass |
+| Domain | Final primary verdict | p-value | Regularization pass | Multiseed pass | Stress pooled AUROC |
+|---|---|---:|---|---|---:|
+| PrOntoQA | **pass** | 0.000999 | pass | pass | 0.9606 |
+| EntailmentBank | **pass** | 0.000999 | pass | pass | 0.9994 |
 
-PrOntoQA stress detail (failure source):
-- Strong permutation significance (`p=0.000999`), but regularization stability fails:
-  - WD 0.01: 0.680
-  - WD 0.1: 0.629
-  - WD 1.0: 0.582
-- Multiseed remains stable (mean 0.720, std 0.037, pooled CI lower 0.689).
-
-Stress-validated cross-domain decision: **FAIL**
-- Artifact: `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json`
+Stress-validated cross-domain decision: **PASS**
+- Artifact: `phase7_results/results/trackc_g2_cross_task_decision_20260309_155350_phase7_g2_feature_prune_stage1_stress_validated.json`
 
 ### Current Claim Boundary (March 9, 2026)
 
 Supported:
 - Arithmetic Option C faithfulness claim within arithmetic scope (stress-validated).
-- EntailmentBank Option C faithfulness claim within entailment scope (eval + stress pass).
-- Domain-decoder remediation resolves the original PrOntoQA eval failure (strict gate now passes).
-- Methodological contribution: lexical confound control and decoder-domain matching are both necessary.
+- PrOntoQA Option C faithfulness claim (eval + stress pass in canonical stress-validated lineage).
+- EntailmentBank Option C faithfulness claim (eval + stress pass in canonical stress-validated lineage).
+- Cross-domain `publishable_cross_domain` claim boundary for the tested Option C protocol.
+- Methodological contribution: stress/eval feature parity is required; mixed (40 SAE + 5 decoder) features are canonical for G2 stress comparability.
 
-Not yet supported:
-- `publishable_cross_domain` claim boundary under full stress policy (blocked by PrOntoQA regularization instability).
-
-### Next Step: PrOntoQA Stress-Stability Remediation
-
-Targeted next work:
-1. Keep PrOntoQA domain decoder fixed (do not revert to arithmetic decoder features).
-2. Reduce sensitivity to strong regularization (feature pruning / lower-dimensional block / calibration freeze).
-3. Rerun PrOntoQA full stress with unchanged split/leakage policy.
-4. Recompute stress-validated cross-domain decision.
-
-Historical ablation lineage:
-- `20260309_124650_phase7_g2_cross_task_gpu135` is retained as pre-fix evidence (decoder mismatch diagnosed).
+Historical ablation lineages retained:
+- `20260309_124650_phase7_g2_cross_task_gpu135` (pre-fix decoder mismatch diagnosis).
+- `20260309_141106_phase7_g2_domain_decoder_fix` (post decoder-fix eval pass, stress fail before mixed-feature parity fix).
 
 ---
 

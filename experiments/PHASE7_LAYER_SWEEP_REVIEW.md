@@ -75,17 +75,19 @@ Option C combines:
 2. Internal consistency detection (SAE trajectory + decoder transition features)
 3. Lexical confound control (logically-valid text edits must score at chance)
 
-Results (canonical domain-decoder lineage `20260309_141106_phase7_g2_domain_decoder_fix`):
+Results (canonical stress-validated lineage `20260309_155350_phase7_g2_feature_prune_stage1`):
 
 | Domain | CV AUROC (eval) | Lexical AUROC | Delta | Eval Gate | Stress Gate |
 |---|---|---|---|---|---|
 | Arithmetic | 0.877 | 0.454 | 0.424 | **PASS** | **PASS** |
-| EntailmentBank | 0.999 | 0.430 | 0.569 | **PASS** | **PASS** |
-| PrOntoQA | 0.964 | 0.467 | 0.497 | **PASS** | FAIL (regularization stability) |
+| EntailmentBank | 0.999 | 0.337 | 0.662 | **PASS** | **PASS** |
+| PrOntoQA | 0.964 | 0.498 | 0.466 | **PASS** | **PASS** |
 
 Cross-domain strict eval gate: **PASS**.
-Cross-domain stress-validated gate: **not yet met** (`publishable_cross_domain=false`).
+Cross-domain stress-validated gate: **met** (`publishable_cross_domain=true`).
 
-Current blocker is no longer decoder mismatch; it is PrOntoQA robustness under strong regularization in the stress suite.
+Closure note:
+- Earlier PrOntoQA stress failure came from stress/eval feature mismatch (SAE-only stress vs mixed eval).
+- After parity fix (`40 SAE + 5 decoder` in stress and eval), both domains pass full stress under unchanged protocol.
 
-See `TODO.md` for active PrOntoQA stress-stability work and `PROJECT_STATUS.md` for full results.
+See `PROJECT_STATUS.md` for canonical artifact links and claim boundaries.
