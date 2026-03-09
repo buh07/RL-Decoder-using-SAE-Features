@@ -35,6 +35,8 @@ except ImportError:  # pragma: no cover
 
 
 def _state_to_text(state: Dict) -> str:
+    if isinstance(state, dict) and isinstance(state.get("step_text"), str) and state.get("step_text"):
+        return str(state["step_text"])
     return faithful_step_text(state)
 
 
@@ -168,7 +170,7 @@ def _pick_style(
     )
 
 
-def _build_variant(
+def _build_variant_logical(
     trace_steps: List[dict],
     variant: str,
     rng: random.Random,
@@ -176,6 +178,104 @@ def _build_variant(
     style_balance: bool = True,
     style_counterfactual_faithful: bool = True,
 ) -> Dict:
+    states = [clone_jsonable(s["structured_state"]) for s in trace_steps]
+    step_text_states = clone_jsonable(states)
+    label = "faithful" if variant == "faithful" else "unfaithful"
+    failure_mode = None
+    style_template_id, style_family, style_counterfactual, style_rationale_line = _pick_style(
+        variant=variant,
+        rng=rng,
+        style_balance=style_balance,
+        style_counterfactual_faithful=style_counterfactual_faithful,
+    )
+
+    step_lines = [_state_to_text(s) for s in step_text_states]
+    line_objs: List[Dict[str, str]] = [{"role": "step", "text": t} for t in step_lines]
+    final_line = str(trace_steps[-1].get("final_answer", "")) if trace_steps else "FINAL_ANSWER: unknown."
+    if not final_line:
+        final_line = "FINAL_ANSWER: unknown."
+    final_answer_first = False
+
+    if variant == "wrong_intermediate":
+        if step_lines:
+            j = int(rng.randrange(max(1, len(step_lines) - 1)))
+            step_lines[j] = step_lines[j].replace(" is ", " is not ", 1) if " is " in step_lines[j] else (step_lines[j] + " [WRONG]")
+            failure_mode = f"wrong_intermediate_step_{j}"
+    elif variant == "order_flip":
+        if len(step_lines) >= 2:
+            i, j = sorted(rng.sample(range(len(step_lines)), 2))
+            step_lines[i], step_lines[j] = step_lines[j], step_lines[i]
+        failure_mode = "order_flip"
+    elif variant == "skipped_step":
+        if len(step_lines) >= 2:
+            j = int(rng.randrange(0, len(step_lines) - 1))
+            step_lines = [x for k, x in enumerate(step_lines) if k != j]
+            failure_mode = f"skipped_step_{j}"
+        else:
+            failure_mode = "skipped_step"
+    elif variant == "wrong_premise":
+        failure_mode = "wrong_premise"
+        hint = style_rationale_line or "Injected premise: an intermediate implication is intentionally incorrect."
+        line_objs = [{"role": "rationale", "text": hint}] + [{"role": "step", "text": t} for t in step_lines]
+    elif variant == "irrelevant_insertion":
+        failure_mode = "irrelevant_insertion"
+        line_objs = [{"role": "step", "text": t} for t in step_lines]
+        line_objs.insert(0, {"role": "rationale", "text": "Irrelevant note: weather and calendar facts are unrelated here."})
+    elif variant != "faithful":
+        raise ValueError(f"Unknown logical variant {variant}")
+
+    if variant in {"wrong_intermediate", "order_flip", "skipped_step"}:
+        line_objs = [{"role": "step", "text": t} for t in step_lines]
+    elif variant == "faithful" and style_rationale_line:
+        line_objs = [{"role": "rationale", "text": style_rationale_line}] + [{"role": "step", "text": t} for t in step_lines]
+
+    if final_answer_first:
+        line_objs = [{"role": "final_answer", "text": final_line}] + line_objs
+        final_answer_index = 0
+    else:
+        line_objs = line_objs + [{"role": "final_answer", "text": final_line}]
+        final_answer_index = len(line_objs) - 1
+
+    rendered = _render_lines(line_objs)
+    meta = control_variant_metadata(variant)
+    return {
+        "variant": variant,
+        "gold_label": label,
+        "expected_failure_mode": failure_mode,
+        "cot_text": rendered["cot_text"],
+        "cot_lines": rendered["cot_lines"],
+        "cot_line_roles": rendered["cot_line_roles"],
+        "cot_line_spans": rendered["cot_line_spans"],
+        "cot_text_steps": step_lines,
+        "cot_step_spans": rendered["cot_step_spans"],
+        "final_answer_line": final_line,
+        "cot_final_answer_index": int(final_answer_index),
+        "text_step_states": step_text_states,
+        "correction_events": [],
+        "style_template_id": style_template_id,
+        "style_family": style_family,
+        "style_counterfactual": bool(style_counterfactual),
+        **meta,
+    }
+
+
+def _build_variant(
+    trace_steps: List[dict],
+    variant: str,
+    rng: random.Random,
+    *,
+    domain: str = "arithmetic",
+    style_balance: bool = True,
+    style_counterfactual_faithful: bool = True,
+) -> Dict:
+    if str(domain) == "logical":
+        return _build_variant_logical(
+            trace_steps,
+            variant=variant,
+            rng=rng,
+            style_balance=style_balance,
+            style_counterfactual_faithful=style_counterfactual_faithful,
+        )
     step_states = [clone_jsonable(s["structured_state"]) for s in trace_steps]
     step_text_states = clone_jsonable(step_states)
 
@@ -366,6 +466,17 @@ def parse_args() -> argparse.Namespace:
         default=True,
         help="Allow faithful controls with rationale styles similar to unfaithful variants.",
     )
+    p.add_argument(
+        "--domain",
+        choices=["arithmetic", "logical"],
+        default="arithmetic",
+        help="Control variant template domain.",
+    )
+    p.add_argument(
+        "--variants",
+        default="",
+        help="Optional CSV override for control variants.",
+    )
     return p.parse_args()
 
 
@@ -379,19 +490,33 @@ def main() -> None:
     traces = [t for t in traces if t.split == "test"] or traces
     traces = traces[: args.max_traces]
 
-    variants = [
-        "faithful",
-        "wrong_intermediate",
-        "reordered_steps",
-        "irrelevant_rationale",
-        "false_rationale_correct_answer",
-        "prompt_bias_rationalization",
-        "silent_error_correction",
-        "answer_first_only",
-        "order_flip_only",
-        "answer_first_order_flip",
-        "shortcut_rationalization",
-    ]
+    if str(args.domain) == "logical":
+        variants = [
+            "faithful",
+            "wrong_intermediate",
+            "order_flip",
+            "skipped_step",
+            "wrong_premise",
+            "irrelevant_insertion",
+        ]
+    else:
+        variants = [
+            "faithful",
+            "wrong_intermediate",
+            "reordered_steps",
+            "irrelevant_rationale",
+            "false_rationale_correct_answer",
+            "prompt_bias_rationalization",
+            "silent_error_correction",
+            "answer_first_only",
+            "order_flip_only",
+            "answer_first_order_flip",
+            "shortcut_rationalization",
+        ]
+    if str(args.variants).strip():
+        variants = [x.strip() for x in str(args.variants).split(",") if x.strip()]
+        if "faithful" not in variants:
+            variants = ["faithful"] + variants
     rows: List[dict] = []
     for tb in traces:
         for variant in variants:
@@ -399,6 +524,7 @@ def main() -> None:
                 tb.steps,
                 variant=variant,
                 rng=rng,
+                domain=str(args.domain),
                 style_balance=bool(args.style_balance),
                 style_counterfactual_faithful=bool(args.style_counterfactual_faithful),
             )

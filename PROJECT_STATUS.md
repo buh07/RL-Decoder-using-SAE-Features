@@ -1,6 +1,6 @@
 # RL-Decoder with SAE Features — Project Status
 
-**Last Updated:** March 7, 2026 (GPT-2 closure stress tests completed; Qwen inquiry pending Q0 diagnostic)
+**Last Updated:** March 8, 2026 (GPT-2 closed; Qwen SAE trajectory ladder active)
 
 ---
 
@@ -277,8 +277,9 @@ Post-closure stress-test summary (March 7):
 
 Qwen status:
 - Qwen remains open as a separate inquiry.
-- Next action is diagnostic-first `Q0` (small hidden-state separation check) before any full Stage 3 commitment.
-- See `TODO.md` for go/no-go criteria.
+- Next action is the Qwen SAE trajectory ladder (Path A→B→C) with canary→full promotion.
+- Primary cross-model publishability criterion is robust-CV `wrong_intermediate AUROC > 0.70`.
+- See `TODO.md` for exact gating and execution order.
 
 ---
 

@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** March 7, 2026
+**Last Updated:** March 8, 2026
 
 ## Core Project Docs
 | File | Purpose |
@@ -35,7 +35,7 @@
 ## Active Inquiry Docs
 | File | Purpose |
 |---|---|
-| `TODO.md` | Qwen diagnostic-first inquiry (`Q0`) go/no-go plan |
+| `TODO.md` | Qwen SAE trajectory ladder plan (canary→full, robust CV gate) |
 
 ## Archived Material
 Historical execution reports and superseded plans are under `docs/archived_reports/`.

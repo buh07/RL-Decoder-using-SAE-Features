@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import ast
 import json
 import gzip
 import hashlib
@@ -270,62 +271,123 @@ def _apply_op(lhs: float, rhs: float, op: str) -> float:
 
 
 def parse_expression_summary(expr: str, c_fallback: Optional[float] = None) -> Dict[str, Any]:
-    """Left-assoc parse summary suitable for one annotation-level structured state.
-
-    For multi-op expressions, this returns the *final reduction step* (lhs, rhs, op -> subresult)
-    and metadata including reduction depth.
-    """
-    nums, ops, err = tokenize_expression(expr)
-    out: Dict[str, Any] = {
-        "parse_error": err,
-        "num_operands": len(nums),
-        "num_operators": len(ops),
-        "is_multi_op_expr": len(ops) > 1,
-        "operands": nums,
-        "operators": ops,
-        "lhs_value": None,
-        "rhs_value": None,
-        "subresult_value": c_fallback,
-        "operator": "unknown",
-        "reduction_depth": max(0, len(ops)),
+    """Precedence-correct parse summary suitable for one annotation-level structured state."""
+    parsed = parse_expression_steps(expr, c_fallback=c_fallback)
+    steps = list(parsed.get("steps") or [])
+    if not steps:
+        nums, ops, _ = tokenize_expression(expr)
+        val = float(nums[0]) if nums else _safe_num(c_fallback)
+        return {
+            "parse_error": parsed.get("parse_error"),
+            "num_operands": int(len(nums)),
+            "num_operators": int(len(ops)),
+            "is_multi_op_expr": bool(len(ops) > 1),
+            "operands": nums,
+            "operators": ops,
+            "lhs_value": val,
+            "rhs_value": 0.0 if val is not None else None,
+            "subresult_value": val,
+            "operator": "unknown",
+            "reduction_depth": int(max(0, len(ops))),
+            "eval_result": parsed.get("eval_result"),
+            "eval_matches_C": parsed.get("eval_matches_C"),
+        }
+    last = steps[-1]
+    return {
+        "parse_error": parsed.get("parse_error"),
+        "num_operands": int(len(steps) + 1),
+        "num_operators": int(len(steps)),
+        "is_multi_op_expr": bool(len(steps) > 1),
+        "operands": [],
+        "operators": [str(s.get("operator", "unknown")) for s in steps],
+        "lhs_value": _safe_num(last.get("lhs_value")),
+        "rhs_value": _safe_num(last.get("rhs_value")),
+        "subresult_value": _safe_num(last.get("subresult_value")),
+        "operator": str(last.get("operator", "unknown")),
+        "reduction_depth": int(max(0, len(steps))),
+        "eval_result": parsed.get("eval_result"),
+        "eval_matches_C": parsed.get("eval_matches_C"),
     }
-    if err is not None:
-        return out
-    if len(nums) == 0:
-        out["parse_error"] = "empty"
-        return out
-    if len(ops) == 0:
-        out["lhs_value"] = nums[0]
-        out["rhs_value"] = 0.0
-        out["subresult_value"] = nums[0] if c_fallback is None else c_fallback
-        out["operator"] = "unknown"
-        return out
-    if len(nums) != len(ops) + 1:
-        out["parse_error"] = "arity_mismatch"
-        return out
 
-    cur = nums[0]
-    last_lhs = nums[0]
-    last_rhs = nums[1]
-    last_op = ops[0]
-    for op_idx, (op, rhs) in enumerate(zip(ops, nums[1:])):
-        last_lhs = cur
-        last_rhs = rhs
-        last_op = op
-        try:
-            cur = _apply_op(cur, rhs, op)
-        except Exception as exc:
-            out["parse_error"] = f"eval_error:{type(exc).__name__}@{op_idx}"
-            return out
-    out["lhs_value"] = last_lhs
-    out["rhs_value"] = last_rhs
-    out["subresult_value"] = cur if c_fallback is None else c_fallback
-    out["operator"] = last_op
-    if c_fallback is not None and math.isfinite(float(c_fallback)):
-        # Note disagreement but do not overwrite; dataset label is source of truth.
-        out["eval_result"] = float(cur)
-        out["eval_matches_C"] = math.isclose(float(cur), float(c_fallback), rel_tol=1e-6, abs_tol=1e-6)
-    return out
+
+def _ast_op_symbol(op_node: ast.operator) -> Optional[str]:
+    if isinstance(op_node, ast.Add):
+        return "+"
+    if isinstance(op_node, ast.Sub):
+        return "-"
+    if isinstance(op_node, ast.Mult):
+        return "*"
+    if isinstance(op_node, (ast.Div, ast.FloorDiv)):
+        return "/"
+    return None
+
+
+def _parse_expression_steps_ast(expr: str) -> Dict[str, Any]:
+    s = (expr or "").strip()
+    if not s:
+        return {"parse_error": "empty", "steps": [], "operation_count": 0, "eval_result": None}
+    try:
+        tree = ast.parse(s, mode="eval")
+    except SyntaxError as exc:
+        return {"parse_error": f"syntax_error:{exc.msg}", "steps": [], "operation_count": 0, "eval_result": None}
+
+    def _eval(node: ast.AST) -> Tuple[Optional[float], List[Dict[str, Any]], Optional[str]]:
+        if isinstance(node, ast.Expression):
+            return _eval(node.body)
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, (int, float)):
+                return float(node.value), [], None
+            return None, [], "unsupported_constant_type"
+        if isinstance(node, ast.UnaryOp):
+            if isinstance(node.op, ast.UAdd):
+                return _eval(node.operand)
+            if isinstance(node.op, ast.USub):
+                val, steps, err = _eval(node.operand)
+                if err is not None or val is None:
+                    return None, steps, err or "unary_eval_error"
+                return -float(val), steps, None
+            return None, [], "unsupported_unary_operator"
+        if isinstance(node, ast.BinOp):
+            op = _ast_op_symbol(node.op)
+            if op is None:
+                return None, [], "unsupported_binary_operator"
+            lv, ls, le = _eval(node.left)
+            if le is not None:
+                return None, ls, le
+            rv, rs, re = _eval(node.right)
+            if re is not None:
+                return None, ls + rs, re
+            if lv is None or rv is None:
+                return None, ls + rs, "missing_operand"
+            try:
+                result = _apply_op(float(lv), float(rv), op)
+            except ZeroDivisionError:
+                return None, ls + rs, "eval_error:ZeroDivisionError"
+            except Exception as exc:  # pragma: no cover
+                return None, ls + rs, f"eval_error:{type(exc).__name__}"
+            steps = ls + rs + [
+                {
+                    "operator": op,
+                    "lhs_value": float(lv),
+                    "rhs_value": float(rv),
+                    "subresult_value": float(result),
+                }
+            ]
+            return float(result), steps, None
+        return None, [], "unsupported_ast_node"
+
+    result, steps, err = _eval(tree)
+    if err is not None:
+        return {"parse_error": err, "steps": steps, "operation_count": int(len(steps)), "eval_result": None}
+    for idx, st in enumerate(steps):
+        st["operation_idx"] = int(idx)
+        st["operation_count"] = int(len(steps))
+    return {
+        "parse_error": None,
+        "steps": steps,
+        "operation_count": int(len(steps)),
+        "eval_result": float(result) if result is not None else None,
+    }
 
 
 def parse_expression_steps(expr: str, c_fallback: Optional[float] = None) -> Dict[str, Any]:
@@ -340,60 +402,13 @@ def parse_expression_steps(expr: str, c_fallback: Optional[float] = None) -> Dic
       "eval_matches_C": bool|None,
     }
     """
-    nums, ops, err = tokenize_expression(expr)
-    out: Dict[str, Any] = {
-        "parse_error": err,
-        "steps": [],
-        "operation_count": int(len(ops)),
-        "eval_result": None,
-        "eval_matches_C": None,
-    }
-    if err is not None:
-        return out
-    if len(nums) == 0:
-        out["parse_error"] = "empty"
-        return out
-    if len(ops) == 0:
-        # No operate step; caller should still emit result step.
-        val = float(nums[0])
-        out["eval_result"] = val
-        if c_fallback is not None and math.isfinite(float(c_fallback)):
-            out["eval_matches_C"] = bool(
-                math.isclose(val, float(c_fallback), rel_tol=1e-6, abs_tol=1e-6)
-            )
-        return out
-    if len(nums) != len(ops) + 1:
-        out["parse_error"] = "arity_mismatch"
-        return out
-
-    cur = float(nums[0])
-    steps: List[Dict[str, Any]] = []
-    op_count = len(ops)
-    for op_idx, (op, rhs) in enumerate(zip(ops, nums[1:])):
-        lhs = float(cur)
-        rhs_f = float(rhs)
-        try:
-            cur = float(_apply_op(lhs, rhs_f, op))
-        except Exception as exc:
-            out["parse_error"] = f"eval_error:{type(exc).__name__}@{op_idx}"
-            out["steps"] = steps
-            return out
-        steps.append(
-            {
-                "operator": op if op in OPERATORS else "unknown",
-                "lhs_value": lhs,
-                "rhs_value": rhs_f,
-                "subresult_value": cur,
-                "operation_idx": int(op_idx),
-                "operation_count": int(op_count),
-            }
-        )
-    out["steps"] = steps
-    out["eval_result"] = float(cur)
-    if c_fallback is not None and math.isfinite(float(c_fallback)):
+    out = _parse_expression_steps_ast(expr)
+    if c_fallback is not None and out.get("eval_result") is not None and math.isfinite(float(c_fallback)):
         out["eval_matches_C"] = bool(
-            math.isclose(float(cur), float(c_fallback), rel_tol=1e-6, abs_tol=1e-6)
+            math.isclose(float(out["eval_result"]), float(c_fallback), rel_tol=1e-6, abs_tol=1e-6)
         )
+    else:
+        out["eval_matches_C"] = None
     return out
 
 

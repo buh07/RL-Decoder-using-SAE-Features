@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import random
 import statistics
-import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
@@ -15,18 +15,32 @@ import torch
 import torch.nn.functional as F
 
 try:  # pragma: no cover
-    from .common import load_json, load_pt, save_json, sha256_file
+    from .common import load_json, load_pt, magnitude_bucket, save_json, sha256_file, sign_label
+    from .sae_assets import load_norm_stats_for_layer, load_sae_for_layer
+    from .state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
 except ImportError:  # pragma: no cover
-    from common import load_json, load_pt, save_json, sha256_file
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT / "src"))
-from sae_architecture import SparseAutoencoder  # type: ignore
-from sae_config import SAEConfig  # type: ignore
+    from common import load_json, load_pt, magnitude_bucket, save_json, sha256_file, sign_label
+    from sae_assets import load_norm_stats_for_layer, load_sae_for_layer
+    from state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
 
 
 METRIC_KEYS = ("cosine_smoothness", "feature_variance_coherence", "magnitude_monotonicity_coherence")
+ANOMALY_KEYS = (
+    "max_delta_l2",
+    "top2_mean_delta_l2",
+    "argmax_step_idx_norm",
+    "p95_delta_l2",
+    "max_delta_cosine",
+    "p95_delta_cosine",
+    "max_delta_l2_norm",
+)
+HYBRID_KEYS = (
+    "hybrid_transition_consistency_mean",
+    "hybrid_transition_inconsistency_fraction",
+    "hybrid_weakest_link_consistency",
+    "hybrid_min_abs_transition_error",
+    "hybrid_p95_abs_transition_error",
+)
 FEATURE_SET_CHOICES = ("eq_top50", "result_top50", "eq_pre_result_150", "divergent_top50")
 
 
@@ -70,39 +84,6 @@ def _load_control_records_artifact(path: str | Path) -> Tuple[List[dict], Dict[s
     if not isinstance(rows, list):
         raise RuntimeError("control-records artifact rows are not available as list")
     return list(rows), payload
-
-
-def _load_sae(layer: int, saes_dir: Path, device: str) -> SparseAutoencoder:
-    ckpt_path = saes_dir / f"gpt2-medium_layer{int(layer)}_sae.pt"
-    if not ckpt_path.exists():
-        raise FileNotFoundError(f"Missing SAE checkpoint: {ckpt_path}")
-    ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
-    c = dict(ckpt["config"])
-    cfg = SAEConfig(
-        input_dim=int(c["input_dim"]),
-        expansion_factor=int(c["expansion_factor"]),
-        use_relu=bool(c.get("use_relu", True)),
-        use_topk=bool(c.get("use_topk", False)),
-        topk_k=int(c.get("topk_k", 0)),
-        use_amp=False,
-    )
-    sae = SparseAutoencoder(cfg)
-    sae.load_state_dict(ckpt["model_state_dict"])
-    return sae.to(device).eval()
-
-
-def _load_norm_stats(layer: int, activations_dir: Path, device: str) -> Tuple[torch.Tensor, torch.Tensor]:
-    p = activations_dir / f"gpt2-medium_layer{int(layer)}_activations.pt"
-    if not p.exists():
-        raise FileNotFoundError(f"Missing activation stats: {p}")
-    payload = torch.load(p, map_location="cpu", weights_only=False)
-    acts = payload["activations"] if isinstance(payload, dict) else payload
-    if not isinstance(acts, torch.Tensor):
-        raise TypeError(f"Unexpected activation payload type for layer={layer}: {type(acts).__name__}")
-    if acts.ndim == 3:
-        acts = acts.reshape(-1, acts.shape[-1])
-    acts = acts.float()
-    return acts.mean(dim=0).to(device), acts.std(dim=0).clamp_min(1e-6).to(device)
 
 
 def _normalize_hidden(h: torch.Tensor, stats: Tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
@@ -320,6 +301,7 @@ def _build_pair_descriptors(
 def _encode_rows_layer_feature_subset(
     rows: Sequence[dict],
     *,
+    model_key: str,
     layer: int,
     feature_indices: Sequence[int],
     saes_dir: Path,
@@ -327,8 +309,19 @@ def _encode_rows_layer_feature_subset(
     device: str,
     batch_size: int,
 ) -> torch.Tensor:
-    sae = _load_sae(layer=layer, saes_dir=saes_dir, device=device)
-    mean, std = _load_norm_stats(layer=layer, activations_dir=activations_dir, device=device)
+    sae = load_sae_for_layer(
+        saes_dir=Path(saes_dir),
+        model_key=str(model_key),
+        layer=int(layer),
+        device=device,
+    )
+    mean, std = load_norm_stats_for_layer(
+        activations_dir=Path(activations_dir),
+        model_key=str(model_key),
+        layer=int(layer),
+        device=device,
+    )
+    sae_dtype = next(sae.parameters()).dtype
     idx = torch.tensor([int(x) for x in feature_indices], dtype=torch.long, device=device)
     outs: List[torch.Tensor] = []
     with torch.no_grad():
@@ -336,7 +329,7 @@ def _encode_rows_layer_feature_subset(
             chunk = rows[start : start + int(batch_size)]
             x = torch.stack([r["raw_hidden"][int(layer)].float() for r in chunk], dim=0).to(device)
             x_norm = _normalize_hidden(x, (mean, std))
-            z = sae.encode(x_norm)
+            z = sae.encode(x_norm.to(dtype=sae_dtype))
             z_sub = z.index_select(dim=1, index=idx).detach().float().cpu()
             outs.append(z_sub)
     del sae
@@ -437,25 +430,213 @@ def _trajectory_samples(
     pairs: Sequence[PairDescriptor],
     *,
     mag_cols: Sequence[int],
+    decoder_preds_by_row: Optional[Sequence[Optional[Dict[str, Any]]]] = None,
 ) -> List[dict]:
     samples: List[dict] = []
     for p in pairs:
         ftraj = feat_rows[p.faithful_row_indices, :].float()
         utraj = feat_rows[p.unfaithful_row_indices, :].float()
-        for lbl, traj in (("faithful", ftraj), ("unfaithful", utraj)):
+        anomaly = _step_anomaly_block(ftraj, utraj)
+        for lbl, traj, row_indices in (
+            ("faithful", ftraj, p.faithful_row_indices),
+            ("unfaithful", utraj, p.unfaithful_row_indices),
+        ):
+            metric_row: Dict[str, Optional[float]] = {
+                "cosine_smoothness": _cosine_smoothness(traj),
+                "feature_variance_coherence": _feature_variance_coherence(traj),
+                "magnitude_monotonicity_coherence": _magnitude_monotonicity_coherence(traj, mag_cols),
+            }
+            if lbl == "unfaithful":
+                metric_row.update({k: float(v) for k, v in anomaly["aggregate"].items()})
+            else:
+                metric_row.update({k: 0.0 for k in ANOMALY_KEYS})
+            if decoder_preds_by_row is not None:
+                pred_seq = [decoder_preds_by_row[int(i)] for i in row_indices]
+                metric_row.update(_hybrid_consistency_block(pred_seq))
             sample = {
                 "trace_id": p.trace_id,
                 "variant": p.unfaithful_variant,
                 "label": lbl,
                 "step_count": int(traj.shape[0]),
-                "metrics": {
-                    "cosine_smoothness": _cosine_smoothness(traj),
-                    "feature_variance_coherence": _feature_variance_coherence(traj),
-                    "magnitude_monotonicity_coherence": _magnitude_monotonicity_coherence(traj, mag_cols),
-                },
+                "metrics": metric_row,
             }
+            if lbl == "unfaithful":
+                sample["step_anomaly_block"] = {
+                    "delta_l2_step": [float(x) for x in anomaly["delta_l2_step"]],
+                    "delta_cosine_step": [float(x) for x in anomaly["delta_cosine_step"]],
+                    "delta_l2_norm_step": [float(x) for x in anomaly["delta_l2_norm_step"]],
+                }
             samples.append(sample)
     return samples
+
+
+def _step_anomaly_block(ftraj: torch.Tensor, utraj: torch.Tensor) -> Dict[str, Any]:
+    if ftraj.ndim != 2 or utraj.ndim != 2 or ftraj.shape != utraj.shape or ftraj.shape[0] == 0:
+        return {
+            "delta_l2_step": [],
+            "delta_cosine_step": [],
+            "delta_l2_norm_step": [],
+            "aggregate": {k: 0.0 for k in ANOMALY_KEYS},
+        }
+    delta = utraj - ftraj
+    d_l2 = delta.norm(dim=1)
+    denom = ftraj.norm(dim=1).clamp_min(1e-8)
+    d_l2_norm = d_l2 / denom
+    d_cos = 1.0 - F.cosine_similarity(utraj, ftraj, dim=1, eps=1e-8)
+
+    top2 = torch.topk(d_l2, k=min(2, int(d_l2.numel())), largest=True).values
+    argmax = int(torch.argmax(d_l2).item()) if int(d_l2.numel()) > 0 else 0
+    denom_steps = max(1, int(d_l2.numel()) - 1)
+
+    aggregate = {
+        "max_delta_l2": float(torch.max(d_l2).item()) if int(d_l2.numel()) > 0 else 0.0,
+        "top2_mean_delta_l2": float(top2.mean().item()) if int(top2.numel()) > 0 else 0.0,
+        "argmax_step_idx_norm": float(argmax / denom_steps),
+        "p95_delta_l2": float(torch.quantile(d_l2, 0.95).item()) if int(d_l2.numel()) > 0 else 0.0,
+        "max_delta_cosine": float(torch.max(d_cos).item()) if int(d_cos.numel()) > 0 else 0.0,
+        "p95_delta_cosine": float(torch.quantile(d_cos, 0.95).item()) if int(d_cos.numel()) > 0 else 0.0,
+        "max_delta_l2_norm": float(torch.max(d_l2_norm).item()) if int(d_l2_norm.numel()) > 0 else 0.0,
+    }
+    return {
+        "delta_l2_step": d_l2.detach().cpu().tolist(),
+        "delta_cosine_step": d_cos.detach().cpu().tolist(),
+        "delta_l2_norm_step": d_l2_norm.detach().cpu().tolist(),
+        "aggregate": aggregate,
+    }
+
+
+def _safe_float(x: Any) -> Optional[float]:
+    if isinstance(x, (int, float)):
+        xf = float(x)
+        if xf == xf and xf not in (float("inf"), float("-inf")):
+            return xf
+    return None
+
+
+def _pred_to_mag_sign(v: Optional[float]) -> Tuple[str, str]:
+    if v is None:
+        return "unknown", "unknown"
+    try:
+        return str(magnitude_bucket(float(v))), str(sign_label(float(v)))
+    except Exception:
+        return "unknown", "unknown"
+
+
+def _hybrid_consistency_block(pred_seq: Sequence[Optional[Dict[str, Any]]]) -> Dict[str, Optional[float]]:
+    if len(pred_seq) < 2:
+        return {k: 0.5 for k in HYBRID_KEYS}
+    consistency: List[float] = []
+    abs_errs: List[float] = []
+    for i in range(len(pred_seq) - 1):
+        cur = pred_seq[i] or {}
+        nxt = pred_seq[i + 1] or {}
+        cur_sub = _safe_float(cur.get("subresult_value"))
+        nxt_lhs = _safe_float(nxt.get("lhs_value"))
+        nxt_rhs = _safe_float(nxt.get("rhs_value"))
+        cur_mag = str(cur.get("magnitude_bucket", "unknown"))
+        cur_sign = str(cur.get("sign", "unknown"))
+        lhs_mag, lhs_sign = _pred_to_mag_sign(nxt_lhs)
+        rhs_mag, rhs_sign = _pred_to_mag_sign(nxt_rhs)
+        match_lhs = cur_mag == lhs_mag and cur_sign == lhs_sign and cur_mag != "unknown"
+        match_rhs = cur_mag == rhs_mag and cur_sign == rhs_sign and cur_mag != "unknown"
+        consistency.append(1.0 if (match_lhs or match_rhs) else 0.0)
+        if cur_sub is not None and (nxt_lhs is not None or nxt_rhs is not None):
+            errs = []
+            if nxt_lhs is not None:
+                errs.append(abs(cur_sub - nxt_lhs))
+            if nxt_rhs is not None:
+                errs.append(abs(cur_sub - nxt_rhs))
+            if errs:
+                abs_errs.append(float(min(errs)))
+    if not consistency:
+        return {k: 0.5 for k in HYBRID_KEYS}
+    err_tensor = torch.tensor(abs_errs, dtype=torch.float32) if abs_errs else torch.tensor([0.0], dtype=torch.float32)
+    mean_cons = float(sum(consistency) / max(1, len(consistency)))
+    return {
+        "hybrid_transition_consistency_mean": mean_cons,
+        "hybrid_transition_inconsistency_fraction": float(1.0 - mean_cons),
+        "hybrid_weakest_link_consistency": float(min(consistency)),
+        "hybrid_min_abs_transition_error": float(torch.min(err_tensor).item()) if abs_errs else 0.0,
+        "hybrid_p95_abs_transition_error": float(torch.quantile(err_tensor, 0.95).item()) if abs_errs else 0.0,
+    }
+
+
+def _row_identity_hash(rows: Sequence[dict]) -> str:
+    h = hashlib.sha256()
+    for r in rows:
+        tid = str(r.get("trace_id", ""))
+        var = str(r.get("control_variant", ""))
+        step = int(r.get("step_idx", -1))
+        ex = int(r.get("example_idx", -1))
+        line = int(r.get("line_index", -1))
+        h.update(f"{tid}|{var}|{step}|{ex}|{line}\n".encode("utf-8"))
+    return h.hexdigest()
+
+
+def _decode_predictions_for_rows(
+    rows: Sequence[dict],
+    *,
+    decoder_checkpoint: str,
+    device: str,
+    batch_size: int,
+    cache_path: Optional[str],
+) -> List[Optional[Dict[str, Any]]]:
+    row_hash = _row_identity_hash(rows)
+    if cache_path:
+        cp = Path(cache_path)
+        if cp.exists():
+            payload = load_json(cp)
+            if (
+                str(payload.get("row_identity_hash", "")) == row_hash
+                and isinstance(payload.get("predictions"), list)
+                and int(payload.get("rows_count", -1)) == int(len(rows))
+            ):
+                preds = list(payload.get("predictions", []))
+                if len(preds) == len(rows):
+                    return preds
+
+    _, cfg, numeric_stats, model = load_model_from_checkpoint(decoder_checkpoint, device=device)
+    full = decode_latent_pred_states(
+        model,
+        rows,
+        cfg,
+        numeric_stats,
+        device=device,
+        batch_size=int(batch_size),
+        cache_inputs="auto",
+        cache_max_gb=8.0,
+        non_blocking_transfer=True,
+    )
+    preds: List[Optional[Dict[str, Any]]] = []
+    for p in full:
+        s = p.get("latent_pred_state", {}) if isinstance(p, dict) else {}
+        preds.append(
+            {
+                "magnitude_bucket": s.get("magnitude_bucket"),
+                "sign": s.get("sign"),
+                "lhs_value": _safe_float(s.get("lhs_value")),
+                "rhs_value": _safe_float(s.get("rhs_value")),
+                "subresult_value": _safe_float(s.get("subresult_value")),
+            }
+        )
+    if len(preds) != len(rows):
+        raise RuntimeError(
+            f"decoder prediction length mismatch: preds={len(preds)} rows={len(rows)} checkpoint={decoder_checkpoint}"
+        )
+    if cache_path:
+        cp = Path(cache_path)
+        cp.parent.mkdir(parents=True, exist_ok=True)
+        save_json(
+            cp,
+            {
+                "schema_version": "phase7_decoder_preds_cache_v1",
+                "decoder_checkpoint": str(decoder_checkpoint),
+                "rows_count": int(len(rows)),
+                "row_identity_hash": str(row_hash),
+                "predictions": preds,
+            },
+        )
+    return preds
 
 
 def _metric_auc_from_samples(samples: Sequence[dict], metric_key: str, *, seed: int, n_bootstrap: int) -> Dict[str, Any]:
@@ -497,6 +678,7 @@ def _variant_metric_table(samples: Sequence[dict], metric_key: str, *, seed: int
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--control-records", required=True)
+    p.add_argument("--model-key", default="gpt2-medium")
     p.add_argument("--layer", type=int, required=True)
     p.add_argument("--saes-dir", default="phase2_results/saes_gpt2_12x_topk/saes")
     p.add_argument("--activations-dir", default="phase2_results/activations")
@@ -522,6 +704,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--n-bootstrap", type=int, default=1000)
     p.add_argument("--batch-size", type=int, default=256)
     p.add_argument("--device", default="cuda:0")
+    p.add_argument("--decoder-checkpoint", default="", help="Optional decoder checkpoint for hybrid consistency features.")
+    p.add_argument("--decoder-device", default="", help="Device for decoder inference (default: --device).")
+    p.add_argument("--decoder-batch-size", type=int, default=128)
+    p.add_argument(
+        "--decoder-preds-cache",
+        default="",
+        help="Optional JSON cache path for per-row decoder predictions used by hybrid metrics.",
+    )
     p.add_argument("--run-tag", default="")
     p.add_argument(
         "--emit-samples",
@@ -552,6 +742,7 @@ def main() -> None:
             "schema_version": "phase7_sae_trajectory_coherence_partial_v1",
             "status": "blocked_no_pairable_trajectories",
             "run_tag": run_tag,
+            "model_key": str(args.model_key),
             "layer": int(layer),
             "source_control_records": str(args.control_records),
             "source_control_records_sha256": sha256_file(args.control_records),
@@ -581,6 +772,7 @@ def main() -> None:
 
     feat_rows = _encode_rows_layer_feature_subset(
         rows_used,
+        model_key=str(args.model_key),
         layer=layer,
         feature_indices=top50,
         saes_dir=Path(args.saes_dir),
@@ -589,7 +781,24 @@ def main() -> None:
         batch_size=int(args.batch_size),
     )
 
-    samples = _trajectory_samples(feat_rows, pair_desc, mag_cols=mag_focus_cols)
+    decoder_preds_by_row: Optional[List[Optional[Dict[str, Any]]]] = None
+    decoder_checkpoint = str(args.decoder_checkpoint).strip()
+    if decoder_checkpoint:
+        decoder_device = str(args.decoder_device).strip() or str(args.device)
+        decoder_preds_by_row = _decode_predictions_for_rows(
+            rows_used,
+            decoder_checkpoint=decoder_checkpoint,
+            device=decoder_device,
+            batch_size=int(args.decoder_batch_size),
+            cache_path=(str(args.decoder_preds_cache).strip() or None),
+        )
+
+    samples = _trajectory_samples(
+        feat_rows,
+        pair_desc,
+        mag_cols=mag_focus_cols,
+        decoder_preds_by_row=decoder_preds_by_row,
+    )
     overall: Dict[str, Any] = {}
     by_variant: Dict[str, Any] = {}
     for mi, metric in enumerate(METRIC_KEYS):
@@ -614,6 +823,7 @@ def main() -> None:
         "schema_version": "phase7_sae_trajectory_coherence_partial_v1",
         "status": "ok",
         "run_tag": run_tag,
+        "model_key": str(args.model_key),
         "layer": int(layer),
         "source_control_records": str(args.control_records),
         "source_control_records_sha256": sha256_file(args.control_records),
@@ -632,6 +842,9 @@ def main() -> None:
             "alignment_policy": "common_step_idx_sorted",
             "metric_policy": "separate_only_no_blend",
             "feature_set": str(args.feature_set),
+            "decoder_checkpoint": (decoder_checkpoint or None),
+            "decoder_device": (str(args.decoder_device).strip() or None),
+            "hybrid_consistency_enabled": bool(decoder_preds_by_row is not None),
         },
         "feature_selection": {
             "selected_features": [int(x) for x in top50],

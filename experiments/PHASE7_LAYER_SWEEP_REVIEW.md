@@ -66,5 +66,5 @@ What cannot be claimed from GPT-2 closure:
 Qwen is an independent follow-up hypothesis test and is not implied by GPT-2 closure.
 
 Next required entry point:
-- `Q0` diagnostic-first viability check (small sample, control-conditioned hidden-state separation at `=` anchor).
-- Full Qwen Stage 3 proceeds only if `Q0` passes predefined go/no-go criteria.
+- Qwen SAE trajectory ladder (Path A→B→C) with robust CV gating.
+- Promote to full Qwen matrix only after canary integrity pass; publishable cross-model signal requires robust-CV `wrong_intermediate AUROC > 0.70`.

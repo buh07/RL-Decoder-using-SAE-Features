@@ -18,6 +18,7 @@ _run_worker() {
   : "${BASE:?BASE required}"
   : "${GPU_ID:?GPU_ID required}"
   : "${LAYERS:?LAYERS required}"
+  : "${MODEL_KEY:?MODEL_KEY required}"
   : "${CONTROL_RECORDS:?CONTROL_RECORDS required}"
   : "${OUT_PARTIAL:?OUT_PARTIAL required}"
 
@@ -27,6 +28,7 @@ _run_worker() {
     echo "[$(date -Is)] worker start gpu=${GPU_ID} layers=${LAYERS}"
     CUDA_VISIBLE_DEVICES="$GPU_ID" "$PY" phase7/sae_feature_faithfulness_discrimination.py \
       --control-records "$CONTROL_RECORDS" \
+      --model-key "$MODEL_KEY" \
       --layers "$LAYERS" \
       --saes-dir "$SAES_DIR" \
       --activations-dir "$ACTIVATIONS_DIR" \
@@ -75,16 +77,43 @@ _run_coordinator() {
       fi
 
       if [[ "$g5_done" -eq 0 ]] && ! tmux has-session -t "$WORKER_SESSION_G5" 2>/dev/null; then
-        echo "worker session missing before completion: $WORKER_SESSION_G5" >&2
-        exit 1
+        sleep 2
+        if [[ -f "$BASE/state/gpu5.done" ]]; then
+          g5_done=1
+        elif [[ -f "$PARTIAL_G5" ]]; then
+          echo "worker session g5 exited after writing partial; synthesizing gpu5.done"
+          touch "$BASE/state/gpu5.done"
+          g5_done=1
+        else
+          echo "worker session missing before completion: $WORKER_SESSION_G5" >&2
+          exit 1
+        fi
       fi
       if [[ "$g6_done" -eq 0 ]] && ! tmux has-session -t "$WORKER_SESSION_G6" 2>/dev/null; then
-        echo "worker session missing before completion: $WORKER_SESSION_G6" >&2
-        exit 1
+        sleep 2
+        if [[ -f "$BASE/state/gpu6.done" ]]; then
+          g6_done=1
+        elif [[ -f "$PARTIAL_G6" ]]; then
+          echo "worker session g6 exited after writing partial; synthesizing gpu6.done"
+          touch "$BASE/state/gpu6.done"
+          g6_done=1
+        else
+          echo "worker session missing before completion: $WORKER_SESSION_G6" >&2
+          exit 1
+        fi
       fi
       if [[ "$g7_done" -eq 0 ]] && ! tmux has-session -t "$WORKER_SESSION_G7" 2>/dev/null; then
-        echo "worker session missing before completion: $WORKER_SESSION_G7" >&2
-        exit 1
+        sleep 2
+        if [[ -f "$BASE/state/gpu7.done" ]]; then
+          g7_done=1
+        elif [[ -f "$PARTIAL_G7" ]]; then
+          echo "worker session g7 exited after writing partial; synthesizing gpu7.done"
+          touch "$BASE/state/gpu7.done"
+          g7_done=1
+        else
+          echo "worker session missing before completion: $WORKER_SESSION_G7" >&2
+          exit 1
+        fi
       fi
       sleep 10
     done
@@ -123,6 +152,7 @@ case "$MODE" in
     RUN_TAG="${RUN_TAG:-phase7_sae_${RUN_ID}}"
     BASE="${BASE:-phase7_results/runs/${RUN_ID}}"
     CONTROL_RECORDS="${CONTROL_RECORDS:-phase7_results/interventions/control_records_phase7_causal_recovery_r2p4_20260305_133136_phase7_causal_recovery_r2p4_canary_raw_every2_even.json}"
+    MODEL_KEY="${MODEL_KEY:-gpt2-medium}"
     SAES_DIR="${SAES_DIR:-phase2_results/saes_gpt2_12x_topk/saes}"
     ACTIVATIONS_DIR="${ACTIVATIONS_DIR:-phase2_results/activations}"
     PHASE4_TOP_FEATURES="${PHASE4_TOP_FEATURES:-phase4_results/topk/probe/top_features_per_layer.json}"
@@ -137,9 +167,16 @@ case "$MODE" in
     MIN_CLASS_PER_SPLIT="${MIN_CLASS_PER_SPLIT:-10}"
     BATCH_SIZE="${BATCH_SIZE:-256}"
 
-    PARTIAL_G5="${PARTIAL_G5:-phase7_results/results/phase7_sae_feature_discrimination_${RUN_TAG}_layers_0_7.json}"
-    PARTIAL_G6="${PARTIAL_G6:-phase7_results/results/phase7_sae_feature_discrimination_${RUN_TAG}_layers_8_15.json}"
-    PARTIAL_G7="${PARTIAL_G7:-phase7_results/results/phase7_sae_feature_discrimination_${RUN_TAG}_layers_16_23.json}"
+    LAYERS_G5="${LAYERS_G5:-0,1,2,3,4,5,6,7}"
+    LAYERS_G6="${LAYERS_G6:-8,9,10,11,12,13,14,15}"
+    LAYERS_G7="${LAYERS_G7:-16,17,18,19,20,21,22,23}"
+
+    LAYERS_TAG_G5="${LAYERS_G5//,/_}"
+    LAYERS_TAG_G6="${LAYERS_G6//,/_}"
+    LAYERS_TAG_G7="${LAYERS_G7//,/_}"
+    PARTIAL_G5="${PARTIAL_G5:-phase7_results/results/phase7_sae_feature_discrimination_${RUN_TAG}_layers_${LAYERS_TAG_G5}.json}"
+    PARTIAL_G6="${PARTIAL_G6:-phase7_results/results/phase7_sae_feature_discrimination_${RUN_TAG}_layers_${LAYERS_TAG_G6}.json}"
+    PARTIAL_G7="${PARTIAL_G7:-phase7_results/results/phase7_sae_feature_discrimination_${RUN_TAG}_layers_${LAYERS_TAG_G7}.json}"
     OUT_MERGED_JSON="${OUT_MERGED_JSON:-phase7_results/results/phase7_sae_feature_discrimination_${RUN_TAG}.json}"
     OUT_MERGED_MD="${OUT_MERGED_MD:-phase7_results/results/phase7_sae_feature_discrimination_${RUN_TAG}.md}"
 
@@ -149,11 +186,13 @@ case "$MODE" in
     COORD_SESSION="p7sae_coord_${RUN_ID}"
 
     mkdir -p "$BASE/logs" "$BASE/state" "$BASE/meta" "phase7_results/results"
+    rm -f "$BASE/state/gpu5.done" "$BASE/state/gpu6.done" "$BASE/state/gpu7.done" "$BASE/state/pipeline.done"
     cat > "$BASE/meta/config.env" <<CFG
 RUN_ID=$RUN_ID
 RUN_TAG=$RUN_TAG
 BASE=$BASE
 CONTROL_RECORDS=$CONTROL_RECORDS
+MODEL_KEY=$MODEL_KEY
 SAES_DIR=$SAES_DIR
 ACTIVATIONS_DIR=$ACTIVATIONS_DIR
 PHASE4_TOP_FEATURES=$PHASE4_TOP_FEATURES
@@ -167,6 +206,9 @@ PROBE_WEIGHT_DECAY=$PROBE_WEIGHT_DECAY
 PROBE_L1_LAMBDA=$PROBE_L1_LAMBDA
 MIN_CLASS_PER_SPLIT=$MIN_CLASS_PER_SPLIT
 BATCH_SIZE=$BATCH_SIZE
+LAYERS_G5=$LAYERS_G5
+LAYERS_G6=$LAYERS_G6
+LAYERS_G7=$LAYERS_G7
 PARTIAL_G5=$PARTIAL_G5
 PARTIAL_G6=$PARTIAL_G6
 PARTIAL_G7=$PARTIAL_G7
@@ -178,14 +220,20 @@ WORKER_SESSION_G7=$WORKER_SESSION_G7
 COORD_SESSION=$COORD_SESSION
 CFG
 
-    tmux new-session -d -s "$WORKER_SESSION_G5" "cd '$ROOT_DIR' && set -a && source '$BASE/meta/config.env' && set +a && GPU_ID=5 LAYERS='0,1,2,3,4,5,6,7' OUT_PARTIAL='$PARTIAL_G5' '$0' worker-g5"
-    tmux new-session -d -s "$WORKER_SESSION_G6" "cd '$ROOT_DIR' && set -a && source '$BASE/meta/config.env' && set +a && GPU_ID=6 LAYERS='8,9,10,11,12,13,14,15' OUT_PARTIAL='$PARTIAL_G6' '$0' worker-g6"
-    tmux new-session -d -s "$WORKER_SESSION_G7" "cd '$ROOT_DIR' && set -a && source '$BASE/meta/config.env' && set +a && GPU_ID=7 LAYERS='16,17,18,19,20,21,22,23' OUT_PARTIAL='$PARTIAL_G7' '$0' worker-g7"
+    tmux has-session -t "$WORKER_SESSION_G5" 2>/dev/null && tmux kill-session -t "$WORKER_SESSION_G5"
+    tmux has-session -t "$WORKER_SESSION_G6" 2>/dev/null && tmux kill-session -t "$WORKER_SESSION_G6"
+    tmux has-session -t "$WORKER_SESSION_G7" 2>/dev/null && tmux kill-session -t "$WORKER_SESSION_G7"
+    tmux has-session -t "$COORD_SESSION" 2>/dev/null && tmux kill-session -t "$COORD_SESSION"
+
+    tmux new-session -d -s "$WORKER_SESSION_G5" "cd '$ROOT_DIR' && set -a && source '$BASE/meta/config.env' && set +a && GPU_ID=5 LAYERS='$LAYERS_G5' OUT_PARTIAL='$PARTIAL_G5' '$0' worker-g5"
+    tmux new-session -d -s "$WORKER_SESSION_G6" "cd '$ROOT_DIR' && set -a && source '$BASE/meta/config.env' && set +a && GPU_ID=6 LAYERS='$LAYERS_G6' OUT_PARTIAL='$PARTIAL_G6' '$0' worker-g6"
+    tmux new-session -d -s "$WORKER_SESSION_G7" "cd '$ROOT_DIR' && set -a && source '$BASE/meta/config.env' && set +a && GPU_ID=7 LAYERS='$LAYERS_G7' OUT_PARTIAL='$PARTIAL_G7' '$0' worker-g7"
     tmux new-session -d -s "$COORD_SESSION" "cd '$ROOT_DIR' && set -a && source '$BASE/meta/config.env' && set +a && '$0' coordinator"
 
     echo "launched phase7-sae"
     echo "  run_id: $RUN_ID"
     echo "  run_tag: $RUN_TAG"
+    echo "  model_key: $MODEL_KEY"
     echo "  worker sessions: $WORKER_SESSION_G5, $WORKER_SESSION_G6, $WORKER_SESSION_G7"
     echo "  coordinator: $COORD_SESSION"
     echo "  merged output: $OUT_MERGED_JSON"

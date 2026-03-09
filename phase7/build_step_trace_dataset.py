@@ -14,6 +14,7 @@ try:  # pragma: no cover
         PHASE7_TRACE_SCHEMA_V2,
         build_structured_state,
         parse_expression_steps,
+        tokenize_expression,
         faithful_step_text,
         group_records_by_example,
         load_pt,
@@ -28,6 +29,7 @@ except ImportError:  # pragma: no cover
         PHASE7_TRACE_SCHEMA_V2,
         build_structured_state,
         parse_expression_steps,
+        tokenize_expression,
         faithful_step_text,
         group_records_by_example,
         load_pt,
@@ -202,9 +204,54 @@ def _expanded_step_state(
     }
 
 
-def _build_from_phase6_records_v2(records: List[dict], split_name: str, model_meta: Dict[str, object]) -> List[dict]:
+def _build_from_phase6_records_v2(
+    records: List[dict],
+    split_name: str,
+    model_meta: Dict[str, object],
+) -> tuple[List[dict], Dict[str, object]]:
+    def _legacy_parse_steps(expr: str, c_fallback: float) -> Dict[str, object]:
+        nums, ops, err = tokenize_expression(expr)
+        if err is not None:
+            return {"parse_error": str(err), "steps": []}
+        if len(nums) == 0:
+            return {"parse_error": "empty", "steps": []}
+        if len(ops) == 0:
+            return {"parse_error": None, "steps": []}
+        if len(nums) != len(ops) + 1:
+            return {"parse_error": "arity_mismatch", "steps": []}
+        cur = float(nums[0])
+        steps: List[dict] = []
+        for op_idx, (op, rhs) in enumerate(zip(ops, nums[1:])):
+            lhs = float(cur)
+            rhs_f = float(rhs)
+            try:
+                if op == "+":
+                    cur = lhs + rhs_f
+                elif op == "-":
+                    cur = lhs - rhs_f
+                elif op == "*":
+                    cur = lhs * rhs_f
+                elif op == "/":
+                    cur = lhs / rhs_f
+                else:
+                    return {"parse_error": "unsupported_op", "steps": steps}
+            except Exception as exc:
+                return {"parse_error": f"eval_error:{type(exc).__name__}@{op_idx}", "steps": steps}
+            steps.append({"operator": op, "operation_idx": int(op_idx)})
+        return {"parse_error": None, "steps": steps}
+
     by_example = group_records_by_example(records)
     out: List[dict] = []
+    relabel_diag: Dict[str, object] = {
+        "legacy_unknown_operate_rows": 0,
+        "rebuilt_unknown_operate_rows": 0,
+        "legacy_parse_error_counts": {},
+        "rebuilt_parse_error_counts": {},
+        "operate_rows_rebuilt": 0,
+        "operator_relabel_delta_count": 0,
+    }
+    legacy_err = Counter()
+    rebuilt_err = Counter()
     for ex_id, group in sorted(by_example.items()):
         trace_id = make_trace_id(split_name, ex_id)
         trace_rows: List[dict] = []
@@ -212,10 +259,13 @@ def _build_from_phase6_records_v2(records: List[dict], split_name: str, model_me
             c_val = float(rec.get("C", 0.0))
             expr = str(rec.get("expr_str", ""))
             ann_idx = int(rec.get("ann_idx", rec_idx))
+            legacy_parsed = _legacy_parse_steps(expr, c_fallback=c_val)
             parsed_steps = parse_expression_steps(expr, c_fallback=c_val)
             op_steps = list(parsed_steps.get("steps") or [])
             op_count = int(parsed_steps.get("operation_count", len(op_steps)))
             parse_error = parsed_steps.get("parse_error")
+            legacy_err[str(legacy_parsed.get("parse_error"))] += 1
+            rebuilt_err[str(parse_error)] += 1
 
             if parse_error and not op_steps:
                 op_steps = [
@@ -229,6 +279,11 @@ def _build_from_phase6_records_v2(records: List[dict], split_name: str, model_me
                     }
                 ]
                 op_count = max(1, op_count)
+            legacy_steps = list(legacy_parsed.get("steps") or [])
+            relabel_diag["legacy_unknown_operate_rows"] = int(
+                int(relabel_diag["legacy_unknown_operate_rows"])
+                + sum(1 for s in legacy_steps if str(s.get("operator", "unknown")) == "unknown")
+            )
 
             for op in op_steps:
                 step_idx = len(trace_rows)
@@ -267,7 +322,23 @@ def _build_from_phase6_records_v2(records: List[dict], split_name: str, model_me
                         "cot_alignment_span": None,
                     }
                 )
+                relabel_diag["operate_rows_rebuilt"] = int(int(relabel_diag["operate_rows_rebuilt"]) + 1)
+                if str(state.get("operator", "unknown")) == "unknown":
+                    relabel_diag["rebuilt_unknown_operate_rows"] = int(
+                        int(relabel_diag["rebuilt_unknown_operate_rows"]) + 1
+                    )
                 trace_rows.append(row)
+            overlap = min(len(legacy_steps), len(op_steps))
+            relabel_diag["operator_relabel_delta_count"] = int(
+                int(relabel_diag["operator_relabel_delta_count"])
+                + sum(
+                    1
+                    for i in range(overlap)
+                    if str((legacy_steps[i] or {}).get("operator", "unknown"))
+                    != str((op_steps[i] or {}).get("operator", "unknown"))
+                )
+                + abs(len(legacy_steps) - len(op_steps))
+            )
 
             emit_step_idx = len(trace_rows)
             emit_state = _expanded_step_state(
@@ -312,7 +383,9 @@ def _build_from_phase6_records_v2(records: List[dict], split_name: str, model_me
             row["trace_len"] = int(trace_len)
             row["structured_state"]["step_idx"] = int(row["step_idx"])
         out.extend(trace_rows)
-    return out
+    relabel_diag["legacy_parse_error_counts"] = {str(k): int(v) for k, v in sorted(legacy_err.items())}
+    relabel_diag["rebuilt_parse_error_counts"] = {str(k): int(v) for k, v in sorted(rebuilt_err.items())}
+    return out, relabel_diag
 
 
 def _summarize(step_records: List[dict], split_name: str) -> Dict:
@@ -320,6 +393,7 @@ def _summarize(step_records: List[dict], split_name: str) -> Dict:
     ops = Counter(r["structured_state"]["operator"] for r in step_records)
     mags = Counter(r["structured_state"]["magnitude_bucket"] for r in step_records)
     parse_err = Counter(bool(r["structured_state"].get("parse_error")) for r in step_records)
+    parse_err_reason = Counter(str(r["structured_state"].get("parse_error")) for r in step_records)
     trace_ids = {r["trace_id"] for r in step_records}
     op_counts = Counter(int(r.get("operation_count", 0)) for r in step_records)
     return {
@@ -330,6 +404,7 @@ def _summarize(step_records: List[dict], split_name: str) -> Dict:
         "operator_counts": dict(ops),
         "magnitude_bucket_counts": dict(mags),
         "parse_error_counts": {"has_error": int(parse_err.get(True, 0)), "no_error": int(parse_err.get(False, 0))},
+        "parse_error_reason_counts": {str(k): int(v) for k, v in sorted(parse_err_reason.items())},
         "operation_count_distribution": {str(k): int(v) for k, v in sorted(op_counts.items())},
     }
 
@@ -401,14 +476,16 @@ def main() -> None:
 
     print(f"Loaded Phase6 train records: {len(train)}")
     if args.state_ontology == "v2_expanded":
-        train_steps = _build_from_phase6_records_v2(train, "train", model_meta)
+        train_steps, train_relabel_diag = _build_from_phase6_records_v2(train, "train", model_meta)
     else:
         train_steps = _build_from_phase6_records(train, "train", model_meta)
+        train_relabel_diag = {}
     print(f"Built Phase7 train step records: {len(train_steps)}")
     if args.state_ontology == "v2_expanded":
-        test_steps = _build_from_phase6_records_v2(test, "test", model_meta)
+        test_steps, test_relabel_diag = _build_from_phase6_records_v2(test, "test", model_meta)
     else:
         test_steps = _build_from_phase6_records(test, "test", model_meta)
+        test_relabel_diag = {}
     print(f"Built Phase7 test step records: {len(test_steps)}")
 
     train_path = out_dir / "gsm8k_step_traces_train.pt"
@@ -437,6 +514,10 @@ def main() -> None:
         "splits": {
             "train": _summarize(train_steps, "train"),
             "test": _summarize(test_steps, "test"),
+        },
+        "relabel_integrity": {
+            "train": train_relabel_diag,
+            "test": test_relabel_diag,
         },
     }
     save_json(out_dir / "build_summary.json", summary)

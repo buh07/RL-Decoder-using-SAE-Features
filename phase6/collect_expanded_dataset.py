@@ -144,6 +144,7 @@ def extract_record(
     model_key: str,
     model_family: str,
     tokenizer_id: str,
+    capture_extra_anchors: bool = False,
 ) -> Tuple[Optional[dict], Optional[str]]:
     """Extract one annotation record with raw hidden states, SAE features, and baseline logprob."""
 
@@ -170,6 +171,16 @@ def extract_record(
     raw_hidden = torch.stack([
         hidden_states[L][0, eq_tok_idx, :].detach().cpu() for L in range(num_layers)
     ]).half()  # (24, 1024)
+    raw_hidden_result = None
+    raw_hidden_pre_eq_last = None
+    if capture_extra_anchors:
+        pre_eq_last_idx = int(pre_eq_toks[-1]) if pre_eq_toks else int(eq_tok_idx)
+        raw_hidden_result = torch.stack(
+            [hidden_states[L][0, result_tok_idx, :].detach().cpu() for L in range(num_layers)]
+        ).half()
+        raw_hidden_pre_eq_last = torch.stack(
+            [hidden_states[L][0, pre_eq_last_idx, :].detach().cpu() for L in range(num_layers)]
+        ).half()
 
     # SAE features at eq_tok position: (num_layers, latent_dim) float16
     sae_features_list = []
@@ -194,7 +205,7 @@ def extract_record(
     top5_vals, top5_ids = lp_vec.topk(5)
 
     C = ann["C"]
-    return {
+    out = {
         "schema_version": "phase6_v1",
         "example_idx":     example_idx,
         "ann_idx":         ann_idx,
@@ -219,7 +230,11 @@ def extract_record(
         "hidden_dim": int(hidden_dim),
         "sae_dim": int(model_sae_dim),
         "tokenizer_id": tokenizer_id,
-    }, None
+    }
+    if capture_extra_anchors:
+        out["raw_hidden_result"] = raw_hidden_result
+        out["raw_hidden_pre_eq_last"] = raw_hidden_pre_eq_last
+    return out, None
 
 
 # ── Main collection ──────────────────────────────────────────────────────────
@@ -337,6 +352,7 @@ def collect(args):
                 model_key=spec.model_key,
                 model_family=spec.model_family,
                 tokenizer_id=spec.tokenizer_id,
+                capture_extra_anchors=bool(args.capture_extra_anchors),
             )
             if rec is None:
                 if skip_reason == "multi_token_result":
@@ -414,6 +430,11 @@ def parse_args():
     p.add_argument("--shard", type=int, nargs=2, metavar=("IDX", "N"),
                    help="Shard index and total shards (e.g., --shard 0 3)")
     p.add_argument("--merge", action="store_true", help="Merge shards and exit")
+    p.add_argument(
+        "--capture-extra-anchors",
+        action="store_true",
+        help="Store additional raw hidden anchors (result token and pre-eq tail token).",
+    )
     return p.parse_args()
 
 

@@ -4,6 +4,7 @@
 - Model scope: `gpt2-medium` only.
 - Protocol scope: Phase 7v3 Track C reformulations (`R1` confidence, `R2` trajectory, `R3` contrastive probe, `R4` geometry).
 - Final disposition for GPT-2: **Track C closed as a negative result for CoT-faithfulness discrimination**.
+- Canonical evidence policy: **robust-only** (variant-robust CV / bootstrap / leakage-clean runs are gating evidence).
 - Shipping configuration for GPT-2 Phase 7: **two-track composite** with structural penalties.
   - Top-level weights: `text=0.50`, `latent=0.50`, `confidence=0.0`, `causal=0.0`.
 
@@ -20,9 +21,9 @@
 - `phase7_results/results/phase7_sae_trajectory_pathb_20260306_234123_phase7_sae_trajectory_pathb.json`
 - `phase7_results/results/phase7_sae_trajectory_pathc_20260306_235018_phase7_sae_trajectory_pathc.json`
 - `phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json`
-- `phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json`
-- `phase7_results/results/mixed_gain_sweep_summary.json`
-- `phase7_results/results/mixed_result_top50_seed_sweep_summary.json`
+- `phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json` (exploratory, non-gating)
+- `phase7_results/results/mixed_gain_sweep_summary.json` (exploratory, non-gating)
+- `phase7_results/results/mixed_result_top50_seed_sweep_summary.json` (exploratory, non-gating)
 
 ## R5.1 Decision Matrix Outcome
 Final closure branch used for GPT-2:
@@ -82,4 +83,5 @@ What this does not support:
 - Using Track C as a positive gate for GPT-2 in this protocol.
 
 ## Next-Step Boundary
-Qwen work is a separate hypothesis test and does not reopen GPT-2 closure by default. See `TODO.md` for the diagnostic-first Qwen `Q0` go/no-go path.
+Qwen work is a separate hypothesis test and does not reopen GPT-2 closure by default.  
+The active next-model path is the **Qwen SAE trajectory ladder** (Path A→B→C with robust CV gating), not the legacy Q0 raw-L2 diagnostic.

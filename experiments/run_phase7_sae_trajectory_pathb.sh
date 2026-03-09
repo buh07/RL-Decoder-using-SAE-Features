@@ -17,6 +17,8 @@ BASE="${BASE:-phase7_results/runs/${RUN_ID}}"
 FEATURE_SETS_CSV="${FEATURE_SETS_CSV:-result_top50,eq_pre_result_150,divergent_top50}"
 
 CONTROL_RECORDS="${CONTROL_RECORDS:-phase7_results/interventions/control_records_phase7_causal_recovery_r2p4_20260305_133136_phase7_causal_recovery_r2p4_canary_raw_every2_even.json}"
+MODEL_KEY="${MODEL_KEY:-gpt2-medium}"
+LAYERS_CSV="${LAYERS_CSV:-4,7,22}"
 SAES_DIR="${SAES_DIR:-phase2_results/saes_gpt2_12x_topk/saes}"
 ACTIVATIONS_DIR="${ACTIVATIONS_DIR:-phase2_results/activations}"
 PHASE4_TOP_FEATURES="${PHASE4_TOP_FEATURES:-phase4_results/topk/probe/top_features_per_layer.json}"
@@ -28,6 +30,26 @@ MIN_COMMON_STEPS="${MIN_COMMON_STEPS:-3}"
 SEED="${SEED:-20260306}"
 N_BOOTSTRAP="${N_BOOTSTRAP:-1000}"
 BATCH_SIZE="${BATCH_SIZE:-256}"
+
+json_parseable() {
+  local p="$1"
+  "$PY" - <<PY
+import json,sys
+try:
+    json.load(open(${p@Q}))
+except Exception:
+    sys.exit(1)
+sys.exit(0)
+PY
+}
+
+subrun_done_with_parseable_json() {
+  local sub_base="$1"
+  local merged_json="$2"
+  [[ -f "${sub_base}/state/pipeline.done" ]] || return 1
+  [[ -f "${merged_json}" ]] || return 1
+  json_parseable "${merged_json}"
+}
 
 mkdir -p "$BASE/logs" "$BASE/meta" "$BASE/state" phase7_results/results
 
@@ -48,11 +70,19 @@ for fs in "${FEATURE_SETS[@]}"; do
   sub_base="phase7_results/runs/${sub_run_id}"
   merged_json="phase7_results/results/phase7_sae_trajectory_coherence_${sub_run_tag}.json"
 
+  if subrun_done_with_parseable_json "$sub_base" "$merged_json"; then
+    echo "[$(date -Is)] feature_set=${fs} already complete; skipping subrun" | tee -a "$BASE/logs/pathb.log"
+    echo "{\"feature_set\":\"${fs}\",\"run_id\":\"${sub_run_id}\",\"run_tag\":\"${sub_run_tag}\",\"merged_json\":\"${merged_json}\"}" >> "$summary_tmp"
+    continue
+  fi
+
   echo "[$(date -Is)] launching feature_set=${fs} run_id=${sub_run_id}" | tee -a "$BASE/logs/pathb.log"
   RUN_ID="$sub_run_id" \
   RUN_TAG="$sub_run_tag" \
   BASE="$sub_base" \
   CONTROL_RECORDS="$CONTROL_RECORDS" \
+  MODEL_KEY="$MODEL_KEY" \
+  LAYERS_CSV="$LAYERS_CSV" \
   SAES_DIR="$SAES_DIR" \
   ACTIVATIONS_DIR="$ACTIVATIONS_DIR" \
   PHASE4_TOP_FEATURES="$PHASE4_TOP_FEATURES" \
@@ -69,8 +99,20 @@ for fs in "${FEATURE_SETS[@]}"; do
   coord_session="p7saetc_coord_${sub_run_id}"
   while [[ ! -f "${sub_base}/state/pipeline.done" ]]; do
     if ! tmux has-session -t "$coord_session" 2>/dev/null; then
-      echo "Coordinator session ended early for ${sub_run_id} and pipeline.done missing" >&2
-      exit 1
+      # Race-safe grace: coordinator may exit just before marker becomes visible.
+      found_done=0
+      for _ in {1..6}; do
+        sleep 5
+        if [[ -f "${sub_base}/state/pipeline.done" ]]; then
+          found_done=1
+          break
+        fi
+      done
+      if [[ "$found_done" -eq 0 ]]; then
+        echo "Coordinator session ended early for ${sub_run_id} and pipeline.done missing" >&2
+        exit 1
+      fi
+      break
     fi
     sleep 20
   done

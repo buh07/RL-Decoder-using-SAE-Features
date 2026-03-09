@@ -21,6 +21,7 @@ try:  # pragma: no cover
     from .common import load_pt, save_json, set_seed
     from .model_registry import resolve_model_spec
     from .state_decoder_core import (
+        OP_TO_ID,
         Phase7StateDataset,
         StateDecoderExperimentConfig,
         MultiHeadStateDecoder,
@@ -41,6 +42,7 @@ except ImportError:  # pragma: no cover
     from common import load_pt, save_json, set_seed
     from model_registry import resolve_model_spec
     from state_decoder_core import (
+        OP_TO_ID,
         Phase7StateDataset,
         StateDecoderExperimentConfig,
         MultiHeadStateDecoder,
@@ -87,6 +89,49 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--device", default="cuda:0")
     p.add_argument("--epochs", type=int, default=None)
     p.add_argument("--batch-size", type=int, default=None)
+    p.add_argument("--learning-rate", type=float, default=None, help="Override config learning rate")
+    p.add_argument("--early-stop-patience", type=int, default=None, help="Override config early-stop patience")
+    p.add_argument("--d-model", type=int, default=None, help="Override decoder d_model")
+    p.add_argument("--n-heads", type=int, default=None, help="Override decoder attention heads")
+    p.add_argument("--n-decoder-layers", type=int, default=None, help="Override decoder layer depth")
+    p.add_argument("--raw-anchor-mode", choices=["eq_only", "multi_anchor"], default=None, help="Raw-hidden anchor mode.")
+    p.add_argument("--label-smoothing-cls", type=float, default=None, help="Override label smoothing for classification heads")
+    p.add_argument(
+        "--operator-loss-mode",
+        choices=["ce", "weighted_ce", "focal"],
+        default=None,
+        help="Override operator loss mode (ce|weighted_ce|focal).",
+    )
+    p.add_argument(
+        "--operator-focal-gamma",
+        type=float,
+        default=None,
+        help="Override focal gamma for operator head when --operator-loss-mode=focal.",
+    )
+    p.add_argument(
+        "--operator-class-weight-scope",
+        choices=["all_steps", "operate_only", "operate_known_only"],
+        default=None,
+        help="Rows used to compute operator class weights when weighted/focal loss is enabled.",
+    )
+    p.add_argument(
+        "--operator-class-weight-max-ratio",
+        type=float,
+        default=None,
+        help="Optional cap for max/min positive operator class weight ratio.",
+    )
+    p.add_argument(
+        "--operator-operate-only-supervision",
+        action="store_true",
+        help="Train operator head only on rows where step_type=='operate'.",
+    )
+    p.add_argument(
+        "--operator-known-only-supervision",
+        action="store_true",
+        help="Train operator head only on operate rows with known operator labels (exclude unknown).",
+    )
+    p.add_argument("--loss-w-operator", type=float, default=None, help="Override operator loss weight")
+    p.add_argument("--loss-w-step-type", type=float, default=None, help="Override step_type loss weight")
     p.add_argument("--num-workers", type=int, default=0)
     p.add_argument("--pin-memory", action="store_true")
     p.add_argument("--persistent-workers", action="store_true")
@@ -103,9 +148,34 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--early-stop-metric",
-        choices=["result_top1", "loss_total", "composite"],
+        choices=["result_top1", "loss_total", "composite", "operator_acc_operate_known_only"],
         default="result_top1",
         help="Metric priority used for best-checkpoint selection/early stopping.",
+    )
+    p.add_argument(
+        "--operator-early-stop-guard",
+        action="store_true",
+        help=(
+            "Do not early-stop while operator_acc is still improving. "
+            "Useful when result-token loss plateaus before operator head converges."
+        ),
+    )
+    p.add_argument(
+        "--operator-guard-min-delta",
+        type=float,
+        default=0.002,
+        help="Minimum operator_acc improvement to reset early-stop counter when --operator-early-stop-guard is set.",
+    )
+    p.add_argument(
+        "--improvement-profile",
+        choices=["none", "d1_tier1", "d2_tier2", "d3_operate_known"],
+        default="none",
+        help=(
+            "Apply pre-registered decoder improvement profile. "
+            "d1_tier1: layers 4-7, longer training, lower LR, label smoothing, stronger operator/step losses. "
+            "d2_tier2: d1 + larger model capacity. "
+            "d3_operate_known: operate-known supervision + capped weighted CE + operator-focused early-stop."
+        ),
     )
     p.add_argument(
         "--deterministic",
@@ -262,6 +332,142 @@ def _resolve_selected_configs(
     return selected, manifest_payload
 
 
+def _apply_user_overrides(cfg: StateDecoderExperimentConfig, args: argparse.Namespace) -> StateDecoderExperimentConfig:
+    updated = StateDecoderExperimentConfig.from_dict(cfg.to_dict())
+    if args.epochs is not None:
+        updated.epochs = int(args.epochs)
+    if args.batch_size is not None:
+        updated.batch_size = int(args.batch_size)
+    if args.learning_rate is not None:
+        updated.learning_rate = float(args.learning_rate)
+    if args.early_stop_patience is not None:
+        updated.early_stop_patience = int(args.early_stop_patience)
+    if args.d_model is not None:
+        updated.d_model = int(args.d_model)
+    if args.n_heads is not None:
+        updated.n_heads = int(args.n_heads)
+    if args.n_decoder_layers is not None:
+        updated.n_decoder_layers = int(args.n_decoder_layers)
+    if args.raw_anchor_mode is not None:
+        updated.raw_anchor_mode = str(args.raw_anchor_mode)
+    if args.label_smoothing_cls is not None:
+        updated.label_smoothing_cls = float(args.label_smoothing_cls)
+    if args.operator_loss_mode is not None:
+        updated.operator_loss_mode = str(args.operator_loss_mode)
+    if args.operator_focal_gamma is not None:
+        updated.operator_focal_gamma = float(args.operator_focal_gamma)
+    if args.operator_class_weight_scope is not None:
+        updated.operator_class_weight_scope = str(args.operator_class_weight_scope)
+    if args.operator_class_weight_max_ratio is not None:
+        updated.operator_class_weight_max_ratio = float(args.operator_class_weight_max_ratio)
+    if args.operator_operate_only_supervision:
+        updated.operator_operate_only_supervision = True
+    if args.operator_known_only_supervision:
+        updated.operator_known_only_supervision = True
+    if args.loss_w_operator is not None:
+        updated.loss_w_operator = float(args.loss_w_operator)
+    if args.loss_w_step_type is not None:
+        updated.loss_w_step_type = float(args.loss_w_step_type)
+    return updated
+
+
+def _apply_improvement_profile(cfg: StateDecoderExperimentConfig, profile: str) -> StateDecoderExperimentConfig:
+    updated = StateDecoderExperimentConfig.from_dict(cfg.to_dict())
+    if profile == "none":
+        return updated
+    if profile == "d1_tier1":
+        updated.layers = (4, 5, 6, 7)
+        updated.name = f"{updated.name}_d1tier1"
+        updated.epochs = 150
+        updated.early_stop_patience = 20
+        updated.learning_rate = 5e-5
+        updated.label_smoothing_cls = 0.10
+        updated.loss_w_operator = 2.0
+        updated.loss_w_step_type = 1.0
+        return updated
+    if profile == "d2_tier2":
+        updated.layers = (0, 1, 2, 3, 4, 5, 6, 7)
+        updated.name = f"{updated.name}_d2tier2"
+        updated.epochs = 150
+        updated.early_stop_patience = 20
+        updated.learning_rate = 5e-5
+        updated.label_smoothing_cls = 0.10
+        updated.loss_w_operator = 2.0
+        updated.loss_w_step_type = 1.0
+        updated.d_model = 384
+        updated.n_heads = 8
+        updated.n_decoder_layers = 3
+        updated.operator_operate_only_supervision = True
+        updated.operator_loss_mode = "weighted_ce"
+        updated.operator_class_weight_scope = "operate_only"
+        updated.operator_focal_gamma = 2.0
+        return updated
+    if profile == "d3_operate_known":
+        updated.layers = (0, 1, 2, 3, 4, 5, 6, 7)
+        updated.name = f"{updated.name}_d3known"
+        updated.epochs = 150
+        updated.early_stop_patience = 20
+        updated.learning_rate = 5e-5
+        updated.label_smoothing_cls = 0.10
+        updated.loss_w_operator = 2.0
+        updated.loss_w_step_type = 1.0
+        updated.d_model = 384
+        updated.n_heads = 8
+        updated.n_decoder_layers = 3
+        updated.operator_operate_only_supervision = True
+        updated.operator_known_only_supervision = True
+        updated.operator_loss_mode = "weighted_ce"
+        updated.operator_class_weight_scope = "operate_known_only"
+        updated.operator_class_weight_max_ratio = 5.0
+        updated.operator_focal_gamma = 2.0
+        return updated
+    raise ValueError(f"Unsupported improvement profile: {profile!r}")
+
+
+def _compute_operator_class_weights(
+    records: List[dict],
+    cfg: StateDecoderExperimentConfig,
+    device: str,
+) -> Optional[torch.Tensor]:
+    mode = str(cfg.operator_loss_mode or "ce")
+    if mode not in {"weighted_ce", "focal"}:
+        return None
+    scope = str(cfg.operator_class_weight_scope or "all_steps")
+    counts = [0.0 for _ in range(len(OP_TO_ID))]
+    unknown_id = int(OP_TO_ID.get("unknown", len(OP_TO_ID) - 1))
+    for r in records:
+        s = r.get("structured_state") or {}
+        if scope == "operate_only" and str(s.get("step_type", "")) != "operate":
+            continue
+        if scope == "operate_known_only" and (
+            str(s.get("step_type", "")) != "operate" or str(s.get("operator", "unknown")) == "unknown"
+        ):
+            continue
+        op = str(s.get("operator", "unknown"))
+        idx = int(OP_TO_ID.get(op, OP_TO_ID["unknown"]))
+        counts[idx] += 1.0
+    inv = [0.0 if c <= 0.0 else 1.0 / c for c in counts]
+    nz = [v for v in inv if v > 0.0]
+    if not nz:
+        return None
+    mean_inv = sum(nz) / float(len(nz))
+    weights = [(v / mean_inv) if v > 0.0 else 0.0 for v in inv]
+    if scope == "operate_known_only":
+        weights[unknown_id] = 0.0
+    ratio_cap = cfg.operator_class_weight_max_ratio
+    if ratio_cap is not None and math.isfinite(float(ratio_cap)) and float(ratio_cap) > 1.0:
+        pos = [w for w in weights if w > 0.0]
+        if pos:
+            min_w = min(pos)
+            max_w = min_w * float(ratio_cap)
+            weights = [min(max_w, w) if w > 0.0 else 0.0 for w in weights]
+            pos2 = [w for w in weights if w > 0.0]
+            if pos2:
+                mean2 = sum(pos2) / float(len(pos2))
+                weights = [(w / mean2) if w > 0.0 else 0.0 for w in weights]
+    return torch.tensor(weights, dtype=torch.float32, device=device)
+
+
 def train_one(
     cfg: StateDecoderExperimentConfig,
     records: List[dict],
@@ -290,6 +496,7 @@ def train_one(
     )
     batch_size = args.batch_size or cfg.batch_size
     epochs = args.epochs or cfg.epochs
+    operator_class_weights = _compute_operator_class_weights(train_records, cfg, args.device)
     train_loader = DataLoader(
         train_ds,
         batch_size=batch_size,
@@ -321,10 +528,17 @@ def train_one(
     model = MultiHeadStateDecoder(cfg).to(args.device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
     scheduler = make_scheduler(optimizer, epochs * max(1, len(train_loader)), cfg.warmup_steps)
+    operator_guard_enabled = bool(
+        args.operator_early_stop_guard or args.improvement_profile in {"d1_tier1", "d2_tier2", "d3_operate_known"}
+    )
+    effective_early_stop_metric = str(args.early_stop_metric)
+    if args.improvement_profile == "d3_operate_known" and effective_early_stop_metric == "result_top1":
+        effective_early_stop_metric = "operator_acc_operate_known_only"
 
     best_state = None
     best_epoch = -1
     best_key = None
+    best_operator_acc = float("-inf")
     no_improve = 0
     history: List[Dict] = []
 
@@ -337,7 +551,12 @@ def train_one(
             dev_batch = move_batch_to_device(batch, args.device, non_blocking=args.non_blocking_transfer)
             x = dev_batch["x"]
             out = model(x)
-            losses = compute_multitask_loss(out, dev_batch, cfg)
+            losses = compute_multitask_loss(
+                out,
+                dev_batch,
+                cfg,
+                operator_class_weights=operator_class_weights,
+            )
             optimizer.zero_grad(set_to_none=True)
             losses["total"].backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -354,6 +573,8 @@ def train_one(
             val_loader,
             args.device,
             numeric_stats,
+            cfg_for_loss=cfg,
+            operator_class_weights=operator_class_weights,
             non_blocking_transfer=args.non_blocking_transfer,
         )
         row = {
@@ -369,35 +590,61 @@ def train_one(
             f"train_total={row['train_loss_total']:.4f} "
             f"val_total={val_metrics['loss_total']:.4f} "
             f"res_top1={val_metrics['result_token_top1']:.4f} "
-            f"op_acc={val_metrics['operator_acc']:.4f} "
-            f"step_acc={val_metrics['step_type_acc']:.4f}"
+            f"op_acc_all={val_metrics['operator_acc']:.4f} "
+            f"op_acc_operate={float(val_metrics.get('operator_acc_operate_only') or 0.0):.4f} "
+            f"op_acc_operate_known={float(val_metrics.get('operator_acc_operate_known_only') or 0.0):.4f} "
+            f"step_acc={val_metrics['step_type_acc']:.4f} "
+            f"mag_acc={val_metrics['magnitude_acc']:.4f} "
+            f"sign_acc={val_metrics['sign_acc']:.4f}"
         )
 
-        if args.early_stop_metric == "loss_total":
+        operator_metric = val_metrics.get("operator_acc_operate_known_only")
+        if operator_metric is None:
+            operator_metric = val_metrics.get("operator_acc_operate_only")
+        if operator_metric is None:
+            operator_metric = val_metrics.get("operator_acc", 0.0)
+        operator_metric = float(operator_metric)
+
+        if effective_early_stop_metric == "loss_total":
             val_key = (
                 float(val_metrics["loss_total"]),
                 -float(val_metrics["result_token_top1"]),
-                -float(val_metrics["operator_acc"]),
+                -operator_metric,
             )
-        elif args.early_stop_metric == "composite":
+        elif effective_early_stop_metric == "composite":
             comp = (
                 float(val_metrics["result_token_top1"])
-                + float(val_metrics["operator_acc"])
+                + operator_metric
                 + float(val_metrics["step_type_acc"])
             ) / 3.0
             val_key = (-comp, float(val_metrics["loss_total"]), -float(val_metrics["result_token_top1"]))
+        elif effective_early_stop_metric == "operator_acc_operate_known_only":
+            op_known = val_metrics.get("operator_acc_operate_known_only")
+            op_known = float(op_known if op_known is not None else operator_metric)
+            val_key = (-op_known, float(val_metrics["loss_total"]), -float(val_metrics["result_token_top1"]))
         else:
             val_key = (
                 -float(val_metrics["result_token_top1"]),
                 float(val_metrics["loss_total"]),
-                -float(val_metrics["operator_acc"]),
+                -operator_metric,
             )
         if best_key is None or val_key < best_key:
             best_key = val_key
             best_epoch = epoch
             best_state = deepcopy(model.state_dict())
             no_improve = 0
+            best_operator_acc = max(best_operator_acc, operator_metric)
         else:
+            operator_acc = operator_metric
+            guard_delta = float(max(0.0, args.operator_guard_min_delta))
+            if operator_guard_enabled and operator_acc >= (best_operator_acc + guard_delta):
+                best_operator_acc = operator_acc
+                no_improve = 0
+                print(
+                    f"[{cfg.name}] operator guard kept training at epoch {epoch}: "
+                    f"operator metric improved to {operator_acc:.4f} (+{guard_delta:.4f} min)"
+                )
+                continue
             no_improve += 1
             if no_improve >= cfg.early_stop_patience:
                 print(f"[{cfg.name}] early stopping at epoch {epoch}")
@@ -411,6 +658,8 @@ def train_one(
         val_loader,
         args.device,
         numeric_stats,
+        cfg_for_loss=cfg,
+        operator_class_weights=operator_class_weights,
         non_blocking_transfer=args.non_blocking_transfer,
     )
     manifest_row = _infer_manifest_row(manifest_payload, cfg)
@@ -457,7 +706,16 @@ def train_one(
         "best_val": best_val_metrics,
         "numeric_stats": {k: v.to_dict() for k, v in numeric_stats.items()},
         "experiment_config": cfg.to_dict(),
-        "early_stop_metric": args.early_stop_metric,
+        "early_stop_metric": effective_early_stop_metric,
+        "operator_early_stop_guard": bool(operator_guard_enabled),
+        "operator_guard_min_delta": float(args.operator_guard_min_delta),
+        "operator_loss_mode": str(cfg.operator_loss_mode),
+        "operator_focal_gamma": float(cfg.operator_focal_gamma),
+        "operator_class_weight_scope": str(cfg.operator_class_weight_scope),
+        "operator_class_weight_max_ratio": cfg.operator_class_weight_max_ratio,
+        "operator_operate_only_supervision": bool(cfg.operator_operate_only_supervision),
+        "operator_known_only_supervision": bool(cfg.operator_known_only_supervision),
+        "improvement_profile": str(args.improvement_profile),
         "checkpoint_path": str(ckpt_path),
         "history": history,
         "schema_version": "phase7_state_decoder_train_result_v1",
@@ -487,7 +745,13 @@ def main() -> None:
     spec = resolve_model_spec(args.model_key, args.adapter_config)
     selected, manifest_payload = _resolve_selected_configs(args, model_num_layers=int(spec.num_layers))
     model_meta = spec.to_dict()
-    selected = [apply_model_metadata_to_config(cfg, model_meta, vocab_size_override=args.vocab_size) for cfg in selected]
+    resolved_cfgs: List[StateDecoderExperimentConfig] = []
+    for cfg in selected:
+        cfg1 = _apply_improvement_profile(cfg, str(args.improvement_profile))
+        cfg2 = _apply_user_overrides(cfg1, args)
+        cfg3 = apply_model_metadata_to_config(cfg2, model_meta, vocab_size_override=args.vocab_size)
+        resolved_cfgs.append(cfg3)
+    selected = resolved_cfgs
 
     records = load_pt(args.dataset_train)
     if args.max_records is not None:

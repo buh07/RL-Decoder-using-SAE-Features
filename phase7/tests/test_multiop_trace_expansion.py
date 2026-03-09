@@ -112,6 +112,28 @@ class MultiOpTraceExpansionTests(unittest.TestCase):
         self.assertTrue(bool(parsed.get("parse_error")))
         self.assertIn("eval_error", str(parsed.get("parse_error")))
 
+    def test_parse_expression_steps_respects_precedence_and_parentheses(self) -> None:
+        parsed = parse_expression_steps("3*(2/3)", c_fallback=None)
+        self.assertIsNone(parsed.get("parse_error"))
+        steps = list(parsed.get("steps") or [])
+        self.assertEqual(len(steps), 2)
+        self.assertEqual(steps[0]["operator"], "/")
+        self.assertEqual(steps[1]["operator"], "*")
+        self.assertAlmostEqual(float(steps[-1]["subresult_value"]), 2.0, places=6)
+
+        parsed2 = parse_expression_steps("(2*111)-50", c_fallback=None)
+        self.assertIsNone(parsed2.get("parse_error"))
+        steps2 = list(parsed2.get("steps") or [])
+        self.assertEqual([s["operator"] for s in steps2], ["*", "-"])
+        self.assertAlmostEqual(float(steps2[-1]["subresult_value"]), 172.0, places=6)
+
+        parsed3 = parse_expression_steps("560//10", c_fallback=None)
+        self.assertIsNone(parsed3.get("parse_error"))
+        steps3 = list(parsed3.get("steps") or [])
+        self.assertEqual(len(steps3), 1)
+        self.assertEqual(steps3[0]["operator"], "/")
+        self.assertAlmostEqual(float(steps3[0]["subresult_value"]), 56.0, places=6)
+
 
 if __name__ == "__main__":
     unittest.main()

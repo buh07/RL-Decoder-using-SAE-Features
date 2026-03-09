@@ -53,6 +53,7 @@ class StateDecoderExperimentConfig:
     n_decoder_layers: int = 2
     dropout: float = 0.1
     aggregator: str = "transformer"
+    raw_anchor_mode: str = "eq_only"  # eq_only | multi_anchor
     hybrid_topk_values: int = 50
     batch_size: int = 64
     epochs: int = 40
@@ -62,6 +63,13 @@ class StateDecoderExperimentConfig:
     seed: int = 17
     val_fraction: float = 0.2
     early_stop_patience: int = 10
+    label_smoothing_cls: float = 0.0
+    operator_loss_mode: str = "ce"  # ce | weighted_ce | focal
+    operator_focal_gamma: float = 2.0
+    operator_class_weight_scope: str = "all_steps"  # all_steps | operate_only | operate_known_only
+    operator_class_weight_max_ratio: Optional[float] = None
+    operator_operate_only_supervision: bool = False
+    operator_known_only_supervision: bool = False
     loss_w_result_token: float = 1.0
     loss_w_operator: float = 0.5
     loss_w_step_type: float = 0.25
@@ -72,14 +80,17 @@ class StateDecoderExperimentConfig:
     loss_w_rhs: float = 0.05
 
     def input_dim(self) -> int:
+        raw_dim = int(self.model_hidden_dim)
+        if str(self.raw_anchor_mode) == "multi_anchor":
+            raw_dim = int(self.model_hidden_dim) * 3
         if self.input_variant == "raw":
-            return int(self.model_hidden_dim)
+            return raw_dim
         if self.input_variant == "sae":
             return int(self.model_sae_dim)
         if self.input_variant == "hybrid":
-            return int(self.model_hidden_dim) + int(self.hybrid_topk_values)
+            return raw_dim + int(self.hybrid_topk_values)
         if self.input_variant == "hybrid_indexed":
-            return int(self.model_hidden_dim) + int(2 * self.hybrid_topk_values)
+            return raw_dim + int(2 * self.hybrid_topk_values)
         raise ValueError(f"Unsupported input_variant={self.input_variant}")
 
     def to_dict(self) -> Dict[str, Any]:
@@ -99,6 +110,7 @@ class StateDecoderExperimentConfig:
 
 
 MULTI_LAYERS = (7, 12, 17, 22)
+MULTI_LAYERS_IMPROVED = (4, 5, 6, 7)
 
 
 def default_state_decoder_configs() -> Dict[str, StateDecoderExperimentConfig]:
@@ -106,6 +118,22 @@ def default_state_decoder_configs() -> Dict[str, StateDecoderExperimentConfig]:
         StateDecoderExperimentConfig(name="state_raw_multi_l7_l12_l17_l22", input_variant="raw", layers=MULTI_LAYERS),
         StateDecoderExperimentConfig(name="state_sae_multi_l7_l12_l17_l22", input_variant="sae", layers=MULTI_LAYERS),
         StateDecoderExperimentConfig(name="state_hybrid_multi_l7_l12_l17_l22", input_variant="hybrid", layers=MULTI_LAYERS),
+        # Phase 6v2 improvement candidates targeting stronger operator/step_type decodability.
+        StateDecoderExperimentConfig(
+            name="state_raw_multi_l4_l5_l6_l7",
+            input_variant="raw",
+            layers=MULTI_LAYERS_IMPROVED,
+        ),
+        StateDecoderExperimentConfig(
+            name="state_sae_multi_l4_l5_l6_l7",
+            input_variant="sae",
+            layers=MULTI_LAYERS_IMPROVED,
+        ),
+        StateDecoderExperimentConfig(
+            name="state_hybrid_multi_l4_l5_l6_l7",
+            input_variant="hybrid",
+            layers=MULTI_LAYERS_IMPROVED,
+        ),
     ]
     return {c.name: c for c in cfgs}
 
@@ -379,13 +407,78 @@ def _masked_mse(pred: torch.Tensor, target: torch.Tensor, mask: torch.Tensor) ->
     return (diff2 * mask).sum() / mask.sum().clamp_min(1.0)
 
 
-def compute_multitask_loss(model_out: Dict[str, torch.Tensor], batch: Dict[str, torch.Tensor], cfg: StateDecoderExperimentConfig):
+def _masked_operator_loss(
+    logits: torch.Tensor,
+    target: torch.Tensor,
+    *,
+    mask: Optional[torch.Tensor],
+    label_smoothing: float,
+    loss_mode: str,
+    focal_gamma: float,
+    class_weights: Optional[torch.Tensor],
+) -> torch.Tensor:
+    if mask is not None:
+        mask_bool = mask.bool()
+        if int(mask_bool.sum().item()) <= 0:
+            return logits.sum() * 0.0
+        logits = logits[mask_bool]
+        target = target[mask_bool]
+    mode = str(loss_mode or "ce")
+    if mode == "focal":
+        log_probs = F.log_softmax(logits, dim=-1)
+        probs = log_probs.exp()
+        gather_idx = target[:, None]
+        log_pt = log_probs.gather(1, gather_idx).squeeze(1)
+        pt = probs.gather(1, gather_idx).squeeze(1)
+        focal_factor = (1.0 - pt).clamp_min(0.0).pow(float(max(0.0, focal_gamma)))
+        sample_loss = -focal_factor * log_pt
+        if class_weights is not None:
+            sample_loss = sample_loss * class_weights[target]
+        return sample_loss.mean()
+    if mode in {"weighted_ce", "ce"}:
+        weight = class_weights if mode == "weighted_ce" else None
+        return F.cross_entropy(logits, target, weight=weight, label_smoothing=label_smoothing)
+    raise ValueError(f"Unsupported operator_loss_mode={mode!r}")
+
+
+def _operator_supervision_mask(
+    batch: Dict[str, torch.Tensor],
+    cfg: StateDecoderExperimentConfig,
+) -> Optional[torch.Tensor]:
+    mask: Optional[torch.Tensor] = None
+    if bool(cfg.operator_operate_only_supervision):
+        operate_id = int(STEP_TO_ID.get("operate", 1))
+        mask = batch["step_type_id"] == operate_id
+    if bool(cfg.operator_known_only_supervision):
+        unknown_id = int(OP_TO_ID.get("unknown", len(OP_TO_ID) - 1))
+        known_mask = batch["operator_id"] != unknown_id
+        mask = known_mask if mask is None else (mask & known_mask)
+    return mask
+
+
+def compute_multitask_loss(
+    model_out: Dict[str, torch.Tensor],
+    batch: Dict[str, torch.Tensor],
+    cfg: StateDecoderExperimentConfig,
+    *,
+    operator_class_weights: Optional[torch.Tensor] = None,
+):
+    ls = float(max(0.0, min(1.0, cfg.label_smoothing_cls)))
     losses: Dict[str, torch.Tensor] = {}
-    losses["result_token"] = F.cross_entropy(model_out["result_token_logits"], batch["result_token_id"])
-    losses["operator"] = F.cross_entropy(model_out["operator_logits"], batch["operator_id"])
-    losses["step_type"] = F.cross_entropy(model_out["step_type_logits"], batch["step_type_id"])
-    losses["magnitude"] = F.cross_entropy(model_out["magnitude_logits"], batch["magnitude_id"])
-    losses["sign"] = F.cross_entropy(model_out["sign_logits"], batch["sign_id"])
+    losses["result_token"] = F.cross_entropy(model_out["result_token_logits"], batch["result_token_id"], label_smoothing=ls)
+    op_mask = _operator_supervision_mask(batch, cfg)
+    losses["operator"] = _masked_operator_loss(
+        model_out["operator_logits"],
+        batch["operator_id"],
+        mask=op_mask,
+        label_smoothing=ls,
+        loss_mode=str(cfg.operator_loss_mode),
+        focal_gamma=float(cfg.operator_focal_gamma),
+        class_weights=operator_class_weights,
+    )
+    losses["step_type"] = F.cross_entropy(model_out["step_type_logits"], batch["step_type_id"], label_smoothing=ls)
+    losses["magnitude"] = F.cross_entropy(model_out["magnitude_logits"], batch["magnitude_id"], label_smoothing=ls)
+    losses["sign"] = F.cross_entropy(model_out["sign_logits"], batch["sign_id"], label_smoothing=ls)
     losses["subresult"] = _masked_mse(model_out["subresult_pred"], batch["subresult_z"], batch["mask_subresult"])
     losses["lhs"] = _masked_mse(model_out["lhs_pred"], batch["lhs_z"], batch["mask_lhs"])
     losses["rhs"] = _masked_mse(model_out["rhs_pred"], batch["rhs_z"], batch["mask_rhs"])
@@ -419,12 +512,114 @@ def _masked_mae(pred: torch.Tensor, target: torch.Tensor, mask: torch.Tensor) ->
     return float(((pred - target).abs() * mask).sum().item()), int(valid)
 
 
+def _init_confusion(labels: Sequence[str]) -> Dict[str, Any]:
+    n = int(len(labels))
+    return {
+        "labels": [str(x) for x in labels],
+        "matrix": [[0 for _ in range(n)] for _ in range(n)],  # rows=true, cols=pred
+    }
+
+
+def _update_confusion(conf: Dict[str, Any], true_ids: Sequence[int], pred_ids: Sequence[int]) -> None:
+    m = conf["matrix"]
+    n = len(m)
+    for t, p in zip(true_ids, pred_ids):
+        ti = int(t)
+        pi = int(p)
+        if 0 <= ti < n and 0 <= pi < n:
+            m[ti][pi] += 1
+
+
+def _per_class_accuracy(conf: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
+    labels = conf["labels"]
+    m = conf["matrix"]
+    out: Dict[str, Dict[str, float]] = {}
+    for i, label in enumerate(labels):
+        row = m[i]
+        total = int(sum(int(x) for x in row))
+        correct = int(row[i]) if i < len(row) else 0
+        out[str(label)] = {
+            "n": total,
+            "accuracy": float(correct / max(1, total)),
+            "correct": correct,
+        }
+    return out
+
+
+def _init_ece(n_bins: int = 15) -> Dict[str, Any]:
+    bins = int(max(2, n_bins))
+    return {
+        "n_bins": bins,
+        "count": [0 for _ in range(bins)],
+        "conf_sum": [0.0 for _ in range(bins)],
+        "acc_sum": [0.0 for _ in range(bins)],
+    }
+
+
+def _update_ece_bins(ece: Dict[str, Any], conf: torch.Tensor, correct: torch.Tensor) -> None:
+    bins = int(ece["n_bins"])
+    conf_cpu = conf.detach().float().cpu()
+    corr_cpu = correct.detach().float().cpu()
+    for c, a in zip(conf_cpu.tolist(), corr_cpu.tolist()):
+        ci = float(c)
+        ai = float(a)
+        # Map c in [0,1] to bin index [0,bins-1].
+        idx = int(min(bins - 1, max(0, int(ci * bins))))
+        ece["count"][idx] += 1
+        ece["conf_sum"][idx] += ci
+        ece["acc_sum"][idx] += ai
+
+
+def _finalize_ece(ece: Dict[str, Any]) -> Dict[str, Any]:
+    bins = int(ece["n_bins"])
+    counts = [int(x) for x in ece["count"]]
+    conf_sum = [float(x) for x in ece["conf_sum"]]
+    acc_sum = [float(x) for x in ece["acc_sum"]]
+    total = int(sum(counts))
+    if total <= 0:
+        return {"defined": False, "ece": None, "n_bins": bins, "bins": []}
+    out_bins: List[Dict[str, float]] = []
+    ece_val = 0.0
+    for i in range(bins):
+        n = counts[i]
+        if n <= 0:
+            out_bins.append(
+                {
+                    "bin_idx": i,
+                    "count": 0,
+                    "avg_confidence": 0.0,
+                    "avg_accuracy": 0.0,
+                }
+            )
+            continue
+        avg_conf = conf_sum[i] / float(n)
+        avg_acc = acc_sum[i] / float(n)
+        weight = float(n) / float(total)
+        ece_val += abs(avg_acc - avg_conf) * weight
+        out_bins.append(
+            {
+                "bin_idx": i,
+                "count": int(n),
+                "avg_confidence": float(avg_conf),
+                "avg_accuracy": float(avg_acc),
+            }
+        )
+    return {
+        "defined": True,
+        "ece": float(ece_val),
+        "n_bins": bins,
+        "bins": out_bins,
+    }
+
+
 def evaluate_state_model(
     model: MultiHeadStateDecoder,
     loader: DataLoader,
     device: str,
     numeric_stats: Dict[str, NumericNormStats],
     *,
+    cfg_for_loss: Optional[StateDecoderExperimentConfig] = None,
+    operator_class_weights: Optional[torch.Tensor] = None,
     non_blocking_transfer: bool = False,
 ) -> Dict[str, Any]:
     model.eval()
@@ -442,6 +637,10 @@ def evaluate_state_model(
         "result_token_top1": 0.0,
         "result_token_top5": 0.0,
         "operator_acc": 0.0,
+        "operator_acc_operate_correct": 0.0,
+        "operator_acc_operate_n": 0.0,
+        "operator_acc_operate_known_correct": 0.0,
+        "operator_acc_operate_known_n": 0.0,
         "step_type_acc": 0.0,
         "magnitude_acc": 0.0,
         "sign_acc": 0.0,
@@ -455,13 +654,30 @@ def evaluate_state_model(
         "baseline_logprob": 0.0,
     }
     by_op: Dict[str, Dict[str, float]] = {}
+    operator_conf = _init_confusion(OPERATORS)
+    operator_conf_operate_only = _init_confusion(OPERATORS)
+    operator_conf_operate_known_only = _init_confusion(OPERATORS)
+    step_type_conf = _init_confusion(STEP_TYPES)
+    magnitude_conf = _init_confusion(MAG_BUCKETS)
+    sign_conf = _init_confusion(SIGNS)
+    operator_ece = _init_ece()
+    operator_ece_operate_only = _init_ece()
+    operator_ece_operate_known_only = _init_ece()
+    step_type_ece = _init_ece()
+    magnitude_ece = _init_ece()
+    sign_ece = _init_ece()
 
     with torch.no_grad():
         for batch in loader:
             dev_batch = move_batch_to_device(batch, device, non_blocking=non_blocking_transfer)
             x = dev_batch["x"]
             out = model(x)
-            losses = compute_multitask_loss(out, dev_batch, model.exp_cfg)
+            losses = compute_multitask_loss(
+                out,
+                dev_batch,
+                cfg_for_loss or model.exp_cfg,
+                operator_class_weights=operator_class_weights,
+            )
             bsz = x.shape[0]
             n += bsz
             for k, v in losses.items():
@@ -493,11 +709,93 @@ def evaluate_state_model(
                 d["n"] += 1.0
                 d["top1"] += 1.0 if pp == yy else 0.0
 
+            op_probs = F.softmax(out["operator_logits"], dim=-1)
+            step_probs = F.softmax(out["step_type_logits"], dim=-1)
+            mag_probs = F.softmax(out["magnitude_logits"], dim=-1)
+            sign_probs = F.softmax(out["sign_logits"], dim=-1)
+            op_pred = op_probs.argmax(dim=-1)
+            step_pred = step_probs.argmax(dim=-1)
+            mag_pred = mag_probs.argmax(dim=-1)
+            sign_pred = sign_probs.argmax(dim=-1)
+            _update_confusion(
+                operator_conf,
+                dev_batch["operator_id"].detach().cpu().tolist(),
+                op_pred.detach().cpu().tolist(),
+            )
+            operate_id = int(STEP_TO_ID.get("operate", 1))
+            operate_mask = dev_batch["step_type_id"] == operate_id
+            unknown_id = int(OP_TO_ID.get("unknown", len(OP_TO_ID) - 1))
+            operate_known_mask = operate_mask & (dev_batch["operator_id"] != unknown_id)
+            op_corr = (op_pred == dev_batch["operator_id"])
+            op_operate_n = int(operate_mask.sum().item())
+            if op_operate_n > 0:
+                agg["operator_acc_operate_correct"] += float(op_corr[operate_mask].float().sum().item())
+                agg["operator_acc_operate_n"] += float(op_operate_n)
+                _update_confusion(
+                    operator_conf_operate_only,
+                    dev_batch["operator_id"][operate_mask].detach().cpu().tolist(),
+                    op_pred[operate_mask].detach().cpu().tolist(),
+                )
+            op_operate_known_n = int(operate_known_mask.sum().item())
+            if op_operate_known_n > 0:
+                agg["operator_acc_operate_known_correct"] += float(op_corr[operate_known_mask].float().sum().item())
+                agg["operator_acc_operate_known_n"] += float(op_operate_known_n)
+                _update_confusion(
+                    operator_conf_operate_known_only,
+                    dev_batch["operator_id"][operate_known_mask].detach().cpu().tolist(),
+                    op_pred[operate_known_mask].detach().cpu().tolist(),
+                )
+            _update_confusion(
+                step_type_conf,
+                dev_batch["step_type_id"].detach().cpu().tolist(),
+                step_pred.detach().cpu().tolist(),
+            )
+            _update_confusion(
+                magnitude_conf,
+                dev_batch["magnitude_id"].detach().cpu().tolist(),
+                mag_pred.detach().cpu().tolist(),
+            )
+            _update_confusion(
+                sign_conf,
+                dev_batch["sign_id"].detach().cpu().tolist(),
+                sign_pred.detach().cpu().tolist(),
+            )
+            op_conf, _ = op_probs.max(dim=-1)
+            step_conf, _ = step_probs.max(dim=-1)
+            mag_conf, _ = mag_probs.max(dim=-1)
+            sign_confv, _ = sign_probs.max(dim=-1)
+            _update_ece_bins(operator_ece, op_conf, (op_pred == dev_batch["operator_id"]).float())
+            if op_operate_n > 0:
+                _update_ece_bins(
+                    operator_ece_operate_only,
+                    op_conf[operate_mask],
+                    (op_pred[operate_mask] == dev_batch["operator_id"][operate_mask]).float(),
+                )
+            if op_operate_known_n > 0:
+                _update_ece_bins(
+                    operator_ece_operate_known_only,
+                    op_conf[operate_known_mask],
+                    (op_pred[operate_known_mask] == dev_batch["operator_id"][operate_known_mask]).float(),
+                )
+            _update_ece_bins(step_type_ece, step_conf, (step_pred == dev_batch["step_type_id"]).float())
+            _update_ece_bins(magnitude_ece, mag_conf, (mag_pred == dev_batch["magnitude_id"]).float())
+            _update_ece_bins(sign_ece, sign_confv, (sign_pred == dev_batch["sign_id"]).float())
+
     if n == 0:
         return {"num_records": 0}
     outm = {"num_records": n}
     for k, v in agg.items():
-        if k.endswith("_mae_z_sum") or k.endswith("_mae_z_n"):
+        if (
+            k.endswith("_mae_z_sum")
+            or k.endswith("_mae_z_n")
+            or k
+            in {
+                "operator_acc_operate_correct",
+                "operator_acc_operate_n",
+                "operator_acc_operate_known_correct",
+                "operator_acc_operate_known_n",
+            }
+        ):
             continue  # handled below
         if k in {"correct_logprob", "baseline_logprob"}:
             outm[f"mean_{k}"] = float(v / n)
@@ -512,6 +810,38 @@ def evaluate_state_model(
     outm["per_operator_result_top1"] = {
         op: {"n": int(d["n"]), "top1_accuracy": float(d["top1"] / max(1.0, d["n"]))} for op, d in sorted(by_op.items())
     }
+    outm["operator_head_confusion"] = operator_conf
+    outm["operator_head_confusion_operate_only"] = operator_conf_operate_only
+    outm["operator_head_confusion_operate_known_only"] = operator_conf_operate_known_only
+    outm["step_type_head_confusion"] = step_type_conf
+    outm["magnitude_head_confusion"] = magnitude_conf
+    outm["sign_head_confusion"] = sign_conf
+    outm["operator_head_per_class_accuracy"] = _per_class_accuracy(operator_conf)
+    outm["operator_head_per_class_accuracy_operate_only"] = _per_class_accuracy(operator_conf_operate_only)
+    outm["operator_head_per_class_accuracy_operate_known_only"] = _per_class_accuracy(operator_conf_operate_known_only)
+    outm["step_type_head_per_class_accuracy"] = _per_class_accuracy(step_type_conf)
+    outm["magnitude_head_per_class_accuracy"] = _per_class_accuracy(magnitude_conf)
+    outm["sign_head_per_class_accuracy"] = _per_class_accuracy(sign_conf)
+    outm["operator_head_ece"] = _finalize_ece(operator_ece)
+    outm["operator_head_ece_operate_only"] = _finalize_ece(operator_ece_operate_only)
+    outm["operator_head_ece_operate_known_only"] = _finalize_ece(operator_ece_operate_known_only)
+    op_operate_n_total = float(agg["operator_acc_operate_n"])
+    outm["operator_num_operate_rows"] = int(op_operate_n_total)
+    outm["operator_acc_operate_only"] = (
+        float(agg["operator_acc_operate_correct"] / op_operate_n_total)
+        if op_operate_n_total > 0
+        else None
+    )
+    op_operate_known_n_total = float(agg["operator_acc_operate_known_n"])
+    outm["operator_num_operate_known_rows"] = int(op_operate_known_n_total)
+    outm["operator_acc_operate_known_only"] = (
+        float(agg["operator_acc_operate_known_correct"] / op_operate_known_n_total)
+        if op_operate_known_n_total > 0
+        else None
+    )
+    outm["step_type_head_ece"] = _finalize_ece(step_type_ece)
+    outm["magnitude_head_ece"] = _finalize_ece(magnitude_ece)
+    outm["sign_head_ece"] = _finalize_ece(sign_ece)
     # de-normalized MAE for interpretability
     for key, stat_name in [("subresult", "subresult_value"), ("lhs", "lhs_value"), ("rhs", "rhs_value")]:
         z_key = f"{key}_mae_z"

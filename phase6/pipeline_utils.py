@@ -85,25 +85,41 @@ def build_input_tensor_from_record(record: dict, cfg) -> torch.Tensor:
     Returns tensor of shape (n_layers_input, input_dim) in float32 on CPU.
     `cfg` may be DecoderExperimentConfig or dict-like with the same fields.
     """
-    input_variant = cfg.input_variant if hasattr(cfg, "input_variant") else cfg["input_variant"]
-    layers = cfg.layers if hasattr(cfg, "layers") else tuple(cfg["layers"])
-    hybrid_topk_values = (
-        cfg.hybrid_topk_values if hasattr(cfg, "hybrid_topk_values") else int(cfg.get("hybrid_topk_values", 50))
-    )
+    def _cfg_get(name: str, default=None):
+        if hasattr(cfg, name):
+            return getattr(cfg, name)
+        if isinstance(cfg, dict):
+            return cfg.get(name, default)
+        return default
+
+    input_variant = _cfg_get("input_variant")
+    layers = _cfg_get("layers")
+    if input_variant is None or layers is None:
+        raise ValueError("Decoder config is missing required fields: input_variant and/or layers")
+    layers = tuple(layers)
+    hybrid_topk_values = int(_cfg_get("hybrid_topk_values", 50))
+    raw_anchor_mode = str(_cfg_get("raw_anchor_mode", "eq_only"))
 
     layer_idx = list(layers)
+    raw_eq = record["raw_hidden"][layer_idx, :].float()
+    raw_sel = raw_eq
+    if str(raw_anchor_mode) == "multi_anchor":
+        raw_result = record.get("raw_hidden_result")
+        raw_pre_eq = record.get("raw_hidden_pre_eq_last")
+        if isinstance(raw_result, torch.Tensor) and isinstance(raw_pre_eq, torch.Tensor):
+            raw_result_sel = raw_result[layer_idx, :].float()
+            raw_pre_eq_sel = raw_pre_eq[layer_idx, :].float()
+            raw_sel = torch.cat([raw_eq, raw_result_sel, raw_pre_eq_sel], dim=-1)
 
     if input_variant == "raw":
-        return record["raw_hidden"][layer_idx, :].float()
+        return raw_sel
     if input_variant == "sae":
         return record["sae_features"][layer_idx, :].float()
     if input_variant == "hybrid":
-        raw_sel = record["raw_hidden"][layer_idx, :].float()
         sae_sel = record["sae_features"][layer_idx, :].float()
         topvals = topk_values_signed(sae_sel, hybrid_topk_values)
         return torch.cat([raw_sel, topvals], dim=-1)
     if input_variant == "hybrid_indexed":
-        raw_sel = record["raw_hidden"][layer_idx, :].float()
         sae_sel = record["sae_features"][layer_idx, :].float()
         topidx, topvals = topk_indices_values_signed(sae_sel, hybrid_topk_values)
         denom = max(1, int(sae_sel.shape[-1]) - 1)

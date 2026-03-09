@@ -932,12 +932,12 @@
           </ul>
         </article>
         <article class="card">
-          <h3>Q0 diagnostic (go/no-go before big runs)</h3>
+          <h3>Active plan: SAE trajectory ladder</h3>
           <ul>
-            <li>Sample 50 traces with faithful/unfaithful controls.</li>
-            <li>Use control-conditioned forward passes.</li>
-            <li>Measure within-trace hidden-state separation at the equation <code>=</code> anchor.</li>
-            <li>Only promote to full Qwen Phase 7 if this diagnostic clearly passes.</li>
+            <li>Precompute Qwen expanded dataset with SAE features and extra anchors.</li>
+            <li>Train Qwen D1 decoders, then run Path A → Path B → Path C on control-conditioned records.</li>
+            <li>Run canary first, then full run only if integrity checks pass.</li>
+            <li>Main success criterion: robust-CV <code>wrong_intermediate AUROC &gt; 0.70</code>.</li>
           </ul>
         </article>
       </div>
@@ -945,7 +945,7 @@
       <div class="callout">
         Rule: Qwen can extend the project, but it does not reopen the GPT-2 closure decision.
       </div>
-      <p class="small">See <code>TODO.md</code> for exact Q0 criteria and promotion gating.</p>
+      <p class="small">Q0 raw-L2 diagnostic is now obsolete in active planning. See <code>TODO.md</code> for the current Qwen ladder gates.</p>
     </section>
   </main>
 </body>

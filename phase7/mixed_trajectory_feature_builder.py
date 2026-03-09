@@ -103,6 +103,7 @@ def _compute_layer_block_vectors(
     batch_size: int,
 ) -> Dict[str, torch.Tensor]:
     sae = _load_sae(layer=layer, saes_dir=saes_dir, model_key=model_key, device=device)
+    sae_dtype = next(sae.parameters()).dtype
     mean, std = _load_norm_stats(layer=layer, activations_dir=activations_dir, model_key=model_key, device=device)
     fidx = torch.tensor([int(x) for x in feature_indices], dtype=torch.long, device=device)
 
@@ -121,7 +122,7 @@ def _compute_layer_block_vectors(
             chunk = rows[start : start + int(batch_size)]
             x = torch.stack([r["raw_hidden"][int(layer)].float() for r in chunk], dim=0).to(device)
             x_norm = (x - mean) / std
-            z = sae.encode(x_norm).index_select(dim=1, index=fidx)
+            z = sae.encode(x_norm.to(dtype=sae_dtype)).index_select(dim=1, index=fidx)
             x_proj = (x @ Q) @ Q.T
 
             raw_chunks.append(x.detach().cpu())

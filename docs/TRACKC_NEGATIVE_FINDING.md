@@ -25,4 +25,5 @@ Post-closure stress tests on March 7, 2026 did not overturn this:
 - Track C remains documented as unresolved/negative for GPT-2 under current protocol and is excluded from production-weight defaults.
 
 ## Forward-Looking Boundary
-Any attempt to revive Track C claims must occur on a separate model inquiry path (Qwen diagnostic-first `Q0`) and must satisfy new evidence gates before promotion.
+Any attempt to revive Track C claims must occur on a separate model inquiry path and must satisfy new evidence gates before promotion.  
+Current next-model path is Qwen SAE trajectory coherence (Path A→B→C with robust CV gating); the legacy Q0 raw hidden-state L2 diagnostic is obsolete for active planning.

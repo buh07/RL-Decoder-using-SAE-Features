@@ -9,7 +9,7 @@ reasoning features from LLM activations using sparse autoencoders (SAEs). Phases
 complete, with the primary target being GPT-2 medium (24-layer, 1024D). Phase 7 for GPT-2 is
 closed with a documented Track C negative result and a final two-track deployment configuration.
 March 7 stress tests (Path B / Path C robust / mixed hidden+SAE ladder) also support closure.
-Qwen work is now a separate diagnostic-first inquiry path.
+Qwen work is now a separate SAE-trajectory inquiry path.
 
 ## Quick Navigation
 
@@ -76,13 +76,19 @@ Primary closure references:
 - `phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json`
 - `phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json`
 
-## Qwen Inquiry (Diagnostic-First)
+## Qwen Inquiry (Active Next-Model Path)
 
-Qwen is intentionally treated as a separate hypothesis test. The next step is a small diagnostic
-(`Q0`) to test whether control-conditioned hidden states separate faithful vs unfaithful variants
-at `=`-anchored positions before committing to a full Phase 7 Qwen pipeline.
+Qwen is intentionally treated as a separate hypothesis test.  
+The active path is now the **SAE trajectory ladder**:
+- Path A: baseline trajectory coherence
+- Path B: feature-set swap
+- Path C: probe/ensemble with robust CV and variant-exclusion validation
 
-The active queue and go/no-go criteria are in `TODO.md`.
+Promotion policy:
+- Run canary first, then full only if integrity checks pass.
+- Primary publishable criterion is robust-CV `wrong_intermediate AUROC > 0.70`.
+
+The active queue and gating details are in `TODO.md`.
 
 ## Project Structure
 

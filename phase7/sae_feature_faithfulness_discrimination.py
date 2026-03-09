@@ -5,7 +5,6 @@ import argparse
 import math
 import random
 import statistics
-import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
@@ -19,16 +18,11 @@ import torch.optim as optim
 try:  # pragma: no cover
     from .causal_intervention_engine import _load_control_records_artifact
     from .common import save_json, sha256_file
+    from .sae_assets import load_norm_stats_for_layer, load_sae_for_layer
 except ImportError:  # pragma: no cover
     from causal_intervention_engine import _load_control_records_artifact
     from common import save_json, sha256_file
-
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT / "src"))
-from sae_architecture import SparseAutoencoder  # type: ignore
-from sae_config import SAEConfig  # type: ignore
+    from sae_assets import load_norm_stats_for_layer, load_sae_for_layer
 
 
 def _parse_layers_csv(value: str) -> List[int]:
@@ -74,41 +68,6 @@ def _split_trace_ids(trace_ids: Sequence[str], *, test_fraction: float, seed: in
     return train_ids, test_ids
 
 
-def _load_sae_for_layer(saes_dir: Path, layer: int, device: str) -> SparseAutoencoder:
-    ckpt_path = saes_dir / f"gpt2-medium_layer{int(layer)}_sae.pt"
-    if not ckpt_path.exists():
-        raise FileNotFoundError(f"Missing SAE checkpoint for layer {layer}: {ckpt_path}")
-    ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
-    cd = dict(ckpt["config"])
-    cfg = SAEConfig(
-        input_dim=int(cd["input_dim"]),
-        expansion_factor=int(cd["expansion_factor"]),
-        use_relu=bool(cd.get("use_relu", True)),
-        use_topk=bool(cd.get("use_topk", False)),
-        topk_k=int(cd.get("topk_k", 0)),
-        use_amp=False,
-    )
-    sae = SparseAutoencoder(cfg)
-    sae.load_state_dict(ckpt["model_state_dict"])
-    return sae.to(device).eval()
-
-
-def _load_norm_stats_for_layer(activations_dir: Path, layer: int, device: str) -> Tuple[torch.Tensor, torch.Tensor]:
-    path = activations_dir / f"gpt2-medium_layer{int(layer)}_activations.pt"
-    if not path.exists():
-        raise FileNotFoundError(f"Missing activation stats file for layer {layer}: {path}")
-    payload = torch.load(path, map_location="cpu", weights_only=False)
-    acts = payload["activations"] if isinstance(payload, dict) else payload
-    if not isinstance(acts, torch.Tensor):
-        raise TypeError(f"Unexpected activation payload type for layer {layer}: {type(acts).__name__}")
-    if acts.ndim == 3:
-        acts = acts.reshape(-1, acts.shape[-1])
-    acts = acts.float()
-    mean = acts.mean(dim=0).to(device)
-    std = acts.std(dim=0).clamp_min(1e-6).to(device)
-    return mean, std
-
-
 def _normalize_hidden(h: torch.Tensor, mean: torch.Tensor, std: torch.Tensor) -> torch.Tensor:
     return (h - mean) / std
 
@@ -116,21 +75,33 @@ def _normalize_hidden(h: torch.Tensor, mean: torch.Tensor, std: torch.Tensor) ->
 def _encode_layer_features(
     rows: Sequence[dict],
     *,
+    model_key: str,
     layer: int,
     saes_dir: Path,
     activations_dir: Path,
     device: str,
     batch_size: int,
 ) -> torch.Tensor:
-    sae = _load_sae_for_layer(saes_dir, layer=layer, device=device)
-    mean, std = _load_norm_stats_for_layer(activations_dir, layer=layer, device=device)
+    sae = load_sae_for_layer(
+        saes_dir=Path(saes_dir),
+        model_key=str(model_key),
+        layer=int(layer),
+        device=device,
+    )
+    mean, std = load_norm_stats_for_layer(
+        activations_dir=Path(activations_dir),
+        model_key=str(model_key),
+        layer=int(layer),
+        device=device,
+    )
+    sae_dtype = next(sae.parameters()).dtype
     out: List[torch.Tensor] = []
     with torch.no_grad():
         for start in range(0, len(rows), int(batch_size)):
             chunk = rows[start : start + int(batch_size)]
             h = torch.stack([r["raw_hidden"][int(layer)].float() for r in chunk], dim=0).to(device)
             h_norm = _normalize_hidden(h, mean, std)
-            z = sae.encode(h_norm).detach().float().cpu()
+            z = sae.encode(h_norm.to(dtype=sae_dtype)).detach().float().cpu()
             out.append(z)
     del sae
     if device.startswith("cuda"):
@@ -199,6 +170,8 @@ def _sample_traces_from_rows(rows: Sequence[dict], sample_traces: int, seed: int
         if tid and lbl in {"faithful", "unfaithful"}:
             labels_by_trace[tid].add(lbl)
     eligible = sorted([t for t, labs in labels_by_trace.items() if {"faithful", "unfaithful"}.issubset(labs)])
+    if int(sample_traces) <= 0:
+        return eligible
     if len(eligible) <= int(sample_traces):
         return eligible
     rng = random.Random(int(seed))
@@ -455,6 +428,7 @@ def _layer_sparse_probe(
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--control-records", required=True)
+    p.add_argument("--model-key", default="gpt2-medium")
     p.add_argument("--layers", required=True, help="Comma-separated layers, e.g. 0,1,2,3")
     p.add_argument("--saes-dir", default="phase2_results/saes_gpt2_12x_topk/saes")
     p.add_argument("--activations-dir", default="phase2_results/activations")
@@ -493,6 +467,7 @@ def main() -> None:
             "schema_version": "phase7_sae_feature_faithfulness_partial_v1",
             "status": "blocked_no_pairable_rows",
             "run_tag": run_tag,
+            "model_key": str(args.model_key),
             "source_control_records": str(args.control_records),
             "source_control_records_sha256": sha256_file(args.control_records),
             "sampled_trace_count": int(len(sampled_trace_ids)),
@@ -513,6 +488,7 @@ def main() -> None:
     for layer in layers:
         feats = _encode_layer_features(
             rows_used,
+            model_key=str(args.model_key),
             layer=int(layer),
             saes_dir=saes_dir,
             activations_dir=activations_dir,
@@ -555,6 +531,7 @@ def main() -> None:
         "schema_version": "phase7_sae_feature_faithfulness_partial_v1",
         "status": "ok",
         "run_tag": run_tag,
+        "model_key": str(args.model_key),
         "source_control_records": str(args.control_records),
         "source_control_records_sha256": sha256_file(args.control_records),
         "source_control_records_stats": payload.get("stats"),
