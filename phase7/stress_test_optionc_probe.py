@@ -467,6 +467,7 @@ def _eval_wrong_lexical(
                 "trace_id": str(r.trace_id),
                 "variant": str(r.variant),
                 "label": int(r.label),
+                "lexical_control": bool(r.lexical_control),
                 "score": float(p),
             }
         )
@@ -478,6 +479,11 @@ def _eval_wrong_lexical(
     primary_member_auroc = _roc_auc(primary_rows)
     wrong = [(float(r["score"]), int(r["label"])) for r in scored if str(r["variant"]) == "wrong_intermediate"]
     lexical = [(float(r["score"]), int(r["label"])) for r in scored if str(r["variant"]) == "lexical_consistent_swap"]
+    lexical_control_rows = [
+        (float(r["score"]), 1 if bool(r["lexical_control"]) else 0)
+        for r in scored
+        if int(r["label"]) == 0
+    ]
     wrong_auc = _roc_auc(wrong)
     return {
         "train_auroc": fit.get("train_auroc"),
@@ -491,10 +497,16 @@ def _eval_wrong_lexical(
         "wrong_intermediate_count": int(len(wrong)),
         "wrong_intermediate_pos": int(sum(y for _, y in wrong)),
         "wrong_intermediate_neg": int(len(wrong) - sum(y for _, y in wrong)),
+        # Legacy lexical metric: AUROC within lexical-consistent variant using original labels.
         "lexical_variant_auroc": _roc_auc(lexical),
         "lexical_variant_count": int(len(lexical)),
         "lexical_variant_pos": int(sum(y for _, y in lexical)),
         "lexical_variant_neg": int(len(lexical) - sum(y for _, y in lexical)),
+        # Eval-aligned lexical confound metric: among faithful rows, detect lexical-control rows.
+        "lexical_control_probe_auroc": _roc_auc(lexical_control_rows),
+        "lexical_control_probe_count": int(len(lexical_control_rows)),
+        "lexical_control_probe_pos": int(sum(y for _, y in lexical_control_rows)),
+        "lexical_control_probe_neg": int(len(lexical_control_rows) - sum(y for _, y in lexical_control_rows)),
         "scored_rows": scored,
     }
 
@@ -676,6 +688,7 @@ def run_permutation(args: argparse.Namespace) -> Dict[str, Any]:
         "observed_primary_member_auroc": observed,
         "observed_wrong_intermediate_auroc": out_obs.get("wrong_intermediate_auroc"),
         "observed_lexical_variant_auroc": out_obs.get("lexical_variant_auroc"),
+        "observed_lexical_control_probe_auroc": out_obs.get("lexical_control_probe_auroc"),
         "observed_test_auroc": out_obs.get("test_auroc"),
         "runs_requested": int(args.permutation_runs),
         "runs_effective": int(stats.get("count", 0)),
@@ -751,6 +764,7 @@ def run_ablation_reg(args: argparse.Namespace) -> Dict[str, Any]:
             "primary_member_auroc": out.get("primary_member_auroc"),
             "wrong_intermediate_auroc": out.get("wrong_intermediate_auroc"),
             "lexical_variant_auroc": out.get("lexical_variant_auroc"),
+            "lexical_control_probe_auroc": out.get("lexical_control_probe_auroc"),
             "test_auroc": out.get("test_auroc"),
             "train_auroc": out.get("train_auroc"),
             "loss_end": out.get("loss_end"),
@@ -771,6 +785,7 @@ def run_ablation_reg(args: argparse.Namespace) -> Dict[str, Any]:
             "primary_member_auroc": out.get("primary_member_auroc"),
             "wrong_intermediate_auroc": out.get("wrong_intermediate_auroc"),
             "lexical_variant_auroc": out.get("lexical_variant_auroc"),
+            "lexical_control_probe_auroc": out.get("lexical_control_probe_auroc"),
             "test_auroc": out.get("test_auroc"),
             "train_auroc": out.get("train_auroc"),
             "loss_end": out.get("loss_end"),
@@ -846,7 +861,8 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
 
     per_seed: List[Dict[str, Any]] = []
     primary_aucs: List[float] = []
-    lexical_aucs: List[float] = []
+    lexical_variant_aucs: List[float] = []
+    lexical_control_probe_aucs: List[float] = []
     pooled_primary: List[Dict[str, Any]] = []
     overlap_total = 0
 
@@ -867,10 +883,13 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
         if not isinstance(wauc, (int, float)):
             wauc = out.get("wrong_intermediate_auroc")
         lauc = out.get("lexical_variant_auroc")
+        lcp_auc = out.get("lexical_control_probe_auroc")
         if isinstance(wauc, (int, float)):
             primary_aucs.append(float(wauc))
         if isinstance(lauc, (int, float)):
-            lexical_aucs.append(float(lauc))
+            lexical_variant_aucs.append(float(lauc))
+        if isinstance(lcp_auc, (int, float)):
+            lexical_control_probe_aucs.append(float(lcp_auc))
 
         scored = list(out.get("scored_rows", []))
         for r in scored:
@@ -893,9 +912,11 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
                 "primary_member_auroc": wauc,
                 "wrong_intermediate_auroc": out.get("wrong_intermediate_auroc"),
                 "lexical_variant_auroc": lauc,
+                "lexical_control_probe_auroc": lcp_auc,
                 "primary_member_count": out.get("primary_member_count"),
                 "wrong_intermediate_count": out.get("wrong_intermediate_count"),
                 "lexical_variant_count": out.get("lexical_variant_count"),
+                "lexical_control_probe_count": out.get("lexical_control_probe_count"),
                 "loss_end": out.get("loss_end"),
             }
         )
@@ -937,7 +958,8 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
         "per_seed": per_seed,
         "primary_member_summary": _summ(primary_aucs),
         "wrong_intermediate_summary": _summ(primary_aucs),
-        "lexical_summary": _summ(lexical_aucs),
+        "lexical_summary": _summ(lexical_variant_aucs),
+        "lexical_control_probe_summary": _summ(lexical_control_probe_aucs),
         "pooled_primary_member": {
             "auroc": pooled_auc,
             "ci95": {
@@ -1002,6 +1024,8 @@ def run_final(args: argparse.Namespace) -> Dict[str, Any]:
         "permutation": {
             "observed_primary_member_auroc": perm.get("observed_primary_member_auroc"),
             "observed_wrong_intermediate_auroc": perm.get("observed_wrong_intermediate_auroc"),
+            "observed_lexical_control_probe_auroc": perm.get("observed_lexical_control_probe_auroc"),
+            "observed_lexical_variant_auroc_legacy": perm.get("observed_lexical_variant_auroc"),
             "distribution": perm.get("wrong_intermediate_auroc_distribution"),
             "primary_distribution": perm.get("primary_member_auroc_distribution"),
             "empirical_p_value": perm.get("empirical_p_value"),
@@ -1016,8 +1040,14 @@ def run_final(args: argparse.Namespace) -> Dict[str, Any]:
             "multiseed_pass": bool(ms_pass),
             "primary_member_summary": ms.get("primary_member_summary"),
             "wrong_intermediate_summary": ms.get("wrong_intermediate_summary"),
+            "lexical_control_probe_summary": ms.get("lexical_control_probe_summary"),
+            "lexical_variant_summary_legacy": ms.get("lexical_summary"),
             "pooled_wrong_intermediate": ms.get("pooled_wrong_intermediate"),
             "pooled_primary_member": ms.get("pooled_primary_member"),
+        },
+        "lexical_metric_definition": {
+            "primary": "lexical_control_probe_auroc (eval-aligned): AUROC among label==0 rows for lexical_control vs non-lexical_control",
+            "legacy": "lexical_variant_auroc: AUROC within lexical_consistent_swap rows using original labels",
         },
         "final_verdict_primary": str(final_primary),
         "final_verdict_legacy": str(final_legacy),
@@ -1030,6 +1060,8 @@ def run_final(args: argparse.Namespace) -> Dict[str, Any]:
         f"- Final verdict (primary/p-value): `{final_primary}`",
         f"- Final verdict (legacy strict): `{final_legacy}`",
         f"- Observed primary-member AUROC: `{perm.get('observed_primary_member_auroc')}`",
+        f"- Observed lexical-control probe AUROC (eval-aligned): `{perm.get('observed_lexical_control_probe_auroc')}`",
+        f"- Observed lexical-variant AUROC (legacy): `{perm.get('observed_lexical_variant_auroc')}`",
         f"- Empirical permutation p-value: `{perm.get('empirical_p_value')}`",
         f"- Regularization pass: `{reg_pass}`",
         f"- Multi-seed pass: `{ms_pass}`",
