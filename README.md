@@ -76,19 +76,29 @@ Primary closure references:
 - `phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json`
 - `phase7_results/results/phase7_mixed_trajectory_validation_phase7_mixed_trajectory_20260307_012248_phase7_mixed_trajectory_validation.json`
 
-## Qwen Inquiry (Active Next-Model Path)
+## Qwen Option C — Faithfulness Detection (Active)
 
-Qwen is intentionally treated as a separate hypothesis test.  
-The active path is now the **SAE trajectory ladder**:
-- Path A: baseline trajectory coherence
-- Path B: feature-set swap
-- Path C: probe/ensemble with robust CV and variant-exclusion validation
+Qwen is the active model for Track C faithfulness validation using the **Option C** method:
+behavioral contradiction labeling + internal consistency detection + lexical confound control.
 
-Promotion policy:
-- Run canary first, then full only if integrity checks pass.
-- Primary publishable criterion is robust-CV `wrong_intermediate AUROC > 0.70`.
+### Current Results (March 9, 2026)
 
-The active queue and gating details are in `TODO.md`.
+| Domain | CV AUROC | Lexical AUROC | Delta | Gate |
+|---|---|---|---|---|
+| **Arithmetic** | 0.877 | 0.454 | 0.424 | **PASS** (stress-validated, p=0.001) |
+| **EntailmentBank** | 0.982 | 0.489 | 0.493 | **PASS** |
+| **PrOntoQA** | 0.676 | 0.519 | 0.157 | FAIL (decoder mismatch diagnosed) |
+
+Cross-domain publishability gate: **not yet met** (both PrOntoQA and EntailmentBank must pass).
+PrOntoQA failure is diagnosed as a decoder feature mismatch (arithmetic decoder used for
+syllogistic domain). Remediation: train domain-specific decoder, rerun.
+
+Key artifacts:
+- Arithmetic: `phase7_results/results/optionc_summary_20260309_084825_phase7_optionc_generated_qwen_arith.json`
+- G2 decision: `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json`
+- Stress: `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json`
+
+See `PROJECT_STATUS.md` for full details and `TODO.md` for active remediation plan.
 
 ## Project Structure
 

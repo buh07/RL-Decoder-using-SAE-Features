@@ -57,24 +57,41 @@ _run_worker() {
   local dec_ckpt="${DECODER_CHECKPOINT:-}"
   local dec_dev="${DECODER_DEVICE:-}"
   local dec_bs="${DECODER_BATCH_SIZE:-128}"
+  local dec_missing_state_policy="${DECODER_MISSING_STATE_POLICY:-}"
   local dec_cache_tmpl="${DECODER_PREDS_CACHE_TEMPLATE:-}"
   local dec_cache=""
   if [[ -n "$dec_cache_tmpl" ]]; then
     dec_cache="${dec_cache_tmpl//\{gpu\}/$GPU_ID}"
   fi
+  local feat_cache_dir="${FEATURE_CACHE_DIR:-}"
+  local feat_cache_key="${FEATURE_CACHE_KEY:-}"
+  local feat_cache_union_json="${FEATURE_CACHE_UNION_JSON:-}"
 
   {
     echo "[$(date -Is)] worker start gpu=${GPU_ID} layers=${LAYERS}"
     for layer in "${layers_arr[@]}"; do
       local out_partial="${OUT_PARTIAL_TEMPLATE//__LAYER__/$layer}"
       local decoder_args=()
+      local feature_cache_args=()
       if [[ -n "$dec_ckpt" ]]; then
         decoder_args+=(--decoder-checkpoint "$dec_ckpt" --decoder-batch-size "$dec_bs")
         if [[ -n "$dec_dev" ]]; then
           decoder_args+=(--decoder-device "$dec_dev")
         fi
+        if [[ -n "$dec_missing_state_policy" ]]; then
+          decoder_args+=(--decoder-missing-state-policy "$dec_missing_state_policy")
+        fi
         if [[ -n "$dec_cache" ]]; then
           decoder_args+=(--decoder-preds-cache "$dec_cache")
+        fi
+      fi
+      if [[ -n "$feat_cache_dir" ]]; then
+        feature_cache_args+=(--feature-cache-dir "$feat_cache_dir")
+        if [[ -n "$feat_cache_key" ]]; then
+          feature_cache_args+=(--feature-cache-key "$feat_cache_key")
+        fi
+        if [[ -n "$feat_cache_union_json" ]]; then
+          feature_cache_args+=(--feature-cache-union-json "$feat_cache_union_json")
         fi
       fi
       CUDA_VISIBLE_DEVICES="$GPU_ID" "$PY" phase7/sae_trajectory_coherence_discrimination.py \
@@ -96,6 +113,7 @@ _run_worker() {
         --run-tag "$RUN_TAG" \
         "${emit_arg[@]}" \
         "${decoder_args[@]}" \
+        "${feature_cache_args[@]}" \
         --output "$out_partial"
     done
     echo "[$(date -Is)] worker done gpu=${GPU_ID}"
@@ -218,6 +236,9 @@ case "$MODE" in
     DECODER_CHECKPOINT="${DECODER_CHECKPOINT:-}"
     DECODER_DEVICE="${DECODER_DEVICE:-}"
     DECODER_BATCH_SIZE="${DECODER_BATCH_SIZE:-128}"
+    FEATURE_CACHE_DIR="${FEATURE_CACHE_DIR:-}"
+    FEATURE_CACHE_KEY="${FEATURE_CACHE_KEY:-}"
+    FEATURE_CACHE_UNION_JSON="${FEATURE_CACHE_UNION_JSON:-}"
 
     LAYERS_CSV="${LAYERS_CSV:-4,7,22}"
     GPU_IDS_CSV="${GPU_IDS_CSV:-5,6,7}"
@@ -306,6 +327,9 @@ DECODER_CHECKPOINT=$DECODER_CHECKPOINT
 DECODER_DEVICE=$DECODER_DEVICE
 DECODER_BATCH_SIZE=$DECODER_BATCH_SIZE
 DECODER_PREDS_CACHE_TEMPLATE=$DECODER_PREDS_CACHE_TEMPLATE
+FEATURE_CACHE_DIR=$FEATURE_CACHE_DIR
+FEATURE_CACHE_KEY=$FEATURE_CACHE_KEY
+FEATURE_CACHE_UNION_JSON=$FEATURE_CACHE_UNION_JSON
 CFG
 
     COORD_SESSION="p7saetc_coord_${RUN_ID}"

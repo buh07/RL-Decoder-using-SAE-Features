@@ -9,7 +9,7 @@ PY="${PYTHON:-.venv/bin/python3}"
 
 usage() {
   cat <<'USAGE'
-usage: experiments/run_qwen_pathc_stress.sh {launch|worker-permutation|worker-ablation-reg|worker-multiseed|coordinator}
+usage: experiments/run_optionc_stress.sh {launch|worker-permutation|worker-ablation-reg|worker-multiseed|coordinator}
 USAGE
 }
 
@@ -64,8 +64,9 @@ run_worker_permutation() {
   [[ "${#PARTIALS[@]}" -gt 0 ]] || { echo "No partials found" >&2; exit 1; }
   {
     echo "[$(date -Is)] permutation worker start"
-    "$PY" phase7/stress_test_pathc_probe.py \
+    "$PY" phase7/stress_test_optionc_probe.py \
       --task permutation \
+      --paired-dataset "$PAIRED_DATASET" \
       --partials "${PARTIALS[@]}" \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
@@ -76,12 +77,9 @@ run_worker_permutation() {
       --lr "$LR" \
       --weight-decay-base "$WEIGHT_DECAY_BASE" \
       --device "$DEVICE" \
-      --feature-mode "$FEATURE_MODE" \
-      --single-layer-source "$SINGLE_LAYER_SOURCE" \
-      --single-layer-id "$SINGLE_LAYER_ID" \
-      --lexical-variant "$LEXICAL_VARIANT" \
       --permutation-runs "$PERMUTATION_RUNS" \
       --permutation-seed "$PERMUTATION_SEED" \
+      --cpu-workers "$CPU_WORKERS" \
       --output-json "$PERMUTATION_JSON"
     echo "[$(date -Is)] permutation worker done"
   } >>"$BASE/logs/permutation.log" 2>&1
@@ -95,8 +93,9 @@ run_worker_ablation_reg() {
   [[ "${#PARTIALS[@]}" -gt 0 ]] || { echo "No partials found" >&2; exit 1; }
   {
     echo "[$(date -Is)] ablation+reg worker start"
-    "$PY" phase7/stress_test_pathc_probe.py \
+    "$PY" phase7/stress_test_optionc_probe.py \
       --task ablation_reg \
+      --paired-dataset "$PAIRED_DATASET" \
       --partials "${PARTIALS[@]}" \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
@@ -107,12 +106,8 @@ run_worker_ablation_reg() {
       --lr "$LR" \
       --weight-decay-base "$WEIGHT_DECAY_BASE" \
       --weight-decay-values "$WEIGHT_DECAY_VALUES" \
-      --single-layer-mode "$SINGLE_LAYER_MODE" \
-      --feature-mode "$FEATURE_MODE" \
-      --single-layer-source "$SINGLE_LAYER_SOURCE" \
-      --single-layer-id "$SINGLE_LAYER_ID" \
-      --lexical-variant "$LEXICAL_VARIANT" \
       --device "$DEVICE" \
+      --cpu-workers "$CPU_WORKERS" \
       --output-json "$ABLATION_REG_JSON"
     echo "[$(date -Is)] ablation+reg worker done"
   } >>"$BASE/logs/ablation_reg.log" 2>&1
@@ -126,8 +121,9 @@ run_worker_multiseed() {
   [[ "${#PARTIALS[@]}" -gt 0 ]] || { echo "No partials found" >&2; exit 1; }
   {
     echo "[$(date -Is)] multiseed worker start"
-    "$PY" phase7/stress_test_pathc_probe.py \
+    "$PY" phase7/stress_test_optionc_probe.py \
       --task multiseed \
+      --paired-dataset "$PAIRED_DATASET" \
       --partials "${PARTIALS[@]}" \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
@@ -137,13 +133,10 @@ run_worker_multiseed() {
       --lr "$LR" \
       --weight-decay-base "$WEIGHT_DECAY_BASE" \
       --device "$DEVICE" \
-      --feature-mode "$FEATURE_MODE" \
-      --single-layer-source "$SINGLE_LAYER_SOURCE" \
-      --single-layer-id "$SINGLE_LAYER_ID" \
-      --lexical-variant "$LEXICAL_VARIANT" \
       --multi-seed-values "$MULTI_SEED_VALUES" \
       --wrong-intermediate-bootstrap-n "$WRONG_INTERMEDIATE_BOOTSTRAP_N" \
       --wrong-intermediate-bootstrap-seed "$WRONG_INTERMEDIATE_BOOTSTRAP_SEED" \
+      --cpu-workers "$CPU_WORKERS" \
       --output-json "$MULTISEED_JSON"
     echo "[$(date -Is)] multiseed worker done"
   } >>"$BASE/logs/multiseed.log" 2>&1
@@ -167,15 +160,13 @@ run_coordinator() {
     json_parseable "$ABLATION_REG_JSON" || { echo "bad json: $ABLATION_REG_JSON" >&2; exit 1; }
     json_parseable "$MULTISEED_JSON" || { echo "bad json: $MULTISEED_JSON" >&2; exit 1; }
 
-    "$PY" phase7/stress_test_pathc_probe.py \
+    "$PY" phase7/stress_test_optionc_probe.py \
       --task final \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
       --permutation-json "$PERMUTATION_JSON" \
       --ablation-reg-json "$ABLATION_REG_JSON" \
       --multiseed-json "$MULTISEED_JSON" \
-      --lexical-variant "$LEXICAL_VARIANT" \
-      --lexical-confound-auroc-max "$LEXICAL_CONFOUND_AUROC_MAX" \
       --output-json "$OUT_JSON" \
       --output-md "$OUT_MD"
 
@@ -189,30 +180,26 @@ run_coordinator() {
 
 case "$MODE" in
   launch)
-    RUN_ID="${RUN_ID:-$(date +%Y%m%d_%H%M%S)_qwen_pathc_stress}"
-    RUN_TAG="${RUN_TAG:-qwen_pathc_stress_${RUN_ID}}"
+    RUN_ID="${RUN_ID:-$(date +%Y%m%d_%H%M%S)_optionc_stress}"
+    RUN_TAG="${RUN_TAG:-optionc_stress_${RUN_ID}}"
     BASE="${BASE:-phase7_results/runs/${RUN_ID}}"
 
-    SOURCE_RUN_ID="${SOURCE_RUN_ID:-20260308_165109_phase7_qwen_trackc_upgrade_qwpathc_robust_full_core}"
-    PARTIAL_GLOB="${PARTIAL_GLOB:-phase7_results/results/phase7_sae_trajectory_coherence_phase7_sae_trajectory_${SOURCE_RUN_ID}_layer*.json}"
+    SOURCE_RUN_ID="${SOURCE_RUN_ID:-20260309_084825_phase7_optionc_generated_qwen_arith}"
+    PAIRED_DATASET="${PAIRED_DATASET:-phase7_results/results/optionc_paired_dataset_${SOURCE_RUN_ID}_full.json}"
+    PARTIAL_GLOB="${PARTIAL_GLOB:-phase7_results/results/optionc_internal_consistency_${SOURCE_RUN_ID}_full_slot*.json}"
 
-    TRAIN_EXCLUDE_VARIANTS="${TRAIN_EXCLUDE_VARIANTS:-order_flip_only,answer_first_order_flip,reordered_steps}"
+    TRAIN_EXCLUDE_VARIANTS="${TRAIN_EXCLUDE_VARIANTS:-lexical_consistent_swap,pair_ambiguous}"
     TRACE_TEST_FRACTION="${TRACE_TEST_FRACTION:-0.20}"
     TRACE_SPLIT_SEED="${TRACE_SPLIT_SEED:-20260306}"
     EPOCHS="${EPOCHS:-500}"
     LR="${LR:-0.03}"
     WEIGHT_DECAY_BASE="${WEIGHT_DECAY_BASE:-0.0001}"
     DEVICE="${DEVICE:-cpu}"
+    CPU_WORKERS="${CPU_WORKERS:-8}"
 
     PERMUTATION_RUNS="${PERMUTATION_RUNS:-1000}"
     PERMUTATION_SEED="${PERMUTATION_SEED:-20260308}"
     WEIGHT_DECAY_VALUES="${WEIGHT_DECAY_VALUES:-0.0001,0.01,0.1,1.0}"
-    SINGLE_LAYER_MODE="${SINGLE_LAYER_MODE:-auto_best}"
-    FEATURE_MODE="${FEATURE_MODE:-full_sae}"
-    SINGLE_LAYER_SOURCE="${SINGLE_LAYER_SOURCE:-auto_best}"
-    SINGLE_LAYER_ID="${SINGLE_LAYER_ID:-0}"
-    LEXICAL_VARIANT="${LEXICAL_VARIANT:-lexical_consistent_swap}"
-    LEXICAL_CONFOUND_AUROC_MAX="${LEXICAL_CONFOUND_AUROC_MAX:-0.60}"
     MULTI_SEED_VALUES="${MULTI_SEED_VALUES:-20260307,20260308,20260309,20260310,20260311,20260312,20260313,20260314,20260315,20260316}"
     WRONG_INTERMEDIATE_BOOTSTRAP_N="${WRONG_INTERMEDIATE_BOOTSTRAP_N:-1000}"
     WRONG_INTERMEDIATE_BOOTSTRAP_SEED="${WRONG_INTERMEDIATE_BOOTSTRAP_SEED:-20260307}"
@@ -220,13 +207,13 @@ case "$MODE" in
     PERMUTATION_JSON="${PERMUTATION_JSON:-$BASE/meta/permutation.json}"
     ABLATION_REG_JSON="${ABLATION_REG_JSON:-$BASE/meta/ablation_reg.json}"
     MULTISEED_JSON="${MULTISEED_JSON:-$BASE/meta/multiseed.json}"
-    OUT_JSON="${OUT_JSON:-phase7_results/results/qwen_pathc_stress_${RUN_ID}.json}"
-    OUT_MD="${OUT_MD:-phase7_results/results/qwen_pathc_stress_${RUN_ID}.md}"
+    OUT_JSON="${OUT_JSON:-phase7_results/results/optionc_stress_${RUN_ID}.json}"
+    OUT_MD="${OUT_MD:-phase7_results/results/optionc_stress_${RUN_ID}.md}"
 
-    PERM_SESSION="p7st_perm_${RUN_ID}"
-    ABR_SESSION="p7st_abr_${RUN_ID}"
-    MSEED_SESSION="p7st_ms_${RUN_ID}"
-    COORD_SESSION="p7st_coord_${RUN_ID}"
+    PERM_SESSION="p7ocst_perm_${RUN_ID}"
+    ABR_SESSION="p7ocst_abr_${RUN_ID}"
+    MSEED_SESSION="p7ocst_ms_${RUN_ID}"
+    COORD_SESSION="p7ocst_coord_${RUN_ID}"
 
     mkdir -p "$BASE/logs" "$BASE/meta" "$BASE/state"
     rm -f "$BASE/state"/*.done
@@ -236,42 +223,39 @@ case "$MODE" in
       echo "No partials found for glob: $PARTIAL_GLOB" >&2
       exit 1
     fi
+    [[ -f "$PAIRED_DATASET" ]] || { echo "missing paired dataset: $PAIRED_DATASET" >&2; exit 1; }
     printf '%s\n' "${PARTIALS[@]}" > "$BASE/meta/partials.list"
 
     cat > "$BASE/meta/config.env" <<CFG
-RUN_ID=$RUN_ID
-RUN_TAG=$RUN_TAG
-BASE=$BASE
-SOURCE_RUN_ID=$SOURCE_RUN_ID
-PARTIAL_GLOB=$PARTIAL_GLOB
-TRAIN_EXCLUDE_VARIANTS=$TRAIN_EXCLUDE_VARIANTS
-TRACE_TEST_FRACTION=$TRACE_TEST_FRACTION
-TRACE_SPLIT_SEED=$TRACE_SPLIT_SEED
-EPOCHS=$EPOCHS
-LR=$LR
-WEIGHT_DECAY_BASE=$WEIGHT_DECAY_BASE
-DEVICE=$DEVICE
-PERMUTATION_RUNS=$PERMUTATION_RUNS
-PERMUTATION_SEED=$PERMUTATION_SEED
-WEIGHT_DECAY_VALUES=$WEIGHT_DECAY_VALUES
-SINGLE_LAYER_MODE=$SINGLE_LAYER_MODE
-FEATURE_MODE=$FEATURE_MODE
-SINGLE_LAYER_SOURCE=$SINGLE_LAYER_SOURCE
-SINGLE_LAYER_ID=$SINGLE_LAYER_ID
-LEXICAL_VARIANT=$LEXICAL_VARIANT
-LEXICAL_CONFOUND_AUROC_MAX=$LEXICAL_CONFOUND_AUROC_MAX
-MULTI_SEED_VALUES=$MULTI_SEED_VALUES
-WRONG_INTERMEDIATE_BOOTSTRAP_N=$WRONG_INTERMEDIATE_BOOTSTRAP_N
-WRONG_INTERMEDIATE_BOOTSTRAP_SEED=$WRONG_INTERMEDIATE_BOOTSTRAP_SEED
-PERMUTATION_JSON=$PERMUTATION_JSON
-ABLATION_REG_JSON=$ABLATION_REG_JSON
-MULTISEED_JSON=$MULTISEED_JSON
-OUT_JSON=$OUT_JSON
-OUT_MD=$OUT_MD
-PERM_SESSION=$PERM_SESSION
-ABR_SESSION=$ABR_SESSION
-MSEED_SESSION=$MSEED_SESSION
-COORD_SESSION=$COORD_SESSION
+RUN_ID=${RUN_ID@Q}
+RUN_TAG=${RUN_TAG@Q}
+BASE=${BASE@Q}
+SOURCE_RUN_ID=${SOURCE_RUN_ID@Q}
+PAIRED_DATASET=${PAIRED_DATASET@Q}
+PARTIAL_GLOB=${PARTIAL_GLOB@Q}
+TRAIN_EXCLUDE_VARIANTS=${TRAIN_EXCLUDE_VARIANTS@Q}
+TRACE_TEST_FRACTION=${TRACE_TEST_FRACTION@Q}
+TRACE_SPLIT_SEED=${TRACE_SPLIT_SEED@Q}
+EPOCHS=${EPOCHS@Q}
+LR=${LR@Q}
+WEIGHT_DECAY_BASE=${WEIGHT_DECAY_BASE@Q}
+DEVICE=${DEVICE@Q}
+CPU_WORKERS=${CPU_WORKERS@Q}
+PERMUTATION_RUNS=${PERMUTATION_RUNS@Q}
+PERMUTATION_SEED=${PERMUTATION_SEED@Q}
+WEIGHT_DECAY_VALUES=${WEIGHT_DECAY_VALUES@Q}
+MULTI_SEED_VALUES=${MULTI_SEED_VALUES@Q}
+WRONG_INTERMEDIATE_BOOTSTRAP_N=${WRONG_INTERMEDIATE_BOOTSTRAP_N@Q}
+WRONG_INTERMEDIATE_BOOTSTRAP_SEED=${WRONG_INTERMEDIATE_BOOTSTRAP_SEED@Q}
+PERMUTATION_JSON=${PERMUTATION_JSON@Q}
+ABLATION_REG_JSON=${ABLATION_REG_JSON@Q}
+MULTISEED_JSON=${MULTISEED_JSON@Q}
+OUT_JSON=${OUT_JSON@Q}
+OUT_MD=${OUT_MD@Q}
+PERM_SESSION=${PERM_SESSION@Q}
+ABR_SESSION=${ABR_SESSION@Q}
+MSEED_SESSION=${MSEED_SESSION@Q}
+COORD_SESSION=${COORD_SESSION@Q}
 CFG
 
     for s in "$PERM_SESSION" "$ABR_SESSION" "$MSEED_SESSION" "$COORD_SESSION"; do
@@ -283,7 +267,7 @@ CFG
     tmux new-session -d -s "$MSEED_SESSION" "cd '$ROOT_DIR' && set -a && source '$BASE/meta/config.env' && set +a && '$0' worker-multiseed"
     tmux new-session -d -s "$COORD_SESSION" "cd '$ROOT_DIR' && set -a && source '$BASE/meta/config.env' && set +a && '$0' coordinator"
 
-    echo "launched qwen pathc stress"
+    echo "launched optionc stress"
     echo "  run_id: $RUN_ID"
     echo "  run_tag: $RUN_TAG"
     echo "  source_run_id: $SOURCE_RUN_ID"

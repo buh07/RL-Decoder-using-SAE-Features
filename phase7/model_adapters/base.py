@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -121,6 +121,117 @@ class BaseCausalLMAdapter(ABC):
             out = self.model(ids, output_hidden_states=True, return_dict=True)
         hidden_states = tuple(out.hidden_states[1:]) if out.hidden_states is not None else tuple()
         return out.logits, hidden_states
+
+    @torch.no_grad()
+    def generate_with_step_hidden_states(
+        self,
+        prompts: Sequence[str],
+        *,
+        max_new_tokens: int = 128,
+        do_sample: bool = False,
+        temperature: float = 1.0,
+        top_p: float = 1.0,
+    ) -> List[Dict[str, Any]]:
+        if self.model is None or self.tokenizer is None:
+            raise RuntimeError("Adapter model/tokenizer is not loaded")
+        if not prompts:
+            return []
+
+        original_padding_side = str(getattr(self.tokenizer, "padding_side", "right"))
+        self.tokenizer.padding_side = "left"
+        try:
+            enc = self.tokenizer(
+                list(prompts),
+                return_tensors="pt",
+                padding=True,
+                add_special_tokens=self._tokenize_add_special_tokens(),
+            )
+            input_ids = enc.input_ids.to(self.device)
+            attention_mask = getattr(enc, "attention_mask", None)
+            if attention_mask is not None:
+                attention_mask = attention_mask.to(self.device)
+            prompt_lens = (
+                attention_mask.sum(dim=1).detach().cpu().tolist()
+                if attention_mask is not None
+                else [int(input_ids.shape[1])] * int(input_ids.shape[0])
+            )
+            pad_token_id = int(
+                self.tokenizer.pad_token_id
+                if self.tokenizer.pad_token_id is not None
+                else self.tokenizer.eos_token_id
+            )
+
+            gen_kwargs: Dict[str, Any] = {
+                "max_new_tokens": int(max_new_tokens),
+                "do_sample": bool(do_sample),
+                "pad_token_id": int(pad_token_id),
+                "return_dict_in_generate": True,
+                "output_hidden_states": True,
+            }
+            if bool(do_sample):
+                gen_kwargs["temperature"] = float(temperature)
+                gen_kwargs["top_p"] = float(top_p)
+            out = self.model.generate(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                **gen_kwargs,
+            )
+            seq = out.sequences.detach().cpu()
+            step_hidden = out.hidden_states
+
+            results: List[Dict[str, Any]] = []
+            for bi in range(int(seq.shape[0])):
+                prompt_len = int(prompt_lens[bi])
+                gen_ids = seq[bi, prompt_len:].tolist()
+                gen_text = self.tokenizer.decode(gen_ids, skip_special_tokens=True)
+
+                step_tensors: List[torch.Tensor] = []
+                if isinstance(step_hidden, (tuple, list)):
+                    for hs_step in step_hidden:
+                        if not isinstance(hs_step, (tuple, list)):
+                            continue
+                        per_layer: List[torch.Tensor] = []
+                        for li, layer_out in enumerate(hs_step):
+                            if li == 0:  # skip embedding layer
+                                continue
+                            if not torch.is_tensor(layer_out):
+                                continue
+                            lt = layer_out.detach()
+                            if lt.ndim == 3:
+                                # [batch, seq, hidden] or [batch, 1, hidden]
+                                vec = lt[bi, -1, :]
+                            elif lt.ndim == 2:
+                                # [batch, hidden]
+                                vec = lt[bi, :]
+                            else:
+                                continue
+                            per_layer.append(vec.float().cpu())
+                        if per_layer:
+                            step_tensors.append(torch.stack(per_layer, dim=0))
+
+                expected_steps = int(len(gen_ids))
+                available_steps = int(len(step_tensors))
+                if available_steps > expected_steps:
+                    step_tensors = step_tensors[:expected_steps]
+                if available_steps < expected_steps and available_steps > 0:
+                    # Align lengths conservatively by truncating generated ids to captured states.
+                    gen_ids = gen_ids[:available_steps]
+                    gen_text = self.tokenizer.decode(gen_ids, skip_special_tokens=True)
+
+                results.append(
+                    {
+                        "prompt": str(prompts[bi]),
+                        "generated_text": str(gen_text),
+                        "generated_token_ids": [int(x) for x in gen_ids],
+                        "hidden_by_generated_token": step_tensors,
+                        "prompt_token_count": int(prompt_len),
+                        "generated_token_count": int(len(gen_ids)),
+                        "captured_step_count": int(len(step_tensors)),
+                    }
+                )
+            return results
+        finally:
+            self.tokenizer.padding_side = original_padding_side
 
     def logprob_at(self, input_ids: Any, pred_pos: int, token_id: int) -> float:
         logits, _ = self.forward(input_ids)

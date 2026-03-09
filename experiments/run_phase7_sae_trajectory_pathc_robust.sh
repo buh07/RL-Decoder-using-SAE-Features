@@ -50,6 +50,19 @@ MIXED_DELTA_EFFECT_FLOOR="${MIXED_DELTA_EFFECT_FLOOR:-0.03}"
 DECODER_CHECKPOINT="${DECODER_CHECKPOINT:-}"
 DECODER_DEVICE="${DECODER_DEVICE:-}"
 DECODER_BATCH_SIZE="${DECODER_BATCH_SIZE:-128}"
+DECODER_MISSING_STATE_POLICY="${DECODER_MISSING_STATE_POLICY:-error}"
+
+json_parseable() {
+  local p="$1"
+  "$PY" - <<PY
+import json,sys
+try:
+    json.load(open(${p@Q}))
+except Exception:
+    sys.exit(1)
+sys.exit(0)
+PY
+}
 
 mkdir -p "$BASE/logs" "$BASE/meta" "$BASE/state" phase7_results/results
 
@@ -98,57 +111,68 @@ MIXED_DELTA_EFFECT_FLOOR=$MIXED_DELTA_EFFECT_FLOOR
 DECODER_CHECKPOINT=$DECODER_CHECKPOINT
 DECODER_DEVICE=$DECODER_DEVICE
 DECODER_BATCH_SIZE=$DECODER_BATCH_SIZE
+DECODER_MISSING_STATE_POLICY=$DECODER_MISSING_STATE_POLICY
 OUT_JSON=$OUT_JSON
 OUT_MD=$OUT_MD
 CFG
 
 {
-  echo "[$(date -Is)] launching Path C robust core run on GPUs 5/6/7"
-  RUN_ID="$CORE_RUN_ID" \
-  RUN_TAG="$CORE_RUN_TAG" \
-  BASE="$CORE_BASE" \
-  CONTROL_RECORDS="$CONTROL_RECORDS" \
-  MODEL_KEY="$MODEL_KEY" \
-  LAYERS_CSV="$LAYERS_CSV" \
-  GPU_IDS_CSV="5,6,7" \
-  SAES_DIR="$SAES_DIR" \
-  ACTIVATIONS_DIR="$ACTIVATIONS_DIR" \
-  PHASE4_TOP_FEATURES="$PHASE4_TOP_FEATURES" \
-  DIVERGENT_SOURCE="$DIVERGENT_SOURCE" \
-  SUBSPACE_SPECS="$SUBSPACE_SPECS" \
-  FEATURE_SET="$FEATURE_SET" \
-  SAMPLE_TRACES="$SAMPLE_TRACES" \
-  MIN_COMMON_STEPS="$MIN_COMMON_STEPS" \
-  SEED="$SEED" \
-  N_BOOTSTRAP="$N_BOOTSTRAP" \
-  BATCH_SIZE="$BATCH_SIZE" \
-  EMIT_SAMPLES=1 \
-  DECODER_CHECKPOINT="$DECODER_CHECKPOINT" \
-  DECODER_DEVICE="$DECODER_DEVICE" \
-  DECODER_BATCH_SIZE="$DECODER_BATCH_SIZE" \
-  ./experiments/run_phase7_sae_trajectory_coherence.sh launch
-
-  while [[ ! -f "$CORE_BASE/state/pipeline.done" ]]; do
-    if ! tmux has-session -t "p7saetc_coord_${CORE_RUN_ID}" 2>/dev/null; then
-      found_done=0
-      for _ in {1..6}; do
-        sleep 5
-        if [[ -f "$CORE_BASE/state/pipeline.done" ]]; then
-          found_done=1
-          break
-        fi
-      done
-      if [[ "$found_done" -eq 0 ]]; then
-        echo "core coordinator exited before pipeline.done" >&2
-        exit 1
-      fi
-      break
-    fi
-    sleep 15
-  done
-
   CORE_SUMMARY="$CORE_BASE/meta/summary.json"
+  core_complete=0
+  if [[ -f "$CORE_BASE/state/pipeline.done" && -f "$CORE_SUMMARY" ]] && json_parseable "$CORE_SUMMARY"; then
+    core_complete=1
+    echo "[$(date -Is)] core run already complete and parseable; skipping relaunch"
+  fi
+
+  if [[ "$core_complete" -ne 1 ]]; then
+    echo "[$(date -Is)] launching Path C robust core run on GPUs 5/6/7"
+    RUN_ID="$CORE_RUN_ID" \
+    RUN_TAG="$CORE_RUN_TAG" \
+    BASE="$CORE_BASE" \
+    CONTROL_RECORDS="$CONTROL_RECORDS" \
+    MODEL_KEY="$MODEL_KEY" \
+    LAYERS_CSV="$LAYERS_CSV" \
+    GPU_IDS_CSV="5,6,7" \
+    SAES_DIR="$SAES_DIR" \
+    ACTIVATIONS_DIR="$ACTIVATIONS_DIR" \
+    PHASE4_TOP_FEATURES="$PHASE4_TOP_FEATURES" \
+    DIVERGENT_SOURCE="$DIVERGENT_SOURCE" \
+    SUBSPACE_SPECS="$SUBSPACE_SPECS" \
+    FEATURE_SET="$FEATURE_SET" \
+    SAMPLE_TRACES="$SAMPLE_TRACES" \
+    MIN_COMMON_STEPS="$MIN_COMMON_STEPS" \
+    SEED="$SEED" \
+    N_BOOTSTRAP="$N_BOOTSTRAP" \
+    BATCH_SIZE="$BATCH_SIZE" \
+    EMIT_SAMPLES=1 \
+    DECODER_CHECKPOINT="$DECODER_CHECKPOINT" \
+    DECODER_DEVICE="$DECODER_DEVICE" \
+    DECODER_BATCH_SIZE="$DECODER_BATCH_SIZE" \
+    DECODER_MISSING_STATE_POLICY="$DECODER_MISSING_STATE_POLICY" \
+    ./experiments/run_phase7_sae_trajectory_coherence.sh launch
+
+    while [[ ! -f "$CORE_BASE/state/pipeline.done" ]]; do
+      if ! tmux has-session -t "p7saetc_coord_${CORE_RUN_ID}" 2>/dev/null; then
+        found_done=0
+        for _ in {1..6}; do
+          sleep 5
+          if [[ -f "$CORE_BASE/state/pipeline.done" ]]; then
+            found_done=1
+            break
+          fi
+        done
+        if [[ "$found_done" -eq 0 ]]; then
+          echo "core coordinator exited before pipeline.done" >&2
+          exit 1
+        fi
+        break
+      fi
+      sleep 15
+    done
+  fi
+
   [[ -f "$CORE_SUMMARY" ]] || { echo "missing core summary: $CORE_SUMMARY" >&2; exit 1; }
+  json_parseable "$CORE_SUMMARY" || { echo "malformed core summary: $CORE_SUMMARY" >&2; exit 1; }
   mapfile -t PARTIALS < <("$PY" - <<PY
 import json
 p = json.load(open(${CORE_SUMMARY@Q}))

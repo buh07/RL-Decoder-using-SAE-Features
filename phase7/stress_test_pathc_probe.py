@@ -31,6 +31,7 @@ STEP_ANOMALY_METRICS = {
 }
 
 FEATURE_MODE_CHOICES = ("full_sae", "trajectory_only", "step_anomaly_only", "single_best_layer")
+DEFAULT_LEXICAL_VARIANT = "lexical_consistent_swap"
 
 
 def _parse_csv(value: str) -> List[str]:
@@ -185,6 +186,7 @@ def _train_eval_wrong(
     epochs: int,
     lr: float,
     weight_decay: float,
+    lexical_variant: str = DEFAULT_LEXICAL_VARIANT,
 ) -> Dict[str, Any]:
     result = apc._train_logreg(
         train_rows,
@@ -206,6 +208,8 @@ def _train_eval_wrong(
     ]
     wrong = [r for r in scored if str(r.variant) == "wrong_intermediate"]
     wrong_auc = apc._roc_auc([(float(r.score), int(r.label)) for r in wrong])
+    lexical = [r for r in scored if str(r.variant) == str(lexical_variant)]
+    lexical_auc = apc._roc_auc([(float(r.score), int(r.label)) for r in lexical])
     return {
         "train_auroc": result.get("train_auroc"),
         "test_auroc": result.get("test_auroc"),
@@ -215,6 +219,11 @@ def _train_eval_wrong(
         "wrong_intermediate_count": int(len(wrong)),
         "wrong_intermediate_pos": int(sum(int(r.label) for r in wrong)),
         "wrong_intermediate_neg": int(len(wrong) - sum(int(r.label) for r in wrong)),
+        "lexical_variant": str(lexical_variant),
+        "lexical_variant_auroc": lexical_auc,
+        "lexical_variant_count": int(len(lexical)),
+        "lexical_variant_pos": int(sum(int(r.label) for r in lexical)),
+        "lexical_variant_neg": int(len(lexical) - sum(int(r.label) for r in lexical)),
         "scored_rows": [
             {
                 "trace_id": str(r.trace_id),
@@ -253,10 +262,15 @@ def _split_with_exclusion(
     }
 
 
-def _collect_wrong_scored(scored_rows: Sequence[Dict[str, Any]], seed_tag: str) -> List[apc.ScoredRow]:
+def _collect_variant_scored(
+    scored_rows: Sequence[Dict[str, Any]],
+    seed_tag: str,
+    *,
+    variant_name: str,
+) -> List[apc.ScoredRow]:
     out: List[apc.ScoredRow] = []
     for r in scored_rows:
-        if str(r.get("variant")) != "wrong_intermediate":
+        if str(r.get("variant")) != str(variant_name):
             continue
         out.append(
             apc.ScoredRow(
@@ -323,6 +337,7 @@ def run_permutation(args: argparse.Namespace) -> Dict[str, Any]:
         epochs=int(args.epochs),
         lr=float(args.lr),
         weight_decay=float(args.weight_decay_base),
+        lexical_variant=str(args.lexical_variant),
     )
     observed_auc = observed.get("wrong_intermediate_auroc")
 
@@ -348,6 +363,7 @@ def run_permutation(args: argparse.Namespace) -> Dict[str, Any]:
             epochs=int(args.epochs),
             lr=float(args.lr),
             weight_decay=float(args.weight_decay_base),
+            lexical_variant=str(args.lexical_variant),
         )
         auc = out.get("wrong_intermediate_auroc")
         if isinstance(auc, (int, float)):
@@ -380,6 +396,7 @@ def run_permutation(args: argparse.Namespace) -> Dict[str, Any]:
         "split_diagnostics": split["split_diagnostics"],
         "train_exclusion_diagnostics": split["train_exclusion_diagnostics"],
         "observed_wrong_intermediate_auroc": observed_auc,
+        "observed_lexical_variant_auroc": observed.get("lexical_variant_auroc"),
         "observed_test_auroc": observed.get("test_auroc"),
         "runs_requested": int(args.permutation_runs),
         "runs_effective": int(stats.get("count", 0)),
@@ -395,6 +412,7 @@ def run_permutation(args: argparse.Namespace) -> Dict[str, Any]:
             "max_lt": 0.70,
             "p_value_lt": 0.01,
         },
+        "lexical_variant": str(args.lexical_variant),
         "pass": bool(legacy_pass),
         "timestamp": datetime.now().isoformat(),
     }
@@ -463,10 +481,12 @@ def run_ablation_reg(args: argparse.Namespace) -> Dict[str, Any]:
             epochs=int(args.epochs),
             lr=float(args.lr),
             weight_decay=float(args.weight_decay_base),
+            lexical_variant=str(args.lexical_variant),
         )
         ablations[name] = {
             "feature_count": int(len(fns)),
             "wrong_intermediate_auroc": res.get("wrong_intermediate_auroc"),
+            "lexical_variant_auroc": res.get("lexical_variant_auroc"),
             "test_auroc": res.get("test_auroc"),
             "train_auroc": res.get("train_auroc"),
             "loss_end": res.get("loss_end"),
@@ -482,9 +502,11 @@ def run_ablation_reg(args: argparse.Namespace) -> Dict[str, Any]:
             epochs=int(args.epochs),
             lr=float(args.lr),
             weight_decay=float(wd),
+            lexical_variant=str(args.lexical_variant),
         )
         reg[str(wd)] = {
             "wrong_intermediate_auroc": res.get("wrong_intermediate_auroc"),
+            "lexical_variant_auroc": res.get("lexical_variant_auroc"),
             "test_auroc": res.get("test_auroc"),
             "train_auroc": res.get("train_auroc"),
             "loss_end": res.get("loss_end"),
@@ -521,6 +543,7 @@ def run_ablation_reg(args: argparse.Namespace) -> Dict[str, Any]:
             "wd_1.0_min": 0.65,
             "ablation_material_delta_min": 0.02,
         },
+        "lexical_variant": str(args.lexical_variant),
         "full_sae_depends_on_full_feature_design": full_dep,
         "timestamp": datetime.now().isoformat(),
     }
@@ -544,6 +567,8 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
     per_seed: List[Dict[str, Any]] = []
     wrong_aucs: List[float] = []
     pooled_wrong_rows: List[apc.ScoredRow] = []
+    lexical_aucs: List[float] = []
+    pooled_lexical_rows: List[apc.ScoredRow] = []
     overlap_total = 0
 
     for seed in seeds:
@@ -563,11 +588,28 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
             epochs=int(args.epochs),
             lr=float(args.lr),
             weight_decay=float(args.weight_decay_base),
+            lexical_variant=str(args.lexical_variant),
         )
         auc = out.get("wrong_intermediate_auroc")
         if isinstance(auc, (int, float)):
             wrong_aucs.append(float(auc))
-        pooled_wrong_rows.extend(_collect_wrong_scored(out.get("scored_rows", []), seed_tag=str(seed)))
+        lex_auc = out.get("lexical_variant_auroc")
+        if isinstance(lex_auc, (int, float)):
+            lexical_aucs.append(float(lex_auc))
+        pooled_wrong_rows.extend(
+            _collect_variant_scored(
+                out.get("scored_rows", []),
+                seed_tag=str(seed),
+                variant_name="wrong_intermediate",
+            )
+        )
+        pooled_lexical_rows.extend(
+            _collect_variant_scored(
+                out.get("scored_rows", []),
+                seed_tag=str(seed),
+                variant_name=str(args.lexical_variant),
+            )
+        )
         per_seed.append(
             {
                 "seed": int(seed),
@@ -577,6 +619,10 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
                 "wrong_intermediate_count": out.get("wrong_intermediate_count"),
                 "wrong_intermediate_pos": out.get("wrong_intermediate_pos"),
                 "wrong_intermediate_neg": out.get("wrong_intermediate_neg"),
+                "lexical_variant_auroc": out.get("lexical_variant_auroc"),
+                "lexical_variant_count": out.get("lexical_variant_count"),
+                "lexical_variant_pos": out.get("lexical_variant_pos"),
+                "lexical_variant_neg": out.get("lexical_variant_neg"),
                 "loss_end": out.get("loss_end"),
             }
         )
@@ -587,7 +633,14 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
         n_bootstrap=int(args.wrong_intermediate_bootstrap_n),
         seed=int(args.wrong_intermediate_bootstrap_seed),
     )
+    pooled_lexical_auc = apc._roc_auc([(float(r.score), int(r.label)) for r in pooled_lexical_rows])
+    pooled_lexical_boot = apc._bootstrap_trace_pair_auc(
+        pooled_lexical_rows,
+        n_bootstrap=int(args.wrong_intermediate_bootstrap_n),
+        seed=int(args.wrong_intermediate_bootstrap_seed),
+    )
     stats = _summ(wrong_aucs)
+    lexical_stats = _summ(lexical_aucs)
 
     pass_flag = bool(
         isinstance(stats.get("mean"), (int, float))
@@ -608,6 +661,7 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
         "seeds": [int(s) for s in seeds],
         "per_seed": per_seed,
         "wrong_intermediate_auroc_distribution": stats,
+        "lexical_variant_auroc_distribution": lexical_stats,
         "pooled_wrong_intermediate_auroc": pooled_auc,
         "pooled_wrong_intermediate_ci95": {
             "lower": pooled_boot.get("ci95_lower"),
@@ -617,6 +671,19 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
             "trace_pair_count": int(pooled_boot.get("valid_trace_pair_count", 0)),
             "defined": bool(pooled_boot.get("defined", False)),
         },
+        "lexical_consistent_swap": {
+            "variant": str(args.lexical_variant),
+            "auroc_distribution": lexical_stats,
+            "pooled_auroc": pooled_lexical_auc,
+            "pooled_ci95": {
+                "lower": pooled_lexical_boot.get("ci95_lower"),
+                "upper": pooled_lexical_boot.get("ci95_upper"),
+                "bootstrap_n": int(args.wrong_intermediate_bootstrap_n),
+                "bootstrap_effective_n": int(pooled_lexical_boot.get("bootstrap_effective_n", 0)),
+                "trace_pair_count": int(pooled_lexical_boot.get("valid_trace_pair_count", 0)),
+                "defined": bool(pooled_lexical_boot.get("defined", False)),
+            },
+        },
         "trace_overlap_count_total": int(overlap_total),
         "criteria": {
             "mean_min": 0.70,
@@ -624,6 +691,7 @@ def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
             "pooled_ci95_lower_min": 0.65,
             "trace_overlap_must_equal": 0,
         },
+        "lexical_variant": str(args.lexical_variant),
         "pass": pass_flag,
         "timestamp": datetime.now().isoformat(),
     }
@@ -678,6 +746,20 @@ def run_final(args: argparse.Namespace) -> Dict[str, Any]:
                 fails_primary.append("multiseed")
             reason_primary = "failed:" + ",".join(fails_primary)
 
+    lexical_block = (ms.get("lexical_consistent_swap") or {}) if isinstance(ms, dict) else {}
+    lexical_ci = lexical_block.get("pooled_ci95") if isinstance(lexical_block, dict) else {}
+    lexical_auroc = lexical_block.get("pooled_auroc") if isinstance(lexical_block, dict) else None
+    lexical_ci_upper = lexical_ci.get("upper") if isinstance(lexical_ci, dict) else None
+    lexical_threshold = float(args.lexical_confound_auroc_max)
+    lexical_confound_pass = bool(
+        isinstance(lexical_auroc, (int, float))
+        and float(lexical_auroc) <= lexical_threshold
+        and (
+            not isinstance(lexical_ci_upper, (int, float))
+            or float(lexical_ci_upper) <= lexical_threshold
+        )
+    )
+
     out = {
         "schema_version": "qwen_pathc_stress_v1",
         "status": "ok",
@@ -717,6 +799,14 @@ def run_final(args: argparse.Namespace) -> Dict[str, Any]:
             "regularization_pass": reg_pass,
             "multiseed_pass": ms_pass,
             "ablation_full_feature_dependency": abr.get("full_sae_depends_on_full_feature_design"),
+            "lexical_confound_pass": lexical_confound_pass,
+        },
+        "confound_diagnostics": {
+            "lexical_variant": str(ms.get("lexical_variant", args.lexical_variant)),
+            "lexical_pooled_auroc": lexical_auroc,
+            "lexical_pooled_ci95": lexical_ci,
+            "lexical_confound_auroc_max": lexical_threshold,
+            "lexical_confound_pass": lexical_confound_pass,
         },
         "legacy_strict_pass": bool(perm_legacy_pass and reg_pass and ms_pass),
         "p_value_primary_pass": bool(perm_primary_pass and reg_pass and ms_pass),
@@ -745,6 +835,7 @@ def run_final(args: argparse.Namespace) -> Dict[str, Any]:
         f"- Regularization pass: `{reg_pass}`",
         f"- Multi-seed pass: `{ms_pass}`",
         f"- Full-feature dependency (interpretive): `{abr.get('full_sae_depends_on_full_feature_design')}`",
+        f"- Lexical confound pass: `{lexical_confound_pass}`",
         "",
         "## Key Numbers",
         "",
@@ -754,6 +845,7 @@ def run_final(args: argparse.Namespace) -> Dict[str, Any]:
         f"- Multi-seed mean±std: `{(ms.get('wrong_intermediate_auroc_distribution') or {}).get('mean')}` ± `{(ms.get('wrong_intermediate_auroc_distribution') or {}).get('std')}`",
         f"- Multi-seed pooled CI95 lower: `{((ms.get('pooled_wrong_intermediate_ci95') or {}).get('lower'))}`",
         f"- Regularization @0.01/@0.1/@1.0: `{((abr.get('regularization') or {}).get('0.01') or {}).get('wrong_intermediate_auroc')}` / `{((abr.get('regularization') or {}).get('0.1') or {}).get('wrong_intermediate_auroc')}` / `{((abr.get('regularization') or {}).get('1.0') or {}).get('wrong_intermediate_auroc')}`",
+        f"- Lexical pooled AUROC/CI95: `{lexical_auroc}` / `{lexical_ci}`",
     ]
     Path(args.output_md).parent.mkdir(parents=True, exist_ok=True)
     Path(args.output_md).write_text("\n".join(lines) + "\n")
@@ -785,6 +877,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--feature-mode", default="full_sae", choices=FEATURE_MODE_CHOICES)
     p.add_argument("--single-layer-source", default="auto_best", choices=("auto_best", "explicit"))
     p.add_argument("--single-layer-id", type=int, default=None)
+    p.add_argument("--lexical-variant", default=DEFAULT_LEXICAL_VARIANT)
+    p.add_argument("--lexical-confound-auroc-max", type=float, default=0.60)
 
     p.add_argument("--multi-seed-values", default="20260307,20260308,20260309,20260310,20260311,20260312,20260313,20260314,20260315,20260316")
     p.add_argument("--wrong-intermediate-bootstrap-n", type=int, default=1000)

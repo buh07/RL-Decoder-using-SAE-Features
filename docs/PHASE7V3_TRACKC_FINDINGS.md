@@ -85,3 +85,65 @@ What this does not support:
 ## Next-Step Boundary
 Qwen work is a separate hypothesis test and does not reopen GPT-2 closure by default.  
 The active next-model path is the **Qwen SAE trajectory ladder** (Path A→B→C with robust CV gating), not the legacy Q0 raw-L2 diagnostic.
+
+For arithmetic stress interpretation on next-model runs:
+- Keep legacy strict permutation-tail checks (`mean/p95/max`) for comparability.
+- Use **empirical permutation p-value** as the primary significance decision (`p < 0.01`).
+- Treat arithmetic as supportive evidence only; use PrOntoQA robust CV as the main publishability gate.
+
+## Qwen Option C Results (All Domains)
+
+### Method Summary
+Option C resolved the lexical confound that invalidated all prior coherence-only lineages:
+- **Behavioral contradiction labeling**: Paired inverse/equivalent prompts create ground-truth unfaithfulness labels from model behavior (no synthetic text manipulation).
+- **Internal consistency detection**: SAE trajectory coherence + decoder transition consistency features scored on generation-time hidden states.
+- **Lexical confound control**: `lexical_consistent_swap` variant must score near chance; faithfulness claim requires `wrong_minus_lexical_delta > 0`.
+- **Rigor controls**: `lexical_control` rows excluded from training; `pair_ambiguous` rows dropped; pair-disjoint CV; bootstrap CI; permutation stress testing.
+
+### Arithmetic Option C Baseline (Completed — PASS)
+Run: `20260309_084825_phase7_optionc_generated_qwen_arith`
+
+| Metric | Value |
+|---|---|
+| Pairs | 2,400 |
+| CV pooled primary AUROC | **0.877** |
+| Lexical control AUROC | 0.454 (chance) |
+| Delta | **0.424** |
+| Behavioral contradiction rate | 13.2% |
+| Strict gate | **pass** |
+
+Stress (`20260309_130420_optionc_stress_full_rigor`): primary verdict **pass** (p=0.000999), regularization pass, multiseed pass (mean 0.879, std 0.024).
+
+Canonical artifacts:
+- `phase7_results/results/optionc_summary_20260309_084825_phase7_optionc_generated_qwen_arith.json`
+- `phase7_results/results/optionc_eval_20260309_084825_phase7_optionc_generated_qwen_arith_full.json`
+- `phase7_results/results/optionc_claim_boundary_20260309_084825_phase7_optionc_generated_qwen_arith_full.json`
+- `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json`
+
+### G2 Cross-Task Validation (Completed — Partial Pass)
+Run: `20260309_124650_phase7_g2_cross_task_gpu135`
+
+| Domain | CV AUROC | Lexical AUROC | Delta | Contradiction Rate | Gate |
+|---|---|---|---|---|---|
+| EntailmentBank | **0.982** | 0.489 | 0.493 | — | **PASS** |
+| PrOntoQA | 0.676 | 0.519 | 0.157 | 60.2% | FAIL |
+
+Cross-domain gate (both must pass): **FAIL**
+
+PrOntoQA failure diagnosis:
+- Gap is only 0.024 below threshold (CI upper touches 0.70; fold 3 crosses it).
+- Root cause: **decoder feature mismatch** — arithmetic decoder features (magnitude, sign, operator, subresult) are meaningless for syllogistic reasoning and add noise.
+- EntailmentBank passes despite same mismatch because signal (0.982) overwhelms noise.
+- High contradiction rate (60.2%) indicates Qwen is weak on synthetic syllogisms.
+
+Remediation: train PrOntoQA-specific decoder with syllogistic heads (inference_type, conclusion_class, premise_class, chain_depth, truth_value, target_entity), then rerun.
+
+Decision artifact:
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json`
+
+### Current Claim Boundary (March 9, 2026)
+- Arithmetic: faithfulness claim **enabled** (stress-validated).
+- EntailmentBank: faithfulness claim **enabled**.
+- PrOntoQA: faithfulness claim **not enabled** (decoder remediation active).
+- Cross-domain publishability: **not yet met** (requires PrOntoQA pass after decoder fix).
+- GPT-2 closure remains unchanged and is not reopened.

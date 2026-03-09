@@ -1,6 +1,6 @@
 # RL-Decoder with SAE Features — Project Status
 
-**Last Updated:** March 8, 2026 (GPT-2 closed; Qwen SAE trajectory ladder active)
+**Last Updated:** March 9, 2026 (GPT-2 closed; Qwen Option C 2/3 domains pass; PrOntoQA decoder remediation active)
 
 ---
 
@@ -275,11 +275,124 @@ Post-closure stress-test summary (March 7):
 - Path C robust variant-exclusion run reported `wrong_intermediate` single-split AUROC `0.694` with CI `[0.586, 0.802]`; 5-fold pooled CV AUROC `0.658` (CI `[0.610, 0.706]`).
 - Mixed hidden+SAE validation remained below publishability thresholds; final mixed decision `mixed_redundant_or_insufficient`.
 
-Qwen status:
-- Qwen remains open as a separate inquiry.
-- Next action is the Qwen SAE trajectory ladder (Path A→B→C) with canary→full promotion.
-- Primary cross-model publishability criterion is robust-CV `wrong_intermediate AUROC > 0.70`.
-- See `TODO.md` for exact gating and execution order.
+### Qwen Option C — Method Overview
+
+Option C combines two innovations that resolved the lexical confound that invalidated all prior coherence-only lineages:
+1. **Behavioral contradiction labeling (Option B)**: Paired inverse/equivalent prompts create member-level correctness labels from model behavior. No synthetic text manipulation needed — unfaithfulness is naturally occurring.
+2. **Internal consistency detection (Option A)**: SAE trajectory coherence + decoder transition consistency features scored on generation-time hidden states.
+3. **Lexical confound control**: `lexical_consistent_swap` variant (logically valid text edit) must score near chance. Faithfulness claim requires `wrong_minus_lexical_delta > 0`.
+
+Key rigor controls applied to all Option C runs:
+- `lexical_control` rows excluded from training by default (`--train-exclude-pair-types`)
+- `pair_ambiguous` rows dropped from evaluation
+- Pair/trace-disjoint CV splits with zero-overlap verification
+- Bootstrap confidence intervals and permutation stress testing
+
+### Qwen Arithmetic Option C (Baseline — Completed)
+
+Run: `20260309_084825_phase7_optionc_generated_qwen_arith`
+
+| Metric | Value |
+|---|---|
+| Pairs | 2,400 (3 shards × 800) |
+| CV pooled primary AUROC | **0.8771** |
+| Single-split primary AUROC | 0.8703 |
+| Lexical control AUROC | 0.4535 (chance) |
+| Wrong-minus-lexical delta | **0.4236** |
+| Behavioral contradiction rate | 13.2% |
+| Behavioral pair AUROC | 0.986 |
+| Strict gate | **pass** |
+| Faithfulness claim | **enabled** |
+| 5-fold CV range | 0.868–0.902 |
+| CI95 | [0.854, 0.898] |
+| Trace overlap | 0 (all folds) |
+
+Stress run: `20260309_130420_optionc_stress_full_rigor`
+
+| Metric | Value |
+|---|---|
+| Primary verdict | **pass** |
+| Legacy strict verdict | fail (diagnostic-only) |
+| Observed AUROC | 0.9054 |
+| Empirical p-value | 0.000999 |
+| Regularization stability | pass |
+| Multiseed stability | pass (mean 0.8790, std 0.0239) |
+| Train exclusion | `lexical_consistent_swap,pair_ambiguous` |
+
+Canonical artifacts:
+- `phase7_results/results/optionc_summary_20260309_084825_phase7_optionc_generated_qwen_arith.json`
+- `phase7_results/results/optionc_eval_20260309_084825_phase7_optionc_generated_qwen_arith_full.json`
+- `phase7_results/results/optionc_claim_boundary_20260309_084825_phase7_optionc_generated_qwen_arith_full.json`
+- `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json`
+- `phase7_results/results/trackc_arithmetic_significance_reframe_20260309_130420_optionc_stress_full_rigor.json`
+
+### Phase G2 Cross-Task Validation (Completed — Partial Pass)
+
+Run: `20260309_124650_phase7_g2_cross_task_gpu135`
+
+Gate policy: both domains must pass all five criteria (CV AUROC > 0.70, CI lower >= 0.65, lexical AUROC <= 0.60, delta >= 0.10, zero overlap).
+
+**EntailmentBank — PASS:**
+
+| Metric | Value |
+|---|---|
+| Pairs | 1,000 |
+| CV pooled primary AUROC | **0.9820** |
+| Lexical control AUROC | 0.489 (chance) |
+| Wrong-minus-lexical delta | **0.493** |
+| Strict gate | **pass** |
+| Faithfulness claim | **enabled** |
+
+**PrOntoQA — FAIL (narrow, diagnosed):**
+
+| Metric | Value |
+|---|---|
+| Pairs | 986 |
+| CV pooled primary AUROC | **0.6757** (threshold: 0.70) |
+| CI95 | [0.643, 0.707] — upper bound touches 0.70 |
+| Lexical control AUROC | 0.519 (chance) — passes lexical gate |
+| Wrong-minus-lexical delta | 0.157 — passes delta gate |
+| Behavioral contradiction rate | **60.2%** (Qwen weak on syllogisms) |
+| Behavioral pair AUROC | 0.809 |
+| 5-fold CV range | 0.655–0.702 (fold 3 crosses 0.70) |
+| Strict gate | **fail** (primary AUROC only) |
+
+**Cross-domain publishability gate: FAIL** (`partial_generalization_or_fail`)
+
+**Diagnosis**: PrOntoQA failed by only 0.024 AUROC. Root cause identified as **decoder feature mismatch**: the 5 decoder transition-consistency features use the arithmetic decoder checkpoint (magnitude, sign, operator, subresult), which produces meaningless predictions for syllogistic reasoning. These garbage features add noise to the marginal PrOntoQA probe. EntailmentBank passes despite the same mismatch because its signal (0.982) overwhelms decoder noise.
+
+**Remediation**: Train a PrOntoQA-specific decoder with syllogistic heads (inference_type, conclusion_class, premise_class, chain_depth, truth_value, target_entity) and rerun G2 PrOntoQA with domain-appropriate transition consistency features.
+
+Cross-domain result summary:
+
+| Domain | CV AUROC | Lexical AUROC | Delta | Contradiction Rate | Gate |
+|---|---|---|---|---|---|
+| Arithmetic | 0.877 | 0.454 | 0.424 | 13.2% | **PASS** |
+| EntailmentBank | 0.982 | 0.489 | 0.493 | — | **PASS** |
+| PrOntoQA | 0.676 | 0.519 | 0.157 | 60.2% | FAIL |
+
+Decision artifact:
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json`
+
+### Current Claim Boundary (March 9, 2026)
+
+Supported:
+- Arithmetic Option C faithfulness claim within arithmetic scope (stress-validated).
+- EntailmentBank Option C faithfulness claim within entailment scope.
+- Methodological contribution: lexical confound control separates text anomaly detection from faithfulness detection.
+
+Not yet supported:
+- Cross-domain publishable faithfulness claim (requires PrOntoQA pass after decoder remediation).
+
+### Next Step: PrOntoQA Domain-Specific Decoder
+
+Active remediation to close the 0.024 AUROC gap:
+1. Build PrOntoQA structured state labels (inference_type, conclusion_class, premise_class, chain_depth, truth_value)
+2. Train PrOntoQA-specific decoder (same `MultiHeadStateDecoder` architecture, syllogistic heads)
+3. Adapt transition consistency features for syllogistic domain
+4. Rerun G2 PrOntoQA with domain-specific decoder
+
+See `TODO.md` for detailed implementation plan and file-level changes.
 
 ---
 

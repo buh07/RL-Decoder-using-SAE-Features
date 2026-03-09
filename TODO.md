@@ -1,174 +1,181 @@
 # Active Tasks
 
-**Last Updated:** March 8, 2026
+**Last Updated:** March 9, 2026
 
-## Project State (Decision Locked)
-- GPT-2 Phase 7 is **closed**.
-- Canonical GPT-2 policy is **robust-only closure evidence**.
-- Final GPT-2 Phase 7 deployment config remains two-track:
-  - `text=0.50`, `latent=0.50`, `confidence=0.0`, `causal=0.0`
-  - structural penalties enabled.
-- Qwen is a **separate next-model inquiry**.
+## Project State (Locked)
+- GPT-2 Phase 7 is closed with a negative Track C result for mechanistic faithfulness.
+- Qwen is the active model for Track C faithfulness validation.
+- Arithmetic Option C is now the baseline evidence source.
+- Publishability gate is **cross-domain G2** (PrOntoQA + EntailmentBank), both must pass.
 
-Canonical GPT-2 closure references:
-- `docs/PHASE7V3_TRACKC_FINDINGS.md`
-- `docs/TRACKC_NEGATIVE_FINDING.md`
-- `phase7_results/results/trackc_phase7v3_closure_note_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json`
-- `phase7_results/results/trackc_phase7v3_decision_phase7v3_20260305_234011_phase7v3_closure_non_smoke.json`
-- `phase7_results/results/optionbc_final_phase7_optionbc_20260306_092554_phase7_optionbc.json`
-- `phase7_results/results/phase7_sae_trajectory_pathc_robust_20260307_001237_phase7_sae_trajectory_pathc_robust.json`
+## Confirmed Baseline: Arithmetic Option C (Completed)
+Run lineage:
+- `20260309_084825_phase7_optionc_generated_qwen_arith`
 
----
+Core results (full run):
+- `cv_primary_pooled_auroc = 0.8771`
+- `single_split primary_member_auroc = 0.8703`
+- `lexical_probe_auroc = 0.4535`
+- `wrong_minus_lexical_delta = 0.4236`
+- `strict_gate_pass = true`
+- `faithfulness_claim_enabled = true`
 
-## Completed (GPT-2)
-- [x] Phase 7v3 Track C closure decision matrix completed.
-- [x] Option B fair-profile comparison completed.
-- [x] Option C split-corrected probe completed.
-- [x] SAE trajectory ladder completed on GPT-2:
-  - Path A baseline
-  - Path B feature-set swap
-  - Path C + robust variant exclusion + bootstrap + grouped CV
-- [x] Mixed hidden+SAE analysis completed and classified as non-gating exploratory for closure decisions.
+Canonical artifacts:
+- `phase7_results/results/optionc_summary_20260309_084825_phase7_optionc_generated_qwen_arith.json`
+- `phase7_results/results/optionc_eval_20260309_084825_phase7_optionc_generated_qwen_arith_full.json`
+- `phase7_results/results/optionc_claim_boundary_20260309_084825_phase7_optionc_generated_qwen_arith_full.json`
 
----
+## Arithmetic Stress (Current)
+Goal: validate the full 2,400-pair arithmetic result with strict stress diagnostics.
 
-## Qwen Active Workstream (Phase 7 SAE Trajectory)
+Status:
+- [x] Option C-native stress harness implemented (`phase7/stress_test_optionc_probe.py`)
+- [x] Stress tmux runner implemented (`experiments/run_optionc_stress.sh`)
+- [x] p-value-primary + legacy strict dual verdict support implemented
+- [x] Full stress run complete (`20260309_130420_optionc_stress_full_rigor`)
+- [x] Arithmetic significance reframe artifact written
 
-### Scope
-- Synthetic-only Track C continuation on `qwen2.5-7b`.
-- Full ladder: **feature discrimination → Path A → Path B → Path C**.
-- Execution topology: tmux on GPUs **5/6/7**.
+Outputs to finalize:
+- `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json`
+- `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.md`
+- `phase7_results/results/trackc_arithmetic_significance_reframe_20260309_130420_optionc_stress_full_rigor.json`
 
-### Required Precompute
-- [ ] Collect Qwen expanded dataset (`train` + `test`) with:
-  - `--capture-extra-anchors`
-  - SAE features enabled.
-- [ ] Build Qwen step-trace datasets from expanded records.
-- [ ] Train Qwen D1 decoder checkpoints (4 parity configs):
-  - `raw_every2_even`
-  - `hybrid_every2_even`
-  - `raw_middle14_07_20`
-  - `hybrid_middle14_07_20`
-- [ ] Derive Qwen `top_features_per_layer` from expanded train split.
-- [ ] Build Qwen variable subspaces for:
-  - `subresult_value`, `operator`, `magnitude_bucket`, `sign`.
-- [ ] Generate Qwen controls + control-conditioned records artifact.
+Decision policy (locked):
+- Primary significance: empirical permutation p-value (`< 0.01`)
+- Legacy strict tail metrics retained for comparability only
 
-### Canary Then Full Ladder
-- [ ] Canary run (`sample_traces=80`) for:
-  - SAE feature discrimination (Qwen divergent source)
-  - Path A
-  - Path B (`result_top50`, `eq_pre_result_150`, `divergent_top50`)
-  - Path C robust
-- [ ] Promotion condition for full run:
-  - all canary artifacts exist and parse
-  - trace-overlap checks pass (`0` overlap)
-  - no fatal runtime errors.
-- [ ] Full run (`sample_traces=0/all eligible`) for same ladder.
+Stress outcome (`20260309_130420_optionc_stress_full_rigor`):
+- `final_verdict_primary = pass`
+- `final_verdict_legacy = fail` (diagnostic-only)
+- observed primary-member AUROC: `0.9054`
+- empirical p-value: `0.000999`
+- regularization stability: `pass`
+- multiseed stability: `pass` (mean `0.8790`, std `0.0239`)
 
-### Primary Qwen Success Criterion
-- [x] Robust Path C criterion:
-  - `wrong_intermediate` robust-CV AUROC `> 0.70`. **FAIL** (0.5727 CV pooled).
-  - Full wrong_intermediate AUROC = 0.6701, 95% CI [0.562, 0.778].
-  - Classified as not yet publishable for mechanistic faithfulness claim.
-  - Result: `phase7_results/results/phase7_qwen_sae_trajectory_ladder_20260308_013903_phase7_qwen_sae_trajectory.json`
+## Option A / Option B Arithmetic Status
+- [x] **Option A (internal consistency)** completed for arithmetic Option C lineage.
+- [x] **Option B (behavioral contradiction baseline)** completed for arithmetic Option C lineage.
+- [x] Arithmetic claim boundary updated to full Option C artifact path.
 
-### Qwen Arithmetic Conclusion
-- SAE trajectory coherence detects **structural** unfaithfulness well (order_flip ~0.98)
-  but converges to the same ~0.67 ceiling on **content** unfaithfulness (wrong_intermediate)
-  as GPT-2 Medium. This ceiling appears method-inherent, not model-specific.
-- Path B divergent_top50 AUROC = 0.831 (inflated by structural variants).
-- The SAE trajectory pipeline does NOT use the state decoder — decoder accuracy is not a factor.
+## Phase G2 Cross-Task Validation (Current Publishability Gate)
+Domain order (locked):
+1. PrOntoQA
+2. EntailmentBank
 
----
+Pass requirement (strict):
+- Both domains must pass:
+  - pooled CV AUROC > 0.70
+  - CI lower >= 0.65
+  - lexical control AUROC <= 0.60
+  - wrong-minus-lexical delta >= 0.10
+  - zero leakage overlap
 
-## General CoT Faithfulness Generalization
+Execution policy:
+- Canary 200 pairs -> full 1000 pairs per domain
+- Feature extraction/scoring on available free 3-GPU set (executed on 1/3/5 for this run)
+- CV/bootstrap/permutation stress on CPU workers
+- Active lineage:
+  - superseded queued run: `20260309_124000_phase7_g2_cross_task` (cancelled)
+  - completed run: `20260309_124650_phase7_g2_cross_task_gpu135`
 
-### Goal
-Generalize the SAE trajectory coherence method from arithmetic to general
-chain-of-thought reasoning. The core hypothesis: if a model faithfully reasons,
-its internal SAE features should evolve coherently across CoT steps, and
-unfaithful reasoning should show detectable inconsistencies.
+Implementation status:
+- [x] Domain switch support added to Option C pair builder (`--domain`)
+- [x] G2 orchestrator added (`experiments/run_phase7_g2_cross_task.sh`)
+- [x] Run PrOntoQA domain Option C (canary->full)
+- [x] Run EntailmentBank domain Option C (canary->full)
+- [x] Emit cross-domain decision artifact
 
-### Key Architectural Changes Needed
-1. **Step segmentation**: Replace arithmetic operation parsing with general
-   sentence/clause boundary detection.
-2. **Anchor tokens**: Replace `=` sign anchor with step-conclusion final tokens.
-3. **Control variants**: Replace arithmetic-specific variants (wrong number)
-   with domain-appropriate variants (wrong conclusion, reordered steps, etc.).
-4. **Feature selection**: Replace `eq_top50` with `conclusion_top50` (features
-   active at reasoning conclusion positions) and `divergent_top50` (unchanged).
-5. **Per-step anomaly detection**: Replace trajectory-level summary metrics
-   with step-level max-anomaly scoring to catch single-step content corruption.
+Planned outputs:
+- `phase7_results/results/optionc_summary_20260309_124650_phase7_g2_cross_task_gpu135_prontoqa.json`
+- `phase7_results/results/optionc_claim_boundary_20260309_124650_phase7_g2_cross_task_gpu135_prontoqa_full.json`
+- `phase7_results/results/optionc_summary_20260309_124650_phase7_g2_cross_task_gpu135_entailmentbank.json`
+- `phase7_results/results/optionc_claim_boundary_20260309_124650_phase7_g2_cross_task_gpu135_entailmentbank_full.json`
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json`
 
-### Phase G1 — PrOntoQA Pilot (Start Here)
+Cross-task result:
+- `prontoqa`: strict gate `fail` (`cv_primary_pooled_auroc=0.6757`)
+  - CI95: [0.643, 0.707] — upper bound touches 0.70, gap is only 0.024
+  - lexical control AUROC: 0.519 (chance) — lexical gate passes cleanly
+  - wrong-minus-lexical delta: 0.157 — passes delta >= 0.10 gate
+  - behavioral contradiction rate: 60.2% (Qwen is weak on syllogistic reasoning)
+  - behavioral pair AUROC: 0.809
+  - 5-fold CV range: 0.655–0.702 (fold 3 crosses threshold)
+  - **Diagnosis**: decoder mismatch — arithmetic decoder features are noise for syllogisms
+- `entailmentbank`: strict gate `pass` (`cv_primary_pooled_auroc=0.9820`)
+  - lexical control AUROC: 0.489 (chance)
+  - wrong-minus-lexical delta: 0.493
+- final publishability: `fail` (both-domains requirement not met)
 
-**Why PrOntoQA**: Synthetic syllogistic reasoning with perfect ground truth at
-every step, mechanically generated variants, controllable chain length (2–5 hops),
-clean one-deduction-per-sentence structure. If the method can't detect
-wrong_intermediate here, it won't work on messier datasets.
+## Next Steps: PrOntoQA Domain-Specific Decoder (Active)
 
-- Source: https://github.com/asaparov/prontoqa
+### Diagnosis
+PrOntoQA failed G2 by only 0.024 AUROC. Root cause: the 5 decoder transition-consistency
+features were computed using the **arithmetic** decoder checkpoint, which predicts magnitude,
+sign, operator, and numeric subresult — all meaningless for syllogistic reasoning. These
+garbage features add noise that hurts the marginal PrOntoQA probe.
 
-#### G1.A — Data Pipeline
-- [ ] Download/generate PrOntoQA dataset (5,000+ examples, chain lengths 3–5).
-- [ ] Prompt Qwen to generate CoT solutions (or use synthetic CoT from dataset).
-- [ ] Generate control variants mechanically:
-  - `wrong_intermediate` — swap one intermediate conclusion for a wrong entity class.
-  - `order_flip` — reorder two non-adjacent deduction steps.
-  - `skipped_step` — remove one deduction from the chain.
-  - `wrong_premise` — substitute an incorrect rule.
-  - `irrelevant_insertion` — insert a true-but-irrelevant statement.
-- [ ] Capture Qwen hidden states at step-conclusion tokens (period at end of each
-  deduction) for faithful + all variants.
-- [ ] Run SAE encoding on captured activations (all 28 layers).
+EntailmentBank passed despite the same mismatch because its signal is overwhelming (0.982).
+PrOntoQA is marginal (0.676), so decoder noise matters.
 
-#### G1.B — Direct Transfer Test
-- [ ] Run existing SAE trajectory coherence pipeline on PrOntoQA data with
-  minimal changes (swap anchor positions and step segmentation only).
-- [ ] Evaluate per-variant AUROC breakdown (especially wrong_intermediate).
-- [ ] Compare to arithmetic baseline (~0.67 ceiling).
+### Plan
+1. **Build PrOntoQA structured state labels** — parse generated CoT text to extract:
+   - `inference_type`: universal_instantiation, modus_ponens, class_subsumption (3-4 way)
+   - `conclusion_class`: class concluded at this step (14-way: mammal, vertebrate, etc.)
+   - `premise_class`: input class at this step (14-way)
+   - `chain_depth`: step position in chain (5-way)
+   - `truth_value`: whether step conclusion is valid given premises (3-way: True/False/Uncertain)
+   - `target_entity`: entity being tracked (10-way: Ava, Ben, Cara, etc.)
 
-#### G1.C — Architecture Improvements
-- [ ] Implement per-step anomaly detection:
-  - For each step, compute `delta_i = SAE(unfaithful, step_i) - SAE(faithful, step_i)`.
-  - Aggregate via `max(anomaly_score_i)` instead of trajectory-level mean.
-- [ ] Test all 28 Qwen layers (not just 3).
-- [ ] Run full Path A→B→C ladder on PrOntoQA.
+2. **Train PrOntoQA-specific decoder** — same architecture as arithmetic decoder
+   (`MultiHeadStateDecoder`) but with syllogistic heads instead of arithmetic heads.
+   Train on faithful-member rows from PrOntoQA paired dataset (~1,679 members, ~3,800 rows).
 
-#### G1.D — Success Criterion
-- [ ] `wrong_intermediate` robust-CV AUROC > 0.70 on PrOntoQA.
-- [ ] If pass: proceed to Phase G2 (cross-task validation).
-- [ ] If fail: investigate per-step anomaly detection before concluding.
+3. **Adapt transition consistency features** — replace arithmetic decoder features with:
+   - `decoder_chain_coherence`: does conclusion_class[step_i] == premise_class[step_i+1]?
+   - `decoder_truth_consistency`: is truth_value stable across the chain?
+   - `decoder_answer_alignment`: does final truth_value match the model's claimed answer?
+   - `decoder_weakest_link`: min consistency across all transitions
+   - `decoder_p95_transition_error`: p95 of prediction confidence gaps across transitions
 
-### Phase G2 — Cross-Task Validation
+4. **Rerun G2 PrOntoQA** with domain-specific decoder checkpoint:
+   - Regenerate features with PrOntoQA decoder
+   - Same CV/bootstrap/permutation stress pipeline
+   - Target: push 0.676 → >0.70
 
-- [ ] Repeat pipeline on **EntailmentBank** (multi-step textual entailment trees).
-  - Source: https://allenai.org/data/entailmentbank
-  - ~1,800 problems with gold reasoning trees.
-  - Control variants: corrupt one intermediate entailment node.
-- [ ] Repeat on **FOLIO** (first-order logic NLI with FOL annotations).
-  - Source: https://github.com/Yale-LILY/FOLIO
-  - ~1,400 examples.
-- [ ] If wrong_intermediate AUROC > 0.70 on robust CV across 2+ datasets:
-  - **Publishable cross-domain mechanistic faithfulness result.**
+### Implementation files to modify
+- `phase7/contradictory_pair_prepare.py` — add PrOntoQA structured state parsing
+- `phase6/decoder_model.py` or new `phase7/prontoqa_decoder_model.py` — syllogistic heads
+- `phase7/train_state_decoders.py` — config for PrOntoQA decoder training
+- `phase7/evaluate_optionc.py` — domain-aware decoder feature computation
 
-### Phase G3 — Semi-Structured Reasoning (Stretch)
+### Risk assessment
+Gap is only 0.024. Even moderate decoder accuracy on truth_value and conclusion_class
+should close it. Main risk: Qwen may not distinctly encode syllogistic class identity
+internally (60% contradiction rate suggests weak syllogistic competence).
 
-- [ ] BIG-Bench Hard (logical deduction / tracking shuffled objects).
-- [ ] CLUTRR (compositional relational reasoning).
-- [ ] HotpotQA (multi-hop factual QA — hardest, requires fact retrieval).
+## Narrative and Documentation Tasks
+- [x] Add canonical memo:
+  - `docs/TRACKC_NEGATIVE_TO_POSITIVE_STORY.md`
+- [x] Update references/index:
+  - `docs/DOCUMENTATION_INDEX.md`
+- [x] Update status summary:
+  - `PROJECT_STATUS.md`
+- [x] Update GPT-2/Qwen claim framing references:
+  - `docs/PHASE7V3_TRACKC_FINDINGS.md`
 
----
+Narrative target:
+- negative (coherence-confounded lineages) -> positive (Option C with lexical control + model-generated CoT)
+- arithmetic is supportive and technically validated
+- publishability requires cross-domain pass in G2
 
-## Policy And Claim Boundary
-- Qwen arithmetic results do **not** reopen GPT-2 closure.
-- General CoT generalization (Phase G) is a new research direction, not a retry.
-- Cross-domain claims require robust evidence on 2+ non-arithmetic datasets.
-
----
+## Claim Boundary (Current)
+- Arithmetic Option C supports a faithfulness-enabled claim **within arithmetic**.
+- EntailmentBank Option C supports a faithfulness-enabled claim **within entailment**.
+- Cross-domain publishability is currently **not met** (PrOntoQA fail, EntailmentBank pass).
+- PrOntoQA failure diagnosed as **decoder mismatch**, not method failure — remediation active.
+- GPT-2 closure remains unchanged and is not reopened by Qwen results.
 
 ## Deprecated / Obsolete
-- [x] Legacy Qwen `Q0` raw hidden-state L2 diagnostic is obsolete for active planning.
-- [x] Qwen entrypoint is now SAE trajectory ladder (Path A→B→C), not Q0 go/no-go.
-- [x] Arithmetic-only wrong_intermediate ceiling (~0.67) confirmed across GPT-2 + Qwen.
+- [x] Legacy Qwen `Q0` raw hidden-state L2 diagnostic is obsolete.
+- [x] Synthetic-only coherence claim from early PrOntoQA runs is historical, not canonical.
+- [x] Arithmetic-only ceiling claims from older trajectory-only runs are superseded by Option C generated-pair baseline.

@@ -293,12 +293,20 @@ EOF
     "$PY" - <<PY
 import json
 from datetime import datetime
+from pathlib import Path
 
 qperm=json.load(open(${QWEN_PERM_JSON@Q}))
 qabr=json.load(open(${QWEN_ABLATION_REG_JSON@Q})) if ${QWEN_ABLATION_REG_JSON@Q} and __import__("os").path.exists(${QWEN_ABLATION_REG_JSON@Q}) else None
 qms=json.load(open(${QWEN_MULTI_JSON@Q})) if ${QWEN_MULTI_JSON@Q} and __import__("os").path.exists(${QWEN_MULTI_JSON@Q}) else None
 gabr=json.load(open(${GPT2_ABLATION_REG_JSON@Q})) if ${GPT2_ABLATION_REG_JSON@Q} and __import__("os").path.exists(${GPT2_ABLATION_REG_JSON@Q}) else None
 gms=json.load(open(${GPT2_MULTI_JSON@Q})) if ${GPT2_MULTI_JSON@Q} and __import__("os").path.exists(${GPT2_MULTI_JSON@Q}) else None
+pval_raw = str(${qwen_perm_pvalue@Q}).strip().strip('"').strip("'")
+qperm_pval = None
+if pval_raw and pval_raw.lower() not in {"null", "none"}:
+    try:
+        qperm_pval = float(pval_raw)
+    except Exception:
+        qperm_pval = None
 
 out={
   "schema_version":"qwen_pathc_single_layer_staged_v1",
@@ -311,7 +319,7 @@ out={
   "qwen_permutation_gate_pass": (${qwen_perm_gate_pass@Q} == "true"),
   "qwen_permutation_legacy_pass": (${qwen_perm_legacy_pass@Q} == "true"),
   "qwen_permutation_pvalue_pass": (${qwen_perm_primary_pass@Q} == "true"),
-  "qwen_permutation_empirical_p_value": (None if ${qwen_perm_pvalue@Q} == "null" else float(${qwen_perm_pvalue@Q})),
+  "qwen_permutation_empirical_p_value": qperm_pval,
   "qwen_permutation_pass": (${qwen_perm_gate_pass@Q} == "true"),
   "qwen_followup_pass": (${qwen_followup_pass@Q} == "true"),
   "gpt2_replication_ran": (${gpt2_replication_ran@Q} == "true"),
@@ -364,6 +372,13 @@ PY
     "$PY" - <<PY
 import json
 from datetime import datetime
+pval_raw = str(${qwen_perm_pvalue@Q}).strip().strip('"').strip("'")
+qperm_pval = None
+if pval_raw and pval_raw.lower() not in {"null", "none"}:
+    try:
+        qperm_pval = float(pval_raw)
+    except Exception:
+        qperm_pval = None
 reframe = {
   "schema_version":"trackc_arithmetic_significance_reframe_v1",
   "run_id": ${RUN_ID@Q},
@@ -372,7 +387,7 @@ reframe = {
   "legacy_strict_pass": (${qwen_perm_legacy_pass@Q} == "true"),
   "p_value_primary_pass": (${qwen_perm_primary_pass@Q} == "true"),
   "gate_pass_used_for_staging": (${qwen_perm_gate_pass@Q} == "true"),
-  "empirical_p_value": (None if ${qwen_perm_pvalue@Q} == "null" else float(${qwen_perm_pvalue@Q})),
+  "empirical_p_value": qperm_pval,
   "interpretation": ("supportive_significance" if (${qwen_perm_primary_pass@Q} == "true") else "not_significant"),
   "timestamp": datetime.now().isoformat(),
 }

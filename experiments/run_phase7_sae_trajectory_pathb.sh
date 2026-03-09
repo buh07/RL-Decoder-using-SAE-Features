@@ -30,6 +30,7 @@ MIN_COMMON_STEPS="${MIN_COMMON_STEPS:-3}"
 SEED="${SEED:-20260306}"
 N_BOOTSTRAP="${N_BOOTSTRAP:-1000}"
 BATCH_SIZE="${BATCH_SIZE:-256}"
+PATHB_REUSE_FEATURE_CACHE="${PATHB_REUSE_FEATURE_CACHE:-1}"
 
 json_parseable() {
   local p="$1"
@@ -61,6 +62,72 @@ fi
 
 summary_tmp="$BASE/meta/pathb_runs.jsonl"
 : > "$summary_tmp"
+
+feature_cache_dir=""
+feature_cache_key=""
+feature_cache_union_json=""
+if [[ "$PATHB_REUSE_FEATURE_CACHE" == "1" ]]; then
+  feature_cache_dir="$BASE/cache/sae_feature_cache"
+  feature_cache_key="pathb_shared"
+  feature_cache_union_json="$BASE/meta/pathb_union_features.json"
+  mkdir -p "$feature_cache_dir"
+  export LAYERS_CSV FEATURE_SETS_CSV PHASE4_TOP_FEATURES DIVERGENT_SOURCE feature_cache_union_json
+  "$PY" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+layers = [int(x.strip()) for x in os.environ["LAYERS_CSV"].split(",") if x.strip()]
+feature_sets = [x.strip() for x in os.environ["FEATURE_SETS_CSV"].split(",") if x.strip()]
+phase4 = json.loads(Path(os.environ["PHASE4_TOP_FEATURES"]).read_text())
+divergent_path = Path(os.environ["DIVERGENT_SOURCE"])
+divergent = json.loads(divergent_path.read_text()) if divergent_path.exists() else {}
+by_layer = (divergent.get("by_layer") or {}) if isinstance(divergent, dict) else {}
+
+def top50(block_key, layer):
+    block = phase4.get(block_key) if isinstance(phase4, dict) else None
+    if not isinstance(block, list) or layer >= len(block):
+        return []
+    return [int(v) for v in list(block[layer])[:50]]
+
+layer_map = {}
+for layer in layers:
+    merged = []
+    seen = set()
+    for fs in feature_sets:
+        feats = []
+        if fs == "eq_top50":
+            feats = top50("eq", layer)
+        elif fs == "result_top50":
+            feats = top50("result", layer)
+        elif fs == "eq_pre_result_150":
+            feats = top50("eq", layer) + top50("pre_eq", layer) + top50("result", layer)
+        elif fs == "divergent_top50":
+            row = by_layer.get(str(layer)) if isinstance(by_layer, dict) else None
+            top = ((row or {}).get("feature_divergence") or {}).get("top_features_abs_d")
+            if isinstance(top, list):
+                for item in top[:50]:
+                    if isinstance(item, dict) and "feature_idx" in item:
+                        feats.append(int(item["feature_idx"]))
+                    elif isinstance(item, (int, float)):
+                        feats.append(int(item))
+        for f in feats:
+            fi = int(f)
+            if fi not in seen:
+                seen.add(fi)
+                merged.append(fi)
+    layer_map[str(layer)] = merged
+
+out = {
+    "schema_version": "phase7_pathb_feature_union_v1",
+    "layers": layers,
+    "feature_sets": feature_sets,
+    "layer_feature_indices": layer_map,
+}
+Path(os.environ["feature_cache_union_json"]).write_text(json.dumps(out, indent=2))
+print(f"wrote {os.environ['feature_cache_union_json']}")
+PY
+fi
 
 for fs in "${FEATURE_SETS[@]}"; do
   fs="$(echo "$fs" | xargs)"
@@ -94,6 +161,9 @@ for fs in "${FEATURE_SETS[@]}"; do
   N_BOOTSTRAP="$N_BOOTSTRAP" \
   BATCH_SIZE="$BATCH_SIZE" \
   FEATURE_SET="$fs" \
+  FEATURE_CACHE_DIR="$feature_cache_dir" \
+  FEATURE_CACHE_KEY="$feature_cache_key" \
+  FEATURE_CACHE_UNION_JSON="$feature_cache_union_json" \
   ./experiments/run_phase7_sae_trajectory_coherence.sh launch | tee -a "$BASE/logs/pathb.log"
 
   coord_session="p7saetc_coord_${sub_run_id}"
@@ -130,12 +200,13 @@ done
 summary_json="phase7_results/results/phase7_sae_trajectory_pathb_${RUN_ID}.json"
 summary_md="phase7_results/results/phase7_sae_trajectory_pathb_${RUN_ID}.md"
 
-export RUN_ID RUN_TAG BASE
+export RUN_ID RUN_TAG BASE PATHB_REUSE_FEATURE_CACHE
 $PY - <<'PY'
 import json
 from pathlib import Path
 from datetime import datetime
 import os
+import hashlib
 
 run_id = os.environ['RUN_ID']
 run_tag = os.environ['RUN_TAG']
@@ -175,6 +246,8 @@ out = {
     'run_tag': run_tag,
     'status': 'ok',
     'feature_sets': [r['feature_set'] for r in rows],
+    'pathb_reuse_feature_cache': os.environ.get('PATHB_REUSE_FEATURE_CACHE', '0') == '1',
+    'feature_cache_union_json': str(base / 'meta' / 'pathb_union_features.json'),
     'by_feature_set': by_feature_set,
     'best_overall': best,
     'timestamp': datetime.now().isoformat(),

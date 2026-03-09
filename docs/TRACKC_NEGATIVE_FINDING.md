@@ -25,5 +25,11 @@ Post-closure stress tests on March 7, 2026 did not overturn this:
 - Track C remains documented as unresolved/negative for GPT-2 under current protocol and is excluded from production-weight defaults.
 
 ## Forward-Looking Boundary
-Any attempt to revive Track C claims must occur on a separate model inquiry path and must satisfy new evidence gates before promotion.  
-Current next-model path is Qwen SAE trajectory coherence (Path A→B→C with robust CV gating); the legacy Q0 raw hidden-state L2 diagnostic is obsolete for active planning.
+Any attempt to revive Track C claims must occur on a separate model inquiry path and must satisfy new evidence gates before promotion.
+Current next-model path is **Qwen Option C** (behavioral contradiction labeling + internal consistency + lexical confound control). The original trajectory-only approach (Path A→B→C) and the legacy Q0 raw hidden-state L2 diagnostic are both obsolete.
+
+Qwen Option C current status (March 9, 2026):
+- Arithmetic: PASS (CV AUROC 0.877, stress p=0.001)
+- EntailmentBank: PASS (CV AUROC 0.982)
+- PrOntoQA: FAIL (CV AUROC 0.676 — decoder mismatch, remediation active)
+- Cross-domain publishability gate: not yet met (PrOntoQA must pass after decoder fix)

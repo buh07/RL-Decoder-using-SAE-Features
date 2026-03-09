@@ -65,6 +65,26 @@ What cannot be claimed from GPT-2 closure:
 ## Open Work (Not GPT-2 Reopening)
 Qwen is an independent follow-up hypothesis test and is not implied by GPT-2 closure.
 
-Next required entry point:
-- Qwen SAE trajectory ladder (Path A→B→C) with robust CV gating.
-- Promote to full Qwen matrix only after canary integrity pass; publishable cross-model signal requires robust-CV `wrong_intermediate AUROC > 0.70`.
+### Qwen Option C Status (March 9, 2026)
+
+The original trajectory-only approach (Path A→B→C) was superseded by **Option C**, which resolved
+the lexical confound that invalidated all prior coherence-only lineages.
+
+Option C combines:
+1. Behavioral contradiction labeling (paired inverse/equivalent questions → ground-truth unfaithfulness)
+2. Internal consistency detection (SAE trajectory + decoder transition features)
+3. Lexical confound control (logically-valid text edits must score at chance)
+
+Results across three domains:
+
+| Domain | CV AUROC | Lexical AUROC | Delta | Gate |
+|---|---|---|---|---|
+| Arithmetic | 0.877 | 0.454 | 0.424 | **PASS** (stress p=0.001) |
+| EntailmentBank | 0.982 | 0.489 | 0.493 | **PASS** |
+| PrOntoQA | 0.676 | 0.519 | 0.157 | FAIL (decoder mismatch) |
+
+Cross-domain publishability gate (all domains pass): **not yet met**.
+PrOntoQA failure diagnosed as arithmetic decoder feature mismatch — remediation active
+(train syllogistic decoder, rerun). Gap is only 0.024.
+
+See `TODO.md` for PrOntoQA decoder remediation plan and `PROJECT_STATUS.md` for full results.

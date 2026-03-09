@@ -15,11 +15,11 @@ import torch
 import torch.nn.functional as F
 
 try:  # pragma: no cover
-    from .common import load_json, load_pt, magnitude_bucket, save_json, sha256_file, sign_label
+    from .common import load_json, load_pt, magnitude_bucket, save_json, save_pt, sha256_file, sign_label
     from .sae_assets import load_norm_stats_for_layer, load_sae_for_layer
     from .state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
 except ImportError:  # pragma: no cover
-    from common import load_json, load_pt, magnitude_bucket, save_json, sha256_file, sign_label
+    from common import load_json, load_pt, magnitude_bucket, save_json, save_pt, sha256_file, sign_label
     from sae_assets import load_norm_stats_for_layer, load_sae_for_layer
     from state_decoder_core import decode_latent_pred_states, load_model_from_checkpoint
 
@@ -336,6 +336,203 @@ def _encode_rows_layer_feature_subset(
     if device.startswith("cuda"):
         torch.cuda.empty_cache()
     return torch.cat(outs, dim=0) if outs else torch.zeros((0, len(feature_indices)), dtype=torch.float32)
+
+
+def _load_union_feature_map(path: Optional[str], *, layer: int) -> Optional[List[int]]:
+    if not path:
+        return None
+    p = Path(str(path))
+    if not p.exists():
+        return None
+    payload = load_json(p)
+    vals: Optional[Sequence[Any]] = None
+    if isinstance(payload, dict):
+        if "layer_feature_indices" in payload and isinstance(payload.get("layer_feature_indices"), dict):
+            vals = payload["layer_feature_indices"].get(str(layer))
+        elif str(layer) in payload:
+            vals = payload.get(str(layer))
+    if not isinstance(vals, Sequence):
+        return None
+    out: List[int] = []
+    seen = set()
+    for x in vals:
+        try:
+            i = int(x)
+        except Exception:
+            continue
+        if i not in seen:
+            seen.add(i)
+            out.append(i)
+    return out or None
+
+
+def _feature_cache_paths(cache_dir: str, cache_key: str, layer: int) -> Tuple[Path, Path]:
+    base = Path(cache_dir)
+    key = str(cache_key).strip() or "default"
+    meta = base / f"{key}_layer{int(layer)}.json"
+    tensor = base / f"{key}_layer{int(layer)}.pt"
+    return meta, tensor
+
+
+def _try_load_feature_cache(
+    *,
+    cache_dir: str,
+    cache_key: str,
+    layer: int,
+    model_key: str,
+    row_identity_hash: str,
+    requested_features: Sequence[int],
+) -> Tuple[Optional[torch.Tensor], Optional[Dict[str, Any]]]:
+    meta_path, tensor_path = _feature_cache_paths(cache_dir, cache_key, layer)
+    if not meta_path.exists() or not tensor_path.exists():
+        return None, None
+    try:
+        meta = load_json(meta_path)
+        cached_features = [int(x) for x in list(meta.get("feature_indices", []))]
+        if (
+            str(meta.get("row_identity_hash", "")) != str(row_identity_hash)
+            or str(meta.get("model_key", "")) != str(model_key)
+            or int(meta.get("layer", -1)) != int(layer)
+            or not cached_features
+        ):
+            return None, None
+        cached_set = set(cached_features)
+        req = [int(x) for x in requested_features]
+        if any(f not in cached_set for f in req):
+            return None, None
+        mat = load_pt(tensor_path).float()
+        if mat.ndim != 2:
+            return None, None
+        col = {f: i for i, f in enumerate(cached_features)}
+        idx = torch.tensor([int(col[f]) for f in req], dtype=torch.long)
+        return mat.index_select(1, idx), meta
+    except Exception:
+        return None, None
+
+
+def _save_feature_cache(
+    *,
+    cache_dir: str,
+    cache_key: str,
+    layer: int,
+    model_key: str,
+    row_identity_hash: str,
+    feature_indices: Sequence[int],
+    feature_matrix: torch.Tensor,
+    source_control_records: str,
+    source_control_records_sha256: str,
+) -> Dict[str, Any]:
+    meta_path, tensor_path = _feature_cache_paths(cache_dir, cache_key, layer)
+    meta_path.parent.mkdir(parents=True, exist_ok=True)
+    save_pt(tensor_path, feature_matrix.detach().cpu().float())
+    meta = {
+        "schema_version": "phase7_sae_feature_cache_v1",
+        "model_key": str(model_key),
+        "layer": int(layer),
+        "rows_count": int(feature_matrix.shape[0]),
+        "feature_count": int(feature_matrix.shape[1]),
+        "feature_indices": [int(x) for x in feature_indices],
+        "row_identity_hash": str(row_identity_hash),
+        "source_control_records": str(source_control_records),
+        "source_control_records_sha256": str(source_control_records_sha256),
+        "feature_tensor_path": str(tensor_path),
+    }
+    save_json(meta_path, meta)
+    return meta
+
+
+def _resolve_feature_rows(
+    rows: Sequence[dict],
+    *,
+    model_key: str,
+    layer: int,
+    requested_features: Sequence[int],
+    saes_dir: Path,
+    activations_dir: Path,
+    device: str,
+    batch_size: int,
+    source_control_records: str,
+    source_control_records_sha256: str,
+    feature_cache_dir: Optional[str],
+    feature_cache_key: Optional[str],
+    feature_cache_union_json: Optional[str],
+) -> Tuple[torch.Tensor, Dict[str, Any]]:
+    req = [int(x) for x in requested_features]
+    row_hash = _row_identity_hash(rows)
+    cache_diag: Dict[str, Any] = {
+        "enabled": bool(str(feature_cache_dir or "").strip()),
+        "cache_hit": False,
+        "cache_saved": False,
+        "cache_dir": (str(feature_cache_dir).strip() or None),
+        "cache_key": (str(feature_cache_key).strip() or None),
+        "row_identity_hash": str(row_hash),
+    }
+
+    cdir = str(feature_cache_dir or "").strip()
+    ckey = str(feature_cache_key or "").strip() or "default"
+    if cdir:
+        cached_mat, cached_meta = _try_load_feature_cache(
+            cache_dir=cdir,
+            cache_key=ckey,
+            layer=int(layer),
+            model_key=str(model_key),
+            row_identity_hash=row_hash,
+            requested_features=req,
+        )
+        if cached_mat is not None:
+            cache_diag["cache_hit"] = True
+            cache_diag["cached_feature_count"] = int(cached_mat.shape[1])
+            cache_diag["cache_meta"] = cached_meta
+            return cached_mat, cache_diag
+
+    encode_features = list(req)
+    union_features = _load_union_feature_map(
+        (str(feature_cache_union_json).strip() or None),
+        layer=int(layer),
+    )
+    if union_features:
+        merged: List[int] = []
+        seen = set()
+        for f in list(union_features) + list(req):
+            fi = int(f)
+            if fi not in seen:
+                seen.add(fi)
+                merged.append(fi)
+        encode_features = merged
+        cache_diag["union_features_used"] = True
+        cache_diag["union_feature_count"] = int(len(merged))
+    else:
+        cache_diag["union_features_used"] = False
+
+    encoded = _encode_rows_layer_feature_subset(
+        rows,
+        model_key=str(model_key),
+        layer=int(layer),
+        feature_indices=encode_features,
+        saes_dir=Path(saes_dir),
+        activations_dir=Path(activations_dir),
+        device=device,
+        batch_size=int(batch_size),
+    )
+    col = {f: i for i, f in enumerate(encode_features)}
+    idx = torch.tensor([int(col[f]) for f in req], dtype=torch.long)
+    feat_rows = encoded.index_select(1, idx)
+
+    if cdir:
+        meta = _save_feature_cache(
+            cache_dir=cdir,
+            cache_key=ckey,
+            layer=int(layer),
+            model_key=str(model_key),
+            row_identity_hash=row_hash,
+            feature_indices=encode_features,
+            feature_matrix=encoded,
+            source_control_records=str(source_control_records),
+            source_control_records_sha256=str(source_control_records_sha256),
+        )
+        cache_diag["cache_saved"] = True
+        cache_diag["cache_meta"] = meta
+    return feat_rows, cache_diag
 
 
 def _cosine_smoothness(traj: torch.Tensor) -> Optional[float]:
@@ -704,9 +901,33 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--n-bootstrap", type=int, default=1000)
     p.add_argument("--batch-size", type=int, default=256)
     p.add_argument("--device", default="cuda:0")
+    p.add_argument(
+        "--feature-cache-dir",
+        default="",
+        help="Optional cache directory for encoded SAE feature rows keyed by layer+row hash.",
+    )
+    p.add_argument(
+        "--feature-cache-key",
+        default="",
+        help="Optional cache key namespace inside --feature-cache-dir.",
+    )
+    p.add_argument(
+        "--feature-cache-union-json",
+        default="",
+        help="Optional JSON mapping layer->feature indices used to pre-encode a union set once for reuse.",
+    )
     p.add_argument("--decoder-checkpoint", default="", help="Optional decoder checkpoint for hybrid consistency features.")
     p.add_argument("--decoder-device", default="", help="Device for decoder inference (default: --device).")
     p.add_argument("--decoder-batch-size", type=int, default=128)
+    p.add_argument(
+        "--decoder-missing-state-policy",
+        choices=["error", "skip"],
+        default="error",
+        help=(
+            "Behavior when --decoder-checkpoint is set but rows are missing required "
+            "'structured_state' payloads."
+        ),
+    )
     p.add_argument(
         "--decoder-preds-cache",
         default="",
@@ -770,19 +991,44 @@ def main() -> None:
     feature_to_col = {int(f): i for i, f in enumerate(top50)}
     mag_focus_cols = [feature_to_col[f] for f in mag_focus_features if f in feature_to_col]
 
-    feat_rows = _encode_rows_layer_feature_subset(
+    feat_rows, feature_cache_diag = _resolve_feature_rows(
         rows_used,
         model_key=str(args.model_key),
         layer=layer,
-        feature_indices=top50,
+        requested_features=top50,
         saes_dir=Path(args.saes_dir),
         activations_dir=Path(args.activations_dir),
         device=str(args.device),
         batch_size=int(args.batch_size),
+        source_control_records=str(args.control_records),
+        source_control_records_sha256=sha256_file(args.control_records),
+        feature_cache_dir=(str(args.feature_cache_dir).strip() or None),
+        feature_cache_key=(str(args.feature_cache_key).strip() or None),
+        feature_cache_union_json=(str(args.feature_cache_union_json).strip() or None),
     )
 
     decoder_preds_by_row: Optional[List[Optional[Dict[str, Any]]]] = None
     decoder_checkpoint = str(args.decoder_checkpoint).strip()
+    decoder_skip_reason: Optional[str] = None
+    decoder_missing_state_count = 0
+    if decoder_checkpoint:
+        decoder_missing_state_count = sum(
+            1 for r in rows_used if not isinstance(r.get("structured_state"), dict)
+        )
+        if decoder_missing_state_count > 0:
+            policy = str(args.decoder_missing_state_policy).strip().lower()
+            if policy == "skip":
+                decoder_skip_reason = (
+                    f"missing_structured_state:{decoder_missing_state_count}/{len(rows_used)}"
+                )
+                decoder_checkpoint = ""
+            else:
+                raise RuntimeError(
+                    "decoder checkpoint provided but rows are missing 'structured_state' "
+                    f"(missing={decoder_missing_state_count} of {len(rows_used)}). "
+                    "Either provide decoder-compatible rows or pass "
+                    "--decoder-missing-state-policy skip."
+                )
     if decoder_checkpoint:
         decoder_device = str(args.decoder_device).strip() or str(args.device)
         decoder_preds_by_row = _decode_predictions_for_rows(
@@ -844,8 +1090,15 @@ def main() -> None:
             "feature_set": str(args.feature_set),
             "decoder_checkpoint": (decoder_checkpoint or None),
             "decoder_device": (str(args.decoder_device).strip() or None),
+            "decoder_missing_state_policy": str(args.decoder_missing_state_policy),
+            "decoder_missing_state_count": int(decoder_missing_state_count),
+            "decoder_skip_reason": decoder_skip_reason,
             "hybrid_consistency_enabled": bool(decoder_preds_by_row is not None),
+            "feature_cache_dir": (str(args.feature_cache_dir).strip() or None),
+            "feature_cache_key": (str(args.feature_cache_key).strip() or None),
+            "feature_cache_union_json": (str(args.feature_cache_union_json).strip() or None),
         },
+        "feature_cache_diagnostics": feature_cache_diag,
         "feature_selection": {
             "selected_features": [int(x) for x in top50],
             "selection_meta": selection_meta,
