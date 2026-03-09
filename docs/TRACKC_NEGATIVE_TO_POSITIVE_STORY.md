@@ -51,51 +51,60 @@ Rationale:
 
 ## 5) G2 Cross-Task Validation (March 9, 2026)
 
-Phase G2 tested Option C on two additional domains to validate generalization:
+This phase has two lineages and both are important:
 
-| Domain | CV AUROC | Lexical AUROC | Delta | Gate |
+1. Historical ablation lineage (pre-fix):
+- `20260309_124650_phase7_g2_cross_task_gpu135`
+- PrOntoQA failed narrowly; EntailmentBank passed.
+- This run isolated the decoder-mismatch problem.
+
+2. Canonical domain-decoder lineage (post-fix):
+- `20260309_141106_phase7_g2_domain_decoder_fix`
+- Both domains pass strict full-eval gates.
+
+Strict full-eval results (canonical lineage):
+
+| Domain | CV AUROC | Lexical AUROC | Delta | Strict Eval Gate |
 |---|---|---|---|---|
-| Arithmetic | 0.877 | 0.454 | 0.424 | **PASS** |
-| EntailmentBank | 0.982 | 0.489 | 0.493 | **PASS** |
-| PrOntoQA | 0.676 | 0.519 | 0.157 | FAIL |
+| PrOntoQA | 0.964 | 0.467 | 0.497 | **PASS** |
+| EntailmentBank | 0.999 | 0.430 | 0.569 | **PASS** |
 
-Run: `20260309_124650_phase7_g2_cross_task_gpu135`
+Cross-domain eval decision: pass.
 
-EntailmentBank result is the strongest in the project — near-perfect discrimination (0.982) with zero lexical confound (0.489). The method generalizes well to multi-step textual entailment.
+## 6) Stress Validation Outcome
 
-PrOntoQA failed narrowly (0.024 below threshold). Two contributing factors identified:
+Full stress was run on both canonical full-domain artifacts:
+- permutation (1000),
+- regularization sweep (`0.0001, 0.01, 0.1, 1.0`),
+- multiseed (`20260307..20260316`).
 
-**Factor 1 — Decoder feature mismatch (remediable):**
-The 5 decoder transition-consistency features were computed using the arithmetic decoder checkpoint, which predicts magnitude, sign, operator, and numeric subresult. For syllogistic reasoning, these predictions are meaningless noise. The probe relied on 120 SAE transition features + 5 garbage decoder features + ~20 aggregate features. Replacing the arithmetic decoder with a domain-specific PrOntoQA decoder (predicting inference_type, conclusion_class, premise_class, chain_depth, truth_value) should close the 0.024 gap.
+Results:
 
-**Factor 2 — Model competence (inherent):**
-Qwen's behavioral contradiction rate on PrOntoQA is 60.2% (vs 13.2% for arithmetic). This means Qwen contradicts itself on 6/10 syllogistic question pairs — it's fundamentally weak at synthetic formal logic. When a model is mostly guessing, the distinction between "faithful" and "unfaithful" internal representations may be small. This is arguably the right behavior: faithfulness detection requires there to be genuine reasoning to be faithful *to*.
+| Domain | Primary Stress Verdict | p-value | Regularization | Multiseed |
+|---|---|---:|---|---|
+| PrOntoQA | **FAIL** | 0.000999 | fail | pass |
+| EntailmentBank | **PASS** | 0.000999 | pass | pass |
 
-## 6) Current Claim Boundary
+Interpretation:
+- The domain-decoder fix resolved the original PrOntoQA eval failure.
+- The remaining blocker is robustness under strong regularization, not lexical confound or leakage.
+
+## 7) Current Claim Boundary
 
 Supported:
-- Arithmetic Option C faithfulness claim (stress-validated, p=0.001).
-- EntailmentBank Option C faithfulness claim.
-- Methodological contribution: lexical confound control is necessary and sufficient to separate text anomaly detection from faithfulness detection.
+- Arithmetic Option C faithfulness claim (stress-validated).
+- EntailmentBank Option C faithfulness claim (eval + stress pass).
+- Decoder mismatch diagnosis and remediation are now validated by the eval recovery on PrOntoQA.
 
 Not yet supported:
-- Cross-domain publishable faithfulness claim (requires PrOntoQA pass after decoder remediation).
-
-## 7) Next Step: PrOntoQA Decoder Remediation
-
-Active plan to close the 0.024 gap:
-1. Parse PrOntoQA CoT steps to extract syllogistic structured states (inference_type, conclusion_class, premise_class, chain_depth, truth_value, target_entity).
-2. Train PrOntoQA-specific decoder using same `MultiHeadStateDecoder` architecture with syllogistic heads.
-3. Replace arithmetic decoder transition features with domain-appropriate features.
-4. Rerun G2 PrOntoQA evaluation.
-
-If PrOntoQA passes after decoder remediation → cross-domain publishability gate met (3/3 domains).
+- `publishable_cross_domain` claim under the full stress policy (PrOntoQA stress final verdict is fail).
 
 ## 8) Research Narrative
-The contribution is methodological, not just numeric:
-- negative result identified a lexical confound,
-- lexical control exposed that confound directly,
-- Option C design removed the confound pathway,
-- arithmetic and entailment now pass under stricter controls,
-- PrOntoQA failure traced to decoder mismatch (engineering, not method failure),
-- cross-domain validation is the final publishability gate.
+
+The paper arc is now:
+- early strong-looking results were partially confounded,
+- lexical control made that confound measurable,
+- contradictory-pair labeling + internal consistency fixed the confound pathway,
+- domain-decoder mismatch was identified as an ablation failure mode,
+- domain-decoder fix restored PrOntoQA full-eval performance,
+- final cross-domain stress gate remains a rigorous blocker until PrOntoQA regularization stability is improved.

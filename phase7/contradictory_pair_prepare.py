@@ -43,6 +43,17 @@ class PairSpec:
     expected_b: float
     domain: str = "arithmetic"
     answer_mode: str = "numeric"
+    logic_meta: Optional[Dict[str, Any]] = None
+
+
+LOGICAL_INFERENCE_TYPES = (
+    "unknown",
+    "fact_assertion",
+    "class_subsumption",
+    "negation",
+    "other",
+)
+LOGICAL_TRUTH_VALUES = ("unknown", "true", "false", "uncertain")
 
 
 def _line_spans(text: str) -> List[Tuple[int, int]]:
@@ -209,6 +220,145 @@ def _format_logic_prompt(*, facts: Sequence[str], question: str, domain: str) ->
     )
 
 
+def _build_decoder_vocab_manifest(domain: str, pair_specs: Sequence[PairSpec]) -> Dict[str, Any]:
+    d = str(domain).strip().lower()
+    out: Dict[str, Any] = {
+        "schema_version": "phase7_optionc_decoder_vocab_v1",
+        "decoder_domain": d,
+        "unknown_id": 0,
+    }
+    if d == "arithmetic":
+        return out
+    classes: set[str] = set()
+    entities: set[str] = set()
+    for ps in pair_specs:
+        meta = dict(ps.logic_meta or {})
+        ent = str(meta.get("entity", "")).strip()
+        if ent:
+            entities.add(ent)
+        for c in list(meta.get("chain", [])):
+            cc = str(c).strip().lower()
+            if cc:
+                classes.add(cc)
+    class_vocab = ["__unknown__"] + sorted(classes)
+    entity_vocab = ["__unknown__"] + sorted(entities)
+    inf_vocab = list(LOGICAL_INFERENCE_TYPES)
+    truth_vocab = list(LOGICAL_TRUTH_VALUES)
+    out.update(
+        {
+            "class_vocab": class_vocab,
+            "entity_vocab": entity_vocab,
+            "inference_type_vocab": inf_vocab,
+            "truth_value_vocab": truth_vocab,
+            "chain_depth_bins": 5,
+            "class_to_id": {k: int(i) for i, k in enumerate(class_vocab)},
+            "entity_to_id": {k: int(i) for i, k in enumerate(entity_vocab)},
+            "inference_type_to_id": {k: int(i) for i, k in enumerate(inf_vocab)},
+            "truth_value_to_id": {k: int(i) for i, k in enumerate(truth_vocab)},
+        }
+    )
+    return out
+
+
+def _infer_logical_structured_state(
+    *,
+    pair_spec: PairSpec,
+    step_text: str,
+    step_idx: int,
+    member_correct: bool,
+    vocab_manifest: Dict[str, Any],
+) -> Dict[str, Any]:
+    unknown_id = int(vocab_manifest.get("unknown_id", 0))
+    class_to_id = {str(k): int(v) for k, v in dict(vocab_manifest.get("class_to_id", {})).items()}
+    entity_to_id = {str(k): int(v) for k, v in dict(vocab_manifest.get("entity_to_id", {})).items()}
+    inf_to_id = {str(k): int(v) for k, v in dict(vocab_manifest.get("inference_type_to_id", {})).items()}
+    truth_to_id = {str(k): int(v) for k, v in dict(vocab_manifest.get("truth_value_to_id", {})).items()}
+    domain = str(pair_spec.domain).strip().lower()
+    meta = dict(pair_spec.logic_meta or {})
+    chain = [str(x).strip().lower() for x in list(meta.get("chain", []))]
+    entity = str(meta.get("entity", "")).strip()
+    line = str(step_text or "")
+    line_l = line.lower()
+
+    inference_type = "unknown"
+    truth_value = "uncertain"
+    premise_cls = "__unknown__"
+    conclusion_cls = "__unknown__"
+    label_source = "fallback"
+    parse_confidence = 0.20
+    unknown_reason = ""
+
+    class_vocab = [str(x) for x in list(vocab_manifest.get("class_vocab", [])) if str(x) != "__unknown__"]
+    mentions = [c for c in class_vocab if re.search(rf"\b{re.escape(c)}\b", line_l)]
+
+    if re.search(r"\bnot\b", line_l):
+        inference_type = "negation"
+        truth_value = "false"
+        label_source = "text_negation"
+        parse_confidence = 0.85
+    elif "all " in line_l and " are " in line_l:
+        inference_type = "class_subsumption"
+        truth_value = "true" if bool(member_correct) else "uncertain"
+        label_source = "text_subsumption"
+        parse_confidence = 0.85
+    elif entity and re.search(rf"\b{re.escape(entity.lower())}\b", line_l):
+        inference_type = "fact_assertion" if int(step_idx) == 0 else "other"
+        truth_value = "true" if bool(member_correct) else "uncertain"
+        label_source = "text_entity_assertion"
+        parse_confidence = 0.75
+
+    if len(mentions) >= 2:
+        premise_cls = str(mentions[0])
+        conclusion_cls = str(mentions[-1])
+        parse_confidence = max(parse_confidence, 0.90)
+    elif len(mentions) == 1:
+        conclusion_cls = str(mentions[0])
+        if int(step_idx) > 0 and chain:
+            premise_cls = str(chain[min(len(chain) - 1, max(0, int(step_idx) - 1))])
+        elif chain:
+            premise_cls = str(chain[0])
+        parse_confidence = max(parse_confidence, 0.70)
+    elif chain:
+        # Deterministic fallback keeps labels available for decoder training.
+        ci = min(len(chain) - 1, max(0, int(step_idx)))
+        pi = min(len(chain) - 1, max(0, int(step_idx) - 1))
+        conclusion_cls = str(chain[ci])
+        premise_cls = str(chain[pi])
+        label_source = "template_chain_fallback"
+        parse_confidence = max(parse_confidence, 0.55)
+        unknown_reason = "no_class_mention_in_step_text"
+    else:
+        unknown_reason = "missing_chain_metadata"
+
+    if truth_value == "uncertain":
+        if bool(member_correct):
+            truth_value = "true"
+        elif int(step_idx) >= 2:
+            truth_value = "false"
+
+    if inference_type == "unknown":
+        inference_type = "other"
+
+    return {
+        "decoder_domain": domain,
+        "inference_type": str(inference_type),
+        "inference_type_id": int(inf_to_id.get(str(inference_type), unknown_id)),
+        "chain_depth_id": int(min(4, max(0, int(step_idx)))),
+        "truth_value": str(truth_value),
+        "truth_value_id": int(truth_to_id.get(str(truth_value), unknown_id)),
+        "conclusion_class": str(conclusion_cls),
+        "conclusion_class_id": int(class_to_id.get(str(conclusion_cls), unknown_id)),
+        "premise_class": str(premise_cls),
+        "premise_class_id": int(class_to_id.get(str(premise_cls), unknown_id)),
+        "target_entity": str(entity),
+        "target_entity_id": int(entity_to_id.get(str(entity), unknown_id)),
+        "logical_label_defined": bool(parse_confidence >= 0.5),
+        "logical_label_source": str(label_source),
+        "logical_parse_confidence": float(parse_confidence),
+        "logical_unknown_reason": str(unknown_reason),
+    }
+
+
 def _build_pair_specs_arithmetic(*, n_pairs: int, seed: int, lexical_fraction: float) -> List[PairSpec]:
     rng = random.Random(int(seed))
     specs: List[PairSpec] = []
@@ -323,6 +473,7 @@ def _build_pair_specs_prontoqa(*, n_pairs: int, seed: int, lexical_fraction: flo
                     expected_b=1.0,
                     domain="prontoqa",
                     answer_mode="boolean",
+                    logic_meta={"entity": ent, "chain": list(chain), "facts": list(facts)},
                 )
             )
             continue
@@ -345,6 +496,7 @@ def _build_pair_specs_prontoqa(*, n_pairs: int, seed: int, lexical_fraction: flo
                     expected_b=1.0,
                     domain="prontoqa",
                     answer_mode="boolean",
+                    logic_meta={"entity": ent, "chain": list(chain), "facts": list(facts)},
                 )
             )
         else:
@@ -365,6 +517,7 @@ def _build_pair_specs_prontoqa(*, n_pairs: int, seed: int, lexical_fraction: flo
                     expected_b=0.0,
                     domain="prontoqa",
                     answer_mode="boolean",
+                    logic_meta={"entity": ent, "chain": list(chain), "facts": list(facts)},
                 )
             )
     return specs
@@ -401,6 +554,7 @@ def _build_pair_specs_entailmentbank(*, n_pairs: int, seed: int, lexical_fractio
                     expected_b=1.0,
                     domain="entailmentbank",
                     answer_mode="boolean",
+                    logic_meta={"entity": x, "chain": [a.lower(), b.lower(), c.lower()], "facts": list(facts)},
                 )
             )
             continue
@@ -423,6 +577,7 @@ def _build_pair_specs_entailmentbank(*, n_pairs: int, seed: int, lexical_fractio
                     expected_b=1.0,
                     domain="entailmentbank",
                     answer_mode="boolean",
+                    logic_meta={"entity": x, "chain": [a.lower(), b.lower(), c.lower()], "facts": list(facts)},
                 )
             )
         else:
@@ -443,6 +598,7 @@ def _build_pair_specs_entailmentbank(*, n_pairs: int, seed: int, lexical_fractio
                     expected_b=0.0,
                     domain="entailmentbank",
                     answer_mode="boolean",
+                    logic_meta={"entity": x, "chain": [a.lower(), b.lower(), c.lower()], "facts": list(facts)},
                 )
             )
     return specs
@@ -591,6 +747,12 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--model-key", default="qwen2.5-7b")
     p.add_argument("--domain", choices=["arithmetic", "prontoqa", "entailmentbank"], default="arithmetic")
+    p.add_argument(
+        "--decoder-domain-labels",
+        choices=["auto", "arithmetic", "prontoqa", "entailmentbank"],
+        default="auto",
+        help="Structured-state label schema. 'auto' uses --domain.",
+    )
     p.add_argument("--sample-pairs", type=int, default=400)
     p.add_argument("--seed", type=int, default=20260309)
     p.add_argument("--lexical-fraction", type=float, default=0.20)
@@ -619,6 +781,29 @@ def _resolve_rows_pt_path(payload_path: Path, rows_path_raw: Any) -> Path:
     return rp.resolve()
 
 
+def _merge_decoder_vocab_manifest(base: Optional[Dict[str, Any]], nxt: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    if base is None:
+        return clone_jsonable(dict(nxt or {})) if nxt is not None else None
+    if nxt is None:
+        return base
+    bd = str(base.get("decoder_domain", "")).strip().lower()
+    nd = str(nxt.get("decoder_domain", "")).strip().lower()
+    if bd != nd:
+        raise RuntimeError(f"decoder vocab domain mismatch across shards: {bd} vs {nd}")
+    if bd == "arithmetic":
+        return base
+    merged = dict(base)
+    for key in ("class_vocab", "entity_vocab"):
+        vals = set(str(x) for x in list(base.get(key, [])))
+        vals.update(str(x) for x in list(nxt.get(key, [])))
+        unknown = "__unknown__"
+        vocab = [unknown] + sorted(v for v in vals if v and v != unknown)
+        merged[key] = vocab
+        map_key = "class_to_id" if key == "class_vocab" else "entity_to_id"
+        merged[map_key] = {v: int(i) for i, v in enumerate(vocab)}
+    return merged
+
+
 def _merge_shard_payloads(shard_paths: Sequence[str], output: str) -> None:
     if not shard_paths:
         raise RuntimeError("merge requested with no shard paths")
@@ -627,6 +812,7 @@ def _merge_shard_payloads(shard_paths: Sequence[str], output: str) -> None:
     num_layers: Optional[int] = None
     hidden_dim: Optional[int] = None
     source_scope: Optional[str] = None
+    merged_decoder_vocab_manifest: Optional[Dict[str, Any]] = None
     for sp_raw in shard_paths:
         sp = Path(str(sp_raw))
         payload = load_json(sp)
@@ -640,6 +826,10 @@ def _merge_shard_payloads(shard_paths: Sequence[str], output: str) -> None:
         if expected_rows_sha and expected_rows_sha != actual_rows_sha:
             raise RuntimeError(f"rows hash mismatch for shard {sp}: expected {expected_rows_sha}, got {actual_rows_sha}")
         rows = list(load_pt(rp))
+        merged_decoder_vocab_manifest = _merge_decoder_vocab_manifest(
+            merged_decoder_vocab_manifest,
+            dict(payload.get("decoder_vocab_manifest") or {}) or None,
+        )
         sk = str(payload.get("model_key"))
         if model_key is None:
             model_key = sk
@@ -737,6 +927,7 @@ def _merge_shard_payloads(shard_paths: Sequence[str], output: str) -> None:
         "lexical_pairs_count": int(lexical_count),
         "behavioral_contradiction_defined_pairs": int(len(contradiction_defined)),
         "behavioral_contradiction_rate": contradiction_rate,
+        "decoder_vocab_manifest": (merged_decoder_vocab_manifest or {"decoder_domain": str(source_scope or "arithmetic"), "unknown_id": 0}),
         "class_counts_member": {
             "faithful": int(sum(1 for m in members if str(m.get("gold_label")) == "faithful")),
             "unfaithful": int(sum(1 for m in members if str(m.get("gold_label")) == "unfaithful")),
@@ -771,6 +962,8 @@ def main() -> None:
         seed=int(args.seed),
         lexical_fraction=float(args.lexical_fraction),
     )
+    decoder_domain_labels = str(args.domain) if str(args.decoder_domain_labels) == "auto" else str(args.decoder_domain_labels)
+    decoder_vocab_manifest = _build_decoder_vocab_manifest(str(decoder_domain_labels), pair_specs_all)
     if int(args.num_shards) > 1:
         pair_specs = [ps for i, ps in enumerate(pair_specs_all) if (int(i) % int(args.num_shards)) == int(args.shard_index)]
     else:
@@ -833,6 +1026,7 @@ def main() -> None:
             "behavioral_contradiction_score": (float(bool(contradiction_flag)) if contradiction_flag is not None else None),
             "behavioral_contradiction_defined": bool(contradiction_flag is not None),
             "behavioral_contradiction_diag": contradiction_diag,
+            "logic_meta": clone_jsonable(ps.logic_meta) if ps.logic_meta is not None else None,
         }
         pairs.append(pair_obj)
 
@@ -862,6 +1056,27 @@ def main() -> None:
                 hidden = hidden_steps[int(tok_idx)]
                 if not torch.is_tensor(hidden) or hidden.ndim != 2:
                     continue
+                step_text = str(sp.get("text", ""))
+                structured_state = {
+                    "step_idx": int(step_idx),
+                    "step_type": ("operate" if str(ps.domain) == "arithmetic" else "reason"),
+                    "operator": "unknown",
+                    "magnitude_bucket": "unknown",
+                    "sign": "unknown",
+                    "subresult_value": None,
+                    "lhs_value": None,
+                    "rhs_value": None,
+                }
+                if str(ps.domain).strip().lower() in {"prontoqa", "entailmentbank"}:
+                    structured_state.update(
+                        _infer_logical_structured_state(
+                            pair_spec=ps,
+                            step_text=step_text,
+                            step_idx=int(step_idx),
+                            member_correct=bool(corr),
+                            vocab_manifest=decoder_vocab_manifest,
+                        )
+                    )
                 rows.append(
                     {
                         "schema_version": "phase7_optionc_member_step_v1",
@@ -882,16 +1097,7 @@ def main() -> None:
                         "hidden_token_pos_0b": int(tok_idx),
                         "result_token_id": int(gen_ids[int(tok_idx)] if tok_idx < len(gen_ids) else -1),
                         "raw_hidden": hidden.half().cpu(),
-                        "structured_state": {
-                            "step_idx": int(step_idx),
-                            "step_type": ("operate" if str(ps.domain) == "arithmetic" else "reason"),
-                            "operator": "unknown",
-                            "magnitude_bucket": "unknown",
-                            "sign": "unknown",
-                            "subresult_value": None,
-                            "lhs_value": None,
-                            "rhs_value": None,
-                        },
+                        "structured_state": structured_state,
                         "cot_source": "model_generated",
                         "domain": str(ps.domain),
                     }
@@ -962,6 +1168,7 @@ def main() -> None:
             "sample_pairs": int(args.sample_pairs),
             "lexical_fraction": float(args.lexical_fraction),
             "answer_tol": float(args.answer_tol),
+            "decoder_domain_labels": str(decoder_domain_labels),
             "generation_config": gen_cfg,
             "generation_runtime_diag": gen_run_diag,
             "device": str(args.device),
@@ -982,6 +1189,7 @@ def main() -> None:
         "lexical_pairs_count": int(lexical_count),
         "behavioral_contradiction_defined_pairs": int(len(contradiction_defined)),
         "behavioral_contradiction_rate": contradiction_rate,
+        "decoder_vocab_manifest": decoder_vocab_manifest,
         "class_counts_member": {
             "faithful": int(sum(1 for m in members if str(m.get("gold_label")) == "faithful")),
             "unfaithful": int(sum(1 for m in members if str(m.get("gold_label")) == "unfaithful")),

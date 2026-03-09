@@ -86,10 +86,10 @@ What this does not support:
 Qwen work is a separate hypothesis test and does not reopen GPT-2 closure by default.  
 The active next-model path is the **Qwen SAE trajectory ladder** (Path A→B→C with robust CV gating), not the legacy Q0 raw-L2 diagnostic.
 
-For arithmetic stress interpretation on next-model runs:
+For next-model stress interpretation:
 - Keep legacy strict permutation-tail checks (`mean/p95/max`) for comparability.
 - Use **empirical permutation p-value** as the primary significance decision (`p < 0.01`).
-- Treat arithmetic as supportive evidence only; use PrOntoQA robust CV as the main publishability gate.
+- Treat arithmetic as supportive evidence only; the publishability gate is cross-domain and stress-validated (PrOntoQA + EntailmentBank).
 
 ## Qwen Option C Results (All Domains)
 
@@ -120,30 +120,43 @@ Canonical artifacts:
 - `phase7_results/results/optionc_claim_boundary_20260309_084825_phase7_optionc_generated_qwen_arith_full.json`
 - `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json`
 
-### G2 Cross-Task Validation (Completed — Partial Pass)
-Run: `20260309_124650_phase7_g2_cross_task_gpu135`
+### G2 Cross-Task Validation (Domain-Decoder Lineage)
+Run: `20260309_141106_phase7_g2_domain_decoder_fix`
 
-| Domain | CV AUROC | Lexical AUROC | Delta | Contradiction Rate | Gate |
-|---|---|---|---|---|---|
-| EntailmentBank | **0.982** | 0.489 | 0.493 | — | **PASS** |
-| PrOntoQA | 0.676 | 0.519 | 0.157 | 60.2% | FAIL |
+Full-eval results:
 
-Cross-domain gate (both must pass): **FAIL**
+| Domain | CV AUROC | Lexical AUROC | Delta | Strict Eval Gate |
+|---|---|---|---|---|
+| PrOntoQA | **0.964** | 0.467 | 0.497 | **PASS** |
+| EntailmentBank | **0.999** | 0.430 | 0.569 | **PASS** |
 
-PrOntoQA failure diagnosis:
-- Gap is only 0.024 below threshold (CI upper touches 0.70; fold 3 crosses it).
-- Root cause: **decoder feature mismatch** — arithmetic decoder features (magnitude, sign, operator, subresult) are meaningless for syllogistic reasoning and add noise.
-- EntailmentBank passes despite same mismatch because signal (0.982) overwhelms noise.
-- High contradiction rate (60.2%) indicates Qwen is weak on synthetic syllogisms.
-
-Remediation: train PrOntoQA-specific decoder with syllogistic heads (inference_type, conclusion_class, premise_class, chain_depth, truth_value, target_entity), then rerun.
+Cross-domain eval gate: **PASS**
 
 Decision artifact:
-- `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json`
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json`
+
+### G2 Full Stress Validation (Final Gate)
+
+Stress runs:
+- PrOntoQA: `20260309_145050_optionc_stress_g2fix_prontoqa`
+- EntailmentBank: `20260309_145052_optionc_stress_g2fix_entailmentbank`
+
+Stress summary:
+
+| Domain | Primary Stress Verdict | p-value | Regularization | Multiseed |
+|---|---|---:|---|---|
+| PrOntoQA | **FAIL** | 0.000999 | fail | pass |
+| EntailmentBank | **PASS** | 0.000999 | pass | pass |
+
+PrOntoQA stress failure is not a leakage issue (pair/trace overlap remains zero). It is a stability issue under stronger weight decay.
+
+Stress-validated cross-domain decision:
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json`
+- `publishable_cross_domain_pass=false`
 
 ### Current Claim Boundary (March 9, 2026)
 - Arithmetic: faithfulness claim **enabled** (stress-validated).
-- EntailmentBank: faithfulness claim **enabled**.
-- PrOntoQA: faithfulness claim **not enabled** (decoder remediation active).
-- Cross-domain publishability: **not yet met** (requires PrOntoQA pass after decoder fix).
+- EntailmentBank: faithfulness claim **enabled** (eval + stress pass).
+- PrOntoQA: strict eval claim **enabled**, but stress final gate currently **fails** on regularization stability.
+- Cross-domain publishability (`publishable_cross_domain`): **not yet met** under full stress policy.
 - GPT-2 closure remains unchanged and is not reopened.

@@ -78,27 +78,32 @@ Primary closure references:
 
 ## Qwen Option C — Faithfulness Detection (Active)
 
-Qwen is the active model for Track C faithfulness validation using the **Option C** method:
+Qwen is the active model for Track C faithfulness validation using the Option C method:
 behavioral contradiction labeling + internal consistency detection + lexical confound control.
 
 ### Current Results (March 9, 2026)
 
-| Domain | CV AUROC | Lexical AUROC | Delta | Gate |
-|---|---|---|---|---|
-| **Arithmetic** | 0.877 | 0.454 | 0.424 | **PASS** (stress-validated, p=0.001) |
-| **EntailmentBank** | 0.982 | 0.489 | 0.493 | **PASS** |
-| **PrOntoQA** | 0.676 | 0.519 | 0.157 | FAIL (decoder mismatch diagnosed) |
+| Domain | CV AUROC (full eval) | Lexical AUROC | Delta | Eval Gate | Full Stress Gate |
+|---|---|---|---|---|---|
+| **Arithmetic** | 0.877 | 0.454 | 0.424 | **PASS** | **PASS** |
+| **PrOntoQA** (domain decoder) | 0.964 | 0.467 | 0.497 | **PASS** | FAIL (regularization stability) |
+| **EntailmentBank** (domain decoder) | 0.999 | 0.430 | 0.569 | **PASS** | **PASS** |
 
-Cross-domain publishability gate: **not yet met** (both PrOntoQA and EntailmentBank must pass).
-PrOntoQA failure is diagnosed as a decoder feature mismatch (arithmetic decoder used for
-syllogistic domain). Remediation: train domain-specific decoder, rerun.
+Cross-domain status:
+- G2 full eval gate (both domains strict gate): **PASS**.
+- G2 stress-validated gate: **not yet met** (`publishable_cross_domain_pass=false`) because PrOntoQA stress final primary verdict is `fail`.
+
+Canonical G2 lineage:
+- `20260309_141106_phase7_g2_domain_decoder_fix`
 
 Key artifacts:
-- Arithmetic: `phase7_results/results/optionc_summary_20260309_084825_phase7_optionc_generated_qwen_arith.json`
-- G2 decision: `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json`
-- Stress: `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json`
+- Eval decision: `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json`
+- Stress (PrOntoQA): `phase7_results/results/optionc_stress_20260309_145050_optionc_stress_g2fix_prontoqa.json`
+- Stress (EntailmentBank): `phase7_results/results/optionc_stress_20260309_145052_optionc_stress_g2fix_entailmentbank.json`
+- Stress-validated cross-domain decision: `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json`
 
-See `PROJECT_STATUS.md` for full details and `TODO.md` for active remediation plan.
+Historical ablation lineage:
+- `20260309_124650_phase7_g2_cross_task_gpu135` (pre domain-decoder fix)
 
 ## Project Structure
 

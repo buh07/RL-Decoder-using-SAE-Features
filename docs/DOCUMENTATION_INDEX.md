@@ -47,6 +47,7 @@
 |---|---|
 | `experiments/run_optionc_stress.sh` | Full Option C stress runner (permutation + ablation/reg + multiseed) |
 | `phase7/stress_test_optionc_probe.py` | Option C-native stress evaluator with p-value-primary decision fields |
+| `phase7/merge_g2_stress_decision.py` | Cross-domain merger for eval + stress decisions (`*_stress_validated`) |
 | `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json` | Arithmetic stress result (primary: pass, p=0.000999) |
 | `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.md` | Arithmetic stress human-readable summary |
 | `phase7_results/results/trackc_arithmetic_significance_reframe_20260309_130420_optionc_stress_full_rigor.json` | Arithmetic significance reframe with p-value-primary policy |
@@ -55,13 +56,16 @@
 | Path | Purpose |
 |---|---|
 | `experiments/run_phase7_g2_cross_task.sh` | PrOntoQA → EntailmentBank cross-task gate orchestrator |
-| `phase7_results/results/optionc_summary_20260309_124650_phase7_g2_cross_task_gpu135_prontoqa.json` | PrOntoQA Option C full summary (CV AUROC 0.676, FAIL) |
-| `phase7_results/results/optionc_claim_boundary_20260309_124650_phase7_g2_cross_task_gpu135_prontoqa_full.json` | PrOntoQA claim boundary (faithfulness_claim_enabled=false) |
-| `phase7_results/results/optionc_eval_20260309_124650_phase7_g2_cross_task_gpu135_prontoqa_full.json` | PrOntoQA detailed eval with fold-level diagnostics |
-| `phase7_results/results/optionc_summary_20260309_124650_phase7_g2_cross_task_gpu135_entailmentbank.json` | EntailmentBank Option C full summary (CV AUROC 0.982, PASS) |
-| `phase7_results/results/optionc_claim_boundary_20260309_124650_phase7_g2_cross_task_gpu135_entailmentbank_full.json` | EntailmentBank claim boundary (faithfulness_claim_enabled=true) |
-| `phase7_results/results/optionc_eval_20260309_124650_phase7_g2_cross_task_gpu135_entailmentbank_full.json` | EntailmentBank detailed eval with fold-level diagnostics |
-| `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json` | Cross-domain publishability decision (both-domain gate: FAIL) |
+| `phase7_results/results/optionc_summary_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa.json` | PrOntoQA Option C full summary (domain-decoder, CV AUROC 0.964, strict eval PASS) |
+| `phase7_results/results/optionc_claim_boundary_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa_full.json` | PrOntoQA claim boundary artifact for canonical G2 lineage |
+| `phase7_results/results/optionc_eval_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa_full.json` | PrOntoQA detailed eval (zero overlap, strict gate pass) |
+| `phase7_results/results/optionc_summary_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank.json` | EntailmentBank Option C full summary (domain-decoder, CV AUROC 0.999, strict eval PASS) |
+| `phase7_results/results/optionc_claim_boundary_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank_full.json` | EntailmentBank claim boundary artifact for canonical G2 lineage |
+| `phase7_results/results/optionc_eval_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank_full.json` | EntailmentBank detailed eval (zero overlap, strict gate pass) |
+| `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json` | Cross-domain decision on strict eval gates (PASS) |
+| `phase7_results/results/optionc_stress_20260309_145050_optionc_stress_g2fix_prontoqa.json` | PrOntoQA full stress result (primary fail due regularization stability) |
+| `phase7_results/results/optionc_stress_20260309_145052_optionc_stress_g2fix_entailmentbank.json` | EntailmentBank full stress result (primary pass) |
+| `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json` | Stress-validated cross-domain decision (not publishable_cross_domain yet) |
 
 ## Option C Pipeline Scripts
 | Path | Purpose |
@@ -76,7 +80,12 @@
 ## Active Inquiry Docs
 | File | Purpose |
 |---|---|
-| `TODO.md` | Active work queue: G2 PrOntoQA decoder remediation + next steps |
+| `TODO.md` | Active work queue: PrOntoQA stress-stability remediation after canonical domain-decoder eval pass |
+
+## Historical Ablation Lineages
+| Path | Purpose |
+|---|---|
+| `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json` | Pre domain-decoder-fix cross-task decision (historical ablation: PrOntoQA fail due decoder mismatch) |
 
 ## Archived Material
 Historical execution reports and superseded plans are under `docs/archived_reports/`.

@@ -107,3 +107,7 @@ pip-delete-this-directory.txt
 .ipynb_checkpoints/
 *.json
 *.zst
+
+# Local caches / presentation exports (non-canonical)
+.hf_cache/
+poster_visualizations/

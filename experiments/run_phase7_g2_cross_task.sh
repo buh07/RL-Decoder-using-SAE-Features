@@ -68,6 +68,8 @@ run_domain_optionc() {
   BASE="$sub_base" \
   MODEL_KEY="$MODEL_KEY" \
   DOMAIN="$domain" \
+  DECODER_DOMAIN="$domain" \
+  DECODER_AUTO_TRAIN=1 \
   GPU_IDS_CSV="$GPU_IDS_CSV" \
   PRECOMPUTE_SHARD_GPUS="$PRECOMPUTE_SHARD_GPUS" \
   CANARY_PAIRS="$CANARY_PAIRS" \
@@ -92,18 +94,20 @@ run_coordinator() {
   require_env
   mkdir -p "$BASE/logs" "$BASE/meta" "$BASE/state"
   local logf="$BASE/logs/coordinator.log"
+  : > "$logf"
   {
     echo "[$(date -Is)] g2 coordinator start run_id=$RUN_ID"
     run_domain_optionc "prontoqa" "$PRONTO_RUN_ID"
     run_domain_optionc "entailmentbank" "$ENTAIL_RUN_ID"
 
-    "$PY" - <<PY
+    RUN_ID_ENV="$RUN_ID" BASE_ENV="$BASE" PRONTO_RUN_ID_ENV="$PRONTO_RUN_ID" ENTAIL_RUN_ID_ENV="$ENTAIL_RUN_ID" "$PY" - <<'PY'
 import json
+import os
 from pathlib import Path
-run_id=${RUN_ID@Q}
-base=Path(${BASE@Q})
-pr_id=${PRONTO_RUN_ID@Q}
-en_id=${ENTAIL_RUN_ID@Q}
+run_id=os.environ["RUN_ID_ENV"]
+base=Path(os.environ["BASE_ENV"])
+pr_id=os.environ["PRONTO_RUN_ID_ENV"]
+en_id=os.environ["ENTAIL_RUN_ID_ENV"]
 
 
 def load(path):
@@ -175,6 +179,11 @@ base.joinpath("meta","summary.json").write_text(json.dumps(out, indent=2))
 print(out_path)
 PY
 
+    if rg -q "command not found" "$logf"; then
+      echo "fatal: detected shell interpolation error during decision emit" >&2
+      exit 1
+    fi
+
     touch "$BASE/state/pipeline.done"
     echo "[$(date -Is)] g2 coordinator done run_id=$RUN_ID"
   } >>"$logf" 2>&1
@@ -187,7 +196,35 @@ case "$MODE" in
     BASE="${BASE:-phase7_results/runs/${RUN_ID}}"
 
     MODEL_KEY="${MODEL_KEY:-qwen2.5-7b}"
-    GPU_IDS_CSV="${GPU_IDS_CSV:-5,6,7}"
+    if [[ -z "${GPU_IDS_CSV:-}" ]]; then
+      GPU_IDS_CSV="$("$PY" - <<'PY'
+import subprocess
+try:
+    raw = subprocess.check_output(
+        ["nvidia-smi", "--query-gpu=index,utilization.gpu,memory.used", "--format=csv,noheader,nounits"],
+        text=True,
+    )
+except Exception:
+    print("5,6,7")
+    raise SystemExit(0)
+rows = []
+for ln in raw.strip().splitlines():
+    try:
+        idx, util, mem = [x.strip() for x in ln.split(",")]
+        rows.append((int(idx), float(util), float(mem)))
+    except Exception:
+        continue
+free = [idx for idx, util, mem in rows if util < 10.0 and mem < 2000.0]
+if len(free) >= 3:
+    print(",".join(str(x) for x in free[:3]))
+elif len(rows) >= 3:
+    rows_sorted = sorted(rows, key=lambda t: (t[2], t[1], t[0]))
+    print(",".join(str(t[0]) for t in rows_sorted[:3]))
+else:
+    print("5,6,7")
+PY
+)"
+    fi
     PRECOMPUTE_SHARD_GPUS="${PRECOMPUTE_SHARD_GPUS:-${GPU_IDS_CSV}}"
     CANARY_PAIRS="${CANARY_PAIRS:-200}"
     FULL_PAIRS="${FULL_PAIRS:-1000}"

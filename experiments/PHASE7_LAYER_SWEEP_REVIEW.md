@@ -75,16 +75,17 @@ Option C combines:
 2. Internal consistency detection (SAE trajectory + decoder transition features)
 3. Lexical confound control (logically-valid text edits must score at chance)
 
-Results across three domains:
+Results (canonical domain-decoder lineage `20260309_141106_phase7_g2_domain_decoder_fix`):
 
-| Domain | CV AUROC | Lexical AUROC | Delta | Gate |
-|---|---|---|---|---|
-| Arithmetic | 0.877 | 0.454 | 0.424 | **PASS** (stress p=0.001) |
-| EntailmentBank | 0.982 | 0.489 | 0.493 | **PASS** |
-| PrOntoQA | 0.676 | 0.519 | 0.157 | FAIL (decoder mismatch) |
+| Domain | CV AUROC (eval) | Lexical AUROC | Delta | Eval Gate | Stress Gate |
+|---|---|---|---|---|---|
+| Arithmetic | 0.877 | 0.454 | 0.424 | **PASS** | **PASS** |
+| EntailmentBank | 0.999 | 0.430 | 0.569 | **PASS** | **PASS** |
+| PrOntoQA | 0.964 | 0.467 | 0.497 | **PASS** | FAIL (regularization stability) |
 
-Cross-domain publishability gate (all domains pass): **not yet met**.
-PrOntoQA failure diagnosed as arithmetic decoder feature mismatch — remediation active
-(train syllogistic decoder, rerun). Gap is only 0.024.
+Cross-domain strict eval gate: **PASS**.
+Cross-domain stress-validated gate: **not yet met** (`publishable_cross_domain=false`).
 
-See `TODO.md` for PrOntoQA decoder remediation plan and `PROJECT_STATUS.md` for full results.
+Current blocker is no longer decoder mismatch; it is PrOntoQA robustness under strong regularization in the stress suite.
+
+See `TODO.md` for active PrOntoQA stress-stability work and `PROJECT_STATUS.md` for full results.

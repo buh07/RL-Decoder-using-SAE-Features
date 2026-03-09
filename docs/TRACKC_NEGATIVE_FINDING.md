@@ -30,6 +30,10 @@ Current next-model path is **Qwen Option C** (behavioral contradiction labeling 
 
 Qwen Option C current status (March 9, 2026):
 - Arithmetic: PASS (CV AUROC 0.877, stress p=0.001)
-- EntailmentBank: PASS (CV AUROC 0.982)
-- PrOntoQA: FAIL (CV AUROC 0.676 — decoder mismatch, remediation active)
-- Cross-domain publishability gate: not yet met (PrOntoQA must pass after decoder fix)
+- Domain-decoder G2 eval (`20260309_141106_phase7_g2_domain_decoder_fix`):
+  - PrOntoQA: PASS (CV AUROC 0.964)
+  - EntailmentBank: PASS (CV AUROC 0.999)
+- Full G2 stress validation:
+  - PrOntoQA: FAIL (regularization stability)
+  - EntailmentBank: PASS
+- Cross-domain `publishable_cross_domain` gate: not yet met under full stress policy

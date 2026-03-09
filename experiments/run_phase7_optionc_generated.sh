@@ -9,7 +9,7 @@ PY="${PYTHON:-.venv/bin/python3}"
 
 usage() {
   cat <<'USAGE'
-usage: experiments/run_phase7_optionc_generated.sh {launch|precompute|worker-a|worker-b|worker-c|score|evaluate|coordinator}
+usage: experiments/run_phase7_optionc_generated.sh {launch|precompute|train-decoder|worker-a|worker-b|worker-c|score|evaluate|coordinator}
 USAGE
 }
 
@@ -189,9 +189,13 @@ scope_vars() {
   export SCOPE_PRECOMP_DONE="$BASE/state/precompute_${scope}.done"
   export SCOPE_SCORE_DONE="$BASE/state/score_${scope}.done"
   export SCOPE_EVAL_DONE="$BASE/state/evaluate_${scope}.done"
+  export SCOPE_DECODER_DONE="$BASE/state/train_decoder_${scope}.done"
+  export SCOPE_DECODER_HASH="$BASE/state/train_decoder_${scope}.hash"
   export SCOPE_PRECOMP_HASH="$BASE/state/precompute_${scope}.hash"
   export SCOPE_SCORE_HASH="$BASE/state/score_${scope}.hash"
   export SCOPE_EVAL_HASH="$BASE/state/evaluate_${scope}.hash"
+  export SCOPE_DECODER_CKPT="phase7_results/checkpoints/optionc_decoder_${RUN_ID}_${DOMAIN}_${scope}.pt"
+  export SCOPE_DECODER_JSON="phase7_results/results/optionc_decoder_${RUN_ID}_${DOMAIN}_${scope}.json"
 }
 
 run_precompute() {
@@ -299,6 +303,62 @@ run_precompute() {
   } >>"$logf" 2>&1
 }
 
+run_train_decoder() {
+  require_env
+  : "${SCOPE:?SCOPE required}"
+  scope_vars "$SCOPE"
+  mkdir -p "$BASE/logs" "$BASE/state"
+  local logf="$BASE/logs/train_decoder_${SCOPE}.log"
+  if [[ "${DECODER_AUTO_TRAIN}" != "1" ]]; then
+    {
+      echo "[$(date -Is)] train-decoder skip (DECODER_AUTO_TRAIN=${DECODER_AUTO_TRAIN}) scope=${SCOPE}"
+    } >>"$logf" 2>&1
+    touch "$SCOPE_DECODER_DONE"
+    write_stage_hash "$SCOPE_DECODER_HASH" "skip"
+    return 0
+  fi
+  local ds_rows_sha train_hash_input train_hash
+  ds_rows_sha="$(dataset_rows_sha "$SCOPE_DATASET_JSON")"
+  train_hash_input="$(
+    printf '%s|' \
+      "$MODEL_KEY" "$DOMAIN" "$SCOPE" "$ds_rows_sha" "$DECODER_DOMAIN" "$DECODER_LAYERS" \
+      "$DECODER_TRAIN_EPOCHS" "$DECODER_TRAIN_BATCH_SIZE" "$DECODER_TRAIN_LR" "$DECODER_TRAIN_WEIGHT_DECAY" \
+      "$(file_sha256 phase7/train_optionc_domain_decoder.py)" \
+      "$(file_sha256 phase7/optionc_domain_decoder.py)"
+  )"
+  train_hash="$(printf '%s' "$train_hash_input" | sha256sum | awk '{print $1}')"
+  if stage_hash_ok "$SCOPE_DECODER_DONE" "$SCOPE_DECODER_HASH" "$train_hash" \
+    && [[ -f "$SCOPE_DECODER_CKPT" ]] \
+    && json_parseable "$SCOPE_DECODER_JSON"; then
+    {
+      echo "[$(date -Is)] train-decoder skip (hash+artifacts match) scope=${SCOPE}"
+    } >>"$logf" 2>&1
+    return 0
+  fi
+  {
+    echo "[$(date -Is)] train-decoder start scope=${SCOPE} domain=${DECODER_DOMAIN}"
+    wait_for_gpus_free "${GPU_IDS_CSV}" "${GPU_WAIT_UTIL_MAX}" "${GPU_WAIT_MEM_MAX_MB}" 3 20 "${GPU_WAIT_TIMEOUT_S}"
+    CUDA_VISIBLE_DEVICES="${DECODER_TRAIN_GPU}" "$PY" phase7/train_optionc_domain_decoder.py \
+      --paired-dataset "$SCOPE_DATASET_JSON" \
+      --decoder-domain "$DECODER_DOMAIN" \
+      --model-key "$MODEL_KEY" \
+      --layers "$DECODER_LAYERS" \
+      --seed "$SEED" \
+      --epochs "$DECODER_TRAIN_EPOCHS" \
+      --batch-size "$DECODER_TRAIN_BATCH_SIZE" \
+      --lr "$DECODER_TRAIN_LR" \
+      --weight-decay "$DECODER_TRAIN_WEIGHT_DECAY" \
+      --device cuda:0 \
+      --output-checkpoint "$SCOPE_DECODER_CKPT" \
+      --output-json "$SCOPE_DECODER_JSON"
+    [[ -f "$SCOPE_DECODER_CKPT" ]] || { echo "missing trained decoder checkpoint: $SCOPE_DECODER_CKPT" >&2; exit 1; }
+    json_parseable "$SCOPE_DECODER_JSON"
+    touch "$SCOPE_DECODER_DONE"
+    write_stage_hash "$SCOPE_DECODER_HASH" "$train_hash"
+    echo "[$(date -Is)] train-decoder done scope=${SCOPE}"
+  } >>"$logf" 2>&1
+}
+
 run_worker() {
   require_env
   : "${SCOPE:?SCOPE required}"
@@ -388,13 +448,22 @@ run_evaluate() {
   mkdir -p "$BASE/logs" "$BASE/state"
   local logf="$BASE/logs/evaluate_${SCOPE}.log"
   local ds_rows_sha eval_hash_input eval_hash dec_stat
+  local decoder_checkpoint_local="$DECODER_CHECKPOINT"
+  local decoder_domain_local="${DECODER_DOMAIN:-auto}"
+  if [[ "${DECODER_AUTO_TRAIN}" == "1" ]]; then
+    decoder_checkpoint_local="$SCOPE_DECODER_CKPT"
+    decoder_domain_local="${DECODER_DOMAIN}"
+  fi
+  if [[ ! -f "$decoder_checkpoint_local" ]]; then
+    decoder_checkpoint_local=""
+  fi
   ds_rows_sha="$(dataset_rows_sha "$SCOPE_DATASET_JSON")"
-  dec_stat="$(stat -c '%s:%Y' "$DECODER_CHECKPOINT" 2>/dev/null || echo missing)"
+  dec_stat="$(stat -c '%s:%Y' "$decoder_checkpoint_local" 2>/dev/null || echo missing)"
   eval_hash_input="$(
     printf '%s|' \
       "$MODEL_KEY" "$SCOPE" "$ds_rows_sha" \
       "$(file_sha256 "$SCOPE_PARTIAL_A")" "$(file_sha256 "$SCOPE_PARTIAL_B")" "$(file_sha256 "$SCOPE_PARTIAL_C")" \
-      "$DECODER_CHECKPOINT" "$dec_stat" "$DECODER_BATCH_SIZE" "$TRAIN_TEST_FRACTION" \
+      "$decoder_checkpoint_local" "$decoder_domain_local" "$dec_stat" "$DECODER_BATCH_SIZE" "$TRAIN_TEST_FRACTION" \
       "$SPLIT_SEED" "$CV_FOLDS" "$CV_SEED" "$SCOPE_BOOTSTRAP" "$BOOTSTRAP_SEED" \
       "$FIT_EPOCHS" "$FIT_LR" "$FIT_WEIGHT_DECAY" "$FIT_DEVICE" "$CPU_WORKERS" \
       "$(file_sha256 phase7/evaluate_optionc.py)"
@@ -413,7 +482,8 @@ run_evaluate() {
     "$PY" phase7/evaluate_optionc.py \
       --paired-dataset "$SCOPE_DATASET_JSON" \
       --partials "$SCOPE_PARTIAL_A" "$SCOPE_PARTIAL_B" "$SCOPE_PARTIAL_C" \
-      --decoder-checkpoint "$DECODER_CHECKPOINT" \
+      --decoder-checkpoint "$decoder_checkpoint_local" \
+      --decoder-domain "$decoder_domain_local" \
       --decoder-device "$DECODER_DEVICE" \
       --decoder-batch-size "$DECODER_BATCH_SIZE" \
       --train-test-fraction "$TRAIN_TEST_FRACTION" \
@@ -451,6 +521,7 @@ run_coordinator() {
     echo "[$(date -Is)] coordinator start run_id=${RUN_ID}"
     # Canary (always call stage runners; each stage performs strict hash+artifact skip)
     SCOPE=canary "$0" precompute
+    SCOPE=canary "$0" train-decoder
     SCOPE=canary "$0" score
     SCOPE=canary "$0" evaluate
     scope_vars canary
@@ -476,6 +547,7 @@ PY
 
     # Full (always call stage runners; each stage performs strict hash+artifact skip)
     SCOPE=full "$0" precompute
+    SCOPE=full "$0" train-decoder
     SCOPE=full "$0" score
     SCOPE=full "$0" evaluate
 
@@ -531,7 +603,36 @@ case "$MODE" in
     BASE="${BASE:-phase7_results/runs/${RUN_ID}}"
     MODEL_KEY="${MODEL_KEY:-qwen2.5-7b}"
     DOMAIN="${DOMAIN:-arithmetic}"
-    GPU_IDS_CSV="${GPU_IDS_CSV:-5,6,7}"
+    if [[ -z "${GPU_IDS_CSV:-}" ]]; then
+      GPU_IDS_CSV="$("$PY" - <<'PY'
+import subprocess
+import json
+try:
+    raw = subprocess.check_output(
+        ["nvidia-smi", "--query-gpu=index,utilization.gpu,memory.used", "--format=csv,noheader,nounits"],
+        text=True,
+    )
+except Exception:
+    print("5,6,7")
+    raise SystemExit(0)
+rows = []
+for ln in raw.strip().splitlines():
+    try:
+        idx, util, mem = [x.strip() for x in ln.split(",")]
+        rows.append((int(idx), float(util), float(mem)))
+    except Exception:
+        continue
+free = [idx for idx, util, mem in rows if util < 10.0 and mem < 2000.0]
+if len(free) >= 3:
+    print(",".join(str(x) for x in free[:3]))
+elif len(rows) >= 3:
+    rows_sorted = sorted(rows, key=lambda t: (t[2], t[1], t[0]))
+    print(",".join(str(t[0]) for t in rows_sorted[:3]))
+else:
+    print("5,6,7")
+PY
+)"
+    fi
     IFS=',' read -r -a _gpu_arr <<< "$GPU_IDS_CSV"
     if (( ${#_gpu_arr[@]} < 3 )); then
       echo "GPU_IDS_CSV must contain at least 3 GPUs (got: $GPU_IDS_CSV)" >&2
@@ -575,6 +676,17 @@ case "$MODE" in
     DECODER_CHECKPOINT="${DECODER_CHECKPOINT:-phase7_results/runs/20260308_165109_phase7_qwen_trackc_upgrade/checkpoints/state_raw_every2_even_d1tier1.pt}"
     DECODER_DEVICE="${DECODER_DEVICE:-cuda:${WORKER_GPU_A}}"
     DECODER_BATCH_SIZE="${DECODER_BATCH_SIZE:-128}"
+    DECODER_DOMAIN="${DECODER_DOMAIN:-${DOMAIN}}"
+    DECODER_AUTO_TRAIN="${DECODER_AUTO_TRAIN:-0}"
+    if [[ "${DOMAIN}" != "arithmetic" && "${DECODER_AUTO_TRAIN}" == "0" ]]; then
+      DECODER_AUTO_TRAIN="1"
+    fi
+    DECODER_TRAIN_GPU="${DECODER_TRAIN_GPU:-${WORKER_GPU_A}}"
+    DECODER_LAYERS="${DECODER_LAYERS:-8,14,20}"
+    DECODER_TRAIN_EPOCHS="${DECODER_TRAIN_EPOCHS:-120}"
+    DECODER_TRAIN_BATCH_SIZE="${DECODER_TRAIN_BATCH_SIZE:-256}"
+    DECODER_TRAIN_LR="${DECODER_TRAIN_LR:-0.0003}"
+    DECODER_TRAIN_WEIGHT_DECAY="${DECODER_TRAIN_WEIGHT_DECAY:-0.01}"
 
     TRAIN_TEST_FRACTION="${TRAIN_TEST_FRACTION:-0.20}"
     SPLIT_SEED="${SPLIT_SEED:-20260309}"
@@ -640,6 +752,14 @@ SCOPE_LAYERS_C=${SCOPE_LAYERS_C@Q}
 DECODER_CHECKPOINT=${DECODER_CHECKPOINT@Q}
 DECODER_DEVICE=${DECODER_DEVICE@Q}
 DECODER_BATCH_SIZE=${DECODER_BATCH_SIZE@Q}
+DECODER_DOMAIN=${DECODER_DOMAIN@Q}
+DECODER_AUTO_TRAIN=${DECODER_AUTO_TRAIN@Q}
+DECODER_TRAIN_GPU=${DECODER_TRAIN_GPU@Q}
+DECODER_LAYERS=${DECODER_LAYERS@Q}
+DECODER_TRAIN_EPOCHS=${DECODER_TRAIN_EPOCHS@Q}
+DECODER_TRAIN_BATCH_SIZE=${DECODER_TRAIN_BATCH_SIZE@Q}
+DECODER_TRAIN_LR=${DECODER_TRAIN_LR@Q}
+DECODER_TRAIN_WEIGHT_DECAY=${DECODER_TRAIN_WEIGHT_DECAY@Q}
 TRAIN_TEST_FRACTION=${TRAIN_TEST_FRACTION@Q}
 SPLIT_SEED=${SPLIT_SEED@Q}
 CV_FOLDS=${CV_FOLDS@Q}
@@ -673,6 +793,9 @@ CFG
     ;;
   precompute)
     run_precompute
+    ;;
+  train-decoder)
+    run_train_decoder
     ;;
   worker-a|worker-b|worker-c|worker-g5|worker-g6|worker-g7)
     run_worker

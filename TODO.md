@@ -57,101 +57,70 @@ Stress outcome (`20260309_130420_optionc_stress_full_rigor`):
 - [x] **Option B (behavioral contradiction baseline)** completed for arithmetic Option C lineage.
 - [x] Arithmetic claim boundary updated to full Option C artifact path.
 
-## Phase G2 Cross-Task Validation (Current Publishability Gate)
+## Phase G2 Cross-Task Validation (Canonical Domain-Decoder Lineage)
 Domain order (locked):
 1. PrOntoQA
 2. EntailmentBank
 
-Pass requirement (strict):
-- Both domains must pass:
-  - pooled CV AUROC > 0.70
-  - CI lower >= 0.65
-  - lexical control AUROC <= 0.60
-  - wrong-minus-lexical delta >= 0.10
-  - zero leakage overlap
+Canonical lineage:
+- `20260309_141106_phase7_g2_domain_decoder_fix`
 
-Execution policy:
-- Canary 200 pairs -> full 1000 pairs per domain
-- Feature extraction/scoring on available free 3-GPU set (executed on 1/3/5 for this run)
-- CV/bootstrap/permutation stress on CPU workers
-- Active lineage:
-  - superseded queued run: `20260309_124000_phase7_g2_cross_task` (cancelled)
-  - completed run: `20260309_124650_phase7_g2_cross_task_gpu135`
+Strict eval requirement (unchanged):
+- pooled CV AUROC > 0.70
+- CI lower >= 0.65
+- lexical control AUROC <= 0.60
+- wrong-minus-lexical delta >= 0.10
+- zero leakage overlap
 
 Implementation status:
-- [x] Domain switch support added to Option C pair builder (`--domain`)
-- [x] G2 orchestrator added (`experiments/run_phase7_g2_cross_task.sh`)
-- [x] Run PrOntoQA domain Option C (canary->full)
-- [x] Run EntailmentBank domain Option C (canary->full)
-- [x] Emit cross-domain decision artifact
+- [x] Domain-aware decoder training/eval path added
+- [x] Domain-mismatch guard added in Option C evaluator
+- [x] PrOntoQA full run passed strict eval gate
+- [x] EntailmentBank full run passed strict eval gate
+- [x] Cross-domain eval decision artifact emitted
 
-Planned outputs:
-- `phase7_results/results/optionc_summary_20260309_124650_phase7_g2_cross_task_gpu135_prontoqa.json`
-- `phase7_results/results/optionc_claim_boundary_20260309_124650_phase7_g2_cross_task_gpu135_prontoqa_full.json`
-- `phase7_results/results/optionc_summary_20260309_124650_phase7_g2_cross_task_gpu135_entailmentbank.json`
-- `phase7_results/results/optionc_claim_boundary_20260309_124650_phase7_g2_cross_task_gpu135_entailmentbank_full.json`
-- `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json`
+Canonical eval outputs:
+- `phase7_results/results/optionc_summary_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa.json`
+- `phase7_results/results/optionc_claim_boundary_20260309_141106_phase7_g2_domain_decoder_fix_prontoqa_full.json`
+- `phase7_results/results/optionc_summary_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank.json`
+- `phase7_results/results/optionc_claim_boundary_20260309_141106_phase7_g2_domain_decoder_fix_entailmentbank_full.json`
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json`
 
-Cross-task result:
-- `prontoqa`: strict gate `fail` (`cv_primary_pooled_auroc=0.6757`)
-  - CI95: [0.643, 0.707] — upper bound touches 0.70, gap is only 0.024
-  - lexical control AUROC: 0.519 (chance) — lexical gate passes cleanly
-  - wrong-minus-lexical delta: 0.157 — passes delta >= 0.10 gate
-  - behavioral contradiction rate: 60.2% (Qwen is weak on syllogistic reasoning)
-  - behavioral pair AUROC: 0.809
-  - 5-fold CV range: 0.655–0.702 (fold 3 crosses threshold)
-  - **Diagnosis**: decoder mismatch — arithmetic decoder features are noise for syllogisms
-- `entailmentbank`: strict gate `pass` (`cv_primary_pooled_auroc=0.9820`)
-  - lexical control AUROC: 0.489 (chance)
-  - wrong-minus-lexical delta: 0.493
-- final publishability: `fail` (both-domains requirement not met)
+Eval result summary:
+- PrOntoQA: strict eval `pass` (`cv_primary_pooled_auroc=0.9636`, lexical `0.4666`, delta `0.4970`)
+- EntailmentBank: strict eval `pass` (`cv_primary_pooled_auroc=0.9992`, lexical `0.4301`, delta `0.5691`)
+- Cross-domain eval decision: `publishable_cross_domain_pass=true`
 
-## Next Steps: PrOntoQA Domain-Specific Decoder (Active)
+## G2 Full Stress Validation (Final Gate)
+Status:
+- [x] Full stress run complete for PrOntoQA
+- [x] Full stress run complete for EntailmentBank
+- [x] Stress-validated cross-domain decision emitted
 
-### Diagnosis
-PrOntoQA failed G2 by only 0.024 AUROC. Root cause: the 5 decoder transition-consistency
-features were computed using the **arithmetic** decoder checkpoint, which predicts magnitude,
-sign, operator, and numeric subresult — all meaningless for syllogistic reasoning. These
-garbage features add noise that hurts the marginal PrOntoQA probe.
+Stress outputs:
+- `phase7_results/results/optionc_stress_20260309_145050_optionc_stress_g2fix_prontoqa.json`
+- `phase7_results/results/optionc_stress_20260309_145052_optionc_stress_g2fix_entailmentbank.json`
+- `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json`
 
-EntailmentBank passed despite the same mismatch because its signal is overwhelming (0.982).
-PrOntoQA is marginal (0.676), so decoder noise matters.
+Stress result summary:
+- PrOntoQA: `final_verdict_primary=fail`
+  - permutation p-value pass (`0.000999`)
+  - multiseed pass (mean `0.7196`, std `0.0374`, pooled CI lower `0.6895`)
+  - **regularization pass fails** (WD 0.1 and 1.0 below thresholds)
+- EntailmentBank: `final_verdict_primary=pass` (all stress components pass)
+- Stress-validated cross-domain decision: `publishable_cross_domain_pass=false`
 
-### Plan
-1. **Build PrOntoQA structured state labels** — parse generated CoT text to extract:
-   - `inference_type`: universal_instantiation, modus_ponens, class_subsumption (3-4 way)
-   - `conclusion_class`: class concluded at this step (14-way: mammal, vertebrate, etc.)
-   - `premise_class`: input class at this step (14-way)
-   - `chain_depth`: step position in chain (5-way)
-   - `truth_value`: whether step conclusion is valid given premises (3-way: True/False/Uncertain)
-   - `target_entity`: entity being tracked (10-way: Ava, Ben, Cara, etc.)
+## Next Steps (Current)
+1. Improve PrOntoQA stress regularization stability without changing split/leakage policy.
+2. Keep domain-decoder lineage fixed as canonical (`20260309_141106...`).
+3. Rerun PrOntoQA full stress and regenerate stress-validated cross-domain decision.
+4. Keep old `20260309_124650...` run tagged as historical pre-fix ablation.
 
-2. **Train PrOntoQA-specific decoder** — same architecture as arithmetic decoder
-   (`MultiHeadStateDecoder`) but with syllogistic heads instead of arithmetic heads.
-   Train on faithful-member rows from PrOntoQA paired dataset (~1,679 members, ~3,800 rows).
-
-3. **Adapt transition consistency features** — replace arithmetic decoder features with:
-   - `decoder_chain_coherence`: does conclusion_class[step_i] == premise_class[step_i+1]?
-   - `decoder_truth_consistency`: is truth_value stable across the chain?
-   - `decoder_answer_alignment`: does final truth_value match the model's claimed answer?
-   - `decoder_weakest_link`: min consistency across all transitions
-   - `decoder_p95_transition_error`: p95 of prediction confidence gaps across transitions
-
-4. **Rerun G2 PrOntoQA** with domain-specific decoder checkpoint:
-   - Regenerate features with PrOntoQA decoder
-   - Same CV/bootstrap/permutation stress pipeline
-   - Target: push 0.676 → >0.70
-
-### Implementation files to modify
-- `phase7/contradictory_pair_prepare.py` — add PrOntoQA structured state parsing
-- `phase6/decoder_model.py` or new `phase7/prontoqa_decoder_model.py` — syllogistic heads
-- `phase7/train_state_decoders.py` — config for PrOntoQA decoder training
-- `phase7/evaluate_optionc.py` — domain-aware decoder feature computation
-
-### Risk assessment
-Gap is only 0.024. Even moderate decoder accuracy on truth_value and conclusion_class
-should close it. Main risk: Qwen may not distinctly encode syllogistic class identity
-internally (60% contradiction rate suggests weak syllogistic competence).
+## Claim Boundary (Current)
+- Arithmetic Option C: faithfulness claim enabled (stress-validated).
+- EntailmentBank Option C: faithfulness claim enabled (eval + stress pass).
+- PrOntoQA Option C: faithfulness claim enabled at eval stage, but stress final gate currently fails on regularization stability.
+- Cross-domain `publishable_cross_domain`: not yet enabled under full stress policy.
 
 ## Narrative and Documentation Tasks
 - [x] Add canonical memo:
@@ -166,14 +135,7 @@ internally (60% contradiction rate suggests weak syllogistic competence).
 Narrative target:
 - negative (coherence-confounded lineages) -> positive (Option C with lexical control + model-generated CoT)
 - arithmetic is supportive and technically validated
-- publishability requires cross-domain pass in G2
-
-## Claim Boundary (Current)
-- Arithmetic Option C supports a faithfulness-enabled claim **within arithmetic**.
-- EntailmentBank Option C supports a faithfulness-enabled claim **within entailment**.
-- Cross-domain publishability is currently **not met** (PrOntoQA fail, EntailmentBank pass).
-- PrOntoQA failure diagnosed as **decoder mismatch**, not method failure — remediation active.
-- GPT-2 closure remains unchanged and is not reopened by Qwen results.
+- publishability requires passing the full cross-domain stress gate
 
 ## Deprecated / Obsolete
 - [x] Legacy Qwen `Q0` raw hidden-state L2 diagnostic is obsolete.

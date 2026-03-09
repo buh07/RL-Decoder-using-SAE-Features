@@ -1,6 +1,6 @@
 # RL-Decoder with SAE Features — Project Status
 
-**Last Updated:** March 9, 2026 (GPT-2 closed; Qwen Option C 2/3 domains pass; PrOntoQA decoder remediation active)
+**Last Updated:** March 9, 2026 (GPT-2 closed; Qwen Option C domain-decoder G2 eval pass; full stress gate pending PrOntoQA stability)
 
 ---
 
@@ -326,73 +326,68 @@ Canonical artifacts:
 - `phase7_results/results/optionc_stress_20260309_130420_optionc_stress_full_rigor.json`
 - `phase7_results/results/trackc_arithmetic_significance_reframe_20260309_130420_optionc_stress_full_rigor.json`
 
-### Phase G2 Cross-Task Validation (Completed — Partial Pass)
+### Phase G2 Cross-Task Validation (Domain-Decoder Lineage)
 
-Run: `20260309_124650_phase7_g2_cross_task_gpu135`
+Canonical run: `20260309_141106_phase7_g2_domain_decoder_fix`
 
-Gate policy: both domains must pass all five criteria (CV AUROC > 0.70, CI lower >= 0.65, lexical AUROC <= 0.60, delta >= 0.10, zero overlap).
+Gate policy (unchanged): both domains must pass all five criteria (CV AUROC > 0.70, CI lower >= 0.65, lexical AUROC <= 0.60, delta >= 0.10, zero overlap).
 
-**EntailmentBank — PASS:**
+Full-eval results (both domains pass strict gate):
 
-| Metric | Value |
-|---|---|
-| Pairs | 1,000 |
-| CV pooled primary AUROC | **0.9820** |
-| Lexical control AUROC | 0.489 (chance) |
-| Wrong-minus-lexical delta | **0.493** |
-| Strict gate | **pass** |
-| Faithfulness claim | **enabled** |
+| Domain | CV pooled primary AUROC | Lexical AUROC | Wrong-minus-lexical delta | Strict gate | Leakage (pair/trace) |
+|---|---:|---:|---:|---|---|
+| PrOntoQA | **0.9636** | 0.4666 | 0.4970 | **pass** | 0 / 0 |
+| EntailmentBank | **0.9992** | 0.4301 | 0.5691 | **pass** | 0 / 0 |
 
-**PrOntoQA — FAIL (narrow, diagnosed):**
+Full-eval cross-domain decision: **PASS**
+- Artifact: `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix.json`
 
-| Metric | Value |
-|---|---|
-| Pairs | 986 |
-| CV pooled primary AUROC | **0.6757** (threshold: 0.70) |
-| CI95 | [0.643, 0.707] — upper bound touches 0.70 |
-| Lexical control AUROC | 0.519 (chance) — passes lexical gate |
-| Wrong-minus-lexical delta | 0.157 — passes delta gate |
-| Behavioral contradiction rate | **60.2%** (Qwen weak on syllogisms) |
-| Behavioral pair AUROC | 0.809 |
-| 5-fold CV range | 0.655–0.702 (fold 3 crosses 0.70) |
-| Strict gate | **fail** (primary AUROC only) |
+### G2 Full Stress Validation (Post-Eval Final Gate)
 
-**Cross-domain publishability gate: FAIL** (`partial_generalization_or_fail`)
+Stress policy (unchanged):
+- permutation 1000 (p-value primary, legacy strict retained),
+- regularization sweep (`0.0001,0.01,0.1,1.0`),
+- multiseed (`20260307..20260316`),
+- grouped bootstrap 1000.
 
-**Diagnosis**: PrOntoQA failed by only 0.024 AUROC. Root cause identified as **decoder feature mismatch**: the 5 decoder transition-consistency features use the arithmetic decoder checkpoint (magnitude, sign, operator, subresult), which produces meaningless predictions for syllogistic reasoning. These garbage features add noise to the marginal PrOntoQA probe. EntailmentBank passes despite the same mismatch because its signal (0.982) overwhelms decoder noise.
+Stress results:
 
-**Remediation**: Train a PrOntoQA-specific decoder with syllogistic heads (inference_type, conclusion_class, premise_class, chain_depth, truth_value, target_entity) and rerun G2 PrOntoQA with domain-appropriate transition consistency features.
+| Domain | Final primary verdict | p-value | Regularization pass | Multiseed pass |
+|---|---|---:|---|---|
+| PrOntoQA | **fail** | 0.000999 | **fail** | pass |
+| EntailmentBank | **pass** | 0.000999 | pass | pass |
 
-Cross-domain result summary:
+PrOntoQA stress detail (failure source):
+- Strong permutation significance (`p=0.000999`), but regularization stability fails:
+  - WD 0.01: 0.680
+  - WD 0.1: 0.629
+  - WD 1.0: 0.582
+- Multiseed remains stable (mean 0.720, std 0.037, pooled CI lower 0.689).
 
-| Domain | CV AUROC | Lexical AUROC | Delta | Contradiction Rate | Gate |
-|---|---|---|---|---|---|
-| Arithmetic | 0.877 | 0.454 | 0.424 | 13.2% | **PASS** |
-| EntailmentBank | 0.982 | 0.489 | 0.493 | — | **PASS** |
-| PrOntoQA | 0.676 | 0.519 | 0.157 | 60.2% | FAIL |
-
-Decision artifact:
-- `phase7_results/results/trackc_g2_cross_task_decision_20260309_124650_phase7_g2_cross_task_gpu135.json`
+Stress-validated cross-domain decision: **FAIL**
+- Artifact: `phase7_results/results/trackc_g2_cross_task_decision_20260309_141106_phase7_g2_domain_decoder_fix_stress_validated.json`
 
 ### Current Claim Boundary (March 9, 2026)
 
 Supported:
 - Arithmetic Option C faithfulness claim within arithmetic scope (stress-validated).
-- EntailmentBank Option C faithfulness claim within entailment scope.
-- Methodological contribution: lexical confound control separates text anomaly detection from faithfulness detection.
+- EntailmentBank Option C faithfulness claim within entailment scope (eval + stress pass).
+- Domain-decoder remediation resolves the original PrOntoQA eval failure (strict gate now passes).
+- Methodological contribution: lexical confound control and decoder-domain matching are both necessary.
 
 Not yet supported:
-- Cross-domain publishable faithfulness claim (requires PrOntoQA pass after decoder remediation).
+- `publishable_cross_domain` claim boundary under full stress policy (blocked by PrOntoQA regularization instability).
 
-### Next Step: PrOntoQA Domain-Specific Decoder
+### Next Step: PrOntoQA Stress-Stability Remediation
 
-Active remediation to close the 0.024 AUROC gap:
-1. Build PrOntoQA structured state labels (inference_type, conclusion_class, premise_class, chain_depth, truth_value)
-2. Train PrOntoQA-specific decoder (same `MultiHeadStateDecoder` architecture, syllogistic heads)
-3. Adapt transition consistency features for syllogistic domain
-4. Rerun G2 PrOntoQA with domain-specific decoder
+Targeted next work:
+1. Keep PrOntoQA domain decoder fixed (do not revert to arithmetic decoder features).
+2. Reduce sensitivity to strong regularization (feature pruning / lower-dimensional block / calibration freeze).
+3. Rerun PrOntoQA full stress with unchanged split/leakage policy.
+4. Recompute stress-validated cross-domain decision.
 
-See `TODO.md` for detailed implementation plan and file-level changes.
+Historical ablation lineage:
+- `20260309_124650_phase7_g2_cross_task_gpu135` is retained as pre-fix evidence (decoder mismatch diagnosed).
 
 ---
 
