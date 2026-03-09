@@ -9,7 +9,7 @@ PY="${PYTHON:-.venv/bin/python3}"
 
 usage() {
   cat <<'USAGE'
-usage: experiments/run_phase7_optionc_generated.sh {launch|precompute|train-decoder|worker-a|worker-b|worker-c|score|evaluate|coordinator}
+usage: experiments/run_phase7_optionc_generated.sh {launch|precompute|train-decoder|worker-a|worker-b|worker-c|score|select-layers|evaluate|coordinator}
 USAGE
 }
 
@@ -166,6 +166,20 @@ sys.exit(0)
 PY
 }
 
+manifest_layers_csv() {
+  local manifest="$1"
+  "$PY" - <<PY
+import json
+try:
+    d=json.load(open(${manifest@Q}))
+except Exception:
+    print("")
+    raise SystemExit(0)
+v=d.get("selected_layers_csv","")
+print(str(v or ""))
+PY
+}
+
 scope_vars() {
   local scope="$1"
   resolve_worker_gpu_slots
@@ -188,14 +202,17 @@ scope_vars() {
   export SCOPE_LAYERS_C="${SCOPE_LAYERS_C:-2,5,8,11,14,17,20,23,26}"
   export SCOPE_PRECOMP_DONE="$BASE/state/precompute_${scope}.done"
   export SCOPE_SCORE_DONE="$BASE/state/score_${scope}.done"
+  export SCOPE_SELECT_DONE="$BASE/state/select_layers_${scope}.done"
   export SCOPE_EVAL_DONE="$BASE/state/evaluate_${scope}.done"
   export SCOPE_DECODER_DONE="$BASE/state/train_decoder_${scope}.done"
   export SCOPE_DECODER_HASH="$BASE/state/train_decoder_${scope}.hash"
   export SCOPE_PRECOMP_HASH="$BASE/state/precompute_${scope}.hash"
   export SCOPE_SCORE_HASH="$BASE/state/score_${scope}.hash"
+  export SCOPE_SELECT_HASH="$BASE/state/select_layers_${scope}.hash"
   export SCOPE_EVAL_HASH="$BASE/state/evaluate_${scope}.hash"
   export SCOPE_DECODER_CKPT="phase7_results/checkpoints/optionc_decoder_${RUN_ID}_${DOMAIN}_${scope}.pt"
   export SCOPE_DECODER_JSON="phase7_results/results/optionc_decoder_${RUN_ID}_${DOMAIN}_${scope}.json"
+  export SAE_LAYER_MANIFEST="phase7_results/results/optionc_sae_layer_selection_${RUN_ID}_${DOMAIN}.json"
 }
 
 run_precompute() {
@@ -323,6 +340,7 @@ run_train_decoder() {
     printf '%s|' \
       "$MODEL_KEY" "$DOMAIN" "$SCOPE" "$ds_rows_sha" "$DECODER_DOMAIN" "$DECODER_LAYERS" \
       "$DECODER_TRAIN_EPOCHS" "$DECODER_TRAIN_BATCH_SIZE" "$DECODER_TRAIN_LR" "$DECODER_TRAIN_WEIGHT_DECAY" \
+      "$DECODER_HEAD_LOSS_WEIGHTS" \
       "$(file_sha256 phase7/train_optionc_domain_decoder.py)" \
       "$(file_sha256 phase7/optionc_domain_decoder.py)"
   )"
@@ -348,6 +366,7 @@ run_train_decoder() {
       --batch-size "$DECODER_TRAIN_BATCH_SIZE" \
       --lr "$DECODER_TRAIN_LR" \
       --weight-decay "$DECODER_TRAIN_WEIGHT_DECAY" \
+      --head-loss-weights "$DECODER_HEAD_LOSS_WEIGHTS" \
       --device cuda:0 \
       --output-checkpoint "$SCOPE_DECODER_CKPT" \
       --output-json "$SCOPE_DECODER_JSON"
@@ -441,13 +460,84 @@ run_score() {
   } >>"$logf" 2>&1
 }
 
+run_select_layers() {
+  require_env
+  : "${SCOPE:?SCOPE required}"
+  scope_vars "$SCOPE"
+  mkdir -p "$BASE/logs" "$BASE/state"
+  local logf="$BASE/logs/select_layers_${SCOPE}.log"
+  local mode="${SAE_LAYER_SELECT_MODE:-none}"
+  if [[ "$mode" != "auto_per_domain" ]]; then
+    {
+      echo "[$(date -Is)] select-layers skip (mode=${mode}) scope=${SCOPE}"
+    } >>"$logf" 2>&1
+    touch "$SCOPE_SELECT_DONE"
+    write_stage_hash "$SCOPE_SELECT_HASH" "skip_${mode}"
+    return 0
+  fi
+  if [[ "$SCOPE" != "canary" ]]; then
+    {
+      echo "[$(date -Is)] select-layers skip (auto_per_domain uses canary manifest) scope=${SCOPE}"
+    } >>"$logf" 2>&1
+    touch "$SCOPE_SELECT_DONE"
+    write_stage_hash "$SCOPE_SELECT_HASH" "reuse_canary"
+    return 0
+  fi
+  local ds_rows_sha sel_hash_input sel_hash
+  ds_rows_sha="$(dataset_rows_sha "$SCOPE_DATASET_JSON")"
+  sel_hash_input="$(
+    printf '%s|' \
+      "$MODEL_KEY" "$DOMAIN" "$SCOPE" "$ds_rows_sha" \
+      "$(file_sha256 "$SCOPE_PARTIAL_A")" "$(file_sha256 "$SCOPE_PARTIAL_B")" "$(file_sha256 "$SCOPE_PARTIAL_C")" \
+      "$SAE_LAYER_TOPK" "$TRAIN_EXCLUDE_PAIR_TYPES" "$TRAIN_TEST_FRACTION" "$SPLIT_SEED" "$CV_FOLDS" \
+      "$FIT_EPOCHS" "$FIT_LR" "$FIT_WEIGHT_DECAY" "$FIT_DEVICE" \
+      "$(file_sha256 phase7/select_optionc_sae_layers.py)"
+  )"
+  sel_hash="$(printf '%s' "$sel_hash_input" | sha256sum | awk '{print $1}')"
+  if stage_hash_ok "$SCOPE_SELECT_DONE" "$SCOPE_SELECT_HASH" "$sel_hash" \
+    && [[ -f "$SAE_LAYER_MANIFEST" ]] \
+    && json_parseable "$SAE_LAYER_MANIFEST" \
+    && [[ -n "$(manifest_layers_csv "$SAE_LAYER_MANIFEST")" ]]; then
+    {
+      echo "[$(date -Is)] select-layers skip (hash+manifest match)"
+    } >>"$logf" 2>&1
+    return 0
+  fi
+  {
+    echo "[$(date -Is)] select-layers start top_k=${SAE_LAYER_TOPK}"
+    "$PY" phase7/select_optionc_sae_layers.py \
+      --paired-dataset "$SCOPE_DATASET_JSON" \
+      --partials "$SCOPE_PARTIAL_A" "$SCOPE_PARTIAL_B" "$SCOPE_PARTIAL_C" \
+      --train-exclude-pair-types "$TRAIN_EXCLUDE_PAIR_TYPES" \
+      --train-test-fraction "$TRAIN_TEST_FRACTION" \
+      --split-seed "$SPLIT_SEED" \
+      --cv-folds "$CV_FOLDS" \
+      --top-k "$SAE_LAYER_TOPK" \
+      --epochs "$FIT_EPOCHS" \
+      --lr "$FIT_LR" \
+      --weight-decay "$FIT_WEIGHT_DECAY" \
+      --device "$FIT_DEVICE" \
+      --output-json "$SAE_LAYER_MANIFEST"
+    json_parseable "$SAE_LAYER_MANIFEST"
+    local selected_csv
+    selected_csv="$(manifest_layers_csv "$SAE_LAYER_MANIFEST")"
+    if [[ -z "$selected_csv" ]]; then
+      echo "select-layers produced empty selected_layers_csv" >&2
+      exit 1
+    fi
+    touch "$SCOPE_SELECT_DONE"
+    write_stage_hash "$SCOPE_SELECT_HASH" "$sel_hash"
+    echo "[$(date -Is)] select-layers done selected=${selected_csv}"
+  } >>"$logf" 2>&1
+}
+
 run_evaluate() {
   require_env
   : "${SCOPE:?SCOPE required}"
   scope_vars "$SCOPE"
   mkdir -p "$BASE/logs" "$BASE/state"
   local logf="$BASE/logs/evaluate_${SCOPE}.log"
-  local ds_rows_sha eval_hash_input eval_hash dec_stat
+  local ds_rows_sha eval_hash_input eval_hash dec_stat sae_layer_allowlist
   local decoder_checkpoint_local="$DECODER_CHECKPOINT"
   local decoder_domain_local="${DECODER_DOMAIN:-auto}"
   if [[ "${DECODER_AUTO_TRAIN}" == "1" ]]; then
@@ -456,6 +546,16 @@ run_evaluate() {
   fi
   if [[ ! -f "$decoder_checkpoint_local" ]]; then
     decoder_checkpoint_local=""
+  fi
+  sae_layer_allowlist="${SAE_SELECTED_LAYERS:-}"
+  if [[ "${SAE_LAYER_SELECT_MODE}" == "auto_per_domain" ]]; then
+    if [[ -f "$SAE_LAYER_MANIFEST" ]]; then
+      sae_layer_allowlist="$(manifest_layers_csv "$SAE_LAYER_MANIFEST")"
+    fi
+    if [[ -z "$sae_layer_allowlist" ]]; then
+      echo "missing SAE layer allowlist manifest in auto_per_domain mode: $SAE_LAYER_MANIFEST" >&2
+      exit 1
+    fi
   fi
   ds_rows_sha="$(dataset_rows_sha "$SCOPE_DATASET_JSON")"
   dec_stat="$(stat -c '%s:%Y' "$decoder_checkpoint_local" 2>/dev/null || echo missing)"
@@ -466,6 +566,7 @@ run_evaluate() {
       "$decoder_checkpoint_local" "$decoder_domain_local" "$dec_stat" "$DECODER_BATCH_SIZE" "$TRAIN_TEST_FRACTION" \
       "$SPLIT_SEED" "$CV_FOLDS" "$CV_SEED" "$SCOPE_BOOTSTRAP" "$BOOTSTRAP_SEED" \
       "$FIT_EPOCHS" "$FIT_LR" "$FIT_WEIGHT_DECAY" "$FIT_DEVICE" "$CPU_WORKERS" \
+      "$LOGICAL_DECODER_FEATURE_MODE" "$sae_layer_allowlist" "$SAE_LAYER_SELECT_MODE" \
       "$(file_sha256 phase7/evaluate_optionc.py)"
   )"
   eval_hash="$(printf '%s' "$eval_hash_input" | sha256sum | awk '{print $1}')"
@@ -484,6 +585,8 @@ run_evaluate() {
       --partials "$SCOPE_PARTIAL_A" "$SCOPE_PARTIAL_B" "$SCOPE_PARTIAL_C" \
       --decoder-checkpoint "$decoder_checkpoint_local" \
       --decoder-domain "$decoder_domain_local" \
+      --logical-decoder-feature-mode "$LOGICAL_DECODER_FEATURE_MODE" \
+      --sae-layer-allowlist "$sae_layer_allowlist" \
       --decoder-device "$DECODER_DEVICE" \
       --decoder-batch-size "$DECODER_BATCH_SIZE" \
       --train-test-fraction "$TRAIN_TEST_FRACTION" \
@@ -523,6 +626,7 @@ run_coordinator() {
     SCOPE=canary "$0" precompute
     SCOPE=canary "$0" train-decoder
     SCOPE=canary "$0" score
+    SCOPE=canary "$0" select-layers
     SCOPE=canary "$0" evaluate
     scope_vars canary
     canary_ok="$("$PY" - <<PY
@@ -549,6 +653,7 @@ PY
     SCOPE=full "$0" precompute
     SCOPE=full "$0" train-decoder
     SCOPE=full "$0" score
+    SCOPE=full "$0" select-layers
     SCOPE=full "$0" evaluate
 
     scope_vars full
@@ -566,6 +671,11 @@ summary={
   "status":"ok",
   "run_id": run_id,
   "domain": ${DOMAIN@Q},
+  "settings": {
+    "logical_decoder_feature_mode": full.get("logical_decoder_feature_mode"),
+    "sae_layer_allowlist": full.get("sae_layer_allowlist"),
+    "sae_feature_count_after_filter": full.get("sae_feature_count_after_filter"),
+  },
   "artifacts":{
     "dataset_canary": f"phase7_results/results/optionc_paired_dataset_{run_id}_canary.json",
     "dataset_full": f"phase7_results/results/optionc_paired_dataset_{run_id}_full.json",
@@ -687,6 +797,7 @@ PY
     DECODER_TRAIN_BATCH_SIZE="${DECODER_TRAIN_BATCH_SIZE:-256}"
     DECODER_TRAIN_LR="${DECODER_TRAIN_LR:-0.0003}"
     DECODER_TRAIN_WEIGHT_DECAY="${DECODER_TRAIN_WEIGHT_DECAY:-0.01}"
+    DECODER_HEAD_LOSS_WEIGHTS="${DECODER_HEAD_LOSS_WEIGHTS:-}"
 
     TRAIN_TEST_FRACTION="${TRAIN_TEST_FRACTION:-0.20}"
     SPLIT_SEED="${SPLIT_SEED:-20260309}"
@@ -700,6 +811,10 @@ PY
     FIT_WEIGHT_DECAY="${FIT_WEIGHT_DECAY:-0.0001}"
     FIT_DEVICE="${FIT_DEVICE:-cpu}"
     CPU_WORKERS="${CPU_WORKERS:-8}"
+    LOGICAL_DECODER_FEATURE_MODE="${LOGICAL_DECODER_FEATURE_MODE:-full}"
+    SAE_LAYER_SELECT_MODE="${SAE_LAYER_SELECT_MODE:-none}"
+    SAE_LAYER_TOPK="${SAE_LAYER_TOPK:-8}"
+    SAE_SELECTED_LAYERS="${SAE_SELECTED_LAYERS:-}"
 
     HF_TOKEN="${HF_TOKEN:-${HUGGING_FACE_HUB_TOKEN:-}}"
     HF_HOME="${HF_HOME:-$ROOT_DIR/.hf_cache}"
@@ -760,6 +875,7 @@ DECODER_TRAIN_EPOCHS=${DECODER_TRAIN_EPOCHS@Q}
 DECODER_TRAIN_BATCH_SIZE=${DECODER_TRAIN_BATCH_SIZE@Q}
 DECODER_TRAIN_LR=${DECODER_TRAIN_LR@Q}
 DECODER_TRAIN_WEIGHT_DECAY=${DECODER_TRAIN_WEIGHT_DECAY@Q}
+DECODER_HEAD_LOSS_WEIGHTS=${DECODER_HEAD_LOSS_WEIGHTS@Q}
 TRAIN_TEST_FRACTION=${TRAIN_TEST_FRACTION@Q}
 SPLIT_SEED=${SPLIT_SEED@Q}
 CV_FOLDS=${CV_FOLDS@Q}
@@ -772,6 +888,10 @@ FIT_LR=${FIT_LR@Q}
 FIT_WEIGHT_DECAY=${FIT_WEIGHT_DECAY@Q}
 FIT_DEVICE=${FIT_DEVICE@Q}
 CPU_WORKERS=${CPU_WORKERS@Q}
+LOGICAL_DECODER_FEATURE_MODE=${LOGICAL_DECODER_FEATURE_MODE@Q}
+SAE_LAYER_SELECT_MODE=${SAE_LAYER_SELECT_MODE@Q}
+SAE_LAYER_TOPK=${SAE_LAYER_TOPK@Q}
+SAE_SELECTED_LAYERS=${SAE_SELECTED_LAYERS@Q}
 HF_TOKEN=${HF_TOKEN@Q}
 HF_HOME=${HF_HOME@Q}
 HUGGINGFACE_HUB_CACHE=${HUGGINGFACE_HUB_CACHE@Q}
@@ -802,6 +922,9 @@ CFG
     ;;
   score)
     run_score
+    ;;
+  select-layers)
+    run_select_layers
     ;;
   evaluate)
     run_evaluate

@@ -54,12 +54,29 @@ def _parse_csv(value: str) -> List[str]:
 
 def _parse_int_csv(value: str) -> List[int]:
     out: List[int] = []
+    seen = set()
     for tok in str(value or "").split(","):
         t = tok.strip()
         if not t:
             continue
-        out.append(int(t))
-    return out
+        v = int(t)
+        if v in seen:
+            continue
+        seen.add(v)
+        out.append(v)
+    return sorted(out)
+
+
+def _feature_allowed_by_layer(feature_name: str, layer_allowlist: Optional[set[int]]) -> bool:
+    if not layer_allowlist:
+        return True
+    if not str(feature_name).startswith("layer") or ":" not in str(feature_name):
+        return True
+    try:
+        layer = int(str(feature_name).split(":", 1)[0].replace("layer", ""))
+    except Exception:
+        return False
+    return layer in layer_allowlist
 
 
 def _roc_auc(scores_labels: Sequence[Tuple[float, int]]) -> Optional[float]:
@@ -192,7 +209,13 @@ def _bootstrap_group_auc(
     return out
 
 
-def _load_rows(paired_dataset: str, partials: Sequence[str]) -> Tuple[List[Row], List[str], Dict[str, Any]]:
+def _load_rows(
+    paired_dataset: str,
+    partials: Sequence[str],
+    *,
+    layer_allowlist: Optional[set[int]] = None,
+    layer_allowlist_values: Optional[Sequence[int]] = None,
+) -> Tuple[List[Row], List[str], Dict[str, Any]]:
     ds = load_json(paired_dataset)
     members_meta = {str(m.get("member_id")): dict(m) for m in list(ds.get("members", [])) if isinstance(m, dict)}
 
@@ -212,8 +235,11 @@ def _load_rows(paired_dataset: str, partials: Sequence[str]) -> Tuple[List[Row],
             rec = feats_by_member.setdefault(mid, {})
             for k, v in f.items():
                 if isinstance(v, (int, float)) and str(k):
-                    rec[str(k)] = float(v)
-                    feature_name_set.add(str(k))
+                    fn = str(k)
+                    if not _feature_allowed_by_layer(fn, layer_allowlist):
+                        continue
+                    rec[fn] = float(v)
+                    feature_name_set.add(fn)
 
     feature_names = sorted(feature_name_set)
     rows: List[Row] = []
@@ -269,10 +295,17 @@ def _load_rows(paired_dataset: str, partials: Sequence[str]) -> Tuple[List[Row],
         "rows_after_join": int(len(rows)),
         "rows_dropped": int(dropped),
         "feature_count": int(len(feature_names)),
+        "sae_layer_allowlist": [int(x) for x in (layer_allowlist_values or [])],
         "member_count_dataset": int(len(members_meta)),
         "partial_count": int(len(partials)),
     }
     return rows, feature_names, meta
+
+
+def _resolve_layer_allowlist(args: argparse.Namespace) -> Tuple[List[int], Optional[set[int]]]:
+    vals = _parse_int_csv(str(args.sae_layer_allowlist)) if str(args.sae_layer_allowlist).strip() else []
+    allow = set(int(x) for x in vals) if vals else None
+    return vals, allow
 
 
 def _subset_rows(rows: Sequence[Row], idx: Sequence[int]) -> List[Row]:
@@ -545,7 +578,13 @@ def _make_split(rows_master: Sequence[Row], args: argparse.Namespace) -> Dict[st
 
 
 def run_permutation(args: argparse.Namespace) -> Dict[str, Any]:
-    rows_master, feature_names, meta = _load_rows(args.paired_dataset, args.partials)
+    layer_vals, layer_allow = _resolve_layer_allowlist(args)
+    rows_master, feature_names, meta = _load_rows(
+        args.paired_dataset,
+        args.partials,
+        layer_allowlist=layer_allow,
+        layer_allowlist_values=layer_vals,
+    )
     split = _make_split(rows_master, args)
     rows_train = split["train_rows"]
     rows_test = split["test_rows"]
@@ -647,7 +686,13 @@ def run_permutation(args: argparse.Namespace) -> Dict[str, Any]:
 
 
 def run_ablation_reg(args: argparse.Namespace) -> Dict[str, Any]:
-    rows_master, feature_names, meta = _load_rows(args.paired_dataset, args.partials)
+    layer_vals, layer_allow = _resolve_layer_allowlist(args)
+    rows_master, feature_names, meta = _load_rows(
+        args.paired_dataset,
+        args.partials,
+        layer_allowlist=layer_allow,
+        layer_allowlist_values=layer_vals,
+    )
     split = _make_split(rows_master, args)
     rows_train = split["train_rows"]
     rows_test = split["test_rows"]
@@ -757,7 +802,13 @@ def run_ablation_reg(args: argparse.Namespace) -> Dict[str, Any]:
 
 
 def run_multiseed(args: argparse.Namespace) -> Dict[str, Any]:
-    rows_master, feature_names, meta = _load_rows(args.paired_dataset, args.partials)
+    layer_vals, layer_allow = _resolve_layer_allowlist(args)
+    rows_master, feature_names, meta = _load_rows(
+        args.paired_dataset,
+        args.partials,
+        layer_allowlist=layer_allow,
+        layer_allowlist_values=layer_vals,
+    )
     seeds = _parse_int_csv(args.multi_seed_values)
     if not seeds:
         raise RuntimeError("No multi-seed values")
@@ -948,6 +999,7 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("--paired-dataset", default="")
     p.add_argument("--partials", nargs="*", default=[])
+    p.add_argument("--sae-layer-allowlist", default="", help="Optional CSV SAE layer allowlist.")
 
     p.add_argument("--train-exclude-variants", default="order_flip_only,answer_first_order_flip,reordered_steps")
     p.add_argument("--trace-test-fraction", type=float, default=0.20)

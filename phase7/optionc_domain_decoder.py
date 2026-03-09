@@ -11,6 +11,14 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 
 LOGICAL_DOMAINS = {"prontoqa", "entailmentbank"}
+DEFAULT_DOMAIN_HEAD_LOSS_WEIGHTS: Dict[str, float] = {
+    "inference": 1.0,
+    "chain_depth": 1.0,
+    "truth": 2.0,
+    "conclusion": 2.0,
+    "premise": 1.5,
+    "entity": 1.0,
+}
 
 
 @dataclass
@@ -228,8 +236,17 @@ def compute_domain_loss(
     batch: Dict[str, torch.Tensor],
     *,
     class_weights: Optional[Dict[str, torch.Tensor]] = None,
+    head_loss_weights: Optional[Dict[str, float]] = None,
 ) -> Dict[str, torch.Tensor]:
     cw = class_weights or {}
+    hlw = dict(DEFAULT_DOMAIN_HEAD_LOSS_WEIGHTS)
+    if head_loss_weights:
+        for k, v in head_loss_weights.items():
+            if k in hlw:
+                try:
+                    hlw[k] = float(v)
+                except Exception:
+                    continue
     losses = {
         "inference": _masked_ce(out["inference_logits"], batch["inference_id"], batch["mask_inference"], class_weights=cw.get("inference")),
         "chain_depth": _masked_ce(
@@ -248,14 +265,14 @@ def compute_domain_loss(
         "premise": _masked_ce(out["premise_logits"], batch["premise_id"], batch["mask_premise"], class_weights=cw.get("premise")),
         "entity": _masked_ce(out["entity_logits"], batch["entity_id"], batch["mask_entity"], class_weights=cw.get("entity")),
     }
-    # Truth/conclusion are highest-value heads for logical transition checks.
+    # Truth/conclusion are high-value heads for logical transition checks by default.
     total = (
-        1.0 * losses["inference"]
-        + 1.0 * losses["chain_depth"]
-        + 2.0 * losses["truth"]
-        + 2.0 * losses["conclusion"]
-        + 1.5 * losses["premise"]
-        + 1.0 * losses["entity"]
+        hlw["inference"] * losses["inference"]
+        + hlw["chain_depth"] * losses["chain_depth"]
+        + hlw["truth"] * losses["truth"]
+        + hlw["conclusion"] * losses["conclusion"]
+        + hlw["premise"] * losses["premise"]
+        + hlw["entity"] * losses["entity"]
     )
     losses["total"] = total
     return losses
@@ -265,6 +282,8 @@ def evaluate_domain_decoder(
     model: OptionCDomainDecoder,
     loader: DataLoader,
     device: str,
+    *,
+    head_loss_weights: Optional[Dict[str, float]] = None,
 ) -> Dict[str, Any]:
     model.eval()
     agg: Dict[str, float] = {
@@ -291,7 +310,7 @@ def evaluate_domain_decoder(
         for batch in loader:
             dev = {k: (v.to(device) if torch.is_tensor(v) else v) for k, v in batch.items()}
             out = model(dev["x"])
-            losses = compute_domain_loss(out, dev)
+            losses = compute_domain_loss(out, dev, head_loss_weights=head_loss_weights)
             bsz = int(dev["x"].shape[0])
             agg["n"] += float(bsz)
             agg["loss_total"] += float(losses["total"].item()) * bsz
@@ -362,6 +381,7 @@ def save_optionc_domain_decoder_checkpoint(
     best_epoch: int,
     best_val: Dict[str, Any],
     history: Sequence[Dict[str, Any]],
+    train_settings: Optional[Dict[str, Any]] = None,
 ) -> None:
     payload = {
         "schema_version": "phase7_optionc_domain_decoder_v1",
@@ -371,6 +391,7 @@ def save_optionc_domain_decoder_checkpoint(
         "best_epoch": int(best_epoch),
         "best_val": dict(best_val),
         "history": [dict(x) for x in history],
+        "train_settings": dict(train_settings or {}),
     }
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)

@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader
 try:  # pragma: no cover
     from .common import load_json, load_pt, save_json, set_seed
     from .optionc_domain_decoder import (
+        DEFAULT_DOMAIN_HEAD_LOSS_WEIGHTS,
         LOGICAL_DOMAINS,
         OptionCDomainDataset,
         OptionCDomainDecoder,
@@ -27,6 +28,7 @@ try:  # pragma: no cover
 except ImportError:  # pragma: no cover
     from common import load_json, load_pt, save_json, set_seed
     from optionc_domain_decoder import (
+        DEFAULT_DOMAIN_HEAD_LOSS_WEIGHTS,
         LOGICAL_DOMAINS,
         OptionCDomainDataset,
         OptionCDomainDecoder,
@@ -54,6 +56,24 @@ def _parse_int_csv(value: str) -> Tuple[int, ...]:
     if not out:
         raise ValueError("--layers must include at least one layer")
     return tuple(sorted(out))
+
+
+def _parse_head_loss_weights(value: str) -> Dict[str, float]:
+    if not str(value or "").strip():
+        return {}
+    out: Dict[str, float] = {}
+    for part in str(value).split(","):
+        tok = part.strip()
+        if not tok:
+            continue
+        if ":" not in tok:
+            raise ValueError(f"Invalid head weight token (expected key:value): {tok}")
+        k, v = tok.split(":", 1)
+        key = str(k).strip()
+        if key not in DEFAULT_DOMAIN_HEAD_LOSS_WEIGHTS:
+            raise ValueError(f"Unknown decoder head in weight override: {key}")
+        out[key] = float(v.strip())
+    return out
 
 
 def _split_rows_by_pair(rows: Sequence[dict], val_fraction: float, seed: int) -> Tuple[List[dict], List[dict]]:
@@ -145,6 +165,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--dropout", type=float, default=0.10)
     p.add_argument("--d-model", type=int, default=768)
     p.add_argument("--class-weight-max-ratio", type=float, default=5.0)
+    p.add_argument(
+        "--head-loss-weights",
+        default="",
+        help="CSV key:value overrides for head weights. Keys: inference,chain_depth,truth,conclusion,premise,entity.",
+    )
     p.add_argument("--early-stop-patience", type=int, default=15)
     p.add_argument("--device", default="cuda:0")
     p.add_argument("--output-checkpoint", required=True)
@@ -155,6 +180,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     set_seed(int(args.seed))
+    head_loss_weights = dict(DEFAULT_DOMAIN_HEAD_LOSS_WEIGHTS)
+    head_loss_weights.update(_parse_head_loss_weights(str(args.head_loss_weights)))
     payload = load_json(args.paired_dataset)
     domain = str(args.decoder_domain).strip().lower()
     if domain not in LOGICAL_DOMAINS:
@@ -225,7 +252,12 @@ def main() -> None:
         for b in train_dl:
             dev = {k: (v.to(args.device) if torch.is_tensor(v) else v) for k, v in b.items()}
             out = model(dev["x"])
-            losses = compute_domain_loss(out, dev, class_weights=class_weights)
+            losses = compute_domain_loss(
+                out,
+                dev,
+                class_weights=class_weights,
+                head_loss_weights=head_loss_weights,
+            )
             optim.zero_grad(set_to_none=True)
             losses["total"].backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -234,7 +266,7 @@ def main() -> None:
             seen += bsz
             train_loss += float(losses["total"].item()) * bsz
 
-        val = evaluate_domain_decoder(model, val_dl, str(args.device))
+        val = evaluate_domain_decoder(model, val_dl, str(args.device), head_loss_weights=head_loss_weights)
         composite = float(val["truth_macro_f1"]) + 0.5 * (float(val["conclusion_macro_f1"]) + float(val["premise_macro_f1"]))
         row = {
             "epoch": int(epoch),
@@ -264,7 +296,7 @@ def main() -> None:
     if best_state is None:
         raise RuntimeError("No best state captured for optionc domain decoder")
     model.load_state_dict(best_state)
-    best_val = evaluate_domain_decoder(model, val_dl, str(args.device))
+    best_val = evaluate_domain_decoder(model, val_dl, str(args.device), head_loss_weights=head_loss_weights)
     save_optionc_domain_decoder_checkpoint(
         args.output_checkpoint,
         model=model,
@@ -272,6 +304,9 @@ def main() -> None:
         best_epoch=int(best_epoch),
         best_val=best_val,
         history=history,
+        train_settings={
+            "head_loss_weights": dict(head_loss_weights),
+        },
     )
     result = {
         "schema_version": "phase7_optionc_domain_decoder_train_result_v1",
@@ -287,6 +322,7 @@ def main() -> None:
         "num_rows_val": int(len(val_rows)),
         "best_epoch": int(best_epoch),
         "best_val": best_val,
+        "head_loss_weights": dict(head_loss_weights),
         "checkpoint_path": str(args.output_checkpoint),
         "history": history,
         "timestamp": datetime.now().isoformat(),

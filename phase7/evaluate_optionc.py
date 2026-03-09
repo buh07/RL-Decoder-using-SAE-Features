@@ -259,6 +259,36 @@ def _parse_csv(value: str) -> List[str]:
     return out
 
 
+def _parse_int_csv(value: str) -> List[int]:
+    out: List[int] = []
+    seen = set()
+    for tok in str(value or "").split(","):
+        t = tok.strip()
+        if not t:
+            continue
+        v = int(t)
+        if v in seen:
+            continue
+        seen.add(v)
+        out.append(v)
+    return sorted(out)
+
+
+def _feature_allowed_by_layer(
+    feature_name: str,
+    layer_allowlist: Optional[set[int]],
+) -> bool:
+    if not layer_allowlist:
+        return True
+    if not str(feature_name).startswith("layer") or ":" not in str(feature_name):
+        return True
+    try:
+        layer = int(str(feature_name).split(":", 1)[0].replace("layer", ""))
+    except Exception:
+        return False
+    return layer in layer_allowlist
+
+
 def _apply_train_pair_type_exclusion(
     train_rows: Sequence[Dict[str, Any]],
     *,
@@ -375,8 +405,20 @@ def _decoder_transition_features_logical(
     pred_seq: Sequence[Optional[Dict[str, Any]]],
     *,
     expected_truth: Optional[bool] = None,
+    feature_mode: str = "full",
 ) -> Dict[str, float]:
+    mode = str(feature_mode or "full").strip().lower()
+    if mode not in {"full", "truth_inference_only"}:
+        mode = "full"
     if len(pred_seq) < 2:
+        if mode == "truth_inference_only":
+            return {
+                "decoder_truth_consistency_mean": 0.5,
+                "decoder_inference_consistency_mean": 0.5,
+                "decoder_answer_alignment": 0.5,
+                "decoder_weakest_link_consistency": 0.5,
+                "decoder_p95_transition_confidence_gap": 0.0,
+            }
         return {
             "decoder_chain_coherence_mean": 0.5,
             "decoder_truth_consistency_mean": 0.5,
@@ -386,6 +428,7 @@ def _decoder_transition_features_logical(
         }
     chain_hits: List[float] = []
     truth_hits: List[float] = []
+    inference_hits: List[float] = []
     confidence_gaps: List[float] = []
     for i in range(len(pred_seq) - 1):
         cur = pred_seq[i] or {}
@@ -394,18 +437,34 @@ def _decoder_transition_features_logical(
         nxt_prem = int(nxt.get("premise_class_id", 0) or 0)
         cur_truth = int(cur.get("truth_value_id", 0) or 0)
         nxt_truth = int(nxt.get("truth_value_id", 0) or 0)
-        if cur_conc > 0 and nxt_prem > 0:
+        cur_inf = int(cur.get("inference_type_id", 0) or 0)
+        nxt_inf = int(nxt.get("inference_type_id", 0) or 0)
+        if cur_conc > 0 and nxt_prem > 0 and mode == "full":
             chain_hits.append(1.0 if cur_conc == nxt_prem else 0.0)
         if cur_truth > 0 and nxt_truth > 0:
             truth_hits.append(1.0 if cur_truth == nxt_truth else 0.0)
+        if cur_inf > 0 and nxt_inf > 0:
+            inference_hits.append(1.0 if cur_inf == nxt_inf else 0.0)
         conc_prob = _safe_float(cur.get("conclusion_top1_prob"))
         prem_prob = _safe_float(nxt.get("premise_top1_prob"))
-        if conc_prob is not None and prem_prob is not None:
+        truth_prob_cur = _safe_float(cur.get("truth_top1_prob"))
+        truth_prob_nxt = _safe_float(nxt.get("truth_top1_prob"))
+        inf_prob_cur = _safe_float(cur.get("inference_top1_prob"))
+        inf_prob_nxt = _safe_float(nxt.get("inference_top1_prob"))
+        if mode == "full" and conc_prob is not None and prem_prob is not None:
             confidence_gaps.append(float(abs(conc_prob - prem_prob)))
+        if truth_prob_cur is not None and truth_prob_nxt is not None:
+            confidence_gaps.append(float(abs(truth_prob_cur - truth_prob_nxt)))
+        if inf_prob_cur is not None and inf_prob_nxt is not None:
+            confidence_gaps.append(float(abs(inf_prob_cur - inf_prob_nxt)))
 
     chain_mean = float(sum(chain_hits) / max(1, len(chain_hits))) if chain_hits else 0.5
     truth_mean = float(sum(truth_hits) / max(1, len(truth_hits))) if truth_hits else 0.5
-    weakest = float(min([chain_mean, truth_mean]))
+    inference_mean = float(sum(inference_hits) / max(1, len(inference_hits))) if inference_hits else 0.5
+    if mode == "truth_inference_only":
+        weakest = float(min([truth_mean, inference_mean]))
+    else:
+        weakest = float(min([chain_mean, truth_mean]))
     if confidence_gaps:
         gaps = torch.tensor(confidence_gaps, dtype=torch.float32)
         p95_gap = float(torch.quantile(gaps, 0.95).item())
@@ -420,6 +479,14 @@ def _decoder_transition_features_logical(
         expected_id = 1 if bool(expected_truth) else 2
         answer_alignment = 1.0 if int(last_truth) == int(expected_id) else 0.0
 
+    if mode == "truth_inference_only":
+        return {
+            "decoder_truth_consistency_mean": truth_mean,
+            "decoder_inference_consistency_mean": inference_mean,
+            "decoder_answer_alignment": float(answer_alignment),
+            "decoder_weakest_link_consistency": weakest,
+            "decoder_p95_transition_confidence_gap": p95_gap,
+        }
     return {
         "decoder_chain_coherence_mean": chain_mean,
         "decoder_truth_consistency_mean": truth_mean,
@@ -435,6 +502,17 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--partials", nargs="+", required=True)
     p.add_argument("--decoder-checkpoint", default="", help="Optional state-decoder checkpoint.")
     p.add_argument("--decoder-domain", choices=["auto", "arithmetic", "prontoqa", "entailmentbank"], default="auto")
+    p.add_argument(
+        "--logical-decoder-feature-mode",
+        choices=["full", "truth_inference_only"],
+        default="full",
+        help="Logical decoder transition feature block mode.",
+    )
+    p.add_argument(
+        "--sae-layer-allowlist",
+        default="",
+        help="Optional CSV allowlist of SAE layers (e.g. 6,8,14). Empty keeps all layers.",
+    )
     p.add_argument("--decoder-device", default="cuda:0")
     p.add_argument("--decoder-batch-size", type=int, default=128)
     p.add_argument("--train-test-fraction", type=float, default=0.20)
@@ -487,6 +565,9 @@ def main() -> None:
     members = list(payload.get("members", []))
     members_by_id: Dict[str, Dict[str, Any]] = {str(m.get("member_id")): dict(m) for m in members}
     pairs = list(payload.get("pairs", []))
+    logical_decoder_feature_mode = str(args.logical_decoder_feature_mode).strip().lower()
+    layer_allowlist_values = _parse_int_csv(str(args.sae_layer_allowlist)) if str(args.sae_layer_allowlist).strip() else []
+    layer_allowlist_set = set(int(x) for x in layer_allowlist_values) if layer_allowlist_values else None
 
     # Merge per-layer partial features.
     merged_features: Dict[str, Dict[str, float]] = defaultdict(dict)
@@ -501,7 +582,10 @@ def main() -> None:
                 continue
             for k, v in dict(m.get("features", {})).items():
                 if isinstance(v, (int, float)):
-                    merged_features[mid][str(k)] = float(v)
+                    fk = str(k)
+                    if _feature_allowed_by_layer(fk, layer_allowlist_set):
+                        merged_features[mid][fk] = float(v)
+    sae_feature_names = sorted({k for d in merged_features.values() for k in d.keys() if str(k).startswith("layer")})
 
     # Decoder-based transition consistency block.
     decoder_added = False
@@ -544,6 +628,7 @@ def main() -> None:
                             "conclusion_class_id": int(s.get("conclusion_class_id", 0) or 0),
                             "premise_class_id": int(s.get("premise_class_id", 0) or 0),
                             "target_entity_id": int(s.get("target_entity_id", 0) or 0),
+                            "inference_top1_prob": _safe_float(c.get("inference_top1_prob")),
                             "conclusion_top1_prob": _safe_float(c.get("conclusion_top1_prob")),
                             "premise_top1_prob": _safe_float(c.get("premise_top1_prob")),
                             "truth_top1_prob": _safe_float(c.get("truth_top1_prob")),
@@ -555,6 +640,7 @@ def main() -> None:
                         _decoder_transition_features_logical(
                             seq,
                             expected_truth=bool(mm.get("is_correct", False)),
+                            feature_mode=logical_decoder_feature_mode,
                         )
                     )
                 decoder_added = True
@@ -798,6 +884,9 @@ def main() -> None:
         "decoder_checkpoint": (str(args.decoder_checkpoint) if str(args.decoder_checkpoint).strip() else None),
         "dataset_domain": str(dataset_domain),
         "decoder_domain_requested": str(expected_decoder_domain),
+        "logical_decoder_feature_mode": str(logical_decoder_feature_mode),
+        "sae_layer_allowlist": [int(x) for x in layer_allowlist_values],
+        "sae_feature_count_after_filter": int(len(sae_feature_names)),
         "decoder_domain": decoder_domain,
         "decoder_domain_match": bool(decoder_domain_match),
         "decoder_feature_block_status": str(decoder_feature_block_status),

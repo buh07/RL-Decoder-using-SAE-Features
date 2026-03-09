@@ -68,6 +68,7 @@ run_worker_permutation() {
       --task permutation \
       --paired-dataset "$PAIRED_DATASET" \
       --partials "${PARTIALS[@]}" \
+      --sae-layer-allowlist "$SAE_LAYER_ALLOWLIST" \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
       --train-exclude-variants "$TRAIN_EXCLUDE_VARIANTS" \
@@ -97,6 +98,7 @@ run_worker_ablation_reg() {
       --task ablation_reg \
       --paired-dataset "$PAIRED_DATASET" \
       --partials "${PARTIALS[@]}" \
+      --sae-layer-allowlist "$SAE_LAYER_ALLOWLIST" \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
       --train-exclude-variants "$TRAIN_EXCLUDE_VARIANTS" \
@@ -125,6 +127,7 @@ run_worker_multiseed() {
       --task multiseed \
       --paired-dataset "$PAIRED_DATASET" \
       --partials "${PARTIALS[@]}" \
+      --sae-layer-allowlist "$SAE_LAYER_ALLOWLIST" \
       --run-id "$RUN_ID" \
       --run-tag "$RUN_TAG" \
       --train-exclude-variants "$TRAIN_EXCLUDE_VARIANTS" \
@@ -196,6 +199,7 @@ case "$MODE" in
     WEIGHT_DECAY_BASE="${WEIGHT_DECAY_BASE:-0.0001}"
     DEVICE="${DEVICE:-cpu}"
     CPU_WORKERS="${CPU_WORKERS:-8}"
+    SAE_LAYER_ALLOWLIST="${SAE_LAYER_ALLOWLIST:-}"
 
     PERMUTATION_RUNS="${PERMUTATION_RUNS:-1000}"
     PERMUTATION_SEED="${PERMUTATION_SEED:-20260308}"
@@ -241,6 +245,7 @@ LR=${LR@Q}
 WEIGHT_DECAY_BASE=${WEIGHT_DECAY_BASE@Q}
 DEVICE=${DEVICE@Q}
 CPU_WORKERS=${CPU_WORKERS@Q}
+SAE_LAYER_ALLOWLIST=${SAE_LAYER_ALLOWLIST@Q}
 PERMUTATION_RUNS=${PERMUTATION_RUNS@Q}
 PERMUTATION_SEED=${PERMUTATION_SEED@Q}
 WEIGHT_DECAY_VALUES=${WEIGHT_DECAY_VALUES@Q}
