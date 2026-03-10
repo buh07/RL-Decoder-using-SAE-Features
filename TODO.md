@@ -142,7 +142,8 @@ Phase 4r's subspace patching (+0.107 Δlog_prob at L22) already demonstrated the
 #### 2. Multi-Model Replication (~2-3 weeks, largest single acceptance boost)
 **Goal:** Show the pipeline generalizes beyond Qwen 2.5-7B. Even one additional model with a positive result fundamentally changes the paper's scope.
 
-- [ ] Select target model (Llama 3 8B preferred — open weights, well-studied, different architecture family).
+- [~] Select target model (Llama 3 8B preferred — open weights, well-studied, different architecture family).
+  - In progress: `phi-2` external-model canary lineage started as immediate replication bootstrapping with local SAE assets; if stable, promote to larger-model replication.
 - [ ] Train SAEs on target model (can reuse phase2 training infrastructure with architecture adapters).
 - [ ] Run full Option C pipeline: pair generation → SAE trace → decoder training → eval → stress.
 - [ ] Keep exact rigor controls: lexical control, exclusions, CV/bootstrap/permutation.

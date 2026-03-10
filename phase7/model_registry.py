@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import Dict, Optional
 
 try:  # pragma: no cover
-    from .model_adapters import GPT2MediumAdapter, Qwen25_7BAdapter
+    from .model_adapters import GPT2MediumAdapter, Phi2Adapter, Qwen25_7BAdapter
 except ImportError:  # pragma: no cover
-    from model_adapters import GPT2MediumAdapter, Qwen25_7BAdapter
+    from model_adapters import GPT2MediumAdapter, Phi2Adapter, Qwen25_7BAdapter
 
 
 @dataclass(frozen=True)
@@ -29,7 +29,7 @@ class ModelSpec:
         return asdict(self)
 
 
-_KNOWN_ADAPTER_CLASSES = {"GPT2MediumAdapter", "Qwen25_7BAdapter"}
+_KNOWN_ADAPTER_CLASSES = {"GPT2MediumAdapter", "Qwen25_7BAdapter", "Phi2Adapter"}
 
 
 _MODEL_SPECS: Dict[str, ModelSpec] = {
@@ -56,6 +56,18 @@ _MODEL_SPECS: Dict[str, ModelSpec] = {
         sae_dir="phase2_results/saes_qwen25_7b_12x_topk/saes",
         model_family="qwen2.5",
         vocab_size=152064,
+    ),
+    "phi-2": ModelSpec(
+        model_key="phi-2",
+        hf_model_id="microsoft/phi-2",
+        tokenizer_id="microsoft/phi-2",
+        num_layers=32,
+        hidden_dim=2560,
+        default_dtype="float16",
+        adapter_class="Phi2Adapter",
+        sae_dir="phase2_results/saes_all_models/saes",
+        model_family="phi",
+        vocab_size=51200,
     ),
 }
 
@@ -139,4 +151,6 @@ def create_adapter(model_key: str, device: str = "cuda:0", adapter_config: Optio
         return GPT2MediumAdapter(**kwargs)
     if spec.adapter_class == "Qwen25_7BAdapter":
         return Qwen25_7BAdapter(**kwargs)
+    if spec.adapter_class == "Phi2Adapter":
+        return Phi2Adapter(**kwargs)
     raise KeyError(f"Unknown adapter_class={spec.adapter_class!r} for model_key={model_key!r}")
