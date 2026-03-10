@@ -20,7 +20,7 @@ PHASE4_TOP_FEATURES="${PHASE4_TOP_FEATURES:-phase7_results/results/top_features_
 FEATURE_SET="${FEATURE_SET:-eq_pre_result_150}"
 
 # Start with SAE-only canary/full for external-model bootstrap.
-DECODER_CHECKPOINT="${DECODER_CHECKPOINT:-}"
+DECODER_CHECKPOINT="${DECODER_CHECKPOINT:-none}"
 DECODER_AUTO_TRAIN="${DECODER_AUTO_TRAIN:-0}"
 DECODER_DOMAIN="${DECODER_DOMAIN:-arithmetic}"
 

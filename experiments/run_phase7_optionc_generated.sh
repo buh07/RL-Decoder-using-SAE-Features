@@ -784,6 +784,10 @@ PY
     SCOPE_LAYERS_C="${SCOPE_LAYERS_C:-2,5,8,11,14,17,20,23,26}"
 
     DECODER_CHECKPOINT="${DECODER_CHECKPOINT:-phase7_results/runs/20260308_165109_phase7_qwen_trackc_upgrade/checkpoints/state_raw_every2_even_d1tier1.pt}"
+    # Allow explicit decoder disable without triggering default fallback.
+    if [[ "${DECODER_CHECKPOINT,,}" == "none" ]]; then
+      DECODER_CHECKPOINT=""
+    fi
     DECODER_DEVICE="${DECODER_DEVICE:-cuda:${WORKER_GPU_A}}"
     DECODER_BATCH_SIZE="${DECODER_BATCH_SIZE:-128}"
     DECODER_DOMAIN="${DECODER_DOMAIN:-${DOMAIN}}"
